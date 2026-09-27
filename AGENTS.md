@@ -6,7 +6,7 @@ Tài liệu này đóng vai trò là **kim chỉ nam (System Directive / Rule of
 
 ## 1. Bản chất & Mục tiêu đồ án
 
-* **Tên đồ án:** PCBid - Website Đấu giá linh kiện PC cũ & Vintage (Used / Vintage PC Hardware Auction Platform).
+* **Tên đồ án:** PCBid - Website Đấu giá linh kiện PC cũ (Used PC Hardware Auction Platform).
 * **Môn học:** IE104 - Internet và Công nghệ Web (ĐH Công nghệ Thông tin - UIT).
 * **Bản chất:** Đồ án bài tập lớn **Frontend thuần**, hướng đến việc chứng minh năng lực hiểu sâu về kiến trúc Web căn bản (Core Web Technologies), tư duy thiết kế giao diện, tổ chức mã nguồn và xử lý tương tác client-side.
 * **Không phải:** Một dự án thương mại điện tử production thực tế cần backend/database chịu tải.
@@ -55,7 +55,7 @@ localStorage.setItem('pcbid_products', JSON.stringify([...]));
 // Người dùng hiện tại đang đăng nhập
 localStorage.setItem('pcbid_currentUser', JSON.stringify({
   id: "user_01",
-  username: "vintagemaster",
+  username: "pcbuilder99",
   fullname: "Nguyễn Văn A",
   email: "user@example.com",
   role: "bidder"
@@ -66,7 +66,7 @@ localStorage.setItem('pcbid_bids', JSON.stringify([
   {
     id: "bid_101",
     productId: 1,
-    bidderName: "vintagemaster",
+    bidderName: "pcbuilder99",
     amount: 5200000,
     timestamp: "2026-09-27T10:30:00"
   }

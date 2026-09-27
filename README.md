@@ -1,4 +1,4 @@
-# PCBid - Website Đấu Giá Linh Kiện PC Cũ & Vintage
+# PCBid - Website Đấu Giá Linh Kiện PC Cũ
 
 Đồ án môn học: **IE104 - Internet & Công nghệ Web**  
 Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**  
@@ -8,7 +8,7 @@ Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
 
 ## 1. Giới thiệu dự án
 
-**PCBid** là nền tảng web mô phỏng sàn đấu giá trực tuyến dành riêng cho linh kiện máy tính cũ và vintage (Used / Vintage PC Parts Auction). 
+**PCBid** là nền tảng web mô phỏng sàn đấu giá trực tuyến dành riêng cho linh kiện máy tính cũ (Used PC Parts Auction). 
 
 Khác với các trang web thương mại điện tử mua bán thông thường, cơ chế cốt lõi của PCBid tập trung hoàn toàn vào **đấu giá theo thời gian thực (Auction & Bidding Simulation)**: người bán đặt giá khởi điểm & thời hạn đấu giá, người mua theo dõi đồng hồ đếm ngược và tham gia trả giá cạnh tranh.
 
@@ -34,7 +34,7 @@ Dự án được xây dựng phục vụ yêu cầu học phần IE104 với ti
 ## 3. Danh sách màn hình & Chức năng dự kiến (7 - 9 màn hình)
 
 1. **Trang chủ (`index.html`)**:
-   - Banner hero giới thiệu, danh mục linh kiện (CPU, GPU, RAM, Mainboard, Vintage...).
+   - Banner hero giới thiệu, danh mục linh kiện (CPU, GPU, RAM, Mainboard, Nguồn PSU, Ổ cứng SSD/HDD...).
    - Danh sách phiên đấu giá hot / nổi bật, phiên đấu giá sắp kết thúc (kèm đồng hồ đếm ngược).
    - Thanh điều hướng (Header) có ô tìm kiếm live search, modal/nút đăng nhập, giỏ theo dõi.
 2. **Danh sách sản phẩm / Phiên đấu giá (`products.html`)**:
