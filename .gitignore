@@ -1,0 +1,29 @@
+# PDF and document files
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# Dependencies & Package Managers
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary / Build files / Logs
+*.log
+dist/
+build/
+.cache/
+.temp/
+.tmp/
