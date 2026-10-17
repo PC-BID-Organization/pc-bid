@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/logo/pc-bid-logo.png" alt="PCBid Logo" width="450" />
+</p>
+
 # PCBid - Website Đấu Giá Linh Kiện PC Cũ
 
 Đồ án môn học: **IE104 - Internet & Công nghệ Web**  
@@ -5,6 +9,7 @@ Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**
 Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
 
 ---
+
 
 ## 1. Giới thiệu dự án
 
