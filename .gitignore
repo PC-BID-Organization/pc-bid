@@ -27,3 +27,5 @@ build/
 .cache/
 .temp/
 .tmp/
+misc/
+
