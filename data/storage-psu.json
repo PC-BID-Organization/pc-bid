@@ -1,0 +1,1412 @@
+[
+  {
+    "id": 5001,
+    "name": "SSD Samsung 980 Pro 1TB NVMe M.2 PCIe Gen 4.0",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Sức khỏe (Health) 99%, chạy 120 giờ, nguyên box",
+    "startingPrice": 1600000,
+    "currentBid": 1950000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2850000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/storage/5001-samsung-980-pro-1.png"
+    ],
+    "description": "Ổ cứng tháo máy cá nhân nâng cấp, đã test bằng CrystalDiskInfo chuẩn Health 99%. Bao test 7 ngày 1 đổi 1.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7000 MB/s",
+      "Tốc độ ghi tối đa": "5000 MB/s",
+      "Độ bền TBW": "600 TBW"
+    }
+  },
+  {
+    "id": 5002,
+    "name": "SSD Kingston NV2 500GB NVMe M.2 PCIe 4.0",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Sức khỏe (Health) 98%, chính hãng SPC hết bảo hành",
+    "startingPrice": 500000,
+    "currentBid": 650000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1050000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/storage/5002-kingston-nv2-500gb-1.jpg"
+    ],
+    "description": "Tháo dàn game net giải thể, chạy mượt mà, không bad sector, dùng làm ổ C cài Win cực nhanh.",
+    "specifications": {
+      "Dung lượng": "500GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "2100 MB/s",
+      "Độ bền TBW": "160 TBW"
+    }
+  },
+  {
+    "id": 5003,
+    "name": "SSD WD Black SN850X 1TB NVMe M.2 PCIe Gen 4",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Sức khỏe (Health) 100%, fullbox còn bảo hành 24 tháng",
+    "startingPrice": 1800000,
+    "currentBid": 2100000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 2990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/storage/5003-wd-black-sn850x-1.jpg"
+    ],
+    "description": "King of Gen 4, kèm heatsink tản nhiệt. Mua tại MemoryZone, nguyên tem NPP.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7300 MB/s",
+      "Tốc độ ghi tối đa": "6300 MB/s",
+      "Độ bền TBW": "600 TBW"
+    }
+  },
+  {
+    "id": 5004,
+    "name": "SSD Crucial P3 Plus 1TB NVMe M.2 PCIe Gen 4",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 96%, chạy khoảng 400 giờ",
+    "startingPrice": 1100000,
+    "currentBid": 1300000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1950000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/storage/5004-crucial-p3-plus-1.jpg"
+    ],
+    "description": "Ổ chứa game cá nhân tháo ra để lên 2TB. Chạy mát, không lỗi lầm.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "5000 MB/s",
+      "Tốc độ ghi tối đa": "4200 MB/s",
+      "Độ bền TBW": "220 TBW"
+    }
+  },
+  {
+    "id": 5005,
+    "name": "SSD Lexar NM620 512GB M.2 2280 NVMe PCIe Gen3x4",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 97%, hết bảo hành",
+    "startingPrice": 450000,
+    "currentBid": 550000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/storage/5005-lexar-nm620-512gb-1.webp"
+    ],
+    "description": "Ổ NVMe Gen 3 giá rẻ cho anh em chống cháy hoặc làm ổ chứa dữ liệu phụ.",
+    "specifications": {
+      "Dung lượng": "512GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "2400 MB/s",
+      "Độ bền TBW": "250 TBW"
+    }
+  },
+  {
+    "id": 5006,
+    "name": "SSD Samsung 970 EVO Plus 500GB NVMe M.2",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 99%, nguyên hộp",
+    "startingPrice": 700000,
+    "currentBid": 850000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1390000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/storage/5006-samsung-970-evo-plus-1.jpg"
+    ],
+    "description": "Huyền thoại Gen 3 có DRAM cache hỗ trợ xử lý đồ họa cực mượt.",
+    "specifications": {
+      "Dung lượng": "500GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "3200 MB/s",
+      "Độ bền TBW": "300 TBW"
+    }
+  },
+  {
+    "id": 5007,
+    "name": "SSD Kingston A400 480GB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 95%, vỏ hơi trầy xước nhẹ",
+    "startingPrice": 350000,
+    "currentBid": 450000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/storage/5007-kingston-a400-480gb-1.jpg"
+    ],
+    "description": "SSD SATA 2.5 inch dùng nâng cấp cho laptop cũ hoặc PC không có khe M.2.",
+    "specifications": {
+      "Dung lượng": "480GB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "500 MB/s",
+      "Tốc độ ghi tối đa": "450 MB/s",
+      "Độ bền TBW": "160 TBW"
+    }
+  },
+  {
+    "id": 5008,
+    "name": "SSD Crucial BX500 240GB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 98%",
+    "startingPrice": 200000,
+    "currentBid": 300000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 520000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/storage/5008-crucial-bx500-240gb-1.jpg"
+    ],
+    "description": "Dung lượng 240GB vừa đủ cài Win10/11 và các ứng dụng văn phòng cơ bản.",
+    "specifications": {
+      "Dung lượng": "240GB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "540 MB/s",
+      "Tốc độ ghi tối đa": "500 MB/s",
+      "Độ bền TBW": "80 TBW"
+    }
+  },
+  {
+    "id": 5009,
+    "name": "HDD PC Western Digital Blue 1TB 3.5 inch SATA 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, không bad sector",
+    "startingPrice": 400000,
+    "currentBid": 550000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1150000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/storage/5009-wd-blue-1tb-1.jpg"
+    ],
+    "description": "HDD lưu dữ liệu, ảnh, phim cực kỳ bền bỉ. Đã kiểm tra cơ không kêu gõ.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "HDD 3.5 inch",
+      "Tốc độ đọc tối đa": "150 MB/s",
+      "Tốc độ ghi tối đa": "150 MB/s",
+      "Độ bền TBW": "Không áp dụng"
+    }
+  },
+  {
+    "id": 5010,
+    "name": "HDD PC Seagate BarraCuda 2TB 3.5 inch SATA 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 99%, chạy ít giờ",
+    "startingPrice": 650000,
+    "currentBid": 800000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1650000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/storage/5010-seagate-barracuda-2tb-1.png"
+    ],
+    "description": "Dung lượng lớn 2TB cho anh em làm đồ họa lưu trữ dự án hoặc game nặng.",
+    "specifications": {
+      "Dung lượng": "2TB",
+      "Loại ổ đĩa": "HDD 3.5 inch",
+      "Tốc độ đọc tối đa": "190 MB/s",
+      "Tốc độ ghi tối đa": "190 MB/s",
+      "Độ bền TBW": "Không áp dụng"
+    }
+  },
+  {
+    "id": 5011,
+    "name": "SSD Samsung 990 PRO 1TB NVMe M.2 PCIe Gen 4.0",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, fullbox còn bảo hành 30 tháng",
+    "startingPrice": 2200000,
+    "currentBid": 2600000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3590000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/storage/5011-samsung-990-pro-1tb-1.jpg"
+    ],
+    "description": "Flagship Gen 4 tốc độ đọc đỉnh cao 7450 MB/s. Phù hợp dựng phim 4K và PS5.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7450 MB/s",
+      "Tốc độ ghi tối đa": "6900 MB/s",
+      "Độ bền TBW": "600 TBW"
+    }
+  },
+  {
+    "id": 5012,
+    "name": "SSD Kingston KC3000 1TB NVMe M.2 PCIe 4.0",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 98%, nguyên tem Vĩnh Xuân",
+    "startingPrice": 1500000,
+    "currentBid": 1800000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2450000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/storage/5012-kingston-kc3000-1tb-1.jpg"
+    ],
+    "description": "Trang bị tản nhiệt nhôm lá mỏng phủ graphene cực mát khi tải nặng.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7000 MB/s",
+      "Tốc độ ghi tối đa": "6000 MB/s",
+      "Độ bền TBW": "800 TBW"
+    }
+  },
+  {
+    "id": 5013,
+    "name": "SSD Corsair MP600 PRO LPX 1TB NVMe Gen4",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 99%, có tản nhiệt nhôm dày sẵn",
+    "startingPrice": 1700000,
+    "currentBid": 2000000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 2790000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/storage/5013-corsair-mp600-pro-1.jpg"
+    ],
+    "description": "Tối ưu hóa sẵn cho máy PlayStation 5 và PC Gaming cao cấp.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7100 MB/s",
+      "Tốc độ ghi tối đa": "5500 MB/s",
+      "Độ bền TBW": "700 TBW"
+    }
+  },
+  {
+    "id": 5014,
+    "name": "SSD WD Blue SN570 500GB NVMe M.2 PCIe Gen 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 97%, hoạt động hoàn hảo",
+    "startingPrice": 550000,
+    "currentBid": 700000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1120000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/storage/5014-wd-blue-sn570-500gb-1.png"
+    ],
+    "description": "Dòng WD Blue tiết kiệm điện năng, tốc độ ổn định cho dân đồ họa cơ bản.",
+    "specifications": {
+      "Dung lượng": "500GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "2300 MB/s",
+      "Độ bền TBW": "300 TBW"
+    }
+  },
+  {
+    "id": 5015,
+    "name": "SSD Samsung 870 EVO 500GB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 99%, nguyên tem Samsung",
+    "startingPrice": 650000,
+    "currentBid": 800000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1290000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/storage/5015-samsung-870-evo-500gb-1.jpg"
+    ],
+    "description": "SSD SATA bền nhất phân khúc với công nghệ V-NAND 3D và thuật toán TurboWrite.",
+    "specifications": {
+      "Dung lượng": "500GB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "560 MB/s",
+      "Tốc độ ghi tối đa": "530 MB/s",
+      "Độ bền TBW": "300 TBW"
+    }
+  },
+  {
+    "id": 5016,
+    "name": "SSD Kioxia Exceria G2 1TB NVMe M.2 PCIe Gen3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 96%, còn bảo hành 6 tháng",
+    "startingPrice": 900000,
+    "currentBid": 1100000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1650000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/storage/5016-kioxia-exceria-g2-1tb-1.jpg"
+    ],
+    "description": "Ổ NVMe Gen 3 giá cực kỳ ngon có sẵn DRAM Cache giúp không bị tụt tốc khi chép file lớn.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "2100 MB/s",
+      "Tốc độ ghi tối đa": "1700 MB/s",
+      "Độ bền TBW": "400 TBW"
+    }
+  },
+  {
+    "id": 5017,
+    "name": "SSD Adata XPG Spectrix S40G 512GB RGB NVMe",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 98%, LED RGB đổi màu chuẩn",
+    "startingPrice": 600000,
+    "currentBid": 750000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1250000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/storage/5017-adata-xpg-s40g-512gb-1.jpg"
+    ],
+    "description": "SSD tích hợp dải đèn LED RGB cực đẹp hỗ trợ đồng bộ phần mềm mainboard.",
+    "specifications": {
+      "Dung lượng": "512GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "2400 MB/s",
+      "Độ bền TBW": "320 TBW"
+    }
+  },
+  {
+    "id": 5018,
+    "name": "SSD TeamGroup MP33 256GB NVMe M.2 PCIe Gen3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 95%",
+    "startingPrice": 250000,
+    "currentBid": 350000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 590000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/storage/5018-teamgroup-mp33-256gb-1.jpg"
+    ],
+    "description": "Hàng tháo máy PC văn phòng, dùng cài Win khởi động siêu nhanh.",
+    "specifications": {
+      "Dung lượng": "256GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "1800 MB/s",
+      "Tốc độ ghi tối đa": "1500 MB/s",
+      "Độ bền TBW": "150 TBW"
+    }
+  },
+  {
+    "id": 5019,
+    "name": "HDD PC Western Digital Black 2TB 3.5 inch SATA 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, vòng quay 7200 RPM",
+    "startingPrice": 800000,
+    "currentBid": 1050000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2250000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/storage/5019-wd-black-2tb-1.png"
+    ],
+    "description": "Dòng WD Black chuyên dụng cho hiệu năng cao và độ tin cậy tuyệt đối.",
+    "specifications": {
+      "Dung lượng": "2TB",
+      "Loại ổ đĩa": "HDD 3.5 inch",
+      "Tốc độ đọc tối đa": "205 MB/s",
+      "Tốc độ ghi tối đa": "205 MB/s",
+      "Độ bền TBW": "Không áp dụng"
+    }
+  },
+  {
+    "id": 5020,
+    "name": "SSD Kingston A2000 1TB NVMe M.2 PCIe Gen 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 97%, mã M.2 quốc dân",
+    "startingPrice": 850000,
+    "currentBid": 1050000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1750000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/storage/5020-kingston-a2000-1tb-1.jpg"
+    ],
+    "description": "Tích hợp mã hóa bảo mật dữ liệu 256-bit XTS-AES phần cứng.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "2200 MB/s",
+      "Tốc độ ghi tối đa": "2000 MB/s",
+      "Độ bền TBW": "600 TBW"
+    }
+  },
+  {
+    "id": 5021,
+    "name": "SSD Gigabyte AORUS Gen4 7000s 1TB NVMe M.2",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, tản nhiệt đồng hầm hố",
+    "startingPrice": 1900000,
+    "currentBid": 2250000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 3200000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/storage/5021-aorus-gen4-7000s-1tb-1.jpg"
+    ],
+    "description": "Tản nhiệt đồng mạ niken nguyên khối cực ngầu, giúp SSD luôn duy trì dưới 50 độ C.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "7000 MB/s",
+      "Tốc độ ghi tối đa": "5500 MB/s",
+      "Độ bền TBW": "700 TBW"
+    }
+  },
+  {
+    "id": 5022,
+    "name": "SSD Silicon Power A60 256GB M.2 NVMe",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 96%",
+    "startingPrice": 220000,
+    "currentBid": 320000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 550000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/storage/5022-silicon-power-a60-256gb-1.jpg"
+    ],
+    "description": "Ổ cứng NVMe nhỏ gọn giá bình dân cho PC văn phòng.",
+    "specifications": {
+      "Dung lượng": "256GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "2200 MB/s",
+      "Tốc độ ghi tối đa": "1600 MB/s",
+      "Độ bền TBW": "150 TBW"
+    }
+  },
+  {
+    "id": 5023,
+    "name": "SSD Transcend 220S 512GB NVMe M.2 PCIe Gen3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 98%",
+    "startingPrice": 480000,
+    "currentBid": 600000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1050000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/storage/5023-transcend-220s-512gb-1.jpg"
+    ],
+    "description": "Bộ nhớ NAND 3D chuẩn công nghiệp hoạt động ổn định nhiệt độ cao.",
+    "specifications": {
+      "Dung lượng": "512GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3500 MB/s",
+      "Tốc độ ghi tối đa": "2800 MB/s",
+      "Độ bền TBW": "400 TBW"
+    }
+  },
+  {
+    "id": 5024,
+    "name": "HDD PC Toshiba P300 1TB 3.5 inch SATA 3",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, 7200 RPM",
+    "startingPrice": 380000,
+    "currentBid": 500000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1090000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/storage/5024-toshiba-p300-1tb-1.jpg"
+    ],
+    "description": "Tích hợp cảm biến sốc nội bộ bảo vệ dữ liệu tối đa.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "HDD 3.5 inch",
+      "Tốc độ đọc tối đa": "150 MB/s",
+      "Tốc độ ghi tối đa": "150 MB/s",
+      "Độ bền TBW": "Không áp dụng"
+    }
+  },
+  {
+    "id": 5025,
+    "name": "SSD WD Green 240GB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 94%, hết bảo hành",
+    "startingPrice": 180000,
+    "currentBid": 280000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/storage/5025-wd-green-240gb-1.jpg"
+    ],
+    "description": "SSD tiết kiệm điện giá rẻ cho học sinh sinh viên học tập.",
+    "specifications": {
+      "Dung lượng": "240GB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "545 MB/s",
+      "Tốc độ ghi tối đa": "430 MB/s",
+      "Độ bền TBW": "80 TBW"
+    }
+  },
+  {
+    "id": 5026,
+    "name": "SSD Samsung 870 QVO 1TB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 98%, dung lượng cực lớn",
+    "startingPrice": 1000000,
+    "currentBid": 1250000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/storage/5026-samsung-870-qvo-1tb-1.jpg"
+    ],
+    "description": "SSD SATA dung lượng 1TB thay thế hoàn hảo cho HDD truyền thống.",
+    "specifications": {
+      "Dung lượng": "1TB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "560 MB/s",
+      "Tốc độ ghi tối đa": "530 MB/s",
+      "Độ bền TBW": "360 TBW"
+    }
+  },
+  {
+    "id": 5027,
+    "name": "SSD Plextor M9PeG 512GB M.2 NVMe RGB",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 96%, kèm tản tản nhiệt phay xước",
+    "startingPrice": 520000,
+    "currentBid": 670000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1350000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/storage/5027-plextor-m9peg-512gb-1.jpg"
+    ],
+    "description": "Thương hiệu Plextor cao cấp, tản nhiệt nhôm sơn tĩnh điện đẹp mắt.",
+    "specifications": {
+      "Dung lượng": "512GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 3",
+      "Tốc độ đọc tối đa": "3200 MB/s",
+      "Tốc độ ghi tối đa": "2000 MB/s",
+      "Độ bền TBW": "320 TBW"
+    }
+  },
+  {
+    "id": 5028,
+    "name": "SSD Crucial P5 Plus 500GB NVMe M.2 Gen4",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 99%, chính hãng Micron",
+    "startingPrice": 950000,
+    "currentBid": 1150000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1790000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/storage/5028-crucial-p5-plus-500gb-1.png"
+    ],
+    "description": "Trang bị chip điều khiển nội bộ Micron cao cấp với bộ mã hóa dựa trên phần cứng.",
+    "specifications": {
+      "Dung lượng": "500GB",
+      "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4",
+      "Tốc độ đọc tối đa": "6600 MB/s",
+      "Tốc độ ghi tối đa": "4000 MB/s",
+      "Độ bền TBW": "300 TBW"
+    }
+  },
+  {
+    "id": 5029,
+    "name": "HDD PC Western Digital Purple 2TB 3.5 inch",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 100%, dòng chuyên ghi hình liên tục",
+    "startingPrice": 700000,
+    "currentBid": 850000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1750000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/storage/5029-wd-purple-2tb-1.jpg"
+    ],
+    "description": "Dòng WD Tím chuyên dùng cho hệ thống camera giám sát hoặc lưu trữ lâu dài.",
+    "specifications": {
+      "Dung lượng": "2TB",
+      "Loại ổ đĩa": "HDD 3.5 inch",
+      "Tốc độ đọc tối đa": "175 MB/s",
+      "Tốc độ ghi tối đa": "175 MB/s",
+      "Độ bền TBW": "Không áp dụng"
+    }
+  },
+  {
+    "id": 5030,
+    "name": "SSD Colorful SL500 512GB 2.5 inch SATA III",
+    "category": "Storage",
+    "condition": "Đã sử dụng - Health 95%, nguyên tem",
+    "startingPrice": 380000,
+    "currentBid": 480000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 820000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/storage/5030-colorful-sl500-512gb-1.jpg"
+    ],
+    "description": "Vỏ kim loại tản nhiệt mạ vàng xám nhám cực kì chắc chắn.",
+    "specifications": {
+      "Dung lượng": "512GB",
+      "Loại ổ đĩa": "SATA 2.5 inch",
+      "Tốc độ đọc tối đa": "500 MB/s",
+      "Tốc độ ghi tối đa": "450 MB/s",
+      "Độ bền TBW": "200 TBW"
+    }
+  },
+  {
+    "id": 6001,
+    "name": "Nguồn Máy Tính Corsair RM850x 850W - 80 Plus Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 95%, full dây modular",
+    "startingPrice": 1800000,
+    "currentBid": 2200000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6001-corsair-rm850x-1.png"
+    ],
+    "description": "Nguồn chuẩn 80 Plus Gold cân ngon các card VGA RTX 3080/4070 Ti. Quạt 135mm êm ái không tiếng động.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6002,
+    "name": "Nguồn Máy Tính Seasonic Focus GX-750 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên tem void, còn bảo hành 36 tháng",
+    "startingPrice": 1500000,
+    "currentBid": 1850000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6002-seasonic-focus-gx750-1.png"
+    ],
+    "description": "Hãng Seasonic nổi tiếng linh kiện cao cấp, áp ra chuẩn, cân dàn i7/Ryzen 7 cực mượt.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6003,
+    "name": "Nguồn Máy Tính Cooler Master MWE White 550W V2",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 90%, hết bảo hành",
+    "startingPrice": 450000,
+    "currentBid": 600000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1190000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6003-cooler-master-mwe-550w-1.png"
+    ],
+    "description": "Nguồn quốc dân cho cấu hình tầm trung GTX 1660 Super / RTX 2060.",
+    "specifications": {
+      "Công suất thực": "550W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6004,
+    "name": "Nguồn Máy Tính MSI MAG A650BN 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn bảo hành chính hãng Mai Hoàng 12 tháng",
+    "startingPrice": 750000,
+    "currentBid": 900000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1450000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6004-msi-mag-a650bn-1.jpg"
+    ],
+    "description": "Nguồn chuẩn Bronze chất lượng cao từ MSI, dây cáp dẹt màu đen đi dây rất gọn đẹp.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6005,
+    "name": "Nguồn Máy Tính Deepcool PK550D 550W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên bản chưa sửa chữa",
+    "startingPrice": 500000,
+    "currentBid": 650000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1150000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6005-deepcool-pk550d-1.webp"
+    ],
+    "description": "Nguồn công suất thực 550W hoạt động bền bỉ, thích hợp văn phòng và gaming nhẹ.",
+    "specifications": {
+      "Công suất thực": "550W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6006,
+    "name": "Nguồn Máy Tính Thermaltake Toughpower GF1 1000W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Likenew 98%, chuẩn PCIe 5.0",
+    "startingPrice": 2500000,
+    "currentBid": 3100000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 4850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6006-thermaltake-gf1-1000w-1.jpg"
+    ],
+    "description": "Nguồn quái thú 1000W chuẩn 80 Plus Gold cân mượt RTX 4090 / RX 7900 XTX.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "140mm"
+    }
+  },
+  {
+    "id": 6007,
+    "name": "Nguồn Máy Tính Asus ROG Strix 750W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox đủ cáp rời và nhãn dán ROG",
+    "startingPrice": 1900000,
+    "currentBid": 2300000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3690000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6007-asus-rog-strix-750w-1.png"
+    ],
+    "description": "Thiết kế tản nhiệt ROG Heatsink độc quyền giúp nguồn hoạt động hoàn toàn yên tĩnh ở mức tải thấp.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6008,
+    "name": "Nguồn Máy Tính Gigabyte P650B 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tình trạng 90%, tem Viễn Sơn",
+    "startingPrice": 600000,
+    "currentBid": 750000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1350000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6008-gigabyte-p650b-1.JPG"
+    ],
+    "description": "Tụ điện 100% Nhật Bản đảm bảo độ tin cậy và tuổi thọ linh kiện cao.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6009,
+    "name": "Nguồn Máy Tính SilverStone Strider Essential 500W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hoạt động bình thường, hết bảo hành",
+    "startingPrice": 350000,
+    "currentBid": 450000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 920000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6009-silverstone-500w-1.jpg"
+    ],
+    "description": "Nguồn 500W giá rẻ kéo dàn máy không card hoặc gắn GTX 1060/1650.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6010,
+    "name": "Nguồn Máy Tính Antec Atom V450 450W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 92%, hết bảo hành",
+    "startingPrice": 280000,
+    "currentBid": 380000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 690000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6010-antec-atom-v450-1.jpg"
+    ],
+    "description": "Nguồn công suất thực chống cháy tốt cho các bộ máy văn phòng học tập.",
+    "specifications": {
+      "Công suất thực": "450W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6011,
+    "name": "Nguồn Máy Tính Corsair CV750 750W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn bảo hành KTC 18 tháng",
+    "startingPrice": 950000,
+    "currentBid": 1200000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6011-corsair-cv750-1.jpg"
+    ],
+    "description": "Dòng CV công suất thực cao giá tốt, chuẩn kích thước nhỏ gọn dễ lắp ca-bô.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6012,
+    "name": "Nguồn Máy Tính Super Flower Leadex III Gold 850W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đủ phụ kiện dây rợ, mới 97%",
+    "startingPrice": 1850000,
+    "currentBid": 2250000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3390000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6012-super-flower-leadex3-850w-1.jpg"
+    ],
+    "description": "Siêu phẩm nguồn đến từ Super Flower, hiệu suất đạt chứng nhận 80 Plus Gold cực ổn định.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "130mm"
+    }
+  },
+  {
+    "id": 6013,
+    "name": "Nguồn Máy Tính NZXT C750 Gold 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox đẹp 98%, nguyên seal tem",
+    "startingPrice": 1600000,
+    "currentBid": 1950000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2890000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6013-nzxt-c750-gold-1.png"
+    ],
+    "description": "Thiết kế tối giản sang trọng đặc trưng NZXT, có nút chuyển chế độ Zero RPM Fan Mode.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6014,
+    "name": "Nguồn Máy Tính FSP Hydro K Pro 600W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng người dùng nhẹ nhàng, nguyên bản",
+    "startingPrice": 550000,
+    "currentBid": 700000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1250000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6014-fsp-hydro-k-600w-1.jpg"
+    ],
+    "description": "Thương hiệu FSP danh tiếng về độ bền, thiết kế đường Single Rail +12V mạnh mẽ.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6015,
+    "name": "Nguồn Máy Tính Be Quiet! Pure Power 11 600W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Siêu tĩnh âm, mới 95%",
+    "startingPrice": 1100000,
+    "currentBid": 1350000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 2150000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6015-be-quiet-pure-power-600w-1.jpg"
+    ],
+    "description": "Sử dụng quạt Silence-optimized Be Quiet! quạt quay gần như không nghe thấy tiếng động.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Semi-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6016,
+    "name": "Nguồn Máy Tính EVGA SuperNOVA 750 GT 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Xách tay US, nguyên bản chưa mở",
+    "startingPrice": 1400000,
+    "currentBid": 1700000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2750000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6016-evga-supernova-750gt-1.png"
+    ],
+    "description": "Chuẩn 80 Plus Gold với toàn bộ tụ Nhật 100%, có quạt bạc đạn Fluid Dynamic Bearing siêu bền.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6017,
+    "name": "Nguồn Máy Tính Xigmatek X-Power III 650 500W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tình trạng 90%, giá học sinh",
+    "startingPrice": 300000,
+    "currentBid": 400000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 780000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6017-xigmatek-xpower-iii-650-1.jpg"
+    ],
+    "description": "Nguồn giá mềm công suất thực 500W gánh khỏe i3/i5 đời cũ kèm GTX 1650.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6018,
+    "name": "Nguồn Máy Tính Cooler Master V850 Gold V2 White",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Màu trắng Ngọc Trinh, fullbox 98%",
+    "startingPrice": 2200000,
+    "currentBid": 2600000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 3890000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6018-cooler-master-v850-white-1.jpg"
+    ],
+    "description": "Bản màu trắng tinh khôi đi kèm dàn dây cáp trắng dẹt chuẩn tone-sur-tone.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6019,
+    "name": "Nguồn Máy Tính ARESCOIL VX600 600W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn chạy tốt, sạch sẽ",
+    "startingPrice": 320000,
+    "currentBid": 420000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 720000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6019-arescoil-vx600-1.png"
+    ],
+    "description": "Nguồn giá rẻ chữa cháy cho bộ máy chơi game tầm trung.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6020,
+    "name": "Nguồn SFX Corsair SF750 750W - 80 Plus Platinum",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Chuẩn SFX nhỏ gọn cho ITX, 98%",
+    "startingPrice": 2600000,
+    "currentBid": 3200000,
+    "bidStep": 50000,
+    "bidCount": 10,
+    "marketPriceNew": 4490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6020-corsair-sf750-sfx-1.png"
+    ],
+    "description": "King of SFX nguồn siêu nhỏ chuẩn 80 Plus Platinum dây bọc dù cao cấp cho ca-bô ITX.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Platinum",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "92mm"
+    }
+  },
+  {
+    "id": 6021,
+    "name": "Nguồn Máy Tính Mik C650B 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 92%, hết bảo hành",
+    "startingPrice": 500000,
+    "currentBid": 650000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6021-mik-c650b-1.jpg"
+    ],
+    "description": "Thương hiệu MIK thiết kế dây cáp đen dẹt đi dây rất sạch sẽ trong vỏ case.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6022,
+    "name": "Nguồn Máy Tính Seasonic S12III 500W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tem xịn, chạy cực bền",
+    "startingPrice": 450000,
+    "currentBid": 600000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1190000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6022-seasonic-s12iii-500w-1.jpg"
+    ],
+    "description": "Dòng S12III của Seasonic nổi tiếng về điện áp ổn định và hoạt động liên tục 24/7.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6023,
+    "name": "Nguồn Máy Tính Corsair HX1000 Platinum 1000W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng trâu cày thanh lý tháo máy lạnh, 92%",
+    "startingPrice": 2100000,
+    "currentBid": 2700000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 5100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6023-corsair-hx1000-platinum-1.png"
+    ],
+    "description": "Chuẩn 80 Plus Platinum siêu tiết kiệm điện năng, hỗ trợ công tắc chuyển Single/Multi Rail.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Platinum",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6024,
+    "name": "Nguồn Máy Tính AcBel iPower 90m 600W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên tem void",
+    "startingPrice": 400000,
+    "currentBid": 520000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 980000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6024-acbel-ipower-600w-1.jpg"
+    ],
+    "description": "Nguồn AcBel nồi đồng cối đá thích hợp anh em lắp máy cày game võ lâm.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6025,
+    "name": "Nguồn Máy Tính Thermaltake Smart BX1 650W Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Mới 94%, quạt êm",
+    "startingPrice": 650000,
+    "currentBid": 800000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1390000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6025-thermaltake-smart-bx1-1.jpg"
+    ],
+    "description": "Quạt tản nhiệt 120mm với khả năng điều tốc thông minh theo nhiệt độ tải.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6026,
+    "name": "Nguồn SFX Cooler Master V750 SFX Gold 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox còn bảo hành 24 tháng",
+    "startingPrice": 1900000,
+    "currentBid": 2300000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3290000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6026-cooler-master-v750-sfx-1.jpg"
+    ],
+    "description": "Nguồn SFX chuyên cho vỏ ca-bô nhỏ gọn, kèm khung chuyển đổi sang chuẩn ATX.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "92mm"
+    }
+  },
+  {
+    "id": 6027,
+    "name": "Nguồn Máy Tính Deepcool PM750D 750W - 80 Plus Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng chính hãng mới 96%",
+    "startingPrice": 1200000,
+    "currentBid": 1500000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 2100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6027-deepcool-pm750d-1.jpg"
+    ],
+    "description": "Chuẩn 80 Plus Gold giá hạt dẻ, cấu trúc mạch LLC Topology biến áp ổn định.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6028,
+    "name": "Nguồn Máy Tính Gamdias Kratos E1 500W RGB",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đèn LED RGB sáng đẹp",
+    "startingPrice": 380000,
+    "currentBid": 480000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6028-gamdias-kratos-e1-1.jpg"
+    ],
+    "description": "Tích hợp 30 hiệu ứng ánh sáng LED RGB có nút bấm thay đổi đằng sau nguồn.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6029,
+    "name": "Nguồn Máy Tính Asus TUF Gaming 650W Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Likenew 97%, nguyên tem Asus",
+    "startingPrice": 1100000,
+    "currentBid": 1350000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6029-asus-tuf-gaming-650w-1.jpg"
+    ],
+    "description": "Chuẩn độ bền quân sự TUF với lớp phủ bo mạch PCB chống ẩm và chống bụi.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6030,
+    "name": "Nguồn Máy Tính Seasonic Prime GX-1000 1000W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đỉnh cao 1000W, còn bảo hành 5 năm",
+    "startingPrice": 2900000,
+    "currentBid": 3600000,
+    "bidStep": 50000,
+    "bidCount": 10,
+    "marketPriceNew": 5490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6030-seasonic-prime-gx1000-1.png"
+    ],
+    "description": "Dòng Prime cao cấp nhất của Seasonic, khả năng điều khiển điện áp cực kỳ chính xác dưới 0.5%.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  }
+]
