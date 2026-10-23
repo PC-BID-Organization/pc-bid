@@ -1,0 +1,482 @@
+[
+  {
+    "id": 3001,
+    "name": "Bo mạch chủ GIGABYTE B760M GAMING WIFI PLUS DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn mới 99%, Fullbox bảo hành chính hãng đến 2027",
+    "startingPrice": 2600000,
+    "currentBid": 3000000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3690000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_gear99",
+    "images": [
+      "images/products/mainboard/3001-gigabyte-b760m-gaming-wifi-1.webp"
+    ],
+    "description": "Mainboard chạy chip Intel Gen 12/13/14, hỗ trợ RAM DDR5 và có sẵn WiFi 6E cực tiện. Nguyên hộp, bao test 7 ngày lỗi hoàn tiền.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR5 (Tối đa 96GB)",
+      "Cổng M.2 NVMe": "2 khe PCIe 4.0 x4 M.2"
+    }
+  },
+  {
+    "id": 3002,
+    "name": "Bo mạch chủ ASUS TUF GAMING B650M-E WIFI (DDR5)",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Like New 98%, Fullbox, bảo hành hãng 24 tháng",
+    "startingPrice": 3200000,
+    "currentBid": 3650000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 4390000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcbuilder",
+    "images": [
+      "images/products/mainboard/3002-asus-tuf-gaming-b650m-e-wifi-1.webp"
+    ],
+    "description": "Main AM5 cực khỏe, tản nhiệt VRM dày dặn, kéo tốt Ryzen 7 7800X3D hoặc Ryzen 9. Đầy đủ phụ kiện râu anten Wi-Fi 6.",
+    "specifications": {
+      "Socket": "AM5",
+      "Chipset": "AMD B650",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 (1x PCIe 5.0 x4, 1x PCIe 4.0 x4)"
+    }
+  },
+  {
+    "id": 3003,
+    "name": "Bo mạch chủ MSI PRO H610M-E DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn đẹp 96%, nguyên bản chưa sửa chữa, bảo hành 6 tháng",
+    "startingPrice": 1100000,
+    "currentBid": 1350000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 1850000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/mainboard/3003-msi-pro-h610m-e-1.jpg"
+    ],
+    "description": "Bo mạch chủ quốc dân cho cấu hình văn phòng hoặc gaming cơ bản kết hợp Intel Core i3 12100F / i5 12400F. Hoạt động bền bỉ, tiết kiệm điện.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel H610",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR4 (Tối đa 64GB)",
+      "Cổng M.2 NVMe": "1 khe M.2 PCIe 3.0 x4"
+    }
+  },
+  {
+    "id": 3004,
+    "name": "Bo mạch chủ ASUS PRIME H510M-K",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn đẹp 95%, socket chuẩn không cong chân, bao test 14 ngày",
+    "startingPrice": 900000,
+    "currentBid": 1100000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1650000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "viet_computer",
+    "images": [
+      "images/products/mainboard/3004-asus-prime-h510m-k-1.jpg"
+    ],
+    "description": "Mainboard LGA1200 bền bỉ, thích hợp cho anh em dựng dàn máy Core i3 10105F hoặc i5 10400F học tập làm việc văn phòng mượt mà.",
+    "specifications": {
+      "Socket": "LGA 1200",
+      "Chipset": "Intel H510",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR4 (Tối đa 64GB)",
+      "Cổng M.2 NVMe": "1 khe M.2 PCIe 3.0 x4"
+    }
+  },
+  {
+    "id": 3005,
+    "name": "Bo mạch chủ MSI PRO B760M-B DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Fullbox 98%, tem Mai Hoàng còn bảo hành 15 tháng",
+    "startingPrice": 1800000,
+    "currentBid": 2150000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_gear99",
+    "images": [
+      "images/products/mainboard/3005-msi-pro-b760m-b-1.png"
+    ],
+    "description": "Hỗ trợ CPU Intel thế hệ 12, 13 và 14 với mức giá cực kỳ kinh tế, chạy RAM DDR4 tiết kiệm chi phí build máy.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR4 (Tối đa 64GB)",
+      "Cổng M.2 NVMe": "1 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3006,
+    "name": "Bo mạch chủ ASUS TUF GAMING B760M-PLUS WIFI DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Like New 99%, Fullbox đầy đủ râu wifi và chắn Fe zin",
+    "startingPrice": 2700000,
+    "currentBid": 3100000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 4190000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "hoanglong_pc",
+    "images": [
+      "images/products/mainboard/3006-asus-tuf-b760m-plus-wifi-1.jpg"
+    ],
+    "description": "Dòng TUF trứ danh với dàn cấp nguồn 12+1 DrMOS, tản nhiệt VRM cực lớn, cổng mạng 2.5Gb và Wi-Fi 6 tích hợp.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR4 (Tối đa 128GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3007,
+    "name": "Bo mạch chủ MSI B760M GAMING PLUS WIFI DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Mới 98%, nguyên hộp xốp, bảo hành hãng 18 tháng",
+    "startingPrice": 2300000,
+    "currentBid": 2600000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3550000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcbuilder",
+    "images": [
+      "images/products/mainboard/3007-msi-b760m-gaming-plus-1.jpg"
+    ],
+    "description": "Thiết kế tông xanh lục bảo bắt mắt, hỗ trợ kết nối mạng không dây WiFi 6E và cổng âm thanh cao cấp cho game thủ.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR4 (Tối đa 128GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3008,
+    "name": "Bo mạch chủ ASUS ROG STRIX B760-G GAMING WIFI DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Like New 99%, giáp trắng bạc tinh tế, Fullbox chính hãng",
+    "startingPrice": 3900000,
+    "currentBid": 4600000,
+    "bidStep": 100000,
+    "bidCount": 7,
+    "marketPriceNew": 5790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phong_retro",
+    "images": [
+      "images/products/mainboard/3008-asus-rog-strix-b760-g-1.jpg"
+    ],
+    "description": "Mẫu mainboard micro-ATX tone trắng đẳng cấp nhất của ASUS ROG. Hỗ trợ RAM DDR5 bus cực cao và âm thanh ROG SupremeFX.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3009,
+    "name": "Bo mạch chủ MSI MPG B760I EDGE WIFI DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn bảo hành 12 tháng, Fullbox anten đầy đủ, đẹp 98%",
+    "startingPrice": 3600000,
+    "currentBid": 4200000,
+    "bidStep": 100000,
+    "bidCount": 6,
+    "marketPriceNew": 5490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "itx_builder",
+    "images": [
+      "images/products/mainboard/3009-msi-mpg-b760i-edge-wifi-1.jpg"
+    ],
+    "description": "Chuẩn Mini-ITX nhỏ gọn giáp bạc sang trọng cho case tí hon SFF. Dàn phase cấp nguồn 8+1+1 90A bao cân i7 13700K / 14700K.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel B760",
+      "Kích thước chuẩn (Form Factor)": "Mini-ITX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR5 (Tối đa 96GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3010,
+    "name": "Bo mạch chủ MSI PRO Z790-P WIFI DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn mới 97%, no box, đầy đủ chắn fe và râu wifi",
+    "startingPrice": 3100000,
+    "currentBid": 3600000,
+    "bidStep": 100000,
+    "bidCount": 5,
+    "marketPriceNew": 5190000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "viet_computer",
+    "images": [
+      "images/products/mainboard/3010-msi-pro-z790-p-wifi-d4-1.jpg"
+    ],
+    "description": "Bo mạch chủ chipset Z790 hỗ trợ ép xung mạnh mẽ CPU dòng K thế hệ 12/13/14, tiết kiệm ngân sách nhờ dùng RAM DDR4.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel Z790",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR4 (Tối đa 128GB)",
+      "Cổng M.2 NVMe": "4 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3011,
+    "name": "Bo mạch chủ ASUS TUF GAMING Z790-PLUS WIFI DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Fullbox like new 99%, bảo hành Viễn Sơn 26 tháng",
+    "startingPrice": 5200000,
+    "currentBid": 6000000,
+    "bidStep": 100000,
+    "bidCount": 8,
+    "marketPriceNew": 7890000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "hoanglong_pc",
+    "images": [
+      "images/products/mainboard/3011-asus-tuf-z790-plus-wifi-1.jpg"
+    ],
+    "description": "Đạt độ bền chuẩn quân sự, cấp nguồn 16+1 phase 60A DrMOS, hỗ trợ PCIe 5.0 cho card đồ họa và RAM DDR5 tốc độ trên 7200MHz.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel Z790",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "4 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3012,
+    "name": "Bo mạch chủ ASUS ROG STRIX Z790-A GAMING WIFI II DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Fullbox 99%, phiên bản Mark II tản nhiệt trắng bạc cao cấp",
+    "startingPrice": 6900000,
+    "currentBid": 7600000,
+    "bidStep": 100000,
+    "bidCount": 7,
+    "marketPriceNew": 10490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phong_retro",
+    "images": [
+      "images/products/mainboard/3012-asus-rog-strix-z790-a-ii-1.jpg"
+    ],
+    "description": "Bản nâng cấp thế hệ 2 với Wi-Fi 7 thế hệ mới, tản nhiệt VRM đồ sộ và 5 khe cắm M.2 có tấm chắn nhiệt riêng biệt.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel Z790",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "5 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3013,
+    "name": "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn mới 98%, Fullbox chính hãng, bảo hành 18 tháng",
+    "startingPrice": 5100000,
+    "currentBid": 5800000,
+    "bidStep": 100000,
+    "bidCount": 7,
+    "marketPriceNew": 7690000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcbuilder",
+    "images": [
+      "images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"
+    ],
+    "description": "Biểu tượng bền bỉ của dòng Tomahawk với tông màu đen tuyền mạnh mẽ, giải pháp tản nhiệt tối ưu và kết nối mạng 2.5G + Wi-Fi 6E.",
+    "specifications": {
+      "Socket": "LGA 1700",
+      "Chipset": "Intel Z790",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "4 khe M.2 PCIe 4.0 x4"
+    }
+  },
+  {
+    "id": 3014,
+    "name": "Bo mạch chủ ASRock Z890 PRO RS WIFI WHITE DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Hàng lướt 99.9%, nguyên hộp vừa mua 1 tháng trải nghiệm",
+    "startingPrice": 5500000,
+    "currentBid": 6100000,
+    "bidStep": 100000,
+    "bidCount": 6,
+    "marketPriceNew": 7990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_gear99",
+    "images": [
+      "images/products/mainboard/3014-asrock-z890-pro-rs-white-1.jpg"
+    ],
+    "description": "Bo mạch chủ socket LGA1851 thế hệ mới nhất cho Intel Core Ultra 200S, tông trắng thanh lịch, tích hợp Wi-Fi 7 và Thunderbolt 4.",
+    "specifications": {
+      "Socket": "LGA 1851",
+      "Chipset": "Intel Z890",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "4 khe M.2 (1x PCIe 5.0, 3x PCIe 4.0)"
+    }
+  },
+  {
+    "id": 3015,
+    "name": "Bo mạch chủ ASRock A520M/ac WIFI DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn đẹp 95%, kèm chắn fe, hoạt động ổn định",
+    "startingPrice": 1150000,
+    "currentBid": 1400000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 1950000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/mainboard/3015-asrock-a520m-ac-1.jpg"
+    ],
+    "description": "Mainboard giá rẻ có sẵn Wi-Fi AC cho CPU AMD Ryzen 3000/4000/5000G, lựa chọn tuyệt vời cho cấu hình máy học tập và làm việc nhỏ gọn.",
+    "specifications": {
+      "Socket": "AM4",
+      "Chipset": "AMD A520",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR4 (Tối đa 64GB)",
+      "Cổng M.2 NVMe": "1 khe M.2 PCIe 3.0 x4"
+    }
+  },
+  {
+    "id": 3016,
+    "name": "Bo mạch chủ ASUS PRIME B550M-A WIFI II DDR4",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Còn mới 97%, Fullbox nguyên phụ kiện, bảo hành 8 tháng",
+    "startingPrice": 1900000,
+    "currentBid": 2250000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "viet_computer",
+    "images": [
+      "images/products/mainboard/3016-asus-prime-b550m-a-wifi-ii-1.jpg"
+    ],
+    "description": "Bo mạch chủ socket AM4 chuẩn PCIe 4.0, có sẵn card Wi-Fi 6 AX200 tích hợp và 4 khe RAM DDR4 tha hồ nâng cấp dung lượng.",
+    "specifications": {
+      "Socket": "AM4",
+      "Chipset": "AMD B550",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR4 (Tối đa 128GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 (1x PCIe 4.0, 1x PCIe 3.0)"
+    }
+  },
+  {
+    "id": 3017,
+    "name": "Bo mạch chủ ASRock B650M Pro RS Wifi DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Mới 99%, Fullbox đầy đủ bảo hành chính hãng SPC 22 tháng",
+    "startingPrice": 2900000,
+    "currentBid": 3300000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 4290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "hoanglong_pc",
+    "images": [
+      "images/products/mainboard/3017-asrock-b650m-pro-rs-wifi-1.jpg"
+    ],
+    "description": "Mẫu mainboard AM5 giá tốt nhất phân khúc, giáp tản nhiệt nhôm bạc hiện đại, cấp nguồn 8+2+1 phase DrMOS kéo tốt Ryzen 7 7700X / 7800X3D.",
+    "specifications": {
+      "Socket": "AM5",
+      "Chipset": "AMD B650",
+      "Kích thước chuẩn (Form Factor)": "Micro-ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "3 khe M.2 (1x PCIe 5.0, 2x PCIe 4.0)"
+    }
+  },
+  {
+    "id": 3018,
+    "name": "Bo mạch chủ Gigabyte B850 AORUS STEALTH ICE DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Like New 99.9%, dòng giấu dây kết nối mặt sau độc đáo",
+    "startingPrice": 5200000,
+    "currentBid": 5800000,
+    "bidStep": 100000,
+    "bidCount": 6,
+    "marketPriceNew": 7690000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phong_retro",
+    "images": [
+      "images/products/mainboard/3018-gigabyte-b850-stealth-ice-1.jpg"
+    ],
+    "description": "Công nghệ cắm dây mặt lưng Stealth giúp khoang case gọn gàng tuyệt đối, phủ sơn trắng băng tuyết cực kỳ đẳng cấp.",
+    "specifications": {
+      "Socket": "AM5",
+      "Chipset": "AMD B850",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "3 khe M.2 (1x PCIe 5.0, 2x PCIe 4.0)"
+    }
+  },
+  {
+    "id": 3019,
+    "name": "Bo mạch chủ ASUS ROG CROSSHAIR X870E HERO DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Mới 99% Fullbox cao cấp, đầy đủ phụ kiện card mở rộng và USB driver",
+    "startingPrice": 12500000,
+    "currentBid": 13900000,
+    "bidStep": 200000,
+    "bidCount": 7,
+    "marketPriceNew": 18990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcbuilder",
+    "images": [
+      "images/products/mainboard/3019-asus-rog-crosshair-x870e-hero-1.jpg"
+    ],
+    "description": "Flagship đỉnh cao cho nền tảng AMD Zen 5 Ryzen 9000. Dàn phase khủng 18+2+2 110A, màn hình LED Polymo, Wi-Fi 7 và 2 cổng USB4 40Gbps.",
+    "specifications": {
+      "Socket": "AM5",
+      "Chipset": "AMD X870E",
+      "Kích thước chuẩn (Form Factor)": "ATX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)",
+      "Cổng M.2 NVMe": "5 khe M.2 (3x PCIe 5.0, 2x PCIe 4.0)"
+    }
+  },
+  {
+    "id": 3020,
+    "name": "Bo mạch chủ Gigabyte Z890I AORUS ULTRA DDR5",
+    "category": "Mainboard",
+    "condition": "Đã sử dụng - Fullbox 99%, chuẩn Mini-ITX siêu hiếm, bảo hành 30 tháng",
+    "startingPrice": 6200000,
+    "currentBid": 7000000,
+    "bidStep": 100000,
+    "bidCount": 8,
+    "marketPriceNew": 9290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "itx_builder",
+    "images": [
+      "images/products/mainboard/3020-gigabyte-z890i-aorus-ultra-1.jpg"
+    ],
+    "description": "Bo mạch chủ ITX kích thước chỉ 17x17cm nhưng trang bị đầy đủ công nghệ hàng đầu: VRM 10 phase 105A, Wi-Fi 7, Thunderbolt 4 kép.",
+    "specifications": {
+      "Socket": "LGA 1851",
+      "Chipset": "Intel Z890",
+      "Kích thước chuẩn (Form Factor)": "Mini-ITX",
+      "Số khe RAM / Chuẩn RAM hỗ trợ": "2 khe DDR5 (Tối đa 96GB)",
+      "Cổng M.2 NVMe": "2 khe M.2 (1x PCIe 5.0, 1x PCIe 4.0)"
+    }
+  }
+]

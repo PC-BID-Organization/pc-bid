@@ -1,0 +1,528 @@
+[
+  {
+    "id": 7001,
+    "name": "Vỏ máy tính HYTE Y70 Touch Infinite Black",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 93%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 9100000,
+    "currentBid": 9500000,
+    "bidStep": 100000,
+    "bidCount": 4,
+    "marketPriceNew": 14290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/case/7001-vo-may-tinh-hyte-y70-touch-infinite-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính HYTE Y70 Touch Infinite Black do đổi sang cấu hình mới. Vỏ đã qua sử dụng, ngoại hình khoảng 93%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "495 x 285 x 520",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7002,
+    "name": "Vỏ máy tính MSI MPG GUNGNIR 300R AIRFLOW WHITE",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 96%, đã vệ sinh, còn phụ kiện lắp đặt cơ bản",
+    "startingPrice": 1950000,
+    "currentBid": 2500000,
+    "bidStep": 50000,
+    "bidCount": 11,
+    "marketPriceNew": 3990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "pcbuilder88",
+    "images": [
+      "images/products/case/7002-vo-may-tinh-msi-mpg-gungnir-300r-airflow-white-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính MSI MPG GUNGNIR 300R AIRFLOW WHITE do thu gọn góc máy. Vỏ đã qua sử dụng, ngoại hình khoảng 96%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "E-ATX;Micro-ATX;Mini-ITX;ATX",
+      "Kích thước case": "505 x 235 x 510",
+      "Màu sắc": "Trắng",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực;Nhựa",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7003,
+    "name": "Vỏ Máy Tính Xigmatek Pano M Nano 3IF (3 Fan)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 96%, đã vệ sinh, còn phụ kiện lắp đặt cơ bản",
+    "startingPrice": 410000,
+    "currentBid": 530000,
+    "bidStep": 10000,
+    "bidCount": 12,
+    "marketPriceNew": 850000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "linh_kien_cu",
+    "images": [
+      "images/products/case/7003-vo-may-tinh-xigmatek-pano-m-nano-3if-(3-fan)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ Máy Tính Xigmatek Pano M Nano 3IF (3 Fan) do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 96%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Hỗ trợ Mainboard": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7004,
+    "name": "Vỏ Máy Tính Xigmatek MYX 3F (3 Fan)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 95%, kính và khung có xước nhẹ, còn ốc lắp cơ bản",
+    "startingPrice": 280000,
+    "currentBid": 310000,
+    "bidStep": 10000,
+    "bidCount": 3,
+    "marketPriceNew": 650000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_hardware",
+    "images": [
+      "images/products/case/7004-vo-may-tinh-xigmatek-myx-3f-(3-fan)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ Máy Tính Xigmatek MYX 3F (3 Fan) do thu gọn góc máy. Vỏ đã qua sử dụng, ngoại hình khoảng 95%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Hỗ trợ Mainboard": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7005,
+    "name": "Vỏ máy tính Lian Li O11D Mini V2 White",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 92%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 1150000,
+    "currentBid": 1500000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "thanh_pcgear",
+    "images": [
+      "images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Lian Li O11D Mini V2 White do nâng cấp dàn PC. Vỏ đã qua sử dụng, ngoại hình khoảng 92%; có vết xước nhỏ do tháo lắp, không ảnh hưởng lắp ráp. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX;Micro-ATX;Mini-ITX",
+      "Kích thước case": "423.6 x 273.3 x 391.95",
+      "Màu sắc": "Trắng",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực",
+      "Hỗ trợ nguồn (PSU)": "ATX (Under 200mm)",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7006,
+    "name": "Vỏ máy tính Lian Li O11 Vision Compact Black",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 98%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 1950000,
+    "currentBid": 2350000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "an_builds",
+    "images": [
+      "images/products/case/7006-vo-may-tinh-lian-li-o11-vision-compact-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Lian Li O11 Vision Compact Black do đổi sang cấu hình mới. Vỏ đã qua sử dụng, ngoại hình khoảng 98%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "E-ATX;ATX;Micro-ATX;Mini-ITX",
+      "Kích thước case": "480 x 304 x 464.5",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7007,
+    "name": "Vỏ máy tính Lian Li O11D Evo RGB White",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 90%, kính và khung có xước nhẹ, còn ốc lắp cơ bản",
+    "startingPrice": 2400000,
+    "currentBid": 2600000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 4590000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "huy_techstore",
+    "images": [
+      "images/products/case/7007-vo-may-tinh-lian-li-o11d-evo-rgb-white-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Lian Li O11D Evo RGB White do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 90%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "Micro-ATX;Mini-ITX;E-ATX",
+      "Kích thước case": "478 x 290 x 471",
+      "Màu sắc": "Trắng",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực;Nhôm",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7008,
+    "name": "Vỏ máy tính Corsair iCUE LINK 3500X TG Mid Tower White (CC-9011281-WW)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 88%, kính và khung có xước nhẹ, còn ốc lắp cơ bản",
+    "startingPrice": 2350000,
+    "currentBid": 2750000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "khoa_modpc",
+    "images": [
+      "images/products/case/7008-vo-may-tinh-corsair-icue-link-3500x-tg-mid-tower-white-(cc-9011281-ww)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Corsair iCUE LINK 3500X TG Mid Tower White (CC-9011281-WW) do đổi sang cấu hình mới. Vỏ đã qua sử dụng, ngoại hình khoảng 88%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "E-ATX",
+      "Kích thước case": "520 x 240 x 500",
+      "Màu sắc": "Trắng",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7009,
+    "name": "Vỏ máy tính Corsair 6500X TG Mid-Tower Black (CC-9011257-WW)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 93%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 2300000,
+    "currentBid": 2550000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 3990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "long_gamingpc",
+    "images": [
+      "images/products/case/7009-vo-may-tinh-corsair-6500x-tg-mid-tower-black-(cc-9011257-ww)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Corsair 6500X TG Mid-Tower Black (CC-9011257-WW) do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 93%; có vết xước nhỏ do tháo lắp, không ảnh hưởng lắp ráp. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "E-ATX;ATX;Micro-ATX;Mini-ITX",
+      "Kích thước case": "496 x 328 x 496",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực;Nhựa",
+      "Hỗ trợ nguồn (PSU)": "ATX 225mm",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7010,
+    "name": "Vỏ máy tính Jonsbo D300 Black",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 92%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 1060000,
+    "currentBid": 1220000,
+    "bidStep": 20000,
+    "bidCount": 8,
+    "marketPriceNew": 1890000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phuc_components",
+    "images": [
+      "images/products/case/7010-vo-may-tinh-jonsbo-d300-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Jonsbo D300 Black do chuyển sang bộ máy khác. Vỏ đã qua sử dụng, ngoại hình khoảng 92%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ITX / M-ATX",
+      "Kích thước case": "236.4 x 420.9 x 460.2",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7011,
+    "name": "Vỏ máy tính NZXT H5 Flow Black (CC-H52FB-01)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 97%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 1650000,
+    "currentBid": 1800000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 2899000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcparts",
+    "images": [
+      "images/products/case/7011-vo-may-tinh-nzxt-h5-flow-black-(cc-h52fb-01)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính NZXT H5 Flow Black (CC-H52FB-01) do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 97%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "464 x 227 x 448",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7012,
+    "name": "Vỏ máy tính Sama W01",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 95%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 300000,
+    "currentBid": 340000,
+    "bidStep": 10000,
+    "bidCount": 4,
+    "marketPriceNew": 770000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "bao_hardware",
+    "images": [
+      "images/products/case/7012-vo-may-tinh-sama-w01-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Sama W01 do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 95%; có vết xước nhỏ do tháo lắp, không ảnh hưởng lắp ráp. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "48.2 x 45.8 x 21.5",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7013,
+    "name": "Vỏ máy tính Xigmatek Gaming X II 3F",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 88%, kính và khung có xước nhẹ, còn ốc lắp cơ bản",
+    "startingPrice": 380000,
+    "currentBid": 480000,
+    "bidStep": 10000,
+    "bidCount": 10,
+    "marketPriceNew": 890000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/case/7013-vo-may-tinh-xigmatek-gaming-x-ii-3f-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Xigmatek Gaming X II 3F do chuyển sang bộ máy khác. Vỏ đã qua sử dụng, ngoại hình khoảng 88%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "430 x 185 x 470",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7014,
+    "name": "Vỏ máy tính Corsair FRAME 4000D Modular Mid-Tower Black (CC-9011290-WW)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 98%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 960000,
+    "currentBid": 1140000,
+    "bidStep": 20000,
+    "bidCount": 9,
+    "marketPriceNew": 2250000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "pcbuilder88",
+    "images": [
+      "images/products/case/7014-vo-may-tinh-corsair-frame-4000d-modular-mid-tower-black-(cc-9011290-ww)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Corsair FRAME 4000D Modular Mid-Tower Black (CC-9011290-WW) do đổi sang cấu hình mới. Vỏ đã qua sử dụng, ngoại hình khoảng 98%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "Mini-ITX;Micro-ATX;ATX;E-ATX",
+      "Kích thước case": "453 x 200 x 466",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7015,
+    "name": "Vỏ máy tính Xigmatek QUANTUM 3GF",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 97%, đã vệ sinh, còn phụ kiện lắp đặt cơ bản",
+    "startingPrice": 480000,
+    "currentBid": 680000,
+    "bidStep": 20000,
+    "bidCount": 10,
+    "marketPriceNew": 1190000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "linh_kien_cu",
+    "images": [
+      "images/products/case/7015-vo-may-tinh-xigmatek-quantum-3gf-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Xigmatek QUANTUM 3GF do thu gọn góc máy. Vỏ đã qua sử dụng, ngoại hình khoảng 97%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "E-ATX;ATX;M-ATX;Mini-ITX",
+      "Kích thước case": "440 x 210 x 480",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép;Kính cường lực",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7016,
+    "name": "Vỏ máy tính Cooler Master ELITE 301 BLACK",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 95%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 620000,
+    "currentBid": 760000,
+    "bidStep": 20000,
+    "bidCount": 7,
+    "marketPriceNew": 1290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_hardware",
+    "images": [
+      "images/products/case/7016-vo-may-tinh-cooler-master-elite-301-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Cooler Master ELITE 301 BLACK do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 95%; có vết xước nhỏ do tháo lắp, không ảnh hưởng lắp ráp. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "202 x 440 x 470",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7017,
+    "name": "Vỏ máy tính Lian Li A3 mATX Black (Mặt gỗ trước)",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 93%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    "startingPrice": 1140000,
+    "currentBid": 1220000,
+    "bidStep": 20000,
+    "bidCount": 4,
+    "marketPriceNew": 2290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "thanh_pcgear",
+    "images": [
+      "images/products/case/7017-vo-may-tinh-lian-li-a3-matx-black-(mat-go-truoc)-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Lian Li A3 mATX Black (Mặt gỗ trước) do thu gọn góc máy. Vỏ đã qua sử dụng, ngoại hình khoảng 93%; có vết xước nhỏ do tháo lắp, không ảnh hưởng lắp ráp. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "Micro-ATX;Mini-ITX",
+      "Kích thước case": "370 x 210 x 394",
+      "Màu sắc": "Đen",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu",
+      "Chất liệu / Kính cường lực": "Chưa có dữ liệu",
+      "Hỗ trợ tản nhiệt AIO tối đa": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7018,
+    "name": "Vỏ máy tính Jonsbo Z20 Black",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 93%, đã vệ sinh, còn phụ kiện lắp đặt cơ bản",
+    "startingPrice": 920000,
+    "currentBid": 980000,
+    "bidStep": 20000,
+    "bidCount": 3,
+    "marketPriceNew": 1750000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "an_builds",
+    "images": [
+      "images/products/case/7018-vo-may-tinh-jonsbo-z20-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Jonsbo Z20 Black do đổi phong cách setup. Vỏ đã qua sử dụng, ngoại hình khoảng 93%; các vị trí bắt ốc sử dụng bình thường theo kiểm tra của người bán. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "Micro-ATX;Mini-ITX",
+      "Kích thước case": "382 x 198 x 335",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép SPCC;Kính cường lực;Nhựa ABS",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU, SFX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "240 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7019,
+    "name": "Vỏ máy tính Jonsbo C6 Max White",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 96%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 620000,
+    "currentBid": 840000,
+    "bidStep": 20000,
+    "bidCount": 11,
+    "marketPriceNew": 1290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "huy_techstore",
+    "images": [
+      "images/products/case/7019-vo-may-tinh-jonsbo-c6-max-white-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Jonsbo C6 Max White do đổi sang cấu hình mới. Vỏ đã qua sử dụng, ngoại hình khoảng 96%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "Micro-ATX;Mini-ITX",
+      "Kích thước case": "202 x 349 x 295",
+      "Màu sắc": "Trắng",
+      "Chất liệu / Kính cường lực": "Thép SPCC;Kính cường lực;Nhựa ABS",
+      "Hỗ trợ nguồn (PSU)": "ATX PSU",
+      "Hỗ trợ tản nhiệt AIO tối đa": "240 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 7020,
+    "name": "Vỏ máy tính Jonsbo D400 Black",
+    "category": "Case",
+    "condition": "Đã sử dụng - Còn mới 96%, khung vỏ nguyên vẹn, thiếu hộp gốc",
+    "startingPrice": 1040000,
+    "currentBid": 1240000,
+    "bidStep": 20000,
+    "bidCount": 10,
+    "marketPriceNew": 1790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "khoa_modpc",
+    "images": [
+      "images/products/case/7020-vo-may-tinh-jonsbo-d400-black-1.jpg"
+    ],
+    "description": "Mình thanh lý Vỏ máy tính Jonsbo D400 Black do thu gọn góc máy. Vỏ đã qua sử dụng, ngoại hình khoảng 96%; đã lau vệ sinh, cần kiểm tra trực tiếp mặt kính và khung. Phụ kiện, số quạt thực tế và tình trạng kính vui lòng đối chiếu khi nhận; bao test lắp ráp 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Hỗ trợ Mainboard": "ATX",
+      "Kích thước case": "488 x 239 x 514",
+      "Màu sắc": "Đen",
+      "Chất liệu / Kính cường lực": "Thép SPCC;Kính cường lực;Nhựa ABS",
+      "Hỗ trợ nguồn (PSU)": "ATX PS2 ≤200mm",
+      "Hỗ trợ tản nhiệt AIO tối đa": "360 mm",
+      "Kích thước tối đa VGA": "Chưa có dữ liệu",
+      "Số quạt đi kèm": "Chưa có dữ liệu"
+    }
+  }
+]

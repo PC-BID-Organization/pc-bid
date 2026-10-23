@@ -1,0 +1,692 @@
+[
+  {
+    "id": 6001,
+    "name": "Nguồn Máy Tính Corsair RM850x 850W - 80 Plus Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 95%, full dây modular",
+    "startingPrice": 1800000,
+    "currentBid": 2200000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 3490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6001-corsair-rm850x-1.png"
+    ],
+    "description": "Nguồn chuẩn 80 Plus Gold cân ngon các card VGA RTX 3080/4070 Ti. Quạt 135mm êm ái không tiếng động.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6002,
+    "name": "Nguồn Máy Tính Seasonic Focus GX-750 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên tem void, còn bảo hành 36 tháng",
+    "startingPrice": 1500000,
+    "currentBid": 1850000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 2990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6002-seasonic-focus-gx750-1.png"
+    ],
+    "description": "Hãng Seasonic nổi tiếng linh kiện cao cấp, áp ra chuẩn, cân dàn i7/Ryzen 7 cực mượt.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6003,
+    "name": "Nguồn Máy Tính Cooler Master MWE White 550W V2",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 90%, hết bảo hành",
+    "startingPrice": 450000,
+    "currentBid": 600000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1190000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6003-cooler-master-mwe-550w-1.png"
+    ],
+    "description": "Nguồn quốc dân cho cấu hình tầm trung GTX 1660 Super / RTX 2060.",
+    "specifications": {
+      "Công suất thực": "550W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6004,
+    "name": "Nguồn Máy Tính MSI MAG A650BN 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn bảo hành chính hãng Mai Hoàng 12 tháng",
+    "startingPrice": 750000,
+    "currentBid": 900000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1450000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6004-msi-mag-a650bn-1.jpg"
+    ],
+    "description": "Nguồn chuẩn Bronze chất lượng cao từ MSI, dây cáp dẹt màu đen đi dây rất gọn đẹp.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6005,
+    "name": "Nguồn Máy Tính Deepcool PK550D 550W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên bản chưa sửa chữa",
+    "startingPrice": 500000,
+    "currentBid": 650000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1150000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6005-deepcool-pk550d-1.webp"
+    ],
+    "description": "Nguồn công suất thực 550W hoạt động bền bỉ, thích hợp văn phòng và gaming nhẹ.",
+    "specifications": {
+      "Công suất thực": "550W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6006,
+    "name": "Nguồn Máy Tính Thermaltake Toughpower GF1 1000W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Likenew 98%, chuẩn PCIe 5.0",
+    "startingPrice": 2500000,
+    "currentBid": 2950000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 4850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6006-thermaltake-gf1-1000w-1.jpg"
+    ],
+    "description": "Nguồn quái thú 1000W chuẩn 80 Plus Gold cân mượt RTX 4090 / RX 7900 XTX.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "140mm"
+    }
+  },
+  {
+    "id": 6007,
+    "name": "Nguồn Máy Tính Asus ROG Strix 750W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox đủ cáp rời và nhãn dán ROG",
+    "startingPrice": 1900000,
+    "currentBid": 2200000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3690000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6007-asus-rog-strix-750w-1.png"
+    ],
+    "description": "Thiết kế tản nhiệt ROG Heatsink độc quyền giúp nguồn hoạt động hoàn toàn yên tĩnh ở mức tải thấp.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6008,
+    "name": "Nguồn Máy Tính Gigabyte P650B 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tình trạng 90%, tem Viễn Sơn",
+    "startingPrice": 600000,
+    "currentBid": 750000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1350000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6008-gigabyte-p650b-1.JPG"
+    ],
+    "description": "Tụ điện 100% Nhật Bản đảm bảo độ tin cậy và tuổi thọ linh kiện cao.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6009,
+    "name": "Nguồn Máy Tính SilverStone Strider Essential 500W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hoạt động bình thường, hết bảo hành",
+    "startingPrice": 350000,
+    "currentBid": 450000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 920000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6009-silverstone-500w-1.jpg"
+    ],
+    "description": "Nguồn 500W giá rẻ kéo dàn máy không card hoặc gắn GTX 1060/1650.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6010,
+    "name": "Nguồn Máy Tính Antec Atom V450 450W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 92%, hết bảo hành",
+    "startingPrice": 280000,
+    "currentBid": 380000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 690000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6010-antec-atom-v450-1.jpg"
+    ],
+    "description": "Nguồn công suất thực chống cháy tốt cho các bộ máy văn phòng học tập.",
+    "specifications": {
+      "Công suất thực": "450W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6011,
+    "name": "Nguồn Máy Tính Corsair CV750 750W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn bảo hành KTC 18 tháng",
+    "startingPrice": 950000,
+    "currentBid": 1150000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6011-corsair-cv750-1.jpg"
+    ],
+    "description": "Dòng CV công suất thực cao giá tốt, chuẩn kích thước nhỏ gọn dễ lắp ca-bô.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6012,
+    "name": "Nguồn Máy Tính Super Flower Leadex III Gold 850W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đủ phụ kiện dây rợ, mới 97%",
+    "startingPrice": 1850000,
+    "currentBid": 2150000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3390000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6012-super-flower-leadex3-850w-1.jpg"
+    ],
+    "description": "Siêu phẩm nguồn đến từ Super Flower, hiệu suất đạt chứng nhận 80 Plus Gold cực ổn định.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "130mm"
+    }
+  },
+  {
+    "id": 6013,
+    "name": "Nguồn Máy Tính NZXT C750 Gold 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox đẹp 98%, nguyên seal tem",
+    "startingPrice": 1600000,
+    "currentBid": 1850000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2890000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6013-nzxt-c750-gold-1.png"
+    ],
+    "description": "Thiết kế tối giản sang trọng đặc trưng NZXT, có nút chuyển chế độ Zero RPM Fan Mode.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6014,
+    "name": "Nguồn Máy Tính FSP Hydro K Pro 600W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng người dùng nhẹ nhàng, nguyên bản",
+    "startingPrice": 550000,
+    "currentBid": 700000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1250000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6014-fsp-hydro-k-600w-1.jpg"
+    ],
+    "description": "Thương hiệu FSP danh tiếng về độ bền, thiết kế đường Single Rail +12V mạnh mẽ.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6015,
+    "name": "Nguồn Máy Tính Be Quiet! Pure Power 11 600W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Siêu tĩnh âm, mới 95%",
+    "startingPrice": 1100000,
+    "currentBid": 1300000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 2150000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6015-be-quiet-pure-power-600w-1.jpg"
+    ],
+    "description": "Sử dụng quạt Silence-optimized Be Quiet! quạt quay gần như không nghe thấy tiếng động.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Semi-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6016,
+    "name": "Nguồn Máy Tính EVGA SuperNOVA 750 GT 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Xách tay US, nguyên bản chưa mở",
+    "startingPrice": 1400000,
+    "currentBid": 1650000,
+    "bidStep": 50000,
+    "bidCount": 5,
+    "marketPriceNew": 2750000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6016-evga-supernova-750gt-1.png"
+    ],
+    "description": "Chuẩn 80 Plus Gold với toàn bộ tụ Nhật 100%, có quạt bạc đạn Fluid Dynamic Bearing siêu bền.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6017,
+    "name": "Nguồn Máy Tính Xigmatek X-Power III 650 500W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tình trạng 90%, giá học sinh",
+    "startingPrice": 300000,
+    "currentBid": 400000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 780000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6017-xigmatek-xpower-iii-650-1.jpg"
+    ],
+    "description": "Nguồn giá mềm công suất thực 500W gánh khỏe i3/i5 đời cũ kèm GTX 1650.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6018,
+    "name": "Nguồn Máy Tính Cooler Master V850 Gold V2 White",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Màu trắng Ngọc Trinh, fullbox 98%",
+    "startingPrice": 2200000,
+    "currentBid": 2550000,
+    "bidStep": 50000,
+    "bidCount": 7,
+    "marketPriceNew": 3890000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6018-cooler-master-v850-white-1.jpg"
+    ],
+    "description": "Bản màu trắng tinh khôi đi kèm dàn dây cáp trắng dẹt chuẩn tone-sur-tone.",
+    "specifications": {
+      "Công suất thực": "850W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6019,
+    "name": "Nguồn Máy Tính ARESCOIL VX600 600W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn chạy tốt, sạch sẽ",
+    "startingPrice": 320000,
+    "currentBid": 420000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 720000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6019-arescoil-vx600-1.png"
+    ],
+    "description": "Nguồn giá rẻ chữa cháy cho bộ máy chơi game tầm trung.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6020,
+    "name": "Nguồn SFX Corsair SF750 750W - 80 Plus Platinum",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Chuẩn SFX nhỏ gọn cho ITX, 98%",
+    "startingPrice": 2600000,
+    "currentBid": 3100000,
+    "bidStep": 50000,
+    "bidCount": 10,
+    "marketPriceNew": 4490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6020-corsair-sf750-sfx-1.png"
+    ],
+    "description": "King of SFX nguồn siêu nhỏ chuẩn 80 Plus Platinum dây bọc dù cao cấp cho ca-bô ITX.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Platinum",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "92mm"
+    }
+  },
+  {
+    "id": 6021,
+    "name": "Nguồn Máy Tính Mik C650B 650W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Còn mới 92%, hết bảo hành",
+    "startingPrice": 500000,
+    "currentBid": 650000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6021-mik-c650b-1.jpg"
+    ],
+    "description": "Thương hiệu MIK thiết kế dây cáp đen dẹt đi dây rất sạch sẽ trong vỏ case.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6022,
+    "name": "Nguồn Máy Tính Seasonic S12III 500W - 80 Plus Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Tem xịn, chạy cực bền",
+    "startingPrice": 450000,
+    "currentBid": 600000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1190000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6022-seasonic-s12iii-500w-1.jpg"
+    ],
+    "description": "Dòng S12III của Seasonic nổi tiếng về điện áp ổn định và hoạt động liên tục 24/7.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6023,
+    "name": "Nguồn Máy Tính Corsair HX1000 Platinum 1000W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng trâu cày thanh lý tháo máy lạnh, 92%",
+    "startingPrice": 2100000,
+    "currentBid": 2500000,
+    "bidStep": 50000,
+    "bidCount": 8,
+    "marketPriceNew": 5100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6023-corsair-hx1000-platinum-1.png"
+    ],
+    "description": "Chuẩn 80 Plus Platinum siêu tiết kiệm điện năng, hỗ trợ công tắc chuyển Single/Multi Rail.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Platinum",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6024,
+    "name": "Nguồn Máy Tính AcBel iPower 90m 600W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Nguyên tem void",
+    "startingPrice": 400000,
+    "currentBid": 500000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 980000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6024-acbel-ipower-600w-1.jpg"
+    ],
+    "description": "Nguồn AcBel nồi đồng cối đá thích hợp anh em lắp máy cày game võ lâm.",
+    "specifications": {
+      "Công suất thực": "600W",
+      "Chuẩn hiệu suất": "80 Plus Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6025,
+    "name": "Nguồn Máy Tính Thermaltake Smart BX1 650W Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Mới 94%, quạt êm",
+    "startingPrice": 650000,
+    "currentBid": 800000,
+    "bidStep": 50000,
+    "bidCount": 3,
+    "marketPriceNew": 1390000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "hoang_minh_store",
+    "images": [
+      "images/products/psu/6025-thermaltake-smart-bx1-1.jpg"
+    ],
+    "description": "Quạt tản nhiệt 120mm với khả năng điều tốc thông minh theo nhiệt độ tải.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6026,
+    "name": "Nguồn SFX Cooler Master V750 SFX Gold 750W",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Fullbox còn bảo hành 24 tháng",
+    "startingPrice": 1900000,
+    "currentBid": 2200000,
+    "bidStep": 50000,
+    "bidCount": 6,
+    "marketPriceNew": 3290000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "cuong_hardware",
+    "images": [
+      "images/products/psu/6026-cooler-master-v750-sfx-1.jpg"
+    ],
+    "description": "Nguồn SFX chuyên cho vỏ ca-bô nhỏ gọn, kèm khung chuyển đổi sang chuẩn ATX.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "92mm"
+    }
+  },
+  {
+    "id": 6027,
+    "name": "Nguồn Máy Tính Deepcool PM750D 750W - 80 Plus Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Hàng chính hãng mới 96%",
+    "startingPrice": 1200000,
+    "currentBid": 1400000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 2100000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "vinh_pc_gear",
+    "images": [
+      "images/products/psu/6027-deepcool-pm750d-1.jpg"
+    ],
+    "description": "Chuẩn 80 Plus Gold giá hạt dẻ, cấu trúc mạch LLC Topology biến áp ổn định.",
+    "specifications": {
+      "Công suất thực": "750W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6028,
+    "name": "Nguồn Máy Tính Gamdias Kratos E1 500W RGB",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đèn LED RGB sáng đẹp",
+    "startingPrice": 380000,
+    "currentBid": 480000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 850000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/psu/6028-gamdias-kratos-e1-1.jpg"
+    ],
+    "description": "Tích hợp 30 hiệu ứng ánh sáng LED RGB có nút bấm thay đổi đằng sau nguồn.",
+    "specifications": {
+      "Công suất thực": "500W",
+      "Chuẩn hiệu suất": "Standard",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "120mm"
+    }
+  },
+  {
+    "id": 6029,
+    "name": "Nguồn Máy Tính Asus TUF Gaming 650W Bronze",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Likenew 97%, nguyên tem Asus",
+    "startingPrice": 1100000,
+    "currentBid": 1300000,
+    "bidStep": 50000,
+    "bidCount": 4,
+    "marketPriceNew": 1990000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "linhkien_cu_giare",
+    "images": [
+      "images/products/psu/6029-asus-tuf-gaming-650w-1.jpg"
+    ],
+    "description": "Chuẩn độ bền quân sự TUF với lớp phủ bo mạch PCB chống ẩm và chống bụi.",
+    "specifications": {
+      "Công suất thực": "650W",
+      "Chuẩn hiệu suất": "80 Plus Bronze",
+      "Kiểu dây nguồn": "Non-Modular",
+      "Kích thước quạt": "135mm"
+    }
+  },
+  {
+    "id": 6030,
+    "name": "Nguồn Máy Tính Seasonic Prime GX-1000 1000W Gold",
+    "category": "PSU",
+    "condition": "Đã sử dụng - Đỉnh cao 1000W, còn bảo hành 5 năm",
+    "startingPrice": 2900000,
+    "currentBid": 3400000,
+    "bidStep": 50000,
+    "bidCount": 10,
+    "marketPriceNew": 5490000,
+    "endTime": "2026-11-15T20:00:00+07:00",
+    "seller": "haisangatx",
+    "images": [
+      "images/products/psu/6030-seasonic-prime-gx1000-1.png"
+    ],
+    "description": "Dòng Prime cao cấp nhất của Seasonic, khả năng điều khiển điện áp cực kỳ chính xác dưới 0.5%.",
+    "specifications": {
+      "Công suất thực": "1000W",
+      "Chuẩn hiệu suất": "80 Plus Gold",
+      "Kiểu dây nguồn": "Full Modular",
+      "Kích thước quạt": "135mm"
+    }
+  }
+]

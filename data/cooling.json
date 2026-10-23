@@ -1,0 +1,527 @@
+[
+  {
+    "id": 8001,
+    "name": "Tản nhiệt Cooler Master Hyper 212 Spectrum V3 ARGB",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 92%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 200000,
+    "currentBid": 290000,
+    "bidStep": 10000,
+    "bidCount": 9,
+    "marketPriceNew": 490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "long_gamingpc",
+    "images": [
+      "images/products/cooling/8001-tan-nhiet-cooler-master-hyper-212-spectrum-v3-argb-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Cooler Master Hyper 212 Spectrum V3 ARGB vì đổi sang cấu hình mới. Tản đã qua sử dụng, ngoại hình khoảng 92%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Số quạt": "1",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "650-1750 RPM ± 10%",
+      "Màu sắc": "Đen",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8002,
+    "name": "Tản nhiệt DEEPCOOL AK400 DIGITAL ARGB",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 97%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 430000,
+    "currentBid": 520000,
+    "bidStep": 10000,
+    "bidCount": 9,
+    "marketPriceNew": 990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phuc_components",
+    "images": [
+      "images/products/cooling/8002-tan-nhiet-deepcool-ak400-digital-argb-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt DEEPCOOL AK400 DIGITAL ARGB vì không còn nhu cầu sử dụng. Tản đã qua sử dụng, ngoại hình khoảng 97%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Chưa xác minh (nguồn chỉ ghi tản nhiệt)",
+      "Đèn LED": "ARGB",
+      "Màu sắc": "Trắng",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8003,
+    "name": "Tản nhiệt DEEPCOOL AG400 ARGB",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 92%, thiếu hộp gốc, bộ ngàm cần xác nhận trước khi nhận",
+    "startingPrice": 370000,
+    "currentBid": 440000,
+    "bidStep": 10000,
+    "bidCount": 7,
+    "marketPriceNew": 790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcparts",
+    "images": [
+      "images/products/cooling/8003-tan-nhiet-deepcool-ag400-argb-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt DEEPCOOL AG400 ARGB vì không còn nhu cầu sử dụng. Tản đã qua sử dụng, ngoại hình khoảng 92%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Đèn LED": "ARGB",
+      "Màu sắc": "Đen",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8004,
+    "name": "Tản nhiệt Cooler Master Hyper 212 Spectrum V3 ARGB",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 96%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 270000,
+    "currentBid": 380000,
+    "bidStep": 10000,
+    "bidCount": 11,
+    "marketPriceNew": 490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "bao_hardware",
+    "images": [
+      "images/products/cooling/8004-tan-nhiet-cooler-master-hyper-212-spectrum-v3-argb-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Cooler Master Hyper 212 Spectrum V3 ARGB vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 96%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Số quạt": "1",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "650-1750 RPM ± 10%",
+      "Màu sắc": "Đen",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8005,
+    "name": "Tản nhiệt Cooler Master HYPER 620S",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 92%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    "startingPrice": 610000,
+    "currentBid": 670000,
+    "bidStep": 10000,
+    "bidCount": 6,
+    "marketPriceNew": 990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/cooling/8005-tan-nhiet-cooler-master-hyper-620s-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Cooler Master HYPER 620S vì đổi sang cấu hình mới. Tản đã qua sử dụng, ngoại hình khoảng 92%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Số quạt": "2",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "1750 RPM",
+      "Màu sắc": "Đen;Bạc",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8006,
+    "name": "Tản nhiệt Cooler Master Hyper 612 Apex",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 88%, đã vệ sinh, quạt hoạt động bình thường theo người bán",
+    "startingPrice": 680000,
+    "currentBid": 780000,
+    "bidStep": 20000,
+    "bidCount": 5,
+    "marketPriceNew": 1690000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "pcbuilder88",
+    "images": [
+      "images/products/cooling/8006-tan-nhiet-cooler-master-hyper-612-apex-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Cooler Master Hyper 612 Apex vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 88%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Số quạt": "2",
+      "Đèn LED": "Không",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "0-2400",
+      "Màu sắc": "Đen;Trắng",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8007,
+    "name": "Tản nhiệt Noctua NH-D15S Chromax Black",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 95%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    "startingPrice": 1700000,
+    "currentBid": 1800000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 2790000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "linh_kien_cu",
+    "images": [
+      "images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Noctua NH-D15S Chromax Black vì chuyển sang bộ máy khác. Tản đã qua sử dụng, ngoại hình khoảng 95%; quạt hoạt động theo kiểm tra của người bán, nên thử nhiệt độ và độ ồn khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "Khí",
+      "Màu sắc": "Đen",
+      "Số ống đồng": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu",
+      "Đèn LED": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8008,
+    "name": "Tản nhiệt AIO Deepcool LT520 Black",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 95%, đã vệ sinh, quạt hoạt động bình thường theo người bán",
+    "startingPrice": 1060000,
+    "currentBid": 1180000,
+    "bidStep": 20000,
+    "bidCount": 6,
+    "marketPriceNew": 2390000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_hardware",
+    "images": [
+      "images/products/cooling/8008-tan-nhiet-aio-deepcool-lt520-black-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Deepcool LT520 Black vì chuyển sang bộ máy khác. Tản đã qua sử dụng, ngoại hình khoảng 95%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "2",
+      "Đèn LED": "RGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "500 ~ 2250 RPM ± 10%",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "Chưa có dữ liệu",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8009,
+    "name": "Tản nhiệt AIO MSI MAG CORELIQUID I240 WHITE",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 90%, thiếu hộp gốc, bộ ngàm cần xác nhận trước khi nhận",
+    "startingPrice": 1600000,
+    "currentBid": 2050000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 3190000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "thanh_pcgear",
+    "images": [
+      "images/products/cooling/8009-tan-nhiet-aio-msi-mag-coreliquid-i240-white-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO MSI MAG CORELIQUID I240 WHITE vì không còn nhu cầu sử dụng. Tản đã qua sử dụng, ngoại hình khoảng 90%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "2",
+      "Đèn LED": "RGB",
+      "Kích thước Radiator": "240 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8010,
+    "name": "Tản nhiệt AIO Corsair iCUE LINK TITAN 240 RX RGB WHITE (CW-9061020-WW)",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 92%, thiếu hộp gốc, bộ ngàm cần xác nhận trước khi nhận",
+    "startingPrice": 2550000,
+    "currentBid": 3000000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 4550000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "an_builds",
+    "images": [
+      "images/products/cooling/8010-tan-nhiet-aio-corsair-icue-link-titan-240-rx-rgb-white-(cw-9061020-ww)-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Corsair iCUE LINK TITAN 240 RX RGB WHITE (CW-9061020-WW) vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 92%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "2",
+      "Đèn LED": "RGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "300–2,100 RPM ±10%",
+      "Màu sắc": "Trắng",
+      "Kích thước Radiator": "240 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8011,
+    "name": "Tản nhiệt Jonsbo TH-240 Black ARGB",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 88%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 900000,
+    "currentBid": 1120000,
+    "bidStep": 20000,
+    "bidCount": 11,
+    "marketPriceNew": 1690000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "huy_techstore",
+    "images": [
+      "images/products/cooling/8011-tan-nhiet-jonsbo-th-240-black-argb-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt Jonsbo TH-240 Black ARGB vì đổi sang cấu hình mới. Tản đã qua sử dụng, ngoại hình khoảng 88%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "2",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "700 – 2400 RPM",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "240 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8012,
+    "name": "Tản nhiệt AIO Cooler Master MASTERLIQUID 240L CORE ARGB WHITE",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 97%, đã vệ sinh, quạt hoạt động bình thường theo người bán",
+    "startingPrice": 1160000,
+    "currentBid": 1300000,
+    "bidStep": 20000,
+    "bidCount": 7,
+    "marketPriceNew": 2090000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "khoa_modpc",
+    "images": [
+      "images/products/cooling/8012-tan-nhiet-aio-cooler-master-masterliquid-240l-core-argb-white-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Cooler Master MASTERLIQUID 240L CORE ARGB WHITE vì thu gọn góc máy. Tản đã qua sử dụng, ngoại hình khoảng 97%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "2",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "650-1750 RPM ± 10%",
+      "Màu sắc": "Trắng",
+      "Kích thước Radiator": "240 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8013,
+    "name": "Tản nhiệt AIO Deepcool MYSTIQUE 360",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 93%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    "startingPrice": 2500000,
+    "currentBid": 2950000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 4490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "long_gamingpc",
+    "images": [
+      "images/products/cooling/8013-tan-nhiet-aio-deepcool-mystique-360-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Deepcool MYSTIQUE 360 vì đổi phong cách setup. Tản đã qua sử dụng, ngoại hình khoảng 93%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Đèn LED": "RGB",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8014,
+    "name": "Tản nhiệt AIO Corsair iCUE LINK TITAN 360 RX RGB LCD Black (CW-9061023-WW)",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 88%, đã vệ sinh, quạt hoạt động bình thường theo người bán",
+    "startingPrice": 2600000,
+    "currentBid": 3200000,
+    "bidStep": 100000,
+    "bidCount": 6,
+    "marketPriceNew": 6490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "phuc_components",
+    "images": [
+      "images/products/cooling/8014-tan-nhiet-aio-corsair-icue-link-titan-360-rx-rgb-lcd-black-(cw-9061023-ww)-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Corsair iCUE LINK TITAN 360 RX RGB LCD Black (CW-9061023-WW) vì không còn nhu cầu sử dụng. Tản đã qua sử dụng, ngoại hình khoảng 88%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "RGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "300 - 2100 RPM ±10%",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8015,
+    "name": "Tản nhiệt AIO Cooler Master MasterLiquid 360 Atmos ARGB Black",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 93%, đã vệ sinh, quạt hoạt động bình thường theo người bán",
+    "startingPrice": 1550000,
+    "currentBid": 2000000,
+    "bidStep": 50000,
+    "bidCount": 9,
+    "marketPriceNew": 3990000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "tuan_pcparts",
+    "images": [
+      "images/products/cooling/8015-tan-nhiet-aio-cooler-master-masterliquid-360-atmos-argb-black-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Cooler Master MasterLiquid 360 Atmos ARGB Black vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 93%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "690-2500 RPM ± 10%",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8016,
+    "name": "Tản nhiệt AIO Cooler Master MasterLiquid 360 Atmos Stealth",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 88%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 1650000,
+    "currentBid": 1750000,
+    "bidStep": 50000,
+    "bidCount": 2,
+    "marketPriceNew": 3190000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "bao_hardware",
+    "images": [
+      "images/products/cooling/8016-tan-nhiet-aio-cooler-master-masterliquid-360-atmos-stealth-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Cooler Master MasterLiquid 360 Atmos Stealth vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 88%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "Không",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "0-2400",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8017,
+    "name": "Tản nhiệt AIO Cooler Master MasterLiquid 360 Core SI ARGB White",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 98%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    "startingPrice": 900000,
+    "currentBid": 940000,
+    "bidStep": 20000,
+    "bidCount": 2,
+    "marketPriceNew": 2090000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "nam_tech99",
+    "images": [
+      "images/products/cooling/8017-tan-nhiet-aio-cooler-master-masterliquid-360-core-si-argb-white-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Cooler Master MasterLiquid 360 Core SI ARGB White vì nâng cấp dàn PC. Tản đã qua sử dụng, ngoại hình khoảng 98%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "650-1750RPM ± 10%",
+      "Màu sắc": "Trắng",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8018,
+    "name": "Tản nhiệt AIO Lian Li HydroShift LCD 360TL Wireless Fan Black (G89.GHS2LCD36TB.00)",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 97%, thiếu hộp gốc, bộ ngàm cần xác nhận trước khi nhận",
+    "startingPrice": 5000000,
+    "currentBid": 5200000,
+    "bidStep": 100000,
+    "bidCount": 2,
+    "marketPriceNew": 8290000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "pcbuilder88",
+    "images": [
+      "images/products/cooling/8018-tan-nhiet-aio-lian-li-hydroshift-lcd-360tl-wireless-fan-black-(g89.ghs2lcd36tb.00)-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Lian Li HydroShift LCD 360TL Wireless Fan Black (G89.GHS2LCD36TB.00) vì đổi sang cấu hình mới. Tản đã qua sử dụng, ngoại hình khoảng 97%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "200-2600RPM",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8019,
+    "name": "Tản nhiệt AIO TRYX Panorama 360 ARGB Black",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 96%, còn bộ ngàm Intel/AMD theo người bán, cần đối chiếu socket",
+    "startingPrice": 5200000,
+    "currentBid": 6300000,
+    "bidStep": 100000,
+    "bidCount": 11,
+    "marketPriceNew": 9890000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "linh_kien_cu",
+    "images": [
+      "images/products/cooling/8019-tan-nhiet-aio-tryx-panorama-360-argb-black-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO TRYX Panorama 360 ARGB Black vì chuyển sang bộ máy khác. Tản đã qua sử dụng, ngoại hình khoảng 96%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "ARGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "500 – 1850 RPM ±10%",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  },
+  {
+    "id": 8020,
+    "name": "Tản nhiệt AIO Corsair iCUE LINK TITAN 360 RX RGB LCD Black (CW-9061023-WW)",
+    "category": "Cooling",
+    "condition": "Đã sử dụng - Còn mới 92%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    "startingPrice": 4000000,
+    "currentBid": 4500000,
+    "bidStep": 100000,
+    "bidCount": 5,
+    "marketPriceNew": 6490000,
+    "endTime": "2026-11-15T00:00:00+07:00",
+    "seller": "minh_hardware",
+    "images": [
+      "images/products/cooling/8020-tan-nhiet-aio-corsair-icue-link-titan-360-rx-rgb-lcd-black-(cw-9061023-ww)-1.jpg"
+    ],
+    "description": "Mình bán lại Tản nhiệt AIO Corsair iCUE LINK TITAN 360 RX RGB LCD Black (CW-9061023-WW) vì đổi sang cấu hình mới. Tản đã qua sử dụng, ngoại hình khoảng 92%; bơm và quạt hoạt động theo kiểm tra của người bán, nên thử tải và kiểm tra rò rỉ khi nhận. Bộ gông/ốc Intel và AMD cần kiểm đếm, xác nhận tương thích socket trước khi giao dịch; bao test 3 ngày (chính sách giả lập).",
+    "specifications": {
+      "Loại tản nhiệt": "AIO nước",
+      "Số quạt": "3",
+      "Đèn LED": "RGB",
+      "Kích thước quạt tản": "120",
+      "Tốc độ quạt": "300 - 2100 RPM ±10%",
+      "Màu sắc": "Đen",
+      "Kích thước Radiator": "360 mm",
+      "Socket hỗ trợ": "Chưa có dữ liệu"
+    }
+  }
+]
