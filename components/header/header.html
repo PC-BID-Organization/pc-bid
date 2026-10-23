@@ -1,0 +1,128 @@
+<!-- ==================== THÀNH PHẦN HEADER (HEADER COMPONENT) ==================== -->
+<header class="header">
+  <!-- 1. Thanh thông tin trên cùng (Top Bar) -->
+  <div class="header__top-bar">
+    <div class="container header__top-bar-inner">
+      <div class="header__course-info">
+        <img src="images/icons/icon-cap.svg" alt="Biểu tượng giáo dục" class="header__course-icon" width="13" height="11">
+        <span>Đồ án môn học IE104 - Trường Đại học Công nghệ Thông tin (UIT) | Sàn đấu giá linh kiện máy tính cũ</span>
+      </div>
+      <div class="header__top-links">
+        <span>Hotline: <strong class="header__top-hotline">1900 6868</strong></span>
+        <span class="header__top-divider">•</span>
+        <a href="mailto:hotro@pcbid.vn" class="header__top-link">Hỗ trợ: hotro@pcbid.vn</a>
+        <span class="header__top-divider">•</span>
+        <a href="#" class="header__top-link">Quy chế hoạt động</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Thanh điều hướng chính (Main Header Bar) -->
+  <div class="header__main-bar">
+    <div class="container header__main-inner">
+      <!-- Logo thương hiệu: kích thước 140x62 -->
+      <a href="index.html" class="header__logo" aria-label="PCBid Trang chủ">
+        <img src="images/logo/pcbid-logo-ee2439.png" alt="Logo PCBid" class="header__logo-img">
+      </a>
+
+      <!-- Hộp tìm kiếm trung tâm: chiều rộng 699px -->
+      <div class="header__search-wrapper">
+        <form class="header__search-form" action="products.html" method="GET">
+          <!-- Hộp chọn danh mục tìm kiếm -->
+          <div class="header__search-category">
+            <span class="header__search-category-text">Tất cả</span>
+            <img src="images/icons/icon-arrow-down.svg" alt="Mũi tên" class="header__search-arrow" width="7" height="4">
+            <select name="category" aria-label="Chọn danh mục" class="header__search-select">
+              <option value="all">Tất cả</option>
+              <option value="vga">Card màn hình (GPU)</option>
+              <option value="cpu">Bộ vi xử lý (CPU)</option>
+              <option value="mainboard">Bo mạch chủ</option>
+              <option value="ram">Bộ nhớ RAM</option>
+              <option value="ssd">Ổ cứng SSD/HDD</option>
+              <option value="psu">Nguồn máy tính (PSU)</option>
+            </select>
+          </div>
+
+          <!-- Ô nhập từ khóa tìm kiếm -->
+          <div class="header__search-input-box">
+            <img src="images/icons/icon-search.svg" alt="Biểu tượng kính lúp" class="header__search-icon" width="14" height="14">
+            <input type="text" name="q" class="header__search-input" placeholder="Tìm kiếm RTX 3070, i5-12400F, RAM DDR5..." aria-label="Tìm kiếm sản phẩm">
+          </div>
+
+          <!-- Nút gửi lệnh tìm kiếm -->
+          <button type="submit" class="header__search-button">
+            <img src="images/icons/icon-search-btn.svg" alt="Tìm kiếm" class="header__search-btn-icon" width="14" height="14">
+            <span>Tìm kiếm</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Cụm nút thao tác người dùng bên phải -->
+      <div class="header__actions">
+        <!-- Nút đăng bán phiên đấu giá mới -->
+        <a href="sell.html" class="header__btn-sell">
+          <img src="images/icons/icon-plus.svg" alt="Thêm phiên" class="header__btn-sell-icon" width="15" height="15">
+          <span>Đăng bán đấu giá</span>
+        </a>
+
+        <!-- Đường kẻ phân cách -->
+        <div class="header__actions-divider"></div>
+
+        <!-- Nút danh sách theo dõi (Watchlist) -->
+        <a href="profile.html#watchlist" class="header__icon-btn" title="Danh sách theo dõi" aria-label="Danh sách theo dõi">
+          <img src="images/icons/icon-bookmark.svg" alt="Theo dõi" class="header__btn-icon-img" width="15" height="16">
+          <span class="header__badge">3</span>
+        </a>
+
+        <!-- Nút thông báo đấu giá -->
+        <a href="profile.html#notifications" class="header__icon-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá">
+          <img src="images/icons/icon-bell.svg" alt="Thông báo" class="header__btn-icon-img" width="14" height="17">
+          <span class="header__badge">5</span>
+        </a>
+
+        <!-- Biểu tượng ảnh đại diện người dùng: kích thước 38x38 -->
+        <a href="profile.html" class="header__user-avatar" title="Tài khoản cá nhân" aria-label="Tài khoản cá nhân">
+          <img src="images/icons/icon-user.svg" alt="Ảnh đại diện" class="header__avatar-icon" width="12" height="12">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Thanh điều hướng danh mục linh kiện (Categories Nav Bar) -->
+  <nav class="header__nav-bar">
+    <div class="container header__nav-container">
+      <ul class="header__nav-list">
+        <li class="header__nav-item">
+          <a href="index.html" class="header__nav-link header__nav-link--active">Trang chủ</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html" class="header__nav-link">Tất cả phiên đấu giá</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=vga" class="header__nav-link">Card màn hình (GPU)</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=cpu" class="header__nav-link">Bộ vi xử lý (CPU)</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=mainboard" class="header__nav-link">Bo mạch chủ (Mainboard)</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=ram" class="header__nav-link">Bộ nhớ RAM</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=ssd" class="header__nav-link">Ổ cứng SSD/HDD</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=psu" class="header__nav-link">Nguồn máy tính (PSU)</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?status=hot" class="header__nav-link">Phiên đang Hot 🔥</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?status=ending" class="header__nav-link">Sắp kết thúc</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>

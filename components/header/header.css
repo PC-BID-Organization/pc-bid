@@ -1,0 +1,411 @@
+/* ==========================================================================
+   ĐỊNH KIỂU THÀNH PHẦN HEADER (Chuẩn hóa pixel theo thiết kế Figma)
+   ========================================================================== */
+
+.header {
+  width: 100%;
+  background-color: var(--color-bg-white, #ffffff);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   1. Thanh thông tin trên cùng (Top Bar - Chiều cao ~28px)
+   -------------------------------------------------------------------------- */
+.header__top-bar {
+  background-color: var(--color-bg-subtle, #eff4ff);
+  border-bottom: 1px solid rgba(226, 191, 178, 0.3);
+  padding: 6px 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.0367em;
+  color: #565e74;
+}
+
+.header__top-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__course-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header__course-icon {
+  width: 13px;
+  height: 11px;
+  display: block;
+}
+
+.header__top-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__top-hotline {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.header__top-divider {
+  color: #565e74;
+}
+
+.header__top-link {
+  color: #565e74;
+  transition: color 0.15s ease;
+}
+
+.header__top-link:hover {
+  color: #ea580c;
+}
+
+/* --------------------------------------------------------------------------
+   2. Thanh điều hướng chính (Main Header Bar - Đệm trên dưới 10px)
+   -------------------------------------------------------------------------- */
+.header__main-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(226, 191, 178, 0.4);
+  padding: 10px 0;
+}
+
+.header__main-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* Logo thương hiệu: kích thước chuẩn 140px x 62px */
+.header__logo {
+  display: flex;
+  align-items: center;
+  width: 140px;
+  height: 62px;
+  flex-shrink: 0;
+}
+
+.header__logo-img {
+  width: 140px;
+  height: 62px;
+  object-fit: fill;
+  display: block;
+}
+
+/* Vùng bao hộp tìm kiếm: chiều rộng cố định 699px */
+.header__search-wrapper {
+  width: 699px;
+  max-width: 699px;
+  padding: 0 32px;
+  box-sizing: border-box;
+}
+
+.header__search-form {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 44px;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 191, 178, 0.8);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Nút chọn danh mục: nằm bên trái, chiều cao 42px */
+.header__search-category {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 10px;
+  background-color: #eff4ff;
+  border-right: 1px solid rgba(226, 191, 178, 0.5);
+  border-radius: 5px 0 0 5px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.header__search-category-text {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.0154em;
+  color: #0b1c30;
+}
+
+.header__search-arrow {
+  width: 7px;
+  height: 4px;
+  display: block;
+}
+
+.header__search-select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Khung nhập liệu từ khóa: bắt đầu từ x=86px */
+.header__search-input-box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 42px;
+  padding: 0 10px;
+  gap: 8px;
+}
+
+.header__search-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.header__search-input {
+  width: 100%;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #0b1c30;
+}
+
+.header__search-input::placeholder {
+  color: rgba(86, 94, 116, 0.6);
+}
+
+/* Nút bấm tìm kiếm: chiều cao 42px, đệm ngang 24px, khoảng cách icon 6px */
+.header__search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 24px;
+  background-color: #ea580c;
+  border-radius: 0 5px 5px 0;
+  color: #ffffff;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 22px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.header__search-button:hover {
+  background-color: #d94e07;
+}
+
+.header__search-btn-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Cụm nút tương tác bên phải (Khoảng cách giữa các nút 20px)
+   -------------------------------------------------------------------------- */
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+/* Nút "Đăng bán đấu giá": đệm 10px 20px, khoảng cách icon 8px, bo góc 6px */
+.header__btn-sell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #ea580c;
+  color: #ffffff;
+  border-radius: 6px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 24px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.header__btn-sell:hover {
+  background-color: #d94e07;
+}
+
+.header__btn-sell-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* Đường kẻ phân cách dọc: rộng 1px, cao 28px */
+.header__actions-divider {
+  width: 1px;
+  height: 28px;
+  background-color: rgba(226, 191, 178, 0.6);
+}
+
+/* Nút biểu tượng (Theo dõi & Thông báo): Đệm 4px */
+.header__icon-btn {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.header__icon-btn:hover {
+  transform: translateY(-1px);
+}
+
+.header__btn-icon-img {
+  display: block;
+}
+
+/* Huy hiệu số đếm thông báo (Badge 3 & 5): vị trí x=14, y=-4, kích thước 20x14, bo tròn 10px */
+.header__badge {
+  position: absolute;
+  top: -4px;
+  left: 14px;
+  width: 20px;
+  height: 14px;
+  background-color: #ea580c;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Vòng tròn ảnh đại diện người dùng: đường kính 38px, bo góc 19px */
+.header__user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 19px;
+  background-color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.header__user-avatar:hover {
+  opacity: 0.9;
+}
+
+.header__avatar-icon {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   3. Thanh điều hướng danh mục linh kiện (Categories Navigation Bar)
+   -------------------------------------------------------------------------- */
+.header__nav-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(226, 191, 178, 0.4);
+}
+
+.header__nav-container {
+  padding: 0 24px;
+}
+
+.header__nav-list {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.header__nav-list::-webkit-scrollbar {
+  display: none;
+}
+
+.header__nav-item {
+  display: inline-block;
+}
+
+.header__nav-link {
+  display: block;
+  padding: 10px 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.0231em;
+  color: #565e74;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.header__nav-link:hover {
+  color: #a33900;
+}
+
+.header__nav-link--active {
+  color: #a33900;
+  font-weight: 700;
+  border-bottom: 2px solid #a33900;
+}
+
+/* --------------------------------------------------------------------------
+   Tối ưu hiển thị đa thiết bị (Responsive Design)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1280px) {
+  .header__search-wrapper {
+    width: auto;
+    flex: 1;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 992px) {
+  /* Ẩn thanh thông tin trên cùng trên màn hình máy tính bảng và điện thoại */
+  .header__top-bar {
+    display: none;
+  }
+
+  .header__main-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header__search-wrapper {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+}

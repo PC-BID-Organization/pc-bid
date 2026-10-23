@@ -1,0 +1,190 @@
+/* ==========================================================================
+   ĐỊNH KIỂU THÀNH PHẦN FOOTER (BEM: .footer)
+   Bố cục 4 cột chân trang, thông tin liên hệ và bản quyền đồ án IE104
+   ========================================================================== */
+
+.footer {
+  background-color: var(--color-bg-subtle, #EFF4FF);
+  border-top: 1px solid var(--color-border-light, rgba(226, 191, 178, 0.4));
+  padding: 40px 0 0 0;
+  margin-top: auto;
+  color: var(--color-text-muted, #565E74);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.1fr 1.2fr;
+  gap: 48px;
+  padding-bottom: 32px;
+}
+
+/* Cột 1: Thông tin thương hiệu */
+.footer__col--brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Kích thước logo chân trang chuẩn thiết kế Figma: 122x54 */
+.footer__logo {
+  display: inline-block;
+  width: 122px;
+  height: 54px;
+}
+
+.footer__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footer__desc {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-muted, #565E74);
+}
+
+.footer__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  max-width: 292px;
+}
+
+.footer__badge-tag {
+  background-color: var(--color-bg-tag, #E5EEFF);
+  color: var(--color-text-subtle, #5C647A);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.036em;
+}
+
+/* Cột 2 & Cột 3: Tiêu đề danh sách liên kết */
+.footer__title {
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--color-text-main, #0B1C30);
+  margin-bottom: 14px;
+}
+
+.footer__links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer__link {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-muted, #565E74);
+  transition: color 0.2s ease, transform 0.15s ease;
+  display: inline-block;
+}
+
+.footer__link:hover {
+  color: var(--color-primary, #EA580C);
+  transform: translateX(3px);
+}
+
+/* Cột 4: Danh sách thông tin liên hệ */
+.footer__contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.footer__contact-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+}
+
+.footer__hotline-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer__hotline-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-main, #0B1C30);
+}
+
+.footer__hotline-number {
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--color-primary-dark, #A33900);
+  letter-spacing: -0.01em;
+}
+
+.footer__hotline-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted, #565E74);
+}
+
+.footer__contact-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-muted, #565E74);
+}
+
+.footer__contact-text strong {
+  color: var(--color-text-main, #0B1C30);
+}
+
+/* Thanh thông tin bản quyền dưới cùng (Bottom Bar) */
+.footer__bottom {
+  border-top: 1px solid var(--color-border-light, rgba(226, 191, 178, 0.4));
+  padding: 20px 0;
+}
+
+.footer__bottom-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-muted, #565E74);
+}
+
+.footer__copyright-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(86, 94, 116, 0.8);
+}
+
+/* Tối ưu hiển thị đa màn hình (Responsive Design) */
+@media (max-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .footer__bottom-inner {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
