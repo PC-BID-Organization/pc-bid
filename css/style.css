@@ -1,0 +1,54 @@
+/* ==========================================================================
+   STYLE CSS - BIẾN TOÀN CỤC & THIẾT KẾ DÙNG CHUNG (GLOBAL DESIGN TOKENS)
+   Chứa bảng màu sắc chuẩn, font chữ và các lớp tiện ích cơ sở
+   ========================================================================== */
+
+:root {
+  /* Bảng màu chủ đạo (Brand Colors) */
+  --color-primary: #EA580C;
+  --color-primary-hover: #D94E07;
+  --color-primary-dark: #A33900;
+  --color-primary-light: #FFEDD5;
+
+  /* Màu nền giao diện (Background Colors) */
+  --color-bg-body: #F8F9FF;
+  --color-bg-white: #FFFFFF;
+  --color-bg-subtle: #EFF4FF;
+  --color-bg-tag: #E5EEFF;
+
+  /* Màu chữ (Text Colors) */
+  --color-text-main: #0B1C30;
+  --color-text-muted: #565E74;
+  --color-text-subtle: #5C647A;
+  --color-text-placeholder: rgba(86, 94, 116, 0.6);
+
+  /* Màu đường viền (Border Colors) */
+  --color-border-subtle: rgba(226, 191, 178, 0.3);
+  --color-border-light: rgba(226, 191, 178, 0.4);
+  --color-border-medium: rgba(226, 191, 178, 0.5);
+  --color-border-strong: rgba(226, 191, 178, 0.8);
+
+  /* Phông chữ hệ thống (Typography) */
+  --font-family-sans: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-heading: 'Space Grotesk', 'Be Vietnam Pro', sans-serif;
+
+  /* Kích thước bố cục chung (Layout Sizes) */
+  --max-width-container: 1440px;
+}
+
+/* Khung chứa nội dung trung tâm (Container chung) */
+.container {
+  width: 100%;
+  max-width: var(--max-width-container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Khung giữ chỗ tránh hiện tượng giật trang khi nạp component động */
+#app-header {
+  min-height: 110px;
+}
+
+#app-footer {
+  min-height: 250px;
+}
