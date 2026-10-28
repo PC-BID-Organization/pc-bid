@@ -1,0 +1,5 @@
+/* ==========================================================================
+   INDEX CSS - ALIAS CHO HOME CSS (Trang Chủ PCBid)
+   Tự động kế thừa toàn bộ bộ quy tắc định kiểu BEM của Trang Chủ
+   ========================================================================== */
+@import url('./home.css');
