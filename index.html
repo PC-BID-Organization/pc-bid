@@ -5,65 +5,1058 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="PCBid - Sàn đấu giá trực tuyến chuyên biệt cho linh kiện máy tính đã qua sử dụng. Đồ án IE104 UIT.">
+    content="PCBid - Sàn đấu giá trực tuyến chuyên biệt cho linh kiện máy tính cũ, card màn hình, CPU, bo mạch chủ đã qua kiểm định Furmark và MemTest86.">
   <title>PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
 
-  <!-- Phông chữ Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Tệp tin định kiểu cốt lõi & biến toàn cục -->
+  <!-- Định kiểu cốt lõi hệ thống -->
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Tệp tin định kiểu riêng cho từng thành phần (Components) -->
+  <!-- Định kiểu thành phần Header/Footer dùng chung -->
   <link rel="stylesheet" href="components/header/header.css">
   <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Tệp tin định kiểu riêng cho Trang chủ -->
+  <link rel="stylesheet" href="css/home.css">
 </head>
 
 <body id="home-page">
 
-  <!-- ==================== KHUNG CHỨA HEADER NẠP ĐỘNG ==================== -->
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
   <div id="app-header"></div>
 
-  <!-- ==================== KHU VỰC NỘI DUNG CHÍNH (MAIN CONTENT PLACEHOLDER) ==================== -->
-  <main style="min-height: 400px; padding: 60px 0;">
-    <div class="container"
-      style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed rgba(226, 191, 178, 0.8); border-radius: 8px; background-color: rgba(239, 244, 255, 0.5); padding: 80px 24px; text-align: center;">
-      <div
-        style="width: 48px; height: 48px; border-radius: 12px; background-color: #E5EEFF; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A33900" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-      </div>
-      <h2
-        style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #0B1C30; margin-bottom: 8px;">
-        Vùng Nội Dung Chính (Main Page Content Area)</h2>
-      <p style="font-size: 14px; line-height: 22px; color: #565E74; max-width: 580px; margin-bottom: 16px;">Khu vực hiển
-        thị nội dung động của từng màn hình chức năng.<br>Shell Header & Footer 4 cột đồng bộ toàn hệ sinh thái PCBid
-        qua bộ nạp component động.</p>
-      <div style="display: flex; gap: 8px;">
-        <span
-          style="display: inline-block; padding: 4px 12px; background-color: #FFFFFF; border: 1px solid rgba(226, 191, 178, 0.5); border-radius: 12px; font-size: 11px; font-weight: 600; color: #565E74;">Đồ
-          án IE104 - UIT</span>
-        <span
-          style="display: inline-block; padding: 4px 12px; background-color: #FFFFFF; border: 1px solid rgba(226, 191, 178, 0.5); border-radius: 12px; font-size: 11px; font-weight: 600; color: #565E74;">Shell
-          Type: Standard</span>
-      </div>
+  <!-- ==================== NỘI DUNG CHÍNH (MAIN) ==================== -->
+  <main class="pcb-home">
+    <div class="container">
+
+      <!-- ============================================================
+           0. BĂNG CHUYỀN HOẠT ĐỘNG SÀN TRỰC TIẾP (LIVE TICKER RIBBON)
+           ============================================================ -->
+      <section class="pcb-ticker" aria-label="Hoạt động đấu giá thời gian thực">
+        <div class="pcb-ticker__left">
+          <span class="pcb-ticker__badge">
+            <span class="pcb-ticker__dot"></span>
+            Trực tiếp sàn đấu giá
+          </span>
+          <div class="pcb-ticker__viewport">
+            <div class="pcb-ticker__track" id="pcb-ticker-track">
+              <!-- JS tự động chèn các sự kiện realtime -->
+            </div>
+          </div>
+        </div>
+        <a href="products.html" class="pcb-ticker__link">
+          <span>Xem tất cả 200 phiên đang mở</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </section>
+
+      <!-- ============================================================
+           1. HERO 2.0: 3 CỘT (SIDEBAR + BANNER TÂM ĐIỂM + PROMOS)
+           ============================================================ -->
+      <section class="hero-v2" aria-labelledby="hero-v2-heading">
+
+        <!-- Cột 1: Sidebar Danh Mục Linh Kiện Cũ -->
+        <aside class="hero-v2__sidebar" aria-label="Danh mục linh kiện">
+          <div class="hero-v2__sidebar-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <span>Danh mục linh kiện</span>
+          </div>
+
+          <ul class="hero-v2__cat-list">
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=vga" class="hero-v2__cat-link hero-v2__cat-link--hot">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="10" rx="2" />
+                    <circle cx="8" cy="12" r="2.5" />
+                    <circle cx="16" cy="12" r="2.5" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Card màn hình (GPU)</span>
+                <span class="hero-v2__cat-count">30</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=cpu" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                    <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Bộ vi xử lý (CPU)</span>
+                <span class="hero-v2__cat-count">30</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=mainboard" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <rect x="7" y="7" width="6" height="6" rx="1" />
+                    <path d="M16 7h1M16 11h1M16 15h1M7 16h10" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Bo mạch chủ (Mainboard)</span>
+                <span class="hero-v2__cat-count">20</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=ram" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="8" width="20" height="8" rx="1.5" />
+                    <path d="M6 16v3M10 16v3M14 16v3M18 16v3M6 8v8M10 8v8M14 8v8M18 8v8" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Bộ nhớ RAM</span>
+                <span class="hero-v2__cat-count">20</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=ssd" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                    <path d="M7 10v4M11 10v4M15 10v4M18 12h3" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Ổ cứng SSD / NVMe</span>
+                <span class="hero-v2__cat-count">30</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=psu" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="10" cy="12" r="3.2" />
+                    <path d="M17 10h1M17 14h1" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Nguồn máy tính (PSU)</span>
+                <span class="hero-v2__cat-count">30</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=cooling" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Tản nhiệt Khí &amp; AIO</span>
+                <span class="hero-v2__cat-count">20</span>
+              </a>
+            </li>
+            <li class="hero-v2__cat-item">
+              <a href="products.html?category=case" class="hero-v2__cat-link">
+                <span class="hero-v2__cat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" />
+                    <circle cx="12" cy="9" r="2.4" />
+                    <path d="M9 17h6" />
+                  </svg>
+                </span>
+                <span class="hero-v2__cat-name">Vỏ máy tính (Case)</span>
+                <span class="hero-v2__cat-count">20</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="hero-v2__sidebar-foot">
+            <span class="hero-v2__sidebar-pill">🛡️ Bao test 7 ngày</span>
+            <span class="hero-v2__sidebar-pill">⚡ Giao 24h</span>
+            <span class="hero-v2__sidebar-pill">🔬 Test Furmark</span>
+          </div>
+        </aside>
+
+        <!-- Cột 2: Banner Công Nghệ & Card Đấu Giá Tâm Điểm Trực Tiếp -->
+        <div class="hero-v2__main">
+          <div class="hero-v2__content">
+            <div>
+              <span class="hero-v2__tagline">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                </svg>
+                Sàn đấu giá linh kiện PC uy tín UIT
+              </span>
+              <h1 class="hero-v2__title" id="hero-v2-heading">
+                Đấu Giá Minh Bạch.<br>
+                <span class="hero-v2__title-accent">Săn Linh Kiện Giá Hời.</span>
+              </h1>
+              <p class="hero-v2__desc">
+                100% linh kiện có thẻ kiểm định Furmark 15p &amp; MemTest86, tem void nguyên vẹn. Đấu giá công khai từng
+                bước giá, đồng hồ mili-giây, bảo vệ ví ảo an toàn.
+              </p>
+            </div>
+
+            <div>
+              <div class="hero-v2__actions">
+                <a href="products.html" class="hero-v2__btn hero-v2__btn--primary">
+                  <span>Khám phá sàn ngay</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </a>
+                <button type="button" class="hero-v2__btn hero-v2__btn--glass" id="btn-open-cert">
+                  <span>Xem phiếu kiểm định mẫu 🛡️</span>
+                </button>
+              </div>
+
+              <div class="hero-v2__stats">
+                <div class="hero-v2__stat-item">
+                  <span class="hero-v2__stat-val">200+</span>
+                  <span class="hero-v2__stat-lbl">Phiên đang mở</span>
+                </div>
+                <div class="hero-v2__stat-item">
+                  <span class="hero-v2__stat-val">2.450+</span>
+                  <span class="hero-v2__stat-lbl">Lượt trả giá</span>
+                </div>
+                <div class="hero-v2__stat-item">
+                  <span class="hero-v2__stat-val">7 ngày</span>
+                  <span class="hero-v2__stat-lbl">Bao test đổi trả</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Tâm Điểm: Đang Đấu Trực Tiếp -->
+          <div class="hero-v2__spotlight">
+            <div class="hero-v2__spotlight-head">
+              <span class="hero-v2__spotlight-live">
+                <span class="pcb-ticker__dot"></span>
+                Đang đấu trực tiếp
+              </span>
+              <span class="hero-v2__spotlight-countdown">
+                ⏳ <span id="hero-spotlight-timer">02:45:18</span>
+              </span>
+            </div>
+
+            <div class="hero-v2__spotlight-media">
+              <img class="hero-v2__spotlight-img" src="images/products/gpu/2028-rx-7800-xt-1.jpg"
+                alt="Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB">
+            </div>
+
+            <h3 class="hero-v2__spotlight-name" title="Gigabyte Radeon RX 7800 XT Gaming OC 16GB">
+              Gigabyte Radeon RX 7800 XT Gaming OC 16GB (Fullbox)
+            </h3>
+
+            <div class="hero-v2__spotlight-pricebox">
+              <div class="hero-v2__spotlight-lbl">
+                <span>Giá đang dẫn đầu:</span>
+                <span style="color:#fdba74;">32 lượt bid</span>
+              </div>
+              <div class="hero-v2__spotlight-bid">12.800.000đ</div>
+            </div>
+
+            <button type="button" class="hero-v2__spotlight-action" data-action="quick-bid" data-id="2002">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v8M8 12h8" />
+              </svg>
+              <span>Tham gia trả giá ngay</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Cột 3: 4 Thẻ Đấu Giá Nổi Bật Thu Nhỏ (Curated Promos) -->
+        <div class="hero-v2__promos">
+          <a href="products.html?sort=ending" class="hero-v2__promo-card">
+            <div class="hero-v2__promo-info">
+              <span class="hero-v2__promo-tag hero-v2__promo-tag--danger">Sắp hết giờ</span>
+              <h4 class="hero-v2__promo-title">Ryzen 5 5600 6C/12T</h4>
+              <span class="hero-v2__promo-sub">Còn 18 phút • Vào bid →</span>
+            </div>
+            <img src="images/products/cpu/1019-ryzen-5-5600-1.jpg" alt="" class="hero-v2__promo-img">
+          </a>
+
+          <a href="products.html?sort=bids" class="hero-v2__promo-card">
+            <div class="hero-v2__promo-info">
+              <span class="hero-v2__promo-tag hero-v2__promo-tag--hot">Cạnh tranh nhất</span>
+              <h4 class="hero-v2__promo-title">RTX 4070 12GB White</h4>
+              <span class="hero-v2__promo-sub">42 lượt bid • Xem ngay →</span>
+            </div>
+            <img src="images/products/gpu/2018-rtx-4070-12gb-1.webp" alt="" class="hero-v2__promo-img">
+          </a>
+
+          <a href="products.html?category=psu" class="hero-v2__promo-card">
+            <div class="hero-v2__promo-info">
+              <span class="hero-v2__promo-tag hero-v2__promo-tag--blue">Nguồn Gold 80+</span>
+              <h4 class="hero-v2__promo-title">NZXT C750 Gold 750W</h4>
+              <span class="hero-v2__promo-sub">Giá từ 1.200k →</span>
+            </div>
+            <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="hero-v2__promo-img">
+          </a>
+
+          <a href="products.html?category=cooling" class="hero-v2__promo-card">
+            <div class="hero-v2__promo-info">
+              <span class="hero-v2__promo-tag hero-v2__promo-tag--cool">Tản nhiệt đỉnh</span>
+              <h4 class="hero-v2__promo-title">Noctua NH-D15s Black</h4>
+              <span class="hero-v2__promo-sub">Test êm ái • Xem ngay →</span>
+            </div>
+            <img src="images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg" alt=""
+              class="hero-v2__promo-img">
+          </a>
+        </div>
+
+      </section>
+
+      <!-- ============================================================
+           2. DẢI CAM KẾT VẬN HÀNH & BẢO HÀNH (TRUST BAR 2.0)
+           ============================================================ -->
+      <section class="pcb-trust" aria-label="Cam kết chất lượng sàn PCBid">
+        <div class="pcb-trust__item">
+          <div class="pcb-trust__icon pcb-trust__icon--orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="pcb-trust__title">Kiểm Định Kỹ Thuật 3 Lớp</h3>
+            <p class="pcb-trust__desc">Furmark 15 phút, MemTest86 2 lượt, chụp macro chân socket CPU trước khi duyệt
+              phiên.</p>
+          </div>
+        </div>
+
+        <div class="pcb-trust__item">
+          <div class="pcb-trust__icon pcb-trust__icon--blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="pcb-trust__title">Bao Test 7 Ngày Đổi Trả</h3>
+            <p class="pcb-trust__desc">Hoàn tiền 100% qua ví cọc mô phỏng nếu linh kiện phát sinh lỗi phần cứng không
+              đúng mô tả.</p>
+          </div>
+        </div>
+
+        <div class="pcb-trust__item">
+          <div class="pcb-trust__icon pcb-trust__icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="pcb-trust__title">Đấu Giá Minh Bạch 100%</h3>
+            <p class="pcb-trust__desc">Mọi bước giá ghi vào nhật ký kiểm toán công khai, không bao giờ có tài khoản bot
+              đẩy giá ảo.</p>
+          </div>
+        </div>
+
+        <div class="pcb-trust__item">
+          <div class="pcb-trust__icon pcb-trust__icon--purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="1" y="3" width="15" height="13" rx="2" />
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="pcb-trust__title">Giao Nhanh 24h &amp; Đồng Kiểm</h3>
+            <p class="pcb-trust__desc">Được mở hộp cắm nguồn test ngoại quan trước khi thanh toán, có COD tại TP.HCM
+              &amp; Hà Nội.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           3. KỆ HÀNG: ĐẤU GIÁ SẮP KẾT THÚC (LIVE COUNTDOWNS)
+           ============================================================ -->
+      <section class="pcb-shelf pcb-shelf--ending" aria-labelledby="shelf-ending-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--clock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="12 7 12 12 15 15"></polyline>
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="shelf-ending-heading">Đấu Giá Sắp Kết Thúc</h2>
+            </div>
+            <p class="pcb-shelf__desc">Đồng hồ đếm ngược trực tiếp theo giây — cơ hội chốt món hời trước khi búa gõ.</p>
+          </div>
+
+          <div class="pcb-shelf__tools">
+            <div class="pcb-shelf__tabs" role="tablist" aria-label="Sắp xếp phiên sắp kết thúc">
+              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" data-ending-tab="ending">Sắp hết
+                giờ</button>
+              <button type="button" class="pcb-shelf__tab" data-ending-tab="bids">Nhiều lượt bid</button>
+              <button type="button" class="pcb-shelf__tab" data-ending-tab="price">Giá cao nhất</button>
+            </div>
+            <a href="products.html?status=ending" class="pcb-shelf__more">
+              <span>Xem tất cả</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </header>
+
+        <!-- Lưới 5 sản phẩm hiển thị nhịp nhàng -->
+        <div class="pcb-grid" id="pcb-ending-grid">
+          <!-- JS Render -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+           4. KHÁM PHÁ THEO DANH MỤC (CATEGORY TILES EXPLORER)
+           ============================================================ -->
+      <section class="pcb-shelf" aria-labelledby="shelf-cat-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--flame">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="shelf-cat-heading">Khám Phá Theo Danh Mục</h2>
+            </div>
+            <p class="pcb-shelf__desc">Đầy đủ 8 nhóm linh kiện chuẩn mực để dựng nên một cỗ máy hoàn chỉnh.</p>
+          </div>
+          <a href="products.html" class="pcb-shelf__more">Xem bảng phân loại →</a>
+        </header>
+
+        <div class="pcb-cats">
+          <a href="products.html?category=vga" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--vga">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="7" width="20" height="10" rx="2" />
+                <circle cx="8" cy="12" r="2.5" />
+                <circle cx="16" cy="12" r="2.5" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">VGA / Card</span>
+            <span class="pcb-cat-tile__count">30 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=cpu" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--cpu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+                <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">CPU / Vi xử lý</span>
+            <span class="pcb-cat-tile__count">30 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=mainboard" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--mb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <rect x="7" y="7" width="6" height="6" rx="1" />
+                <path d="M16 7h1M16 11h1M16 15h1M7 16h10" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Bo mạch chủ</span>
+            <span class="pcb-cat-tile__count">20 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=ram" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--ram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="8" width="20" height="8" rx="1.5" />
+                <path d="M6 16v3M10 16v3M14 16v3M18 16v3M6 8v8M10 8v8M14 8v8M18 8v8" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Bộ nhớ RAM</span>
+            <span class="pcb-cat-tile__count">20 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=ssd" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--ssd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="6" width="18" height="12" rx="2" />
+                <path d="M7 10v4M11 10v4M15 10v4M18 12h3" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Ổ cứng SSD/NVMe</span>
+            <span class="pcb-cat-tile__count">30 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=psu" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--psu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <circle cx="10" cy="12" r="3.2" />
+                <path d="M17 10h1M17 14h1" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Nguồn máy tính</span>
+            <span class="pcb-cat-tile__count">30 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=cooling" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--fan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Tản nhiệt khí/AIO</span>
+            <span class="pcb-cat-tile__count">20 phiên mở</span>
+          </a>
+
+          <a href="products.html?category=case" class="pcb-cat-tile">
+            <span class="pcb-cat-tile__icon pcb-cat-tile__icon--case">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="5" y="2" width="14" height="20" rx="2" />
+                <circle cx="12" cy="9" r="2.4" />
+                <path d="M9 17h6" />
+              </svg>
+            </span>
+            <span class="pcb-cat-tile__name">Vỏ máy Case</span>
+            <span class="pcb-cat-tile__count">20 phiên mở</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           5. KỆ HÀNG: ĐẤU GIÁ NỔI BẬT (TRENDING HOT WITH CATEGORY TABS)
+           ============================================================ -->
+      <section class="pcb-shelf" aria-labelledby="shelf-hot-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--flame">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path
+                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="shelf-hot-heading">Đấu Giá Nổi Bật Trong Tuần</h2>
+            </div>
+            <p class="pcb-shelf__desc">Các phiên có lượng người quan tâm và số lượt trả giá cao nhất.</p>
+          </div>
+
+          <div class="pcb-shelf__tools">
+            <div class="pcb-shelf__tabs" role="tablist" aria-label="Lọc danh mục đấu giá nổi bật">
+              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" data-hot-tab="all">Tất cả</button>
+              <button type="button" class="pcb-shelf__tab" data-hot-tab="gpu">Card VGA</button>
+              <button type="button" class="pcb-shelf__tab" data-hot-tab="cpu">CPU</button>
+              <button type="button" class="pcb-shelf__tab" data-hot-tab="ram">RAM</button>
+              <button type="button" class="pcb-shelf__tab" data-hot-tab="mainboard">Mainboard</button>
+            </div>
+            <a href="products.html?status=hot" class="pcb-shelf__more">Xem thêm phiên hot →</a>
+          </div>
+        </header>
+
+        <div class="pcb-grid" id="pcb-hot-grid">
+          <!-- JS Render -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+           6. GÓC KIỂM ĐỊNH KỸ THUẬT ĐỘC QUYỀN (HARDWARE VERIFICATION LAB)
+           ============================================================ -->
+      <section class="pcb-lab" aria-labelledby="lab-heading">
+        <div class="pcb-lab__head">
+          <div>
+            <span class="pcb-lab__tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Tiêu chuẩn kiểm định PCBid Lab
+            </span>
+            <h2 class="pcb-lab__title" id="lab-heading">Quy Trình Kiểm Định Phần Cứng 4 Bước</h2>
+            <p class="pcb-lab__desc">
+              Loại bỏ 100% rủi ro trâu cày dập nát, cong chân socket hay ổ cứng bad sector trước khi mở phiên.
+            </p>
+          </div>
+          <button type="button" class="pcb-lab__btn-cert" onclick="document.getElementById('btn-open-cert').click()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Xem phiếu kiểm định mẫu
+          </button>
+        </div>
+
+        <div class="pcb-lab__grid">
+          <div class="pcb-lab__step">
+            <span class="pcb-lab__step-num">01</span>
+            <div class="pcb-lab__thumb">
+              <img src="images/icons/tem-void-dan-do-dien-tu.jpg" alt="Tem Void dán linh kiện"
+                class="pcb-lab__thumb-img pcb-lab__thumb-img--cover" loading="lazy">
+            </div>
+            <h3 class="pcb-lab__step-title">Soi Ngoại Quan &amp; Tem</h3>
+            <p class="pcb-lab__desc">Tem Void chính hãng, chân socket CPU thẳng 100%, tụ điện không phù.</p>
+          </div>
+
+          <div class="pcb-lab__step">
+            <span class="pcb-lab__step-num">02</span>
+            <div class="pcb-lab__thumb">
+              <img src="images/icons/furmark.png" alt="FurMark Stress Test"
+                class="pcb-lab__thumb-img pcb-lab__thumb-img--contain" loading="lazy">
+            </div>
+            <h3 class="pcb-lab__step-title">Stress Test Furmark</h3>
+            <p class="pcb-lab__desc">Tải tối đa 15 phút, nhiệt độ &lt; 75°C, xung nhịp ổn định không artifact.</p>
+          </div>
+
+          <div class="pcb-lab__step">
+            <span class="pcb-lab__step-num">03</span>
+            <div class="pcb-lab__thumb">
+              <img src="images/icons/memtest86.webp" alt="MemTest86 RAM & SSD Test"
+                class="pcb-lab__thumb-img pcb-lab__thumb-img--contain" loading="lazy">
+            </div>
+            <h3 class="pcb-lab__step-title">MemTest86 &amp; Sức Khỏe</h3>
+            <p class="pcb-lab__desc">RAM 0 error sau 2 pass, SSD chuẩn CrystalDiskInfo sức khỏe 100%.</p>
+          </div>
+
+          <div class="pcb-lab__step">
+            <span class="pcb-lab__step-num">04</span>
+            <div class="pcb-lab__thumb">
+              <img src="images/icons/tem-pcbid.jpg" alt="Tem bảo chứng PCBid Verified"
+                class="pcb-lab__thumb-img pcb-lab__thumb-img--cover" loading="lazy">
+            </div>
+            <h3 class="pcb-lab__step-title">Niêm Phong PCBid</h3>
+            <p class="pcb-lab__desc">Dán tem vỡ bảo chứng, đóng gói chống tĩnh điện, kích hoạt bao test 7 ngày.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           7. KỆ HÀNG: SẢN PHẨM MỚI LÊN SÀN (FRESH LISTINGS)
+           ============================================================ -->
+      <section class="pcb-shelf" aria-labelledby="shelf-new-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--star">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                  </polygon>
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="shelf-new-heading">Sản Phẩm Mới Lên Sàn</h2>
+            </div>
+            <p class="pcb-shelf__desc">Vừa được duyệt mở phiên trong 24 giờ qua — giá khởi điểm cực kỳ hấp dẫn.</p>
+          </div>
+          <a href="products.html?sort=newest" class="pcb-shelf__more">Xem hàng mới lên sàn →</a>
+        </header>
+
+        <div class="pcb-grid" id="pcb-new-grid">
+          <!-- JS Render -->
+        </div>
+      </section>
+
+      <!-- ============================================================
+           8. ALBUM ẢNH LINH KIỆN THỰC TẾ (REAL HARDWARE GALLERY & LIGHTBOX)
+           ============================================================ -->
+      <section class="pcb-shelf" aria-labelledby="gallery-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--cam">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="gallery-heading">Album Ảnh Linh Kiện Thực Tế</h2>
+            </div>
+            <p class="pcb-shelf__desc">Ảnh chụp góc cận cảnh bởi kiểm định viên và người bán — không dùng ảnh render 3D
+              mạng.</p>
+          </div>
+          <span style="font-size:12px; color:#64748b;">(Bấm vào ảnh để xem chi tiết)</span>
+        </header>
+
+        <div class="pcb-gallery">
+          <div class="pcb-gallery__item pcb-gallery__item--large"
+            data-gallery-src="images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"
+            data-gallery-caption="MSI MAG Z790 TOMAHAWK WIFI DDR5 - Cận cảnh tụ rắn &amp; tản nhiệt VRM hầm hố, tem niêm phong nguyên bản">
+            <img class="pcb-gallery__img" src="images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"
+              alt="MSI MAG Z790 Tomahawk Wifi" loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">MSI MAG Z790 TOMAHAWK WIFI DDR5</span>
+              <span class="pcb-gallery__sub">Soi tụ rắn &amp; tem niêm phong • Đạt chuẩn 100%</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item" data-gallery-src="images/products/gpu/2028-rx-7800-xt-1.jpg"
+            data-gallery-caption="Gigabyte Radeon RX 7800 XT Gaming OC 16GB - Fullbox tản nhiệt 3 quạt Windforce nguyên tem">
+            <img class="pcb-gallery__img" src="images/products/gpu/2028-rx-7800-xt-1.jpg" alt="Radeon RX 7800 XT"
+              loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">Radeon RX 7800 XT 16GB</span>
+              <span class="pcb-gallery__sub">3 quạt Windforce • Fullbox</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item" data-gallery-src="images/products/cpu/1012-i5-13600k-1.jpg"
+            data-gallery-caption="Intel Core i5-13600K - Chân tiếp xúc mạ vàng nguyên vẹn, lưng kim loại không cấn móp">
+            <img class="pcb-gallery__img" src="images/products/cpu/1012-i5-13600k-1.jpg" alt="Intel Core i5-13600K"
+              loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">Intel Core i5-13600K</span>
+              <span class="pcb-gallery__sub">Chân tiếp xúc hoàn hảo</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item" data-gallery-src="images/products/ram/4003-gskill-trident-z-rgb-16gb-1.jpg"
+            data-gallery-caption="G.SKILL Trident Z RGB 16GB 3600MHz - Đèn LED đổi màu mượt mà, pass Memtest 2 vòng">
+            <img class="pcb-gallery__img" src="images/products/ram/4003-gskill-trident-z-rgb-16gb-1.jpg"
+              alt="RAM G.Skill Trident Z RGB" loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">G.SKILL Trident Z RGB</span>
+              <span class="pcb-gallery__sub">Pass 2 lượt MemTest86</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item"
+            data-gallery-src="images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"
+            data-gallery-caption="Vỏ máy tính Lian Li O11 Dynamic Mini V2 Snow White - 2 mặt kính cường lực trong vắt kèm fan RGB">
+            <img class="pcb-gallery__img" src="images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"
+              alt="Lian Li O11D Mini V2" loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">Lian Li O11D Mini Snow White</span>
+              <span class="pcb-gallery__sub">Kính cường lực không tì vết</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item"
+            data-gallery-src="images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg"
+            data-gallery-caption="Noctua NH-D15s chromax.black - Lá tản nhôm đen tĩnh điện đều đẹp, quạt êm không rơ lắc">
+            <img class="pcb-gallery__img"
+              src="images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg" alt="Noctua NH-D15s"
+              loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">Noctua NH-D15s Black</span>
+              <span class="pcb-gallery__sub">Lá tản nhôm tinh khiết</span>
+            </div>
+          </div>
+
+          <div class="pcb-gallery__item" data-gallery-src="images/products/psu/6013-nzxt-c750-gold-1.png"
+            data-gallery-caption="NZXT C750 Gold Full Modular - Dây cáp bọc lưới đầy đủ, tem chuẩn 80 Plus Gold">
+            <img class="pcb-gallery__img" src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="NZXT C750 Gold"
+              loading="lazy">
+            <div class="pcb-gallery__overlay">
+              <span class="pcb-gallery__caption">NZXT C750 Gold Modular</span>
+              <span class="pcb-gallery__sub">Full cáp bọc lưới</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           9. BẢNG VÀNG CHỐT GIÁ HỜI (RECENT BARGAIN WINS)
+           ============================================================ -->
+      <section class="pcb-shelf" aria-labelledby="wins-heading">
+        <header class="pcb-shelf__head">
+          <div class="pcb-shelf__heading">
+            <div class="pcb-shelf__title-wrap">
+              <span class="pcb-shelf__icon pcb-shelf__icon--star" style="background:#ecfdf5; color:#059669;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                  <path d="M4 22h16" />
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+              </span>
+              <h2 class="pcb-shelf__title" id="wins-heading">Bảng Vàng Vừa Chốt Giá Hời Hôm Nay</h2>
+            </div>
+            <p class="pcb-shelf__desc">Khách hàng thông thái đã tiết kiệm hàng triệu đồng thông qua cơ chế đấu giá công
+              khai.</p>
+          </div>
+        </header>
+
+        <div class="pcb-wins">
+          <div class="pcb-win-card">
+            <img src="images/products/gpu/2018-rtx-4070-12gb-1.webp" alt="" class="pcb-win-card__img">
+            <div class="pcb-win-card__info">
+              <h4 class="pcb-win-card__title">RTX 4070 12GB OC</h4>
+              <div class="pcb-win-card__price">11.400.000đ</div>
+              <span class="pcb-win-card__saved">Tiết kiệm 3.800.000đ</span>
+            </div>
+          </div>
+
+          <div class="pcb-win-card">
+            <img src="images/products/cpu/1012-i5-13600k-1.jpg" alt="" class="pcb-win-card__img">
+            <div class="pcb-win-card__info">
+              <h4 class="pcb-win-card__title">Intel Core i5-13600K</h4>
+              <div class="pcb-win-card__price">5.200.000đ</div>
+              <span class="pcb-win-card__saved">Tiết kiệm 2.900.000đ</span>
+            </div>
+          </div>
+
+          <div class="pcb-win-card">
+            <img src="images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg" alt="" class="pcb-win-card__img">
+            <div class="pcb-win-card__info">
+              <h4 class="pcb-win-card__title">MSI MAG Z790 DDR5</h4>
+              <div class="pcb-win-card__price">4.300.000đ</div>
+              <span class="pcb-win-card__saved">Tiết kiệm 2.900.000đ</span>
+            </div>
+          </div>
+
+          <div class="pcb-win-card">
+            <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="pcb-win-card__img">
+            <div class="pcb-win-card__info">
+              <h4 class="pcb-win-card__title">Corsair RM850x Gold</h4>
+              <div class="pcb-win-card__price">1.950.000đ</div>
+              <span class="pcb-win-card__saved">Tiết kiệm 1.650.000đ</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           10. VÌ SAO CHỌN PCBID (HOW IT WORKS & CORE VALUES)
+           ============================================================ -->
+      <section class="pcb-values" aria-labelledby="values-heading">
+        <div class="pcb-values__head">
+          <h2 class="pcb-values__title" id="values-heading">Vì Sao Nên Mua Bán Đấu Giá Tại PCBid?</h2>
+          <p class="pcb-values__desc">
+            Không còn nỗi lo gặp phải card trâu cày dập nát, không sợ lừa đảo cọc tiền trên mạng xã hội. Mọi giao dịch
+            được đảm bảo qua quy trình bảo vệ độc quyền.
+          </p>
+        </div>
+
+        <ol class="pcb-values__steps">
+          <li class="pcb-values__step">
+            <span class="pcb-values__step-num">BƯỚC 01</span>
+            <h3 class="pcb-values__step-title">Chọn Linh Kiện &amp; Đọc Test</h3>
+            <p class="pcb-values__step-desc">Xem chi tiết báo cáo nhiệt độ Furmark, số giờ chạy CrystalDisk và ảnh chụp
+              macro chân socket.</p>
+          </li>
+          <li class="pcb-values__step">
+            <span class="pcb-values__step-num">BƯỚC 02</span>
+            <h3 class="pcb-values__step-title">Trả Giá Theo Bước Giá</h3>
+            <p class="pcb-values__step-desc">Nhấn nút đặt giá nhanh, hệ thống tạm giữ khoản cọc mô phỏng an toàn, công
+              khai người dẫn đầu.</p>
+          </li>
+          <li class="pcb-values__step">
+            <span class="pcb-values__step-num">BƯỚC 03</span>
+            <h3 class="pcb-values__step-title">Theo Dõi Tới Giây Cuối</h3>
+            <p class="pcb-values__step-desc">Đồng hồ đếm ngược trực tiếp. Nếu bị vượt giá, khoản cọc của bạn được hoàn
+              trả tức thì 100%.</p>
+          </li>
+          <li class="pcb-values__step">
+            <span class="pcb-values__step-num">BƯỚC 04</span>
+            <h3 class="pcb-values__step-title">Nhận Hàng &amp; Bao Test 7 Ngày</h3>
+            <p class="pcb-values__step-desc">Giao hàng đồng kiểm tận tay. Trong 7 ngày nếu phát sinh lỗi phần cứng, bạn
+              được đổi mới hoặc hoàn tiền.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ============================================================
+           11. ĐĂNG KÝ EMAIL NHẬN THÔNG BÁO LINH KIỆN (NEWSLETTER)
+           ============================================================ -->
+      <section class="pcb-subscribe" aria-labelledby="sub-heading">
+        <div>
+          <h2 class="pcb-subscribe__title" id="sub-heading">Săn Linh Kiện Đúng Nhu Cầu Của Bạn</h2>
+          <p class="pcb-subscribe__desc">Nhận thông báo qua email ngay khi có phiên đấu giá bạn quan tâm — cam
+            kết không gửi thư rác.</p>
+        </div>
+        <form class="pcb-subscribe__form" id="pcb-subscribe-form">
+          <input type="email" class="pcb-subscribe__input" id="pcb-subscribe-input"
+            placeholder="Nhập địa chỉ email của bạn..." required>
+          <button type="submit" class="pcb-subscribe__btn">Đăng ký ngay</button>
+        </form>
+      </section>
+
     </div>
   </main>
 
-  <!-- ==================== KHUNG CHỨA FOOTER NẠP ĐỘNG ==================== -->
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
   <div id="app-footer"></div>
 
-  <!-- Mã JavaScript ứng dụng chính (Module ES6) -->
+  <!-- ============================================================
+       12. HỘP THOẠI ĐẤU GIÁ NHANH (QUICK BID MODAL)
+       ============================================================ -->
+  <div class="pcb-modal-backdrop" id="pcb-bid-modal" role="dialog" aria-modal="true" aria-labelledby="bid-modal-title">
+    <div class="pcb-modal">
+      <div class="pcb-modal__head">
+        <h3 class="pcb-modal__title" id="bid-modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            color="#ea580c">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v8M8 12h8" />
+          </svg>
+          Đặt giá nhanh linh kiện
+        </h3>
+        <button type="button" class="pcb-modal__close" data-action="close-bid-modal" aria-label="Đóng hộp thoại">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="pcb-modal__body">
+        <div class="pcb-modal__product">
+          <img src="" alt="" class="pcb-modal__img" id="pcb-modal-img">
+          <div>
+            <h4 class="pcb-modal__prod-name" id="pcb-modal-name">Tên sản phẩm</h4>
+            <span class="pcb-modal__prod-cond" id="pcb-modal-cond">Like New 99%</span>
+          </div>
+        </div>
+
+        <div class="pcb-modal__price-display">
+          <div>
+            <span style="font-size:11px; color:#9a3412; font-weight:600;">Giá cao nhất hiện nay</span>
+            <div class="pcb-modal__cur-val" id="pcb-modal-cur-bid">0đ</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px; color:#475569;" id="pcb-modal-step-info">Bước giá: +100.000đ</span>
+          </div>
+        </div>
+
+        <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:6px; display:block;">
+          Chọn mức tăng bước giá của bạn:
+        </label>
+        <div class="pcb-modal__step-btns">
+          <button type="button" class="pcb-modal__step-btn pcb-modal__step-btn--active"
+            id="pcb-step-1">+100.000đ</button>
+          <button type="button" class="pcb-modal__step-btn" id="pcb-step-2">+200.000đ</button>
+          <button type="button" class="pcb-modal__step-btn" id="pcb-step-3">+300.000đ</button>
+        </div>
+
+        <div class="pcb-modal__wallet-box">
+          <span>Ví cọc tạm ứng mô phỏng:</span>
+          <strong>15.000.000đ (Đủ điều kiện)</strong>
+        </div>
+
+        <button type="button" class="pcb-modal__submit" id="pcb-modal-submit-btn">
+          Xác nhận đặt giá
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       13. HỘP THOẠI XEM PHIẾU KIỂM ĐỊNH MẪU (CERTIFICATE MODAL)
+       ============================================================ -->
+  <div class="pcb-modal-backdrop" id="pcb-cert-modal-box" role="dialog" aria-modal="true"
+    aria-labelledby="cert-modal-title">
+    <div class="pcb-modal pcb-cert-modal">
+      <div class="pcb-modal__head">
+        <h3 class="pcb-modal__title" id="cert-modal-title">Phiếu Kiểm Định Chất Lượng Tiêu Chuẩn</h3>
+        <button type="button" class="pcb-modal__close" data-action="close-cert-modal" aria-label="Đóng hộp thoại">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="pcb-modal__body">
+        <div class="pcb-cert-card">
+          <div class="pcb-cert-card__head">
+            <div>
+              <h4 class="pcb-cert-card__title">TRUNG TÂM KIỂM ĐỊNH PHẦN CỨNG PCBID</h4>
+              <span style="font-size:11px; color:#64748b;">Mã chứng chỉ: #UIT-QC-2026-8892</span>
+            </div>
+            <div class="pcb-cert-card__stamp">ĐẠT CHUẨN A+</div>
+          </div>
+
+          <table class="pcb-cert-table">
+            <tr>
+              <td>Thiết bị kiểm định:</td>
+              <td>ASUS ROG Strix GeForce RTX 3070 8GB OC</td>
+            </tr>
+            <tr>
+              <td>Nhiệt độ Furmark (15P):</td>
+              <td style="color:#059669;">64.8°C (Quạt 58% - Rất mát)</td>
+            </tr>
+            <tr>
+              <td>Xung nhịp Boost thực tế:</td>
+              <td>1905 MHz (Ổn định 99.4%)</td>
+            </tr>
+            <tr>
+              <td>Tình trạng VRAM &amp; Tụ điện:</td>
+              <td>100% tụ rắn không phù, tem void SPC nguyên vẹn</td>
+            </tr>
+            <tr>
+              <td>Bảo đảm sàn PCBid:</td>
+              <td>Bao test 7 ngày 1 đổi 1 hoặc hoàn tiền ví cọc</td>
+            </tr>
+          </table>
+
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #cbd5e1; padding-top:8px; font-size:11px; color:#64748b;">
+            <span>Kiểm định viên: <strong>Nguyễn Trọng Thao (UIT Hardware Lab)</strong></span>
+            <span>Ngày cấp: <strong>Hôm nay</strong></span>
+          </div>
+        </div>
+
+        <button type="button" class="pcb-modal__submit" style="margin-top:16px;" data-action="close-cert-modal">
+          Đã hiểu, quay lại sàn đấu giá
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       14. HỘP THOẠI XEM ẢNH THỰC TẾ (LIGHTBOX CARD MODAL)
+       Căn giữa màn hình, có nút X góc trên bên phải, có caption và button đóng bên dưới
+       ============================================================ -->
+  <div class="pcb-modal-backdrop" id="pcb-lightbox-modal" role="dialog" aria-modal="true"
+    aria-labelledby="pcb-lightbox-title">
+    <div class="pcb-modal pcb-lightbox-card">
+      <div class="pcb-modal__head">
+        <h3 class="pcb-modal__title" id="pcb-lightbox-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            color="#ea580c">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          Ảnh thực tế linh kiện
+        </h3>
+        <button type="button" class="pcb-modal__close" data-action="close-lightbox" aria-label="Đóng hộp thoại">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="pcb-lightbox-card__body">
+        <div class="pcb-lightbox-card__media">
+          <img src="" alt="" class="pcb-lightbox-card__img" id="pcb-lightbox-img">
+        </div>
+
+        <div class="pcb-lightbox-card__info">
+          <p class="pcb-lightbox-card__caption" id="pcb-lightbox-caption"></p>
+          <span class="pcb-lightbox-card__tag">✓ Ảnh chụp thực tế trước khi lên sàn đấu giá PCBid</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <!-- Nạp Header/Footer động từ components/ -->
   <script type="module" src="js/main.js"></script>
+  <!-- Kích hoạt chức năng trang chủ -->
+  <script type="module" src="js/index.js"></script>
 </body>
 
 </html>
