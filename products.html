@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Danh sách các phiên đấu giá linh kiện máy tính cũ tại PCBid - Card màn hình VGA, CPU, RAM, Bo mạch chủ, Nguồn PSU, Ổ cứng SSD đã qua kiểm tra chất lượng.">
+  <title>Danh sách đấu giá linh kiện PC cũ | PCBid</title>
+
+  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Định kiểu cốt lõi hệ thống -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Định kiểu thành phần Header/Footer dùng chung -->
+  <link rel="stylesheet" href="components/header/header.css">
+  <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Định kiểu card sản phẩm dùng chung từ home.css -->
+  <link rel="stylesheet" href="css/home.css">
+
+  <!-- Định kiểu riêng cho trang Danh sách sản phẩm & Bộ lọc -->
+  <link rel="stylesheet" href="css/products.css">
+</head>
+
+<body id="products-page">
+
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
+  <div id="app-header"></div>
+
+  <!-- ==================== NỘI DUNG CHÍNH (MAIN) ==================== -->
+  <main class="pcb-products-page">
+    <div class="container">
+
+      <!-- 1. Thanh điều hướng đường dẫn (Breadcrumb) -->
+      <nav class="pcb-breadcrumb" aria-label="Đường dẫn trang">
+        <div class="pcb-breadcrumb__item">
+          <a href="index.html" class="pcb-breadcrumb__link">Trang chủ</a>
+          <span class="pcb-breadcrumb__separator">/</span>
+        </div>
+        <div class="pcb-breadcrumb__item">
+          <span class="pcb-breadcrumb__current">Đấu giá linh kiện</span>
+        </div>
+      </nav>
+
+      <!-- 2. Banner giới thiệu sàn đấu giá linh kiện -->
+      <section class="pcb-products-hero" aria-labelledby="products-hero-heading">
+        <div class="pcb-products-hero__content">
+          <span class="pcb-products-hero__badge">
+            <span class="pcb-ticker__dot"></span>
+            Sàn giao dịch trực tiếp 24/7
+          </span>
+          <h1 class="pcb-products-hero__title" id="products-hero-heading">
+            Tất cả phiên đấu giá linh kiện PC
+          </h1>
+          <p class="pcb-products-hero__desc">
+            Khám phá hàng trăm linh kiện máy tính cũ được kiểm thử nghiêm ngặt (Furmark, MemTest86, CrystalDiskInfo). Đặt giá minh bạch, bao test 7 ngày hoàn tiền 100%.
+          </p>
+        </div>
+        <div class="pcb-products-hero__stats">
+          <div class="pcb-products-hero__stat-item">
+            <span class="pcb-products-hero__stat-val" id="hero-stat-total">200+</span>
+            <span class="pcb-products-hero__stat-lbl">Phiên đang mở</span>
+          </div>
+          <div class="pcb-products-hero__stat-item">
+            <span class="pcb-products-hero__stat-val">100%</span>
+            <span class="pcb-products-hero__stat-lbl">Kiểm định chuẩn</span>
+          </div>
+          <div class="pcb-products-hero__stat-item">
+            <span class="pcb-products-hero__stat-val">7 ngày</span>
+            <span class="pcb-products-hero__stat-lbl">Bao test đổi trả</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Nút mở bộ lọc dành cho thiết bị di động -->
+      <button type="button" class="pcb-filter-toggle-btn" id="filter-toggle-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        <span>Mở bộ lọc tìm kiếm</span>
+      </button>
+
+      <!-- 3. Khu vực Danh mục & Lưới sản phẩm (2 Cột) -->
+      <div class="pcb-catalog">
+
+        <!-- ==================== CỘT TRÁI: SIDEBAR BỘ LỌC ==================== -->
+        <aside class="pcb-filter" id="pcb-filter-sidebar" aria-label="Bộ lọc tìm kiếm">
+          <div class="pcb-filter__header">
+            <h2 class="pcb-filter__title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" color="#ea580c">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              Bộ lọc linh kiện
+            </h2>
+            <button type="button" class="pcb-filter__reset-btn" id="reset-filter-btn">Thiết lập lại</button>
+          </div>
+
+          <!-- Nhóm 1: Danh mục linh kiện -->
+          <div class="pcb-filter__group">
+            <h3 class="pcb-filter__label">
+              <span>Danh mục sản phẩm</span>
+            </h3>
+            <ul class="pcb-filter__list">
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="all" checked>
+                  <span class="pcb-filter__name">Tất cả linh kiện</span>
+                  <span class="pcb-filter__count" id="count-cat-all">200</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="vga">
+                  <span class="pcb-filter__name">Card màn hình (GPU)</span>
+                  <span class="pcb-filter__count" id="count-cat-vga">30</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="cpu">
+                  <span class="pcb-filter__name">Bộ vi xử lý (CPU)</span>
+                  <span class="pcb-filter__count" id="count-cat-cpu">30</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="mainboard">
+                  <span class="pcb-filter__name">Bo mạch chủ (Mainboard)</span>
+                  <span class="pcb-filter__count" id="count-cat-mainboard">25</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="ram">
+                  <span class="pcb-filter__name">Bộ nhớ RAM</span>
+                  <span class="pcb-filter__count" id="count-cat-ram">25</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="storage">
+                  <span class="pcb-filter__name">Ổ cứng (SSD / HDD)</span>
+                  <span class="pcb-filter__count" id="count-cat-storage">30</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="psu">
+                  <span class="pcb-filter__name">Nguồn máy tính (PSU)</span>
+                  <span class="pcb-filter__count" id="count-cat-psu">20</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="cooling">
+                  <span class="pcb-filter__name">Tản nhiệt (Khí / AIO)</span>
+                  <span class="pcb-filter__count" id="count-cat-cooling">20</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="category" value="case">
+                  <span class="pcb-filter__name">Vỏ case máy tính</span>
+                  <span class="pcb-filter__count" id="count-cat-case">20</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Nhóm 2: Khoảng giá đấu hiện tại -->
+          <div class="pcb-filter__group">
+            <h3 class="pcb-filter__label">
+              <span>Khoảng giá hiện tại</span>
+            </h3>
+            <ul class="pcb-filter__list">
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="all" checked>
+                  <span class="pcb-filter__name">Tất cả mức giá</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="0-1000000">
+                  <span class="pcb-filter__name">Dưới 1.000.000₫</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="1000000-3000000">
+                  <span class="pcb-filter__name">1.000.000₫ - 3.000.000₫</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="3000000-7000000">
+                  <span class="pcb-filter__name">3.000.000₫ - 7.000.000₫</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="7000000-15000000">
+                  <span class="pcb-filter__name">7.000.000₫ - 15.000.000₫</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="radio" class="pcb-filter__radio" name="price_range" value="15000000-999999999">
+                  <span class="pcb-filter__name">Trên 15.000.000₫</span>
+                </label>
+              </li>
+            </ul>
+
+            <!-- Ô nhập giá tự do -->
+            <div class="pcb-filter__price-range">
+              <input type="number" class="pcb-filter__price-input" id="price-min" placeholder="Từ ₫" min="0" step="100000">
+              <span style="color:#94a3b8;">-</span>
+              <input type="number" class="pcb-filter__price-input" id="price-max" placeholder="Đến ₫" min="0" step="100000">
+            </div>
+            <button type="button" class="pcb-filter__price-apply" id="apply-price-btn">Áp dụng giá</button>
+          </div>
+
+          <!-- Nhóm 3: Tình trạng linh kiện -->
+          <div class="pcb-filter__group">
+            <h3 class="pcb-filter__label">
+              <span>Tình trạng hàng cũ</span>
+            </h3>
+            <ul class="pcb-filter__list">
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="condition" value="likenew">
+                  <span class="pcb-filter__name">Like New 99% / Fullbox</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="condition" value="used">
+                  <span class="pcb-filter__name">Đã sử dụng (Hết BH / Tem Void)</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="condition" value="new">
+                  <span class="pcb-filter__name">Hàng mới 100% (New seal)</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Nhóm 4: Chứng nhận kiểm định kỹ thuật UIT -->
+          <div class="pcb-filter__group">
+            <h3 class="pcb-filter__label">
+              <span>Tiêu chuẩn kiểm định</span>
+            </h3>
+            <ul class="pcb-filter__list">
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="seal" value="furmark">
+                  <span class="pcb-filter__name">Pass Furmark 15p < 75°C</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="seal" value="memtest">
+                  <span class="pcb-filter__name">Pass MemTest86 0 Error</span>
+                </label>
+              </li>
+              <li class="pcb-filter__item">
+                <label class="pcb-filter__checkbox-label">
+                  <input type="checkbox" class="pcb-filter__checkbox" name="seal" value="crystal">
+                  <span class="pcb-filter__name">CrystalDiskInfo Sức khỏe 100%</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- ==================== CỘT PHẢI: NỘI DUNG SẢN PHẨM ==================== -->
+        <section class="pcb-catalog__main" aria-label="Danh sách linh kiện đấu giá">
+
+          <!-- Thanh công cụ sắp xếp & Thống kê kết quả -->
+          <div class="pcb-toolbar">
+            <div class="pcb-toolbar__result-info">
+              Hiển thị <span class="pcb-toolbar__result-count" id="catalog-count">0</span> linh kiện đang mở đấu giá
+            </div>
+
+            <div class="pcb-toolbar__controls">
+              <label for="catalog-sort" class="pcb-toolbar__sort-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="21" y1="10" x2="3" y2="10"></line>
+                  <line x1="21" y1="6" x2="3" y2="6"></line>
+                  <line x1="21" y1="14" x2="3" y2="14"></line>
+                  <line x1="21" y1="18" x2="3" y2="18"></line>
+                </svg>
+                Sắp xếp theo:
+              </label>
+              <select id="catalog-sort" class="pcb-toolbar__sort-select">
+                <option value="ending">Thời gian: Sắp kết thúc trước</option>
+                <option value="bids-desc">Lượt bid: Nhiều nhất</option>
+                <option value="price-asc">Giá hiện tại: Thấp đến cao</option>
+                <option value="price-desc">Giá hiện tại: Cao đến thấp</option>
+                <option value="newest">Phiên mới lên sàn</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Các chip bộ lọc đang áp dụng -->
+          <div class="pcb-active-filters" id="active-filters-container">
+            <!-- JS tự động chèn các chip lọc khi người dùng chọn -->
+          </div>
+
+          <!-- Lưới các thẻ linh kiện đấu giá (4-5 cột theo màn hình) -->
+          <div class="pcb-catalog__grid" id="catalog-products-grid">
+            <!-- Sản phẩm sẽ được JavaScript nạp tự động qua API/Local dữ liệu -->
+          </div>
+
+          <!-- 4. Thanh phân trang mẫu (Pagination) -->
+          <nav class="pcb-pagination" aria-label="Phân trang danh sách linh kiện" id="pcb-pagination">
+            <a href="#" class="pcb-pagination__item pcb-pagination__item--disabled" data-page="prev" aria-label="Trang trước">
+              ‹ Trước
+            </a>
+            <a href="#" class="pcb-pagination__item pcb-pagination__item--active" data-page="1">1</a>
+            <a href="#" class="pcb-pagination__item" data-page="2">2</a>
+            <a href="#" class="pcb-pagination__item" data-page="3">3</a>
+            <a href="#" class="pcb-pagination__item" data-page="4">4</a>
+            <span class="pcb-pagination__dots">...</span>
+            <a href="#" class="pcb-pagination__item" data-page="10">10</a>
+            <a href="#" class="pcb-pagination__item" data-page="next" aria-label="Trang sau">
+              Sau ›
+            </a>
+          </nav>
+
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
+  <div id="app-footer"></div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <!-- Nạp Header/Footer động từ components/ -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Kích hoạt chức năng trang danh mục sản phẩm & bộ lọc -->
+  <script type="module" src="js/products.js"></script>
+</body>
+
+</html>
