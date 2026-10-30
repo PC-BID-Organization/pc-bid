@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Danh sách các phiên đấu giá linh kiện máy tính cũ tại PCBid - Card màn hình VGA, CPU, RAM, Bo mạch chủ, Nguồn PSU, Ổ cứng SSD đã qua kiểm tra chất lượng.">
+    content="Danh sách các phiên đấu giá linh kiện máy tính cũ tại PCBid - Card màn hình VGA, CPU, RAM, Bo mạch chủ, Nguồn PSU, Ổ cứng SSD đã qua kiểm định chất lượng.">
   <title>Danh sách đấu giá linh kiện PC cũ | PCBid</title>
 
   <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
@@ -264,7 +264,7 @@
               <li class="pcb-filter__item">
                 <label class="pcb-filter__checkbox-label">
                   <input type="checkbox" class="pcb-filter__checkbox" name="seal" value="furmark">
-                  <span class="pcb-filter__name">Pass Furmark 15p < 75°C</span>
+                  <span class="pcb-filter__name">Pass Furmark 15p &lt; 75°C</span>
                 </label>
               </li>
               <li class="pcb-filter__item">
@@ -289,7 +289,7 @@
           <!-- Thanh công cụ sắp xếp & Thống kê kết quả -->
           <div class="pcb-toolbar">
             <div class="pcb-toolbar__result-info">
-              Hiển thị <span class="pcb-toolbar__result-count" id="catalog-count">0</span> linh kiện đang mở đấu giá
+              Hiển thị <span class="pcb-toolbar__result-count" id="catalog-count">16</span> linh kiện đang mở đấu giá
             </div>
 
             <div class="pcb-toolbar__controls">
@@ -317,9 +317,812 @@
             <!-- JS tự động chèn các chip lọc khi người dùng chọn -->
           </div>
 
-          <!-- Lưới các thẻ linh kiện đấu giá (4-5 cột theo màn hình) -->
+          <!-- ============================================================
+               LƯỚI THẺ LINH KIỆN ĐẤU GIÁ (4-5 CỘT PHỦ KÍN DANH MỤC)
+               Tất cả các thẻ đều gắn liên kết dẫn sang product-detail.html?id=...
+               ============================================================ -->
           <div class="pcb-catalog__grid" id="catalog-products-grid">
-            <!-- Sản phẩm sẽ được JavaScript nạp tự động qua API/Local dữ liệu -->
+
+            <!-- Card 1: GPU - ASUS Phoenix GTX 1650 Super -->
+            <article class="pcb-card" data-id="2001" data-category="GPU" data-price="2000000" data-bids="6">
+              <a href="product-detail.html?id=2001" class="pcb-card__media" aria-label="Xem chi tiết Card màn hình ASUS Phoenix GTX 1650 Super">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">02:15:30</span>
+                </div>
+                <span class="pcb-card__condition">Đã sử dụng</span>
+                <img class="pcb-card__img" src="images/products/gpu/2001-gtx-1650-super-1.jpg" alt="ASUS Phoenix GTX 1650 Super 4GB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="2001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">GPU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Furmark &lt; 75°C</span>
+                </div>
+                <a href="product-detail.html?id=2001" class="pcb-card__title" title="Card màn hình ASUS Phoenix GeForce GTX 1650 Super 4GB">
+                  Card màn hình ASUS Phoenix GeForce GTX 1650 Super 4GB
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">4GB GDDR6</span>
+                  <span class="pcb-card__spec">Nguồn 350W</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">2.000.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">3.800.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>6</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=2001" class="pcb-card__btn" data-action="quick-bid" data-id="2001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 2: GPU - Gigabyte GTX 1660 Super OC -->
+            <article class="pcb-card" data-id="2002" data-category="GPU" data-price="3400000" data-bids="11">
+              <a href="product-detail.html?id=2002" class="pcb-card__media" aria-label="Xem chi tiết Card màn hình Gigabyte GTX 1660 Super">
+                <div class="pcb-card__countdown pcb-card__countdown--urgent" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">00:14:20</span>
+                </div>
+                <span class="pcb-card__condition">Đã sử dụng</span>
+                <img class="pcb-card__img" src="images/products/gpu/2002-gtx-1660-super-1.jpg" alt="Gigabyte GTX 1660 Super OC 6GB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="2002" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">GPU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Furmark &lt; 75°C</span>
+                </div>
+                <a href="product-detail.html?id=2002" class="pcb-card__title" title="Card màn hình Gigabyte GeForce GTX 1660 Super OC 6GB">
+                  Card màn hình Gigabyte GeForce GTX 1660 Super OC 6GB
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">6GB GDDR6</span>
+                  <span class="pcb-card__spec">Nguồn 450W</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">3.400.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">5.500.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>11</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=2002" class="pcb-card__btn" data-action="quick-bid" data-id="2002">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 3: CPU - Intel Core i3-10105F -->
+            <article class="pcb-card" data-id="1001" data-category="CPU" data-price="1350000" data-bids="14">
+              <a href="product-detail.html?id=1001" class="pcb-card__media" aria-label="Xem chi tiết CPU Intel Core i3-10105F">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">03:45:00</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/cpu/1001-i3-10105f-1.png" alt="Intel Core i3-10105F" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="1001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">CPU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ UIT Lab OK</span>
+                </div>
+                <a href="product-detail.html?id=1001" class="pcb-card__title" title="Bộ vi xử lý Intel Core i3-10105F (4C/8T, 4.4GHz)">
+                  Bộ vi xử lý Intel Core i3-10105F (4C/8T, 4.4GHz)
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Socket LGA 1200</span>
+                  <span class="pcb-card__spec">4 Nhân / 8 Luồng</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">1.350.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.100.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>14</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=1001" class="pcb-card__btn" data-action="quick-bid" data-id="1001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 4: CPU - Intel Core i5-10400F -->
+            <article class="pcb-card" data-id="1002" data-category="CPU" data-price="2100000" data-bids="8">
+              <a href="product-detail.html?id=1002" class="pcb-card__media" aria-label="Xem chi tiết CPU Intel Core i5-10400F">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">04:20:15</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/cpu/1002-i5-10400f-1.jpg" alt="Intel Core i5-10400F" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="1002" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">CPU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ UIT Lab OK</span>
+                </div>
+                <a href="product-detail.html?id=1002" class="pcb-card__title" title="Bộ vi xử lý Intel Core i5-10400F (6C/12T, 4.3GHz)">
+                  Bộ vi xử lý Intel Core i5-10400F (6C/12T, 4.3GHz)
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Socket LGA 1200</span>
+                  <span class="pcb-card__spec">6 Nhân / 12 Luồng</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">2.100.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">3.200.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>8</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=1002" class="pcb-card__btn" data-action="quick-bid" data-id="1002">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 5: Mainboard - GIGABYTE B760M GAMING WIFI PLUS -->
+            <article class="pcb-card" data-id="3001" data-category="Mainboard" data-price="3000000" data-bids="8">
+              <a href="product-detail.html?id=3001" class="pcb-card__media" aria-label="Xem chi tiết Mainboard GIGABYTE B760M">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">05:12:40</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/mainboard/3001-gigabyte-b760m-gaming-wifi-1.webp" alt="GIGABYTE B760M GAMING WIFI PLUS" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="3001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Mainboard</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Fullbox 2027</span>
+                </div>
+                <a href="product-detail.html?id=3001" class="pcb-card__title" title="Bo mạch chủ GIGABYTE B760M GAMING WIFI PLUS DDR5">
+                  Bo mạch chủ GIGABYTE B760M GAMING WIFI PLUS DDR5
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Socket LGA 1700</span>
+                  <span class="pcb-card__spec">Chuẩn DDR5 / WiFi 6E</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">3.000.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">3.690.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>8</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=3001" class="pcb-card__btn" data-action="quick-bid" data-id="3001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 6: Mainboard - MSI MAG Z790 TOMAHAWK WIFI DDR5 -->
+            <article class="pcb-card" data-id="3013" data-category="Mainboard" data-price="4600000" data-bids="12">
+              <a href="product-detail.html?id=3013" class="pcb-card__media" aria-label="Xem chi tiết MSI MAG Z790 TOMAHAWK">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">06:30:10</span>
+                </div>
+                <span class="pcb-card__condition">Fullbox 99%</span>
+                <img class="pcb-card__img" src="images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg" alt="MSI MAG Z790 TOMAHAWK WIFI" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="3013" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Mainboard</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ VRM 16+1+1</span>
+                </div>
+                <a href="product-detail.html?id=3013" class="pcb-card__title" title="Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5">
+                  Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Socket LGA 1700</span>
+                  <span class="pcb-card__spec">PCIe 5.0 x16</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">4.600.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">7.200.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>12</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=3013" class="pcb-card__btn" data-action="quick-bid" data-id="3013">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 7: RAM - Corsair Vengeance LPX 16GB -->
+            <article class="pcb-card" data-id="4001" data-category="RAM" data-price="750000" data-bids="15">
+              <a href="product-detail.html?id=4001" class="pcb-card__media" aria-label="Xem chi tiết RAM Corsair Vengeance LPX">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">01:50:40</span>
+                </div>
+                <span class="pcb-card__condition">Đã sử dụng</span>
+                <img class="pcb-card__img" src="images/products/ram/4001-corsair-vengeance-lpx-1.jpg" alt="Corsair Vengeance LPX 16GB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="4001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">RAM</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ MemTest 0 Error</span>
+                </div>
+                <a href="product-detail.html?id=4001" class="pcb-card__title" title="RAM Corsair Vengeance LPX 16GB (2x8GB) DDR4 3200MHz">
+                  RAM Corsair Vengeance LPX 16GB (2x8GB) DDR4 3200MHz
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">DDR4 3200MHz</span>
+                  <span class="pcb-card__spec">Tản nhôm đen</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">750.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">1.250.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>15</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=4001" class="pcb-card__btn" data-action="quick-bid" data-id="4001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 8: RAM - G.SKILL Trident Z RGB 16GB -->
+            <article class="pcb-card" data-id="4003" data-category="RAM" data-price="950000" data-bids="18">
+              <a href="product-detail.html?id=4003" class="pcb-card__media" aria-label="Xem chi tiết RAM G.SKILL Trident Z">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">02:40:20</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/ram/4003-gskill-trident-z-rgb-16gb-1.jpg" alt="G.SKILL Trident Z RGB 16GB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="4003" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">RAM</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ MemTest 0 Error</span>
+                </div>
+                <a href="product-detail.html?id=4003" class="pcb-card__title" title="RAM G.SKILL Trident Z RGB 16GB (2x8GB) DDR4 3200MHz">
+                  RAM G.SKILL Trident Z RGB 16GB (2x8GB) DDR4 3200MHz
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">DDR4 3200MHz</span>
+                  <span class="pcb-card__spec">LED RGB Aura</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">950.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">1.600.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>18</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=4003" class="pcb-card__btn" data-action="quick-bid" data-id="4003">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 9: SSD - Samsung 980 PRO 1TB -->
+            <article class="pcb-card" data-id="5001" data-category="SSD" data-price="1850000" data-bids="20">
+              <a href="product-detail.html?id=5001" class="pcb-card__media" aria-label="Xem chi tiết SSD Samsung 980 PRO">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">00:45:10</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/storage/5001-samsung-980-pro-1.png" alt="Samsung 980 PRO 1TB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="5001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">SSD</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Sức khỏe 100%</span>
+                </div>
+                <a href="product-detail.html?id=5001" class="pcb-card__title" title="Ổ cứng SSD Samsung 980 PRO 1TB PCIe NVMe 4.0 M.2">
+                  Ổ cứng SSD Samsung 980 PRO 1TB PCIe NVMe 4.0 M.2
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Đọc 7000 MB/s</span>
+                  <span class="pcb-card__spec">Ghi ít &lt; 2TB</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">1.850.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.650.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>20</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=5001" class="pcb-card__btn" data-action="quick-bid" data-id="5001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 10: SSD - WD Black SN850X 1TB -->
+            <article class="pcb-card" data-id="5003" data-category="SSD" data-price="2100000" data-bids="9">
+              <a href="product-detail.html?id=5003" class="pcb-card__media" aria-label="Xem chi tiết SSD WD Black SN850X">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">04:15:00</span>
+                </div>
+                <span class="pcb-card__condition">Fullbox 99%</span>
+                <img class="pcb-card__img" src="images/products/storage/5003-wd-black-sn850x-1.jpg" alt="WD Black SN850X 1TB" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="5003" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">SSD</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Sức khỏe 100%</span>
+                </div>
+                <a href="product-detail.html?id=5003" class="pcb-card__title" title="Ổ cứng SSD WD Black SN850X 1TB PCIe Gen4 NVMe M.2">
+                  Ổ cứng SSD WD Black SN850X 1TB PCIe Gen4 NVMe M.2
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Đọc 7300 MB/s</span>
+                  <span class="pcb-card__spec">Bảo hành 2028</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">2.100.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.900.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>9</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=5003" class="pcb-card__btn" data-action="quick-bid" data-id="5003">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 11: PSU - Corsair RM850x 850W -->
+            <article class="pcb-card" data-id="6001" data-category="PSU" data-price="2300000" data-bids="10">
+              <a href="product-detail.html?id=6001" class="pcb-card__media" aria-label="Xem chi tiết Nguồn Corsair RM850x">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">03:10:45</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/psu/6001-corsair-rm850x-1.png" alt="Corsair RM850x 850W Gold" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="6001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">PSU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ 80 Plus Gold</span>
+                </div>
+                <a href="product-detail.html?id=6001" class="pcb-card__title" title="Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Modular">
+                  Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Modular
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Công suất 850W</span>
+                  <span class="pcb-card__spec">Full Modular</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">2.300.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">3.450.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>10</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=6001" class="pcb-card__btn" data-action="quick-bid" data-id="6001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 12: PSU - Seasonic Focus GX-750 -->
+            <article class="pcb-card" data-id="6002" data-category="PSU" data-price="1950000" data-bids="7">
+              <a href="product-detail.html?id=6002" class="pcb-card__media" aria-label="Xem chi tiết Nguồn Seasonic Focus GX-750">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">05:22:10</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/psu/6002-seasonic-focus-gx750-1.png" alt="Seasonic Focus GX-750" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="6002" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">PSU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Tụ Nhật 105°C</span>
+                </div>
+                <a href="product-detail.html?id=6002" class="pcb-card__title" title="Nguồn máy tính Seasonic Focus GX-750 750W 80 Plus Gold">
+                  Nguồn máy tính Seasonic Focus GX-750 750W 80 Plus Gold
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Công suất 750W</span>
+                  <span class="pcb-card__spec">Bảo hành 2029</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">1.950.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.850.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>7</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=6002" class="pcb-card__btn" data-action="quick-bid" data-id="6002">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 13: Cooling - Cooler Master Hyper 212 Spectrum V3 -->
+            <article class="pcb-card" data-id="8001" data-category="Cooling" data-price="290000" data-bids="9">
+              <a href="product-detail.html?id=8001" class="pcb-card__media" aria-label="Xem chi tiết Tản nhiệt Cooler Master Hyper 212">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">06:05:30</span>
+                </div>
+                <span class="pcb-card__condition">Đã sử dụng</span>
+                <img class="pcb-card__img" src="images/products/cooling/8001-tan-nhiet-cooler-master-hyper-212-spectrum-v3-argb-1.jpg" alt="Cooler Master Hyper 212 Spectrum V3" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="8001" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Tản nhiệt</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Đủ gông Intel/AMD</span>
+                </div>
+                <a href="product-detail.html?id=8001" class="pcb-card__title" title="Tản nhiệt khí Cooler Master Hyper 212 Spectrum V3 ARGB">
+                  Tản nhiệt khí Cooler Master Hyper 212 Spectrum V3 ARGB
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Quạt 120mm ARGB</span>
+                  <span class="pcb-card__spec">4 Ống đồng</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">290.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">490.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>9</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=8001" class="pcb-card__btn" data-action="quick-bid" data-id="8001">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 14: Cooling - Tản AIO Deepcool LT520 240mm -->
+            <article class="pcb-card" data-id="8008" data-category="Cooling" data-price="1450000" data-bids="16">
+              <a href="product-detail.html?id=8008" class="pcb-card__media" aria-label="Xem chi tiết Tản nước Deepcool LT520">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">01:10:00</span>
+                </div>
+                <span class="pcb-card__condition">Fullbox 99%</span>
+                <img class="pcb-card__img" src="images/products/cooling/8008-tan-nhiet-aio-deepcool-lt520-black-1.jpg" alt="Deepcool LT520 Black AIO 240mm" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="8008" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Tản nhiệt</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Gương vô cực</span>
+                </div>
+                <a href="product-detail.html?id=8008" class="pcb-card__title" title="Tản nhiệt nước AIO Deepcool LT520 240mm Black ARGB">
+                  Tản nhiệt nước AIO Deepcool LT520 240mm Black ARGB
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Két 240mm nhôm</span>
+                  <span class="pcb-card__spec">2x Fan FK120</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">1.450.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.250.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>16</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=8008" class="pcb-card__btn" data-action="quick-bid" data-id="8008">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 15: Case - Lian Li O11 Dynamic EVO RGB White -->
+            <article class="pcb-card" data-id="7007" data-category="Case" data-price="2800000" data-bids="12">
+              <a href="product-detail.html?id=7007" class="pcb-card__media" aria-label="Xem chi tiết Vỏ case Lian Li O11D EVO RGB">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">03:55:10</span>
+                </div>
+                <span class="pcb-card__condition">Like New 99%</span>
+                <img class="pcb-card__img" src="images/products/case/7007-vo-may-tinh-lian-li-o11d-evo-rgb-white-1.jpg" alt="Lian Li O11D EVO RGB White" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="7007" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Case</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Kính không vết xước</span>
+                </div>
+                <a href="product-detail.html?id=7007" class="pcb-card__title" title="Vỏ máy tính Lian Li O11 Dynamic EVO RGB White">
+                  Vỏ máy tính Lian Li O11 Dynamic EVO RGB White
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Hỗ trợ E-ATX</span>
+                  <span class="pcb-card__spec">3 Két nước 360mm</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">2.800.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">4.200.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>12</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=7007" class="pcb-card__btn" data-action="quick-bid" data-id="7007">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 16: Case - NZXT H5 Flow Black -->
+            <article class="pcb-card" data-id="7011" data-category="Case" data-price="1350000" data-bids="7">
+              <a href="product-detail.html?id=7011" class="pcb-card__media" aria-label="Xem chi tiết Vỏ case NZXT H5 Flow">
+                <div class="pcb-card__countdown" data-timestamp="1794700000000">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">04:45:20</span>
+                </div>
+                <span class="pcb-card__condition">Fullbox 99%</span>
+                <img class="pcb-card__img" src="images/products/case/7011-vo-may-tinh-nzxt-h5-flow-black-(cc-h52fb-01)-1.jpg" alt="NZXT H5 Flow Black" loading="lazy">
+              </a>
+              <button type="button" class="pcb-card__watch" data-action="watch" data-id="7011" aria-label="Lưu theo dõi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat">Case</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass">✓ Kèm 2 Fan F120</span>
+                </div>
+                <a href="product-detail.html?id=7011" class="pcb-card__title" title="Vỏ máy tính NZXT H5 Flow Black Mid-Tower">
+                  Vỏ máy tính NZXT H5 Flow Black Mid-Tower
+                </a>
+                <div class="pcb-card__specs">
+                  <span class="pcb-card__spec">Chuẩn ATX</span>
+                  <span class="pcb-card__spec">Kính cường lực hông</span>
+                </div>
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá hiện tại</span>
+                    <span class="pcb-card__price-val">1.350.000₫</span>
+                  </div>
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val">2.150.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>7</strong> lượt
+                    </span>
+                  </div>
+                  <a href="product-detail.html?id=7011" class="pcb-card__btn" data-action="quick-bid" data-id="7011">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Tham gia đấu giá
+                  </a>
+                </div>
+              </div>
+            </article>
+
           </div>
 
           <!-- 4. Thanh phân trang mẫu (Pagination) -->

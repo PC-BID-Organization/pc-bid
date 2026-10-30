@@ -20,130 +20,6 @@ const DATA_SOURCES = [
   { key: 'case', path: 'data/case.json', label: 'Case', category: 'Case' }
 ];
 
-// Dữ liệu dự phòng khi chạy trên giao thức file:/// hoặc không fetch được JSON
-const FALLBACK_PRODUCTS = [
-  {
-    id: 2001,
-    name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
-    category: "GPU",
-    condition: "Like New 99% - Fullbox, Tem Void SPC nguyên vẹn",
-    startingPrice: 4200000,
-    currentBid: 5800000,
-    bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
-    endTime: new Date(Date.now() + 18 * 60 * 1000).toISOString(),
-    seller: "hoanglong_pc",
-    images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
-    specifications: { "VRAM": "8GB GDDR6", "Nhiệt độ test": "Furmark 65°C" }
-  },
-  {
-    id: 2002,
-    name: "Card màn hình Gigabyte GeForce GTX 1660 Super OC 6GB",
-    category: "GPU",
-    condition: "Đã sử dụng - Bản 2 quạt mát mẻ, còn sáng đẹp",
-    startingPrice: 2300000,
-    currentBid: 3400000,
-    bidStep: 100000,
-    bidCount: 11,
-    marketPriceNew: 5500000,
-    endTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
-    seller: "vananh_gaming",
-    images: ["images/products/gpu/2002-gtx-1660-super-1.jpg"],
-    specifications: { "VRAM": "6GB GDDR6", "Nguồn đề xuất": "450W" }
-  },
-  {
-    id: 1001,
-    name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
-    category: "CPU",
-    condition: "Đã sử dụng - Chân Socket AM4 hoàn hảo, bao test 7 ngày",
-    startingPrice: 3800000,
-    currentBid: 4900000,
-    bidStep: 100000,
-    bidCount: 22,
-    marketPriceNew: 8900000,
-    endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    seller: "gaming_zone_vn",
-    images: ["images/products/cpu/1019-ryzen-5-5600-1.jpg"],
-    specifications: { "Socket": "AM4", "TDP": "105W" }
-  },
-  {
-    id: 3001,
-    name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
-    category: "Mainboard",
-    condition: "Like New 99% - Fullbox phụ kiện râu anten, chặn main",
-    startingPrice: 3500000,
-    currentBid: 4600000,
-    bidStep: 100000,
-    bidCount: 11,
-    marketPriceNew: 7200000,
-    endTime: new Date(Date.now() + 115 * 60 * 1000).toISOString(),
-    seller: "pc_premium_uit",
-    images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-    specifications: { "Socket": "LGA 1700", "Chuẩn RAM": "DDR5" }
-  },
-  {
-    id: 4001,
-    name: "RAM G.SKILL Trident Z RGB 32GB (2x16GB) 3600MHz DDR4",
-    category: "RAM",
-    condition: "Đã sử dụng - MemTest86 2 lượt 0 error, tản nhôm phay xước",
-    startingPrice: 1100000,
-    currentBid: 1650000,
-    bidStep: 50000,
-    bidCount: 11,
-    marketPriceNew: 2800000,
-    endTime: new Date(Date.now() + 85 * 60 * 1000).toISOString(),
-    seller: "linhkien_chinhhang",
-    images: ["images/products/ram/4001-trident-z-1.jpg"],
-    specifications: { "Dung lượng": "32GB (2x16GB)", "Bus": "3600MHz" }
-  },
-  {
-    id: 5001,
-    name: "Ổ cứng SSD Samsung 980 PRO 1TB PCIe NVMe 4.0 M.2",
-    category: "SSD",
-    condition: "Like New 99% - Sức khỏe CrystalDiskInfo 100%, ghi ít",
-    startingPrice: 1300000,
-    currentBid: 1850000,
-    bidStep: 50000,
-    bidCount: 18,
-    marketPriceNew: 2600000,
-    endTime: new Date(Date.now() + 35 * 60 * 1000).toISOString(),
-    seller: "storage_pro",
-    images: ["images/products/storage/5001-samsung-980-pro-1.jpg"],
-    specifications: { "Tốc độ đọc": "7000 MB/s", "Chuẩn": "M.2 PCIe 4.0" }
-  },
-  {
-    id: 6001,
-    name: "Nguồn máy tính Corsair RM850e 850W 80 Plus Gold",
-    category: "PSU",
-    condition: "Like New 99% - Dây Full Modular nguyên túi, tem bảo hành SPC",
-    startingPrice: 1600000,
-    currentBid: 2150000,
-    bidStep: 50000,
-    bidCount: 9,
-    marketPriceNew: 3300000,
-    endTime: new Date(Date.now() + 150 * 60 * 1000).toISOString(),
-    seller: "vietnam_power",
-    images: ["images/products/psu/6001-corsair-rm850e-1.jpg"],
-    specifications: { "Công suất": "850W", "Chứng nhận": "80 Plus Gold" }
-  },
-  {
-    id: 7001,
-    name: "Tản nhiệt nước AIO Deepcool LT720 360mm ARGB",
-    category: "Cooling",
-    condition: "Like New 99% - Đủ gông Intel 1700 và AMD AM5",
-    startingPrice: 1400000,
-    currentBid: 1950000,
-    bidStep: 50000,
-    bidCount: 14,
-    marketPriceNew: 3100000,
-    endTime: new Date(Date.now() + 190 * 60 * 1000).toISOString(),
-    seller: "cooler_master_vn",
-    images: ["images/products/cooling/7001-deepcool-lt720-1.jpg"],
-    specifications: { "Kích thước két": "360mm", "Đèn": "ARGB vô cực" }
-  }
-];
-
 /* ==========================================================================
    2. TRẠNG THÁI TOÀN TRANG (APPLICATION STATE)
    ========================================================================== */
@@ -170,16 +46,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. Phân tích tham số từ URL (ví dụ: products.html?category=vga&q=rtx)
   parseUrlParams();
 
-  // 2. Tải toàn bộ dữ liệu linh kiện
+  // 2. Thu thập dữ liệu tĩnh sẵn có từ DOM (đảm bảo hiển thị ngay cả khi chạy giao thức file:///)
+  parseStaticCardsFromDOM();
+
+  // 3. Cố gắng tải thêm dữ liệu từ JSON nếu môi trường hỗ trợ fetch
   await loadAllProducts();
 
-  // 3. Khởi tạo các bộ lắng nghe sự kiện (Event Listeners)
+  // 4. Khởi tạo các bộ lắng nghe sự kiện (Event Listeners)
   initFilterEventListeners();
 
-  // 4. Áp dụng bộ lọc và render danh sách ra giao diện
+  // 5. Gắn sự kiện click vào các thẻ card điều hướng sang trang chi tiết
+  attachCardClickEvents();
+
+  // 6. Áp dụng bộ lọc và render danh sách ra giao diện
   applyFiltersAndRender();
 
-  // 5. Kích hoạt bộ đếm thời gian đếm ngược thời gian thực
+  // 7. Kích hoạt bộ đếm thời gian đếm ngược thời gian thực
   setInterval(updateLiveCountdowns, 1000);
 });
 
@@ -210,42 +92,81 @@ function parseUrlParams() {
 }
 
 /* ==========================================================================
-   4. TẢI TOÀN BỘ DỮ LIỆU SẢN PHẨM (DATA LOADER)
+   4. THU THẬP DỮ LIỆU TĨNH TỪ DOM & TẢI TỪ FILE JSON (DATA LOADER)
    ========================================================================== */
+function parseStaticCardsFromDOM() {
+  const staticCards = document.querySelectorAll('#catalog-products-grid .pcb-card');
+  if (staticCards.length === 0) return;
+
+  const collected = [];
+  staticCards.forEach(card => {
+    const id = parseInt(card.getAttribute('data-id'), 10) || Math.floor(Math.random() * 10000);
+    const category = card.getAttribute('data-category') || 'PC';
+    const price = parseInt(card.getAttribute('data-price'), 10) || 0;
+    const bids = parseInt(card.getAttribute('data-bids'), 10) || 0;
+    const name = card.querySelector('.pcb-card__title')?.textContent.trim() || 'Linh kiện PC';
+    const image = card.querySelector('.pcb-card__img')?.getAttribute('src') || '';
+    const condition = card.querySelector('.pcb-card__condition')?.textContent.trim() || 'Đã sử dụng';
+
+    collected.push({
+      id,
+      name,
+      category,
+      condition,
+      currentBid: price,
+      marketPriceNew: price * 1.5,
+      bidCount: bids,
+      endTimestamp: Date.now() + (Math.floor(Math.random() * 8) + 1) * 3600 * 1000,
+      images: [image],
+      specifications: {}
+    });
+  });
+
+  if (collected.length > 0) {
+    rawProducts = collected;
+  }
+}
+
 async function loadAllProducts() {
   let allLoaded = [];
 
-  // Tải đồng thời tất cả các tệp json danh mục
-  const fetchPromises = DATA_SOURCES.map(async (src) => {
-    try {
-      const res = await fetch(src.path);
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const list = await res.json();
-      return list.map(item => normalizeProduct(item, src.category));
-    } catch (e) {
-      return [];
-    }
-  });
+  // Tải đồng thời tất cả các tệp json danh mục nếu có web server
+  try {
+    const fetchPromises = DATA_SOURCES.map(async (src) => {
+      try {
+        const res = await fetch(src.path);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const list = await res.json();
+        return list.map(item => normalizeProduct(item, src.category));
+      } catch (e) {
+        return [];
+      }
+    });
 
-  const results = await Promise.all(fetchPromises);
-  results.forEach(list => {
-    allLoaded.push(...list);
-  });
-
-  // Nếu tải rỗng (khi chạy không có server), dùng dữ liệu dự phòng phong phú
-  if (allLoaded.length === 0) {
-    allLoaded = FALLBACK_PRODUCTS.map(p => normalizeProduct(p, p.category));
+    const results = await Promise.all(fetchPromises);
+    results.forEach(list => {
+      allLoaded.push(...list);
+    });
+  } catch (err) {
+    // Không làm gián đoạn nếu chạy offline
   }
 
   // Bổ sung dữ liệu người dùng tự đăng bán từ localStorage nếu có
-  const localItems = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-  if (Array.isArray(localItems) && localItems.length > 0) {
-    localItems.forEach(item => {
-      allLoaded.unshift(normalizeProduct(item, item.category || 'PC'));
-    });
+  try {
+    const localItems = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    if (Array.isArray(localItems) && localItems.length > 0) {
+      localItems.forEach(item => {
+        allLoaded.unshift(normalizeProduct(item, item.category || 'PC'));
+      });
+    }
+  } catch (e) {
+    // Bỏ qua lỗi parse
   }
 
-  rawProducts = allLoaded;
+  // Nếu tải JSON thành công, thay thế danh sách thô
+  if (allLoaded.length > 0) {
+    rawProducts = allLoaded;
+  }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar
   updateSidebarCategoryCounts();
@@ -349,7 +270,6 @@ function initFilterEventListeners() {
   priceRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {
       filterState.priceRange = e.target.value;
-      // Xóa ô nhập giá tự do nếu chuyển về radio
       const minInput = document.getElementById('price-min');
       const maxInput = document.getElementById('price-max');
       if (minInput) minInput.value = '';
@@ -375,7 +295,6 @@ function initFilterEventListeners() {
       filterState.minPrice = min;
       filterState.maxPrice = max;
 
-      // Bỏ check radio
       priceRadios.forEach(r => { r.checked = false; });
 
       currentPage = 1;
@@ -492,7 +411,6 @@ function resetAllFilters() {
   filterState.searchQuery = '';
   filterState.sortBy = 'ending';
 
-  // Khôi phục form UI
   const catCheckboxes = document.querySelectorAll('input[name="category"]');
   catCheckboxes.forEach(cb => { cb.checked = (cb.value === 'all'); });
 
@@ -523,7 +441,7 @@ function resetAllFilters() {
 function applyFiltersAndRender() {
   let list = [...rawProducts];
 
-  // 1. Lọc theo từ khóa tìm kiếm (nếu có từ URL hoặc thanh tìm kiếm)
+  // 1. Lọc theo từ khóa tìm kiếm
   if (filterState.searchQuery) {
     const q = filterState.searchQuery.toLowerCase();
     list = list.filter(p => {
@@ -697,7 +615,7 @@ function renderCurrentPage() {
   grid.innerHTML = pageItems.map(product => renderCatalogProductCard(product)).join('');
 
   // Gắn sự kiện click toàn bộ thẻ card chuyển hướng sang product-detail.html
-  attachCardClickEvents(grid);
+  attachCardClickEvents();
 
   // Render lại phân trang
   renderPagination(filteredProducts.length);
@@ -705,15 +623,14 @@ function renderCurrentPage() {
 
 /**
  * Gắn sự kiện click trên từng card để chuyển sang product-detail.html?id=...
- * Đồng thời ngăn chặn khi người dùng click vào nút Đặt giá nhanh hoặc nút Lưu theo dõi
+ * Đồng thời ngăn chặn khi người dùng click vào nút bookmark
  */
-function attachCardClickEvents(gridElement) {
-  const cards = gridElement.querySelectorAll('.pcb-card');
+function attachCardClickEvents() {
+  const cards = document.querySelectorAll('.pcb-card');
   cards.forEach(card => {
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
-      // Nếu click vào nút Đặt giá hoặc Nút bookmark thì không chuyển trang
-      if (e.target.closest('.pcb-card__btn') || e.target.closest('.pcb-card__watch')) {
+      if (e.target.closest('.pcb-card__watch')) {
         return;
       }
       const productId = card.getAttribute('data-id');
@@ -723,18 +640,8 @@ function attachCardClickEvents(gridElement) {
     });
   });
 
-  // Sự kiện nút Đặt giá nhanh (Quick Bid)
-  const bidBtns = gridElement.querySelectorAll('[data-action="quick-bid"]');
-  bidBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.getAttribute('data-id');
-      window.location.href = `product-detail.html?id=${id}`;
-    });
-  });
-
   // Sự kiện nút Theo dõi (Watchlist)
-  const watchBtns = gridElement.querySelectorAll('[data-action="watch"]');
+  const watchBtns = document.querySelectorAll('[data-action="watch"]');
   watchBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -751,7 +658,6 @@ function renderCatalogProductCard(product) {
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
 
-  // Trích xuất 2 thông số kỹ thuật tiêu biểu
   const specs = product.specifications || {};
   const specItems = Object.entries(specs).slice(0, 2).map(([k, v]) => {
     return `<span class="pcb-card__spec" title="${escapeHtml(k)}: ${escapeHtml(v)}">${escapeHtml(v)}</span>`;
@@ -762,8 +668,8 @@ function renderCatalogProductCard(product) {
     : 'images/products/gpu/2018-rtx-4070-12gb-1.webp';
 
   return `
-    <article class="pcb-card" data-id="${product.id}" data-category="${escapeHtml(product.category)}">
-      <div class="pcb-card__media">
+    <article class="pcb-card" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
+      <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
         <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"></circle>
@@ -773,7 +679,7 @@ function renderCatalogProductCard(product) {
         </div>
         <span class="pcb-card__condition">${conditionLabel}</span>
         <img class="pcb-card__img" src="${imageSrc}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.src='images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'">
-      </div>
+      </a>
 
       <button type="button" class="pcb-card__watch" data-action="watch" data-id="${product.id}" aria-label="Lưu theo dõi">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -809,10 +715,10 @@ function renderCatalogProductCard(product) {
             </span>
           </div>
 
-          <button type="button" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
+          <a href="${detailUrl}" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
             Tham gia đấu giá
-          </button>
+          </a>
         </div>
       </div>
     </article>
@@ -839,7 +745,6 @@ function renderPagination(totalItems) {
     </a>
   `;
 
-  // Hiển thị danh sách số trang
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
       html += `
@@ -895,7 +800,6 @@ function updateLiveCountdowns() {
       textSpan.textContent = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
     }
 
-    // Nếu thời gian dưới 15 phút, kích hoạt trạng thái khẩn cấp nhấp nháy đỏ
     if (diff < 15 * 60 * 1000) {
       el.classList.add('pcb-card__countdown--urgent');
     } else {
@@ -924,7 +828,7 @@ function getConditionBadge(conditionText) {
 function getHardwareSeal(product) {
   const cat = String(product.category || '').toLowerCase();
   if (cat.includes('gpu') || cat.includes('vga')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã stress test Furmark ổn định">✓ Furmark < 75°C</span>`;
+    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã stress test Furmark ổn định">✓ Furmark &lt; 75°C</span>`;
   }
   if (cat.includes('ram')) {
     return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã chạy MemTest86 không lỗi">✓ MemTest 0 Error</span>`;
