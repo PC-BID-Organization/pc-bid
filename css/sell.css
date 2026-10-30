@@ -1,0 +1,599 @@
+/* ==========================================================================
+   SELL CSS - ĐỊNH KIỂU TRANG ĐĂNG PHIÊN ĐẤU GIÁ LINH KIỆN PCBid
+   Quy ước BEM: block__element--modifier
+   Thuần CSS3: Flexbox, CSS Grid, CSS Custom Properties, Responsive Media Queries
+   Toàn bộ chú thích bằng Tiếng Việt có dấu chuẩn quy định AGENTS.md
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BỐ CỤC TỔNG THỂ TRANG ĐĂNG BÁN (PAGE LAYOUT)
+   -------------------------------------------------------------------------- */
+.pcb-sell-page {
+  background-color: var(--pcb-bg-canvas, #f8fafc);
+  color: var(--pcb-text-main, #0f172a);
+  font-family: var(--pcb-font-main, 'Be Vietnam Pro', sans-serif);
+  padding: 16px 0 64px;
+  min-height: calc(100vh - 150px - 300px);
+}
+
+/* Banner phần đầu trang đăng bán */
+.pcb-sell-hero {
+  background: linear-gradient(135deg, #0b1a2d 0%, #152943 100%);
+  border-radius: var(--pcb-radius-md, 12px);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(11, 26, 45, 0.15);
+}
+
+.pcb-sell-hero::before {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.pcb-sell-hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+}
+
+.pcb-sell-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(234, 88, 12, 0.2);
+  border: 1px solid rgba(234, 88, 12, 0.4);
+  color: #fdba74;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.pcb-sell-hero__title {
+  font-family: var(--pcb-font-heading, 'Space Grotesk', sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px;
+}
+
+.pcb-sell-hero__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Các bước quy trình đăng bán (Stepper Indicators) */
+.pcb-sell-steps {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 16px;
+  border-radius: var(--pcb-radius-sm, 8px);
+}
+
+.pcb-sell-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.pcb-sell-step--active {
+  color: #fb923c;
+}
+
+.pcb-sell-step__num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.pcb-sell-step--active .pcb-sell-step__num {
+  background: var(--pcb-primary, #ea580c);
+  color: #ffffff;
+}
+
+/* Khung bố cục 2 cột chính: Form đăng ký (Trái) & Xem trước Card thời gian thực (Phải) */
+.pcb-sell-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   2. KHỐI THẺ FORM NHẬP LIỆU (FORM PANEL CARDS)
+   -------------------------------------------------------------------------- */
+.pcb-sell-panel {
+  background: #ffffff;
+  border: 1px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: var(--pcb-radius-md, 12px);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--pcb-shadow-card, 0 1px 3px rgba(15, 23, 42, 0.06));
+}
+
+.pcb-sell-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 18px;
+}
+
+.pcb-sell-panel__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--pcb-primary-light, #fff7ed);
+  color: var(--pcb-primary, #ea580c);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pcb-sell-panel__title {
+  font-family: var(--pcb-font-heading, 'Space Grotesk', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pcb-text-main, #0f172a);
+  margin: 0;
+}
+
+.pcb-sell-panel__subtitle {
+  font-size: 12px;
+  color: var(--pcb-text-muted, #64748b);
+  margin: 2px 0 0;
+}
+
+/* Hàng lưới 2 cột trong form */
+.pcb-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pcb-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.pcb-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.pcb-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcb-text-main, #0f172a);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pcb-form-label--required::after {
+  content: " *";
+  color: #dc2626;
+}
+
+.pcb-form-select,
+.pcb-form-input,
+.pcb-form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--pcb-text-main, #0f172a);
+  background: #ffffff;
+  border: 1.5px solid var(--pcb-border-medium, #cbd5e1);
+  border-radius: var(--pcb-radius-xs, 6px);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.pcb-form-select:focus,
+.pcb-form-input:focus,
+.pcb-form-textarea:focus {
+  border-color: var(--pcb-primary, #ea580c);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.pcb-form-textarea {
+  resize: vertical;
+  min-height: 85px;
+  line-height: 1.5;
+}
+
+.pcb-form-hint {
+  font-size: 11px;
+  color: var(--pcb-text-muted, #64748b);
+  margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   3. KHỐI XEM TRƯỚC THÔNG SỐ KỸ THUẬT TỰ ĐỘNG (SPECIFICATIONS PREVIEW)
+   -------------------------------------------------------------------------- */
+.pcb-spec-box {
+  background: #f8fafc;
+  border: 1px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: var(--pcb-radius-sm, 8px);
+  padding: 14px 16px;
+  margin-top: 8px;
+}
+
+.pcb-spec-box__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.pcb-spec-box__title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pcb-text-secondary, #475569);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pcb-spec-box__badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.pcb-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.pcb-spec-item {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.pcb-spec-item__key {
+  font-size: 11px;
+  color: var(--pcb-text-faint, #94a3b8);
+  font-weight: 500;
+}
+
+.pcb-spec-item__val {
+  font-size: 12px;
+  color: var(--pcb-text-main, #0f172a);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   4. LƯỚI THUMBNAIL CHỌN ẢNH ĐẠI DIỆN TỪ REPO
+   -------------------------------------------------------------------------- */
+.pcb-thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.pcb-thumb-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: #ffffff;
+  border: 2px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: var(--pcb-radius-xs, 6px);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.pcb-thumb-item:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.pcb-thumb-item--active {
+  border-color: var(--pcb-primary, #ea580c);
+  background-color: var(--pcb-primary-light, #fff7ed);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+
+.pcb-thumb-item--active::after {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  background: var(--pcb-primary, #ea580c);
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pcb-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --------------------------------------------------------------------------
+   5. CỘT PHẢI: XEM TRƯỚC CARD SẢN PHẨM TRỰC TIẾP (LIVE PREVIEW)
+   -------------------------------------------------------------------------- */
+.pcb-sell-preview-col {
+  position: sticky;
+  top: 80px;
+}
+
+.pcb-preview-card {
+  background: #ffffff;
+  border: 1px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: var(--pcb-radius-md, 12px);
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.pcb-preview-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 14px;
+}
+
+.pcb-preview-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pcb-text-secondary, #475569);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.pcb-preview-card__badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pcb-primary, #ea580c);
+  background: var(--pcb-primary-light, #fff7ed);
+  padding: 3px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+/* Gợi ý quy định sàn */
+.pcb-seller-rules {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--pcb-radius-sm, 8px);
+  padding: 14px;
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pcb-text-secondary, #475569);
+}
+
+.pcb-seller-rules__title {
+  font-weight: 700;
+  color: var(--pcb-text-main, #0f172a);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pcb-seller-rules__list {
+  padding-left: 18px;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   6. CỤM NÚT HÀNH ĐỘNG GỬI FORM (FORM ACTIONS)
+   -------------------------------------------------------------------------- */
+.pcb-sell-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 0 0;
+}
+
+.pcb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: var(--pcb-radius-xs, 6px);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.pcb-btn--primary {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+}
+
+.pcb-btn--primary:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.45);
+  transform: translateY(-1px);
+}
+
+.pcb-btn--secondary {
+  background: #ffffff;
+  border: 1.5px solid var(--pcb-border-medium, #cbd5e1);
+  color: var(--pcb-text-secondary, #475569);
+}
+
+.pcb-btn--secondary:hover {
+  background: #f1f5f9;
+  color: var(--pcb-text-main, #0f172a);
+}
+
+/* --------------------------------------------------------------------------
+   7. HỘP THOẠI THÔNG BÁO THÀNH CÔNG (SUCCESS TOAST / MODAL)
+   -------------------------------------------------------------------------- */
+.pcb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+
+.pcb-modal-overlay--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pcb-modal-box {
+  background: #ffffff;
+  border-radius: var(--pcb-radius-md, 12px);
+  padding: 32px 24px;
+  width: 90%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  transform: scale(0.92);
+  transition: transform 0.25s ease;
+}
+
+.pcb-modal-overlay--open .pcb-modal-box {
+  transform: scale(1);
+}
+
+.pcb-modal-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #059669;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.pcb-modal-title {
+  font-family: var(--pcb-font-heading, 'Space Grotesk', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pcb-text-main, #0f172a);
+  margin: 0 0 8px;
+}
+
+.pcb-modal-desc {
+  font-size: 13px;
+  color: var(--pcb-text-muted, #64748b);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   8. THIẾT KẾ ĐÁP ỨNG THIẾT BỊ (RESPONSIVE MEDIA QUERIES)
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  .pcb-sell-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pcb-sell-preview-col {
+    position: static;
+  }
+
+  .pcb-sell-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pcb-form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pcb-thumb-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pcb-sell-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pcb-btn {
+    width: 100%;
+  }
+}
