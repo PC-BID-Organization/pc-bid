@@ -1,0 +1,1006 @@
+/* ==========================================================================
+   PROFILE CSS - ĐỊNH KIỂU TRANG THÔNG TIN TÀI KHOẢN (USER PROFILE PAGE)
+   Dự án: PCBid - Sàn Đấu Giá Linh Kiện PC Cũ
+   Quy ước đặt tên: BEM (Block Element Modifier)
+   Toàn bộ chú thích được viết bằng tiếng Việt có dấu theo chuẩn quy định
+   ========================================================================== */
+
+/* ==========================================================================
+   1. KHUNG CHỨA TRANG CHÍNH & NỀN TỔNG THỂ (MAIN WRAPPER & BACKGROUND)
+   ========================================================================== */
+
+.pcb-profile {
+  background-color: var(--color-bg-body, #F8F9FF);
+  min-height: calc(100vh - 110px - 250px);
+  padding: 24px 0 64px;
+  font-family: var(--font-family-sans, 'Be Vietnam Pro', sans-serif);
+  color: var(--color-text-main, #0B1C30);
+}
+
+/* ==========================================================================
+   2. THANH ĐIỀU HƯỚNG ĐƯỜNG DẪN (BREADCRUMB)
+   ========================================================================== */
+
+.pcb-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--color-text-muted, #565E74);
+}
+
+.pcb-breadcrumb__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted, #565E74);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.pcb-breadcrumb__link:hover {
+  color: var(--color-primary, #EA580C);
+}
+
+.pcb-breadcrumb__icon {
+  flex-shrink: 0;
+}
+
+.pcb-breadcrumb__separator {
+  color: #CBD5E1;
+  user-select: none;
+}
+
+.pcb-breadcrumb__item {
+  color: var(--color-text-muted, #565E74);
+}
+
+.pcb-breadcrumb__item--active {
+  color: var(--color-text-main, #0B1C30);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   3. BỐ CỤC 2 CỘT DASHBOARD (2-COLUMN DASHBOARD GRID)
+   ========================================================================== */
+
+.pcb-profile__layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ==========================================================================
+   4. CỘT TRÁI: SIDEBAR THÔNG TIN VÀ MENU ĐIỀU HƯỚNG
+   ========================================================================== */
+
+.pcb-profile__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 4.1. Thẻ tóm tắt thông tin người dùng (User Summary Card) */
+.pcb-user-card {
+  background: var(--color-bg-white, #FFFFFF);
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pcb-user-card__avatar-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 16px;
+}
+
+.pcb-user-card__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary, #EA580C);
+  padding: 3px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pcb-user-card__avatar-svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Tích xanh xác thực góc dưới phải avatar */
+.pcb-user-card__badge-check {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 24px;
+  height: 24px;
+  background-color: #10B981;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.pcb-user-card__name {
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-main, #0B1C30);
+  margin-bottom: 4px;
+}
+
+.pcb-user-card__uid {
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 12px;
+}
+
+/* Huy hiệu tài khoản đã xác thực */
+.pcb-user-card__verified-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  color: #059669;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* 4.2. Khung ví ảo (Virtual Wallet Box) */
+.pcb-wallet-box {
+  background-color: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+}
+
+.pcb-wallet-box__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pcb-wallet-box__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.pcb-wallet-box__tag {
+  background-color: #FFEDD5;
+  color: #C2410C;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.pcb-wallet-box__balance {
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-primary, #EA580C);
+  line-height: 1.2;
+}
+
+.pcb-wallet-box__divider {
+  height: 1px;
+  background-color: #FED7AA;
+  margin: 12px 0;
+}
+
+.pcb-wallet-box__hold {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 14px;
+}
+
+.pcb-wallet-box__hold strong {
+  color: var(--color-text-main, #0B1C30);
+  font-weight: 600;
+}
+
+.pcb-wallet-box__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-primary, #EA580C);
+  color: var(--color-primary, #EA580C);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pcb-wallet-box__btn:hover {
+  background-color: var(--color-primary, #EA580C);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+}
+
+/* 4.3. Menu điều hướng các tab (Navigation Menu List) */
+.pcb-profile-nav {
+  background: var(--color-bg-white, #FFFFFF);
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pcb-profile-nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+
+.pcb-profile-nav__item {
+  width: 100%;
+}
+
+.pcb-profile-nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.pcb-profile-nav__link:hover {
+  background-color: #F8FAFC;
+  color: var(--color-text-main, #0B1C30);
+}
+
+.pcb-profile-nav__link--active {
+  background-color: #FFF7ED;
+  color: var(--color-primary, #EA580C);
+  font-weight: 600;
+}
+
+.pcb-profile-nav__link--active:hover {
+  background-color: #FFEDD5;
+}
+
+.pcb-profile-nav__link-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pcb-profile-nav__icon {
+  flex-shrink: 0;
+}
+
+.pcb-profile-nav__arrow {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.pcb-profile-nav__badge {
+  background-color: #F1F5F9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.pcb-profile-nav__divider {
+  height: 1px;
+  background-color: #F1F5F9;
+  margin: 6px 0;
+}
+
+.pcb-profile-nav__link--logout {
+  color: #DC2626;
+}
+
+.pcb-profile-nav__link--logout:hover {
+  background-color: #FEF2F2;
+  color: #B91C1C;
+}
+
+/* 4.4. Thẻ phụ tin cậy (Trust Note Mini Card) */
+.pcb-trust-card {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%);
+  border: 1px solid #FFEDD5;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pcb-trust-card__icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #FFEDD5;
+  color: var(--color-primary, #EA580C);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pcb-trust-card__content {
+  flex: 1;
+}
+
+.pcb-trust-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-main, #0B1C30);
+  margin-bottom: 4px;
+}
+
+.pcb-trust-card__desc {
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ==========================================================================
+   5. CỘT PHẢI: KHUNG NỘI DUNG CHÍNH (MAIN CONTENT AREA)
+   ========================================================================== */
+
+.pcb-profile__main {
+  background: var(--color-bg-white, #FFFFFF);
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 5.1. Tiêu đề mục & Thanh phân cách */
+.pcb-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #F1F5F9;
+  margin-bottom: 28px;
+}
+
+.pcb-profile-header__left {
+  flex: 1;
+}
+
+.pcb-profile-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-main, #0B1C30);
+  margin: 0 0 6px;
+}
+
+.pcb-profile-header__accent {
+  display: inline-block;
+  width: 4px;
+  height: 24px;
+  background-color: var(--color-primary, #EA580C);
+  border-radius: 2px;
+}
+
+.pcb-profile-header__desc {
+  font-size: 14px;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pcb-profile-header__sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.pcb-profile-header__sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* ==========================================================================
+   6. BIỂU MẪU CHỈNH SỬA THÔNG TIN TÀI KHOẢN (ACCOUNT INFO FORM)
+   ========================================================================== */
+
+.pcb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pcb-form__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.pcb-form__label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pcb-form__label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #334155;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pcb-form__required {
+  color: var(--color-primary, #EA580C);
+  margin-left: 2px;
+}
+
+.pcb-form__checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748B;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pcb-form__checkbox-inline input[type="checkbox"] {
+  accent-color: var(--color-primary, #EA580C);
+  cursor: pointer;
+}
+
+/* Ô nhập liệu có icon định vị */
+.pcb-form__input-wrapper,
+.pcb-form__textarea-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pcb-form__icon-left {
+  position: absolute;
+  left: 14px;
+  color: #94A3B8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.pcb-form__icon-left--textarea {
+  top: 14px;
+  align-items: flex-start;
+}
+
+.pcb-form__icon-right {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.pcb-form__icon-right--verified {
+  color: #10B981;
+}
+
+.pcb-form__input {
+  width: 100%;
+  height: 44px;
+  padding: 10px 16px 10px 42px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0F172A;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.pcb-form__input--has-right-icon {
+  padding-right: 42px;
+}
+
+.pcb-form__textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 12px 16px 12px 42px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0F172A;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.pcb-form__input:focus,
+.pcb-form__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #EA580C);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.pcb-form__hint {
+  font-size: 12px;
+  color: #64748B;
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+/* Hàng 2 cột cho email & điện thoại */
+.pcb-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Khung thông báo ghi chú giao hàng an toàn */
+.pcb-form__alert-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #FFFBEB;
+  border: 1px solid #FEF3C7;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #B45309;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+.pcb-form__alert-note svg {
+  flex-shrink: 0;
+}
+
+/* 6.1. Cài đặt thông báo đấu giá (Notification Preferences) */
+.pcb-form__group--notification {
+  margin-top: 8px;
+}
+
+.pcb-form__checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pcb-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.pcb-checkbox-card:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+.pcb-checkbox-card__input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.pcb-checkbox-card__box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #CBD5E1;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.pcb-checkbox-card__box svg {
+  display: none;
+}
+
+.pcb-checkbox-card__input:checked ~ .pcb-checkbox-card__box {
+  background-color: var(--color-primary, #EA580C);
+  border-color: var(--color-primary, #EA580C);
+}
+
+.pcb-checkbox-card__input:checked ~ .pcb-checkbox-card__box svg {
+  display: block;
+}
+
+.pcb-checkbox-card:has(.pcb-checkbox-card__input:checked) {
+  border-color: #FED7AA;
+  background-color: #FFF7ED;
+}
+
+.pcb-checkbox-card__text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+}
+
+/* 6.2. Dòng thao tác nút bấm (Form Actions Row) */
+.pcb-form__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 24px;
+  margin-top: 8px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.pcb-form__last-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748B;
+}
+
+.pcb-form__last-update svg {
+  color: #94A3B8;
+}
+
+.pcb-form__last-update strong {
+  color: var(--color-text-main, #0B1C30);
+  font-weight: 600;
+}
+
+.pcb-form__btn-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Các lớp nút bấm chuẩn hệ thống PCBid */
+.pcb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  height: 42px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.pcb-btn--primary {
+  background-color: var(--color-primary, #EA580C);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.24);
+}
+
+.pcb-btn--primary:hover {
+  background-color: var(--color-primary-hover, #D94E07);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.32);
+  transform: translateY(-1px);
+}
+
+.pcb-btn--secondary {
+  background-color: #FFFFFF;
+  color: #334155;
+  border: 1px solid #CBD5E1;
+}
+
+.pcb-btn--secondary:hover {
+  background-color: #F8FAFC;
+  border-color: #94A3B8;
+  color: var(--color-text-main, #0B1C30);
+}
+
+/* ==========================================================================
+   7. HỘP THOẠI POP-UP (MODAL DIALOGS)
+   ========================================================================== */
+
+.pcb-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.pcb-modal.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pcb-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(11, 28, 48, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.pcb-modal__dialog {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: scale(0.95);
+  transition: transform 0.25s ease;
+  overflow: hidden;
+}
+
+.pcb-modal.is-active .pcb-modal__dialog {
+  transform: scale(1);
+}
+
+.pcb-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.pcb-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pcb-modal__icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #FFF7ED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pcb-modal__title {
+  font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text-main, #0B1C30);
+  margin: 0;
+}
+
+.pcb-modal__subtitle {
+  font-size: 12px;
+  color: #64748B;
+  margin: 2px 0 0;
+}
+
+.pcb-modal__close-btn {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pcb-modal__close-btn:hover {
+  background-color: #F1F5F9;
+  color: #334155;
+}
+
+.pcb-modal__form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pcb-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   8. THÔNG BÁO DẠNG TOAST (FLOATING TOAST NOTIFICATION)
+   ========================================================================== */
+
+.pcb-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1100;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  padding: 12px 18px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+  font-weight: 500;
+  transform: translateY(100px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.pcb-toast.is-show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pcb-toast__icon-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #10B981;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   9. THÍCH ỨNG ĐA THIẾT BỊ (RESPONSIVE MEDIA QUERIES)
+   ========================================================================== */
+
+/* Thiết bị màn hình máy tính bảng và laptop nhỏ (< 1024px) */
+@media (max-width: 1024px) {
+  .pcb-profile__layout {
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+  }
+
+  .pcb-profile__main {
+    padding: 24px;
+  }
+}
+
+/* Thiết bị di động và máy tính bảng dọc (< 768px) */
+@media (max-width: 768px) {
+  .pcb-profile {
+    padding: 16px 0 48px;
+  }
+
+  .pcb-profile__layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pcb-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pcb-form__row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .pcb-form__checkbox-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pcb-form__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .pcb-form__btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pcb-form__btn-group .pcb-btn {
+    width: 100%;
+  }
+
+  .pcb-form__last-update {
+    justify-content: center;
+  }
+
+  .pcb-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    justify-content: center;
+  }
+}
