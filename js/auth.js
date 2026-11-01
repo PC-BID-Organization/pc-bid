@@ -1,16 +1,19 @@
 /**
  * PCBid - Tập lệnh xử lý Trang xác thực (Authentication Script)
- * Quản lý kiểm tra hợp lệ biểu mẫu đăng ký, ẩn/hiện mật khẩu, lưu tài khoản vào LocalStorage
- * và hiển thị pop-up thông báo thành công kèm tự động chuyển hướng.
+ * Quản lý kiểm tra hợp lệ biểu mẫu đăng ký, đăng nhập, ẩn/hiện mật khẩu,
+ * lưu tài khoản vào LocalStorage và hiển thị pop-up thông báo thành công.
  * Toàn bộ chú thích được viết bằng tiếng Việt có dấu theo chuẩn quy định
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Khởi tạo chức năng ẩn/hiện mật khẩu
+  // 1. Khởi tạo chức năng ẩn/hiện mật khẩu (dùng chung cho Đăng ký & Đăng nhập)
   initPasswordToggles();
 
   // 2. Khởi tạo xử lý biểu mẫu đăng ký thành viên
   initRegisterForm();
+
+  // 3. Khởi tạo xử lý biểu mẫu đăng nhập
+  initLoginForm();
 });
 
 /**
@@ -50,7 +53,75 @@ function initPasswordToggles() {
 }
 
 /**
- * Xử lý kiểm tra và gửi biểu mẫu đăng ký
+ * Xử lý kiểm tra và gửi biểu mẫu đăng nhập (Dành cho login.html)
+ */
+function initLoginForm() {
+  const form = document.getElementById('login-form');
+  if (!form) return;
+
+  const inputUsername = document.getElementById('login-username');
+  const inputPassword = document.getElementById('login-password');
+
+  // Tự động điền email nếu vừa hoàn tất đăng ký ở trang register.html
+  const prefillEmail = localStorage.getItem(STORAGE_KEY_PREFILL);
+  if (prefillEmail && inputUsername && !inputUsername.value) {
+    inputUsername.value = prefillEmail;
+    // Xóa prefill sau khi đã tự động điền
+    localStorage.removeItem(STORAGE_KEY_PREFILL);
+  }
+
+  // Lắng nghe sự kiện người dùng nhập liệu để xóa lỗi đỏ
+  [inputUsername, inputPassword].forEach(input => {
+    if (!input) return;
+    input.addEventListener('input', () => clearFieldError(input));
+  });
+
+  // Lắng nghe sự kiện submit biểu mẫu đăng nhập
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    let isValid = true;
+
+    // 1. Kiểm tra Tên đăng nhập / Email
+    const usernameVal = inputUsername ? inputUsername.value.trim() : '';
+    if (!usernameVal) {
+      showFieldError(inputUsername, 'err-login-username', 'Vui lòng nhập tên đăng nhập hoặc email.');
+      isValid = false;
+    } else {
+      clearFieldError(inputUsername, 'err-login-username');
+    }
+
+    // 2. Kiểm tra Mật khẩu
+    const pwdVal = inputPassword ? inputPassword.value : '';
+    if (!pwdVal) {
+      showFieldError(inputPassword, 'err-login-password', 'Vui lòng nhập mật khẩu.');
+      isValid = false;
+    } else {
+      clearFieldError(inputPassword, 'err-login-password');
+    }
+
+    if (!isValid) return;
+
+    // Giả lập thông tin đăng nhập thành công
+    const userData = {
+      fullname: 'Nguyễn Văn A',
+      email: usernameVal.includes('@') ? usernameVal : 'user.pcbid@gmail.com',
+      phone: '0912345678',
+      walletBalance: 50000000,
+      walletHold: 0,
+      isLoggedIn: true,
+      loggedInAt: new Date().toISOString()
+    };
+
+    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
+
+    // Chuyển hướng sang trang profile.html (hoặc index.html)
+    window.location.href = 'profile.html';
+  });
+}
+
+/**
+ * Xử lý kiểm tra và gửi biểu mẫu đăng ký (Dành cho register.html)
  */
 function initRegisterForm() {
   const form = document.getElementById('register-form');
@@ -153,7 +224,7 @@ function initRegisterForm() {
       clearFieldError(checkTerms, 'err-terms');
     }
 
-    // Nếu có trường không hợp lệ, cuộn tới trường lỗi đầu tiên
+    // Nếu có trường không hợp lệ, dừng lại
     if (!isValid) return;
 
     // Tiến hành lưu thông tin tài khoản người dùng vào LocalStorage
@@ -166,7 +237,7 @@ function initRegisterForm() {
       registeredAt: new Date().toISOString()
     });
 
-    // Mở Pop-up thông báo Đăng ký thành công kèm đếm ngược chuyển hướng sang login.html
+    // Mở Pop-up thông báo Đăng ký thành công
     openSuccessModal({
       fullname: fullnameVal,
       email: emailVal,
@@ -209,13 +280,9 @@ function clearFieldError(inputEl, errId) {
  * @param {Object} userData 
  */
 function saveUserAccount(userData) {
-  // Lưu người dùng hiện tại
   localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
-
-  // Lưu email để login.html có thể tự động điền sẵn
   localStorage.setItem(STORAGE_KEY_PREFILL, userData.email);
 
-  // Thêm vào danh sách tài khoản đã đăng ký trong hệ thống
   const existingUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
   const userIndex = existingUsers.findIndex(u => u.email === userData.email);
   if (userIndex >= 0) {
@@ -239,12 +306,10 @@ let progressAnimation = null;
 function openSuccessModal(info) {
   const modal = document.getElementById('modal-register-success');
   if (!modal) {
-    // Nếu không tìm thấy modal, chuyển hướng thẳng sang login.html
     window.location.href = 'login.html';
     return;
   }
 
-  // Điền dữ liệu người dùng vào khung tóm tắt của pop-up
   const userNameEl = document.getElementById('success-user-name');
   const userEmailEl = document.getElementById('success-user-email');
   const userPhoneEl = document.getElementById('success-user-phone');
@@ -253,11 +318,9 @@ function openSuccessModal(info) {
   if (userEmailEl) userEmailEl.textContent = info.email;
   if (userPhoneEl) userPhoneEl.textContent = info.phone;
 
-  // Hiển thị modal pop-up
   modal.classList.add('is-active');
   modal.setAttribute('aria-hidden', 'false');
 
-  // Đếm ngược 3 giây chuyển sang trang login.html
   let secondsRemaining = 3;
   const countdownNumberEl = document.getElementById('countdown-number');
   const progressBarEl = document.getElementById('countdown-progress');
@@ -265,7 +328,6 @@ function openSuccessModal(info) {
   const totalTime = 3000;
   const startTime = Date.now();
 
-  // Hiệu ứng thanh tiến trình mượt mà (smooth progress bar)
   const updateProgress = () => {
     const elapsed = Date.now() - startTime;
     const progress = Math.max(0, 100 - (elapsed / totalTime) * 100);
@@ -279,7 +341,6 @@ function openSuccessModal(info) {
   };
   progressAnimation = requestAnimationFrame(updateProgress);
 
-  // Bộ đếm lùi số giây hiển thị
   countdownTimer = setInterval(() => {
     secondsRemaining -= 1;
     if (countdownNumberEl) {
@@ -293,7 +354,6 @@ function openSuccessModal(info) {
     }
   }, 1000);
 
-  // Xử lý khi người dùng bấm trực tiếp vào nút "Đăng nhập ngay"
   const btnGoLogin = document.getElementById('btn-go-to-login');
   if (btnGoLogin) {
     btnGoLogin.addEventListener('click', (e) => {
