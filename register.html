@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="PCBid - Đăng ký tài khoản thành viên mới. Tham gia sàn đấu giá linh kiện máy tính cũ uy tín, bảo đảm quyền lợi với ví ảo ký quỹ an toàn.">
+  <title>Đăng Ký Tài Khoản | PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
+
+  <!-- Nạp phông chữ Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Định kiểu hệ thống cốt lõi và Header / Footer dùng chung -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="components/header/header.css">
+  <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Định kiểu riêng cho các trang xác thực (Đăng ký / Đăng nhập) -->
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body id="register-page">
+
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
+  <div id="app-header"></div>
+
+  <!-- ==================== NỘI DUNG CHÍNH (MAIN AUTH) ==================== -->
+  <main class="pcb-auth">
+    <!-- Hiệu ứng quầng sáng mờ trang trí phía sau (Ambient glow) -->
+    <div class="pcb-auth__glow" aria-hidden="true"></div>
+
+    <div class="container pcb-auth__container">
+
+      <!-- ============================================================
+           THẺ KHUNG ĐĂNG KÝ TRUNG TÂM (CENTERED AUTHENTICATION CARD)
+           ============================================================ -->
+      <section class="pcb-auth-card" aria-labelledby="register-heading">
+        <!-- Vạch màu cam gradient trang trí đỉnh thẻ -->
+        <div class="pcb-auth-card__accent-bar" aria-hidden="true"></div>
+
+        <div class="pcb-auth-card__inner">
+
+          <!-- 1. Tiêu đề và Logo thẻ xác thực -->
+          <header class="pcb-auth-card__header">
+            <a href="index.html" class="pcb-auth-card__logo-link" aria-label="PCBid Trang chủ">
+              <img src="images/logo/pcbid-logo-ee2439.png" alt="Logo PCBid" class="pcb-auth-card__logo-img">
+            </a>
+            <h1 class="pcb-auth-card__title" id="register-heading">Tạo tài khoản mới</h1>
+            <p class="pcb-auth-card__subtitle">Tham gia đấu giá và mua bán linh kiện PC giá tốt</p>
+          </header>
+
+          <!-- 2. Biểu mẫu đăng ký thành viên -->
+          <form class="pcb-auth-form" id="register-form" novalidate>
+
+            <!-- TRƯỜNG 1: HỌ VÀ TÊN -->
+            <div class="pcb-auth-form__group">
+              <label for="reg-fullname" class="pcb-auth-form__label">
+                HỌ VÀ TÊN <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+              </label>
+              <div class="pcb-auth-form__input-wrap">
+                <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </span>
+                <input type="text" id="reg-fullname" name="fullname" class="pcb-auth-form__input" placeholder="Nguyễn Văn A" required autofocus autocomplete="name">
+              </div>
+              <span class="pcb-auth-form__error" id="err-fullname"></span>
+            </div>
+
+            <!-- TRƯỜNG 2: ĐỊA CHỈ EMAIL -->
+            <div class="pcb-auth-form__group">
+              <label for="reg-email" class="pcb-auth-form__label">
+                ĐỊA CHỈ EMAIL <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+              </label>
+              <div class="pcb-auth-form__input-wrap">
+                <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                </span>
+                <input type="email" id="reg-email" name="email" class="pcb-auth-form__input" placeholder="nhap.email@example.com" required autocomplete="email">
+              </div>
+              <span class="pcb-auth-form__error" id="err-email"></span>
+            </div>
+
+            <!-- TRƯỜNG 3: SỐ ĐIỆN THOẠI -->
+            <div class="pcb-auth-form__group">
+              <label for="reg-phone" class="pcb-auth-form__label">
+                SỐ ĐIỆN THOẠI <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+              </label>
+              <div class="pcb-auth-form__input-wrap">
+                <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                </span>
+                <input type="tel" id="reg-phone" name="phone" class="pcb-auth-form__input" placeholder="0912345678" required pattern="[0-9]{10,11}" autocomplete="tel">
+              </div>
+              <span class="pcb-auth-form__error" id="err-phone"></span>
+            </div>
+
+            <!-- TRƯỜNG 4: MẬT KHẨU -->
+            <div class="pcb-auth-form__group">
+              <label for="reg-password" class="pcb-auth-form__label">
+                MẬT KHẨU <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+              </label>
+              <div class="pcb-auth-form__input-wrap">
+                <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </span>
+                <input type="password" id="reg-password" name="password" class="pcb-auth-form__input pcb-auth-form__input--password" placeholder="Tối thiểu 8 ký tự" required minlength="8" autocomplete="new-password">
+                <button type="button" class="pcb-auth-form__toggle-pwd" data-target="reg-password" aria-label="Ẩn hoặc hiện mật khẩu" title="Hiển thị mật khẩu">
+                  <svg class="pcb-icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="pcb-icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+              <span class="pcb-auth-form__error" id="err-password"></span>
+            </div>
+
+            <!-- TRƯỜNG 5: XÁC NHẬN MẬT KHẨU -->
+            <div class="pcb-auth-form__group">
+              <label for="reg-confirm-password" class="pcb-auth-form__label">
+                XÁC NHẬN MẬT KHẨU <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+              </label>
+              <div class="pcb-auth-form__input-wrap">
+                <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <polyline points="9 12 11 14 15 10" />
+                  </svg>
+                </span>
+                <input type="password" id="reg-confirm-password" name="confirmPassword" class="pcb-auth-form__input pcb-auth-form__input--password" placeholder="Nhập lại mật khẩu vừa tạo" required minlength="8" autocomplete="new-password">
+                <button type="button" class="pcb-auth-form__toggle-pwd" data-target="reg-confirm-password" aria-label="Ẩn hoặc hiện mật khẩu xác nhận" title="Hiển thị mật khẩu">
+                  <svg class="pcb-icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="pcb-icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+              <span class="pcb-auth-form__error" id="err-confirm-password"></span>
+            </div>
+
+            <!-- CHECKBOX ĐỒNG Ý QUY CHẾ HOẠT ĐỘNG SÀN ĐẤU GIÁ PCBID -->
+            <div class="pcb-auth-form__terms">
+              <label class="pcb-auth-checkbox">
+                <input type="checkbox" id="reg-terms" name="agreeTerms" required class="pcb-auth-checkbox__input">
+                <span class="pcb-auth-checkbox__box" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="pcb-auth-checkbox__text">
+                  Tôi đồng ý với <a href="#" class="pcb-auth-form__link" target="_blank" rel="noopener">Quy chế hoạt động sàn đấu giá PCBid</a> và <a href="#" class="pcb-auth-form__link" target="_blank" rel="noopener">Chính sách bảo mật</a>.
+                </span>
+              </label>
+              <span class="pcb-auth-form__error" id="err-terms"></span>
+            </div>
+
+            <!-- NÚT BẤM CHÍNH & CÁC LIÊN KẾT ĐIỀU HƯỚNG -->
+            <div class="pcb-auth-form__actions">
+              <!-- Nút bấm chính: Đăng ký tài khoản -->
+              <button type="submit" class="pcb-auth-btn pcb-auth-btn--primary" id="btn-submit-register">
+                <span>Đăng ký tài khoản</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+
+              <!-- Dòng link chuyển đổi: Đã có tài khoản? Đăng nhập -->
+              <p class="pcb-auth-form__switch">
+                Đã có tài khoản? <a href="login.html" class="pcb-auth-form__link pcb-auth-form__link--bold">Đăng nhập</a>
+              </p>
+
+              <!-- Đường phân cách HOẶC -->
+              <div class="pcb-auth-divider" role="separator">
+                <span class="pcb-auth-divider__line"></span>
+                <span class="pcb-auth-divider__text">HOẶC</span>
+                <span class="pcb-auth-divider__line"></span>
+              </div>
+
+              <!-- Nút quay lại trang chủ -->
+              <a href="index.html" class="pcb-auth-btn pcb-auth-btn--outline">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+                <span>Quay lại trang chủ</span>
+              </a>
+            </div>
+
+          </form>
+
+          <!-- 3. Huy hiệu cam kết an toàn ở chân thẻ (Footer Badges) -->
+          <footer class="pcb-auth-card__footer">
+            <span class="pcb-auth-card__badge-item">
+              <span class="pcb-auth-card__badge-check">✓</span>
+              Miễn phí đăng ký
+            </span>
+            <span class="pcb-auth-card__badge-dot">•</span>
+            <span class="pcb-auth-card__badge-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Giao dịch ký quỹ an toàn
+            </span>
+          </footer>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
+  <div id="app-footer"></div>
+
+  <!-- ==================== POP-UP MODAL: ĐĂNG KÝ THÀNH CÔNG ==================== -->
+  <div class="pcb-modal" id="modal-register-success" aria-hidden="true" role="dialog" aria-labelledby="success-title">
+    <div class="pcb-modal__backdrop"></div>
+    <div class="pcb-modal__dialog pcb-modal__dialog--success">
+      <div class="pcb-modal__success-body">
+        <!-- Vòng tròn icon tích xanh hoàn thành -->
+        <div class="pcb-modal__success-icon-wrap">
+          <div class="pcb-modal__success-icon-bg">
+            <svg class="pcb-modal__check-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </div>
+
+        <h2 class="pcb-modal__title" id="success-title">Đăng ký tài khoản thành công!</h2>
+        <p class="pcb-modal__desc">
+          Chào mừng <strong id="success-user-name">Bạn</strong> đã trở thành thành viên của sàn đấu giá linh kiện máy tính cũ <strong>PCBid</strong>.
+        </p>
+
+        <!-- Khung tóm tắt thông tin tài khoản vừa tạo -->
+        <div class="pcb-modal__summary-box">
+          <div class="pcb-modal__summary-row">
+            <span class="pcb-modal__summary-label">Email đăng nhập:</span>
+            <span class="pcb-modal__summary-val" id="success-user-email">email@example.com</span>
+          </div>
+          <div class="pcb-modal__summary-row">
+            <span class="pcb-modal__summary-label">Số điện thoại:</span>
+            <span class="pcb-modal__summary-val" id="success-user-phone">0912345678</span>
+          </div>
+          <div class="pcb-modal__summary-row">
+            <span class="pcb-modal__summary-label">Ví ảo mặc định:</span>
+            <span class="pcb-modal__summary-val pcb-modal__summary-val--highlight">50.000.000 đ</span>
+          </div>
+        </div>
+
+        <!-- Thông báo đếm ngược tự động chuyển hướng -->
+        <div class="pcb-modal__countdown">
+          <p class="pcb-modal__countdown-text">
+            Tự động chuyển hướng sang trang Đăng nhập sau <span id="countdown-number">3</span> giây...
+          </p>
+          <div class="pcb-modal__progress-track" aria-hidden="true">
+            <div class="pcb-modal__progress-bar" id="countdown-progress"></div>
+          </div>
+        </div>
+
+        <!-- Nút chuyển ngay sang login.html -->
+        <a href="login.html" class="pcb-auth-btn pcb-auth-btn--primary pcb-auth-btn--full" id="btn-go-to-login">
+          <span>Đăng nhập ngay</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TẬP LỆNH SCRIPTS ==================== -->
+  <!-- Nạp Header/Footer động từ components/ -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Kích hoạt xử lý biểu mẫu đăng ký & pop-up thành công -->
+  <script type="module" src="js/auth.js"></script>
+</body>
+
+</html>
