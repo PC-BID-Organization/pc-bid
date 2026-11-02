@@ -779,7 +779,10 @@ function hienThiModalThanhCong(tenSanPham, soTien) {
 
   if (oTenSP) oTenSP.textContent = tenSanPham;
   if (oSoTien) oSoTien.textContent = dinhDangVnd(soTien);
-  if (modal) modal.hidden = false;
+  if (modal) {
+    modal.hidden = false;
+    modal.removeAttribute('hidden');
+  }
 
   // Ngăn cuộn trang khi modal mở
   document.body.style.overflow = 'hidden';
@@ -790,7 +793,10 @@ function hienThiModalThanhCong(tenSanPham, soTien) {
  */
 function dongModal() {
   const modal = document.getElementById('pcb-pd-modal');
-  if (modal) modal.hidden = true;
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('hidden', '');
+  }
   document.body.style.overflow = '';
 }
 
@@ -970,10 +976,14 @@ function ganSuKien() {
  * Điểm khởi động chính của module — chạy sau khi DOM đã sẵn sàng
  */
 async function khoiDong() {
-  // Đọc ID sản phẩm từ tham số URL (?id=2001)
+  // Gắn toàn bộ bộ lắng nghe sự kiện (event listener) và khởi tạo tab ngay từ đầu
+  ganSuKien();
+  khoiDongHeTongTab();
+
+  // Đọc ID sản phẩm từ tham số URL (?id=2001). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2001
   const thamSoUrl = new URLSearchParams(window.location.search);
   const idChuoi = thamSoUrl.get('id');
-  const idSanPham = parseInt(idChuoi, 10);
+  const idSanPham = (idChuoi && !isNaN(parseInt(idChuoi, 10))) ? parseInt(idChuoi, 10) : 2001;
 
   const vungLoading = document.getElementById('pcb-pd-loading');
   const vungLoi = document.getElementById('pcb-pd-error');
@@ -985,13 +995,6 @@ async function khoiDong() {
   if (vungLoi) vungLoi.hidden = true;
   if (vungLayout) vungLayout.hidden = true;
   if (vungBody) vungBody.hidden = true;
-
-  // Kiểm tra tham số ID hợp lệ
-  if (!idChuoi || isNaN(idSanPham)) {
-    if (vungLoading) vungLoading.hidden = true;
-    if (vungLoi) vungLoi.hidden = false;
-    return;
-  }
 
   // Tìm sản phẩm theo ID
   const sanPham = await timSanPhamTheoId(idSanPham);
@@ -1010,12 +1013,6 @@ async function khoiDong() {
 
   // Render toàn bộ thông tin sản phẩm
   hienThiSanPham(sanPham);
-
-  // Khởi tạo hệ thống tab nội dung dưới
-  khoiDongHeTongTab();
-
-  // Gắn tất cả event listener tương tác
-  ganSuKien();
 }
 
 // Chạy module sau khi DOM đã nạp xong

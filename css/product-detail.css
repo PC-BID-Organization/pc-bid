@@ -3,6 +3,19 @@
    Áp dụng design token từ style.css, tuân thủ chuẩn BEM
    ========================================================================== */
 
+/* Đảm bảo thuộc tính [hidden] luôn ẩn phần tử dù có display: flex hay grid */
+[hidden],
+.pcb-pd-modal[hidden],
+.pcb-pd-toast[hidden],
+.pcb-pd__loading[hidden],
+.pcb-pd__error[hidden],
+.pcb-pd__layout[hidden],
+.pcb-pd__body[hidden],
+.pcb-pd__panel[hidden],
+.pcb-pd__countdown-ended[hidden] {
+  display: none !important;
+}
+
 /* ==========================================================================
    1. KHUNG TRANG VÀ CONTAINER CHÍNH
    ========================================================================== */
