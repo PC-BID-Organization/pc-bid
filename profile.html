@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="PCBid - Quản lý phiên đấu giá của tôi, theo dõi các sản phẩm đang đặt giá, linh kiện tự đăng bán và danh sách quan tâm trên sàn đấu giá linh kiện PC cũ.">
+  <title>Quản Lý Đấu Giá & Hồ Sơ Cá Nhân | PCBid</title>
+
+  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Định kiểu cốt lõi hệ thống -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Định kiểu thành phần Header/Footer dùng chung -->
+  <link rel="stylesheet" href="components/header/header.css">
+  <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Định kiểu riêng cho trang Hồ sơ & Quản lý đấu giá -->
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body id="profile-page">
+
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
+  <div id="app-header"></div>
+
+  <!-- ==================== NỘI DUNG CHÍNH (MAIN DASHBOARD) ==================== -->
+  <main class="pcb-profile">
+    <div class="container">
+
+      <!-- 1. Thanh điều hướng Breadcrumb -->
+      <nav class="pcb-profile__breadcrumb" aria-label="Đường dẫn trang">
+        <a href="index.html" class="pcb-profile__breadcrumb-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          Trang chủ
+        </a>
+        <span class="pcb-profile__breadcrumb-separator">/</span>
+        <a href="profile.html" class="pcb-profile__breadcrumb-link">Tài khoản cá nhân</a>
+        <span class="pcb-profile__breadcrumb-separator">/</span>
+        <span class="pcb-profile__breadcrumb-current" id="breadcrumb-current">Quản lý đấu giá</span>
+      </nav>
+
+      <!-- 2. Bố cục bảng điều khiển 2 cột (Dashboard 2-Column Grid) -->
+      <div class="pcb-profile__layout">
+
+        <!-- ==================== CỘT TRÁI: SIDEBAR THÔNG TIN & MENU ==================== -->
+        <aside class="pcb-profile__sidebar" aria-label="Thanh bên tài khoản">
+
+          <!-- Thẻ tóm tắt thông tin người dùng -->
+          <div class="pcb-user-card">
+            <div class="pcb-user-card__avatar-wrap">
+              <div class="pcb-user-card__avatar">
+                <img src="images/icons/icon-user.svg" alt="Ảnh đại diện người dùng" id="sidebar-user-avatar"
+                  class="pcb-user-card__avatar-img">
+              </div>
+              <span class="pcb-user-card__verified-badge" title="Tài khoản đã xác thực">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </span>
+            </div>
+
+            <h2 class="pcb-user-card__name" id="sidebar-user-name">Nguyễn Văn A</h2>
+            <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #UIT-IE104-9842</p>
+
+            <div class="pcb-user-card__tag">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Tài khoản đã xác thực
+            </div>
+
+            <!-- Khung ví ảo mô phỏng (Virtual Wallet Box) -->
+            <div class="pcb-wallet">
+              <div class="pcb-wallet__header">
+                <div class="pcb-wallet__title-wrap">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                  </svg>
+                  <span>Số dư ví ảo:</span>
+                </div>
+                <span class="pcb-wallet__badge">Khả dụng</span>
+              </div>
+
+              <div class="pcb-wallet__amount" id="wallet-balance-display">50.000.000 đ</div>
+
+              <div class="pcb-wallet__divider"></div>
+
+              <div class="pcb-wallet__hold-row">
+                <span class="pcb-wallet__hold-lbl">Đang giữ cọc đấu:</span>
+                <span class="pcb-wallet__hold-val" id="wallet-hold-display">3.500.000 đ</span>
+              </div>
+
+              <button type="button" class="pcb-wallet__deposit-btn" id="btn-open-deposit-modal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Nạp thêm tiền cọc
+              </button>
+            </div>
+          </div>
+
+          <!-- Menu chuyển đổi danh mục quản lý -->
+          <nav class="pcb-profile-nav" aria-label="Menu chức năng cá nhân">
+            <ul class="pcb-profile-nav__list">
+              <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn pcb-profile-nav__btn--active"
+                  data-section="section-auctions">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2l6 6m-2 2l-6-6M3 21l6-6m2 2l-6 6" />
+                      <path d="M10 6l8 8-4 4-8-8 4-4z" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Quản lý đấu giá</span>
+                  <span class="pcb-profile-nav__badge" id="nav-auctions-count">4 phiên</span>
+                </button>
+              </li>
+
+              <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn" data-section="section-account">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Thông tin tài khoản</span>
+                </button>
+              </li>
+
+              <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn" data-section="section-security">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Bảo mật & Đổi mật khẩu</span>
+                </button>
+              </li>
+
+              <li class="pcb-profile-nav__divider"></li>
+
+              <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn pcb-profile-nav__btn--logout" id="btn-logout">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Đăng xuất</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Thẻ ghi chú uy tín & an toàn sàn -->
+          <div class="pcb-trust-note">
+            <div class="pcb-trust-note__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </div>
+            <div class="pcb-trust-note__content">
+              <h4 class="pcb-trust-note__title">Bảo vệ tài khoản 2 lớp</h4>
+              <p class="pcb-trust-note__desc">Mọi phiên đặt giá trên PCBid đều yêu cầu xác thực ví và mã OTP an toàn.</p>
+            </div>
+          </div>
+
+        </aside>
+
+        <!-- ==================== CỘT PHẢI: KHU VỰC NỘI DUNG CHÍNH ==================== -->
+        <section class="pcb-profile__main-panel" aria-label="Nội dung quản lý">
+
+          <!-- #################### SECTION 1: QUẢN LÝ ĐẤU GIÁ CỦA TÔI #################### -->
+          <div class="pcb-section" id="section-auctions">
+
+            <!-- Tiêu đề Section & Nút tạo nhanh -->
+            <div class="pcb-section__header">
+              <div class="pcb-section__title-group">
+                <div class="pcb-section__indicator"></div>
+                <div>
+                  <h1 class="pcb-section__title">Quản lý phiên đấu giá của tôi</h1>
+                  <p class="pcb-section__subtitle">
+                    Theo dõi sát sao các phiên bạn đang tham gia trả giá, linh kiện tự đăng bán và danh sách sản phẩm quan tâm.
+                  </p>
+                </div>
+              </div>
+
+              <a href="sell.html" class="pcb-btn-primary pcb-section__action-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Đăng phiên bán mới</span>
+              </a>
+            </div>
+
+            <!-- Thanh điều hướng Tab chính cho Đấu giá (Sub-tabs) -->
+            <div class="pcb-tabs" role="tablist" aria-label="Danh mục phiên đấu giá">
+              <button type="button" class="pcb-tab pcb-tab--active" id="tab-btn-participating" role="tab"
+                aria-selected="true" aria-controls="tab-content-participating" data-tab="participating">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>Phiên đang tham gia</span>
+                <span class="pcb-tab__counter" id="count-participating">0</span>
+              </button>
+
+              <button type="button" class="pcb-tab" id="tab-btn-selling" role="tab" aria-selected="false"
+                aria-controls="tab-content-selling" data-tab="selling">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+                <span>Linh kiện tôi đã đăng bán</span>
+                <span class="pcb-tab__counter" id="count-selling">0</span>
+              </button>
+
+              <button type="button" class="pcb-tab" id="tab-btn-watchlist" role="tab" aria-selected="false"
+                aria-controls="tab-content-watchlist" data-tab="watchlist">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>Danh sách theo dõi</span>
+                <span class="pcb-tab__counter" id="count-watchlist">0</span>
+              </button>
+            </div>
+
+            <!-- Thanh công cụ tìm kiếm nhanh & Bộ lọc trạng thái con -->
+            <div class="pcb-filter-bar">
+              <div class="pcb-filter-bar__search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" id="auction-search-input" class="pcb-filter-bar__input"
+                  placeholder="Lọc nhanh tên linh kiện (RTX, i5, B760...)" aria-label="Tìm kiếm trong danh sách">
+              </div>
+
+              <div class="pcb-filter-bar__chips" id="filter-chips-container">
+                <!-- Sẽ render động các chip lọc tùy theo Tab đang chọn -->
+              </div>
+            </div>
+
+            <!-- ================= TAB 1: PHIÊN ĐANG THAM GIA ================= -->
+            <div class="pcb-tab-pane pcb-tab-pane--active" id="tab-content-participating" role="tabpanel"
+              aria-labelledby="tab-btn-participating">
+              <div class="pcb-auctions-grid" id="grid-participating">
+                <!-- Render động các thẻ đấu giá kèm Badge Dẫn đầu (Xanh) hoặc Bị vượt giá (Đỏ) -->
+              </div>
+              <div class="pcb-empty-state" id="empty-participating" style="display: none;">
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Chưa tham gia phiên đấu giá nào</h3>
+                <p class="pcb-empty-state__desc">Khám phá ngay các phiên đấu giá hot đang diễn ra trên sàn để săn linh kiện máy tính giá tốt nhất!</p>
+                <a href="products.html" class="pcb-btn-primary">Xem tất cả phiên đấu giá</a>
+              </div>
+            </div>
+
+            <!-- ================= TAB 2: LINH KIỆN ĐÃ ĐĂNG BÁN ================= -->
+            <div class="pcb-tab-pane" id="tab-content-selling" role="tabpanel" aria-labelledby="tab-btn-selling">
+              <div class="pcb-auctions-grid" id="grid-selling">
+                <!-- Render động các linh kiện người bán đăng với Badge Đang diễn ra, Đã bán, Đã kết thúc -->
+              </div>
+              <div class="pcb-empty-state" id="empty-selling" style="display: none;">
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Bạn chưa đăng bán linh kiện nào</h3>
+                <p class="pcb-empty-state__desc">Bạn có linh kiện máy tính cũ không dùng đến? Đăng lên PCBid để tiếp cận hàng ngàn người mua uy tín!</p>
+                <a href="sell.html" class="pcb-btn-primary">Tạo phiên đấu giá ngay</a>
+              </div>
+            </div>
+
+            <!-- ================= TAB 3: DANH SÁCH THEO DÕI ================= -->
+            <div class="pcb-tab-pane" id="tab-content-watchlist" role="tabpanel" aria-labelledby="tab-btn-watchlist">
+              <div class="pcb-auctions-grid" id="grid-watchlist">
+                <!-- Render danh sách sản phẩm user đã bấm quan tâm -->
+              </div>
+              <div class="pcb-empty-state" id="empty-watchlist" style="display: none;">
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Danh sách theo dõi trống</h3>
+                <p class="pcb-empty-state__desc">Bấm vào biểu tượng bookmark trên các thẻ linh kiện ngoài trang chủ để tiện theo dõi diễn biến giá.</p>
+                <a href="products.html" class="pcb-btn-primary">Dạo sàn săn linh kiện</a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- #################### SECTION 2: THÔNG TIN TÀI KHOẢN (CHUẨN FIGMA) #################### -->
+          <div class="pcb-section" id="section-account" style="display: none;">
+            <div class="pcb-section__header">
+              <div class="pcb-section__title-group">
+                <div class="pcb-section__indicator"></div>
+                <div>
+                  <h2 class="pcb-section__title">Thông tin tài khoản</h2>
+                  <p class="pcb-section__subtitle">
+                    Quản lý thông tin định danh, số điện thoại và địa chỉ giao nhận linh kiện máy tính khi thắng đấu giá.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pcb-sync-badge">
+                <span class="pcb-sync-badge__dot"></span>
+                <span>Đã đồng bộ dữ liệu</span>
+              </div>
+            </div>
+
+            <!-- Biểu mẫu cập nhật thông tin cá nhân -->
+            <form id="form-account-info" class="pcb-form">
+              <div class="pcb-form__grid">
+                <!-- Trường Họ và tên -->
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-fullname" class="pcb-form__label">
+                    HỌ VÀ TÊN <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap">
+                    <svg class="pcb-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <input type="text" id="input-fullname" name="fullname" class="pcb-input" value="Nguyễn Văn A"
+                      required placeholder="Nhập họ và tên đầy đủ">
+                  </div>
+                  <span class="pcb-form__hint">Tên này sẽ hiển thị ẩn danh một phần trên bảng giá phiên đấu (VD: N*** A).</span>
+                </div>
+
+                <!-- Trường Email -->
+                <div class="pcb-form__group">
+                  <label for="input-email" class="pcb-form__label">
+                    ĐỊA CHỈ EMAIL <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap">
+                    <svg class="pcb-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    <input type="email" id="input-email" name="email" class="pcb-input" value="nguyenvana@example.com"
+                      required placeholder="email@domain.com">
+                    <span class="pcb-verified-check" title="Email đã xác thực">✓</span>
+                  </div>
+                  <span class="pcb-form__hint">Nhận thông báo khi bị vượt giá hoặc thắng phiên đấu.</span>
+                </div>
+
+                <!-- Trường Số điện thoại -->
+                <div class="pcb-form__group">
+                  <label for="input-phone" class="pcb-form__label">
+                    SỐ ĐIỆN THOẠI <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap">
+                    <svg class="pcb-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    <input type="tel" id="input-phone" name="phone" class="pcb-input" value="0912345678" required
+                      placeholder="09xxxxxxxx">
+                    <span class="pcb-verified-check" title="Số điện thoại đã xác thực">✓</span>
+                  </div>
+                  <span class="pcb-form__hint">Dùng để shipper liên hệ giao hàng linh kiện công nghệ.</span>
+                </div>
+
+                <!-- Trường Địa chỉ nhận hàng -->
+                <div class="pcb-form__group pcb-form__group--full">
+                  <div class="pcb-form__label-row">
+                    <label for="input-address" class="pcb-form__label">
+                      ĐỊA CHỈ NHẬN HÀNG <span class="pcb-form__required">*</span>
+                    </label>
+                    <span class="pcb-form__default-badge">Đặt làm địa chỉ mặc định</span>
+                  </div>
+                  <div class="pcb-input-icon-wrap">
+                    <svg class="pcb-input-icon pcb-input-icon--textarea" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <textarea id="input-address" name="address" class="pcb-textarea" rows="3" required
+                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố">Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</textarea>
+                  </div>
+                  <div class="pcb-form__notice">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>Lưu ý: Địa chỉ cần chính xác để đơn vị vận chuyển giao an toàn các linh kiện dễ vỡ (VGA, CPU, Màn hình).</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cài đặt thông báo đấu giá -->
+              <div class="pcb-form__notification-settings">
+                <span class="pcb-form__section-caption">CÀI ĐẶT THÔNG BÁO ĐẤU GIÁ</span>
+                <div class="pcb-form__checkbox-row">
+                  <label class="pcb-checkbox-label">
+                    <input type="checkbox" id="pref-sms" name="pref_sms" checked class="pcb-checkbox">
+                    <span class="pcb-checkbox-custom"></span>
+                    <span class="pcb-checkbox-text">Báo SMS khi có người trả giá cao hơn</span>
+                  </label>
+                  <label class="pcb-checkbox-label">
+                    <input type="checkbox" id="pref-email" name="pref_email" checked class="pcb-checkbox">
+                    <span class="pcb-checkbox-custom"></span>
+                    <span class="pcb-checkbox-text">Báo Email khi phiên đấu sắp kết thúc (15 phút)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Thanh nút thao tác cuối form -->
+              <div class="pcb-form__actions">
+                <div class="pcb-form__last-update">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span>Lần cập nhật gần nhất:</span>
+                  <strong id="last-update-time">Hôm nay, 14:32</strong>
+                </div>
+
+                <div class="pcb-form__btn-group">
+                  <button type="button" class="pcb-btn-secondary" id="btn-switch-to-security">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    Đổi mật khẩu
+                  </button>
+
+                  <button type="submit" class="pcb-btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Lưu thay đổi thông tin
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- #################### SECTION 3: BẢO MẬT & ĐỔI MẬT KHẨU #################### -->
+          <div class="pcb-section" id="section-security" style="display: none;">
+            <div class="pcb-section__header">
+              <div class="pcb-section__title-group">
+                <div class="pcb-section__indicator"></div>
+                <div>
+                  <h2 class="pcb-section__title">Bảo mật & Đổi mật khẩu</h2>
+                  <p class="pcb-section__subtitle">
+                    Thiết lập mật khẩu mạnh và quản lý các thiết bị đăng nhập vào sàn PCBid.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <form id="form-change-password" class="pcb-form">
+              <div class="pcb-form__grid" style="max-width: 580px;">
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-current-pass" class="pcb-form__label">MẬT KHẨU HIỆN TẠI <span class="pcb-form__required">*</span></label>
+                  <input type="password" id="input-current-pass" class="pcb-input" required placeholder="Nhập mật khẩu hiện tại">
+                </div>
+
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-new-pass" class="pcb-form__label">MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
+                  <input type="password" id="input-new-pass" class="pcb-input" required placeholder="Tối thiểu 8 ký tự, gồm chữ và số">
+                </div>
+
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-confirm-pass" class="pcb-form__label">XÁC NHẬN MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
+                  <input type="password" id="input-confirm-pass" class="pcb-input" required placeholder="Nhập lại mật khẩu mới">
+                </div>
+              </div>
+
+              <div class="pcb-form__actions" style="margin-top: 24px;">
+                <div></div>
+                <button type="submit" class="pcb-btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Cập nhật mật khẩu mới
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
+  <div id="app-footer"></div>
+
+  <!-- ==================== MODAL 1: NẠP TIỀN CỌC VÍ ẢO MÔ PHỎNG ==================== -->
+  <div class="pcb-modal" id="modal-deposit" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="pcb-modal__overlay" data-action="close-modal"></div>
+    <div class="pcb-modal__card">
+      <div class="pcb-modal__header">
+        <div class="pcb-modal__title-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+          <h3 class="pcb-modal__title">Nạp tiền cọc ví ảo mô phỏng</h3>
+        </div>
+        <button type="button" class="pcb-modal__close" data-action="close-modal" aria-label="Đóng cửa sổ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="pcb-modal__body">
+        <p class="pcb-modal__desc">
+          Đây là ví ảo phục vụ chạy demo bài tập lớn môn <strong>IE104</strong>. Tiền nạp sẽ được cộng trực tiếp vào <code>localStorage</code> để bạn thoải mái kiểm thử tính năng đặt giá và giữ cọc đấu giá.
+        </p>
+
+        <label class="pcb-form__label" for="deposit-amount-input">CHỌN SỐ TIỀN CẦN NẠP:</label>
+        <div class="pcb-preset-grid">
+          <button type="button" class="pcb-preset-btn" data-amount="5000000">+5.000.000 đ</button>
+          <button type="button" class="pcb-preset-btn pcb-preset-btn--selected" data-amount="10000000">+10.000.000 đ</button>
+          <button type="button" class="pcb-preset-btn" data-amount="20000000">+20.000.000 đ</button>
+          <button type="button" class="pcb-preset-btn" data-amount="50000000">+50.000.000 đ</button>
+        </div>
+
+        <div class="pcb-input-icon-wrap" style="margin-top: 14px;">
+          <input type="number" id="deposit-amount-input" class="pcb-input" value="10000000" min="500000" step="500000"
+            placeholder="Hoặc tự nhập số tiền...">
+          <span style="position: absolute; right: 14px; top: 12px; font-weight: 700; color: #565E74;">VND</span>
+        </div>
+      </div>
+
+      <div class="pcb-modal__footer">
+        <button type="button" class="pcb-btn-secondary" data-action="close-modal">Hủy bỏ</button>
+        <button type="button" class="pcb-btn-primary" id="btn-confirm-deposit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Xác nhận nạp tiền
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: TRẢ GIÁ NHANH (QUICK BID MODAL) ==================== -->
+  <div class="pcb-modal" id="modal-quick-bid" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="pcb-modal__overlay" data-action="close-modal"></div>
+    <div class="pcb-modal__card">
+      <div class="pcb-modal__header">
+        <div class="pcb-modal__title-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+            <path d="M14 2l6 6m-2 2l-6-6M3 21l6-6m2 2l-6 6" />
+            <path d="M10 6l8 8-4 4-8-8 4-4z" />
+          </svg>
+          <h3 class="pcb-modal__title">Trả giá tiếp để giành lại thế dẫn đầu</h3>
+        </div>
+        <button type="button" class="pcb-modal__close" data-action="close-modal" aria-label="Đóng cửa sổ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="pcb-modal__body">
+        <div class="pcb-quick-bid-item" id="quick-bid-product-info">
+          <!-- Render tóm tắt linh kiện đang bị vượt giá -->
+        </div>
+
+        <div class="pcb-quick-bid__price-summary">
+          <div class="pcb-quick-bid__row">
+            <span>Giá cao nhất hiện tại:</span>
+            <strong id="qb-current-price" class="pcb-quick-bid__current-val">0 đ</strong>
+          </div>
+          <div class="pcb-quick-bid__row">
+            <span>Bước giá tối thiểu (+1 bước):</span>
+            <span id="qb-step-val" class="pcb-quick-bid__step-val">+50.000 đ</span>
+          </div>
+          <div class="pcb-quick-bid__divider"></div>
+          <div class="pcb-quick-bid__row pcb-quick-bid__row--highlight">
+            <span>Mức giá bạn sẽ đặt mới:</span>
+            <strong id="qb-new-price" class="pcb-quick-bid__new-val">0 đ</strong>
+          </div>
+        </div>
+
+        <div class="pcb-quick-bid__multipliers">
+          <button type="button" class="pcb-mult-btn pcb-mult-btn--active" data-mult="1">+1 Bước giá</button>
+          <button type="button" class="pcb-mult-btn" data-mult="2">+2 Bước giá</button>
+          <button type="button" class="pcb-mult-btn" data-mult="5">+5 Bước giá</button>
+        </div>
+      </div>
+
+      <div class="pcb-modal__footer">
+        <a href="product-detail.html" class="pcb-btn-secondary" id="qb-goto-detail">
+          Trang chi tiết đầy đủ
+        </a>
+        <button type="button" class="pcb-btn-primary" id="btn-submit-quick-bid">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Xác nhận đặt giá
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST THÔNG BÁO TỔNG QUAN ==================== -->
+  <div class="pcb-toast" id="pcb-toast" aria-live="polite">
+    <div class="pcb-toast__icon" id="pcb-toast-icon">✓</div>
+    <div class="pcb-toast__message" id="pcb-toast-message">Cập nhật thành công!</div>
+  </div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <!-- Nạp Header/Footer động từ components/ -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Logic tương tác bảng điều khiển tài khoản & quản lý đấu giá -->
+  <script type="module" src="js/profile.js"></script>
+</body>
+
+</html>
