@@ -1,0 +1,1282 @@
+/* ==========================================================================
+   PRODUCT-DETAIL.CSS - Định kiểu trang Chi Tiết Phiên Đấu Giá (BEM)
+   Áp dụng design token từ style.css, tuân thủ chuẩn BEM
+   ========================================================================== */
+
+/* ==========================================================================
+   1. KHUNG TRANG VÀ CONTAINER CHÍNH
+   ========================================================================== */
+
+/* Khung tổng thể trang chi tiết sản phẩm */
+.pcb-product-detail {
+  background-color: var(--color-bg-body);
+  min-height: calc(100vh - 110px - 250px);
+  padding: 24px 0 64px;
+}
+
+/* ==========================================================================
+   2. ĐƯỜNG DẪN ĐIỀU HƯỚNG (BREADCRUMB)
+   ========================================================================== */
+
+/* Thanh điều hướng breadcrumb */
+.pcb-pd__breadcrumb {
+  margin-bottom: 24px;
+}
+
+/* Danh sách các mục breadcrumb theo chiều ngang */
+.pcb-pd__breadcrumb-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Mỗi mục trong breadcrumb */
+.pcb-pd__breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+/* Dấu phân cách breadcrumb */
+.pcb-pd__breadcrumb-item--sep {
+  color: var(--color-border-strong);
+  padding: 0 2px;
+}
+
+/* Mục hiện tại (trang đang xem) */
+.pcb-pd__breadcrumb-item--current {
+  color: var(--color-text-main);
+  font-weight: 600;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Liên kết trong breadcrumb */
+.pcb-pd__breadcrumb-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.pcb-pd__breadcrumb-link:hover {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   3. TRẠNG THÁI LOADING & LỖI
+   ========================================================================== */
+
+/* Vùng hiển thị trạng thái đang tải dữ liệu */
+.pcb-pd__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+/* Vòng quay loading (spinner) CSS thuần */
+.pcb-pd__loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: pcbPdSpin 0.8s linear infinite;
+}
+
+@keyframes pcbPdSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Chữ trạng thái loading */
+.pcb-pd__loading-text {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* Vùng hiển thị lỗi sản phẩm không tồn tại */
+.pcb-pd__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+/* Biểu tượng lỗi lớn */
+.pcb-pd__error-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+/* Tiêu đề thông báo lỗi */
+.pcb-pd__error-title {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  color: var(--color-text-main);
+  font-weight: 700;
+}
+
+/* Mô tả lỗi */
+.pcb-pd__error-desc {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* Nút quay lại danh sách từ trang lỗi */
+.pcb-pd__error-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin-top: 8px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.pcb-pd__error-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   4. BỐ CỤC 2 CỘT CHÍNH (LAYOUT GRID)
+   ========================================================================== */
+
+/* Grid 2 cột: cột gallery trái + cột thông tin đấu giá phải */
+.pcb-pd__layout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 40px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+
+/* ==========================================================================
+   5. GALLERY ẢNH SẢN PHẨM (CỘT TRÁI)
+   ========================================================================== */
+
+/* Cột gallery bám dính khi cuộn */
+.pcb-pd__gallery {
+  position: sticky;
+  top: 120px;
+}
+
+/* Khung ảnh chính lớn */
+.pcb-pd__gallery-main {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: var(--color-bg-white);
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(11, 28, 48, 0.06);
+}
+
+/* Ảnh sản phẩm chính - co dãn khung */
+.pcb-pd__gallery-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 16px;
+  transition: transform 0.35s ease;
+}
+
+/* Hiệu ứng phóng to khi di chuột vào ảnh chính */
+.pcb-pd__gallery-main:hover .pcb-pd__gallery-main-img {
+  transform: scale(1.05);
+}
+
+/* Dải thumbnail ảnh nhỏ bên dưới */
+.pcb-pd__gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-medium) transparent;
+}
+
+/* Mỗi ảnh thumbnail */
+.pcb-pd__gallery-thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  border: 2px solid var(--color-border-light);
+  overflow: hidden;
+  cursor: pointer;
+  background-color: var(--color-bg-white);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Thumbnail đang được chọn */
+.pcb-pd__gallery-thumb--active {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+/* Ảnh bên trong thumbnail */
+.pcb-pd__gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+/* ==========================================================================
+   6. THÔNG TIN SẢN PHẨM & HỘP ĐẤU GIÁ (CỘT PHẢI)
+   ========================================================================== */
+
+/* Cột thông tin và hộp đấu giá */
+.pcb-pd__info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Nhóm nhãn danh mục và tình trạng */
+.pcb-pd__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Nhãn badge dùng chung */
+.pcb-pd__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Nhãn danh mục (màu xanh dương nhạt) */
+.pcb-pd__badge--category {
+  background-color: var(--color-bg-tag);
+  color: #2A5BD7;
+}
+
+/* Nhãn tình trạng sản phẩm (màu cam nhạt) */
+.pcb-pd__badge--condition {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+/* Tiêu đề tên sản phẩm (h1) */
+.pcb-pd__title {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.35;
+}
+
+/* Mô tả tình trạng chi tiết từ người bán */
+.pcb-pd__condition-text {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  border-left: 3px solid var(--color-primary-light);
+  padding-left: 12px;
+}
+
+/* ==========================================================================
+   7. ĐỒNG HỒ ĐẾM NGƯỢC (COUNTDOWN)
+   ========================================================================== */
+
+/* Khung bao đồng hồ đếm ngược */
+.pcb-pd__countdown-wrap {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+/* Nhãn tiêu đề đồng hồ */
+.pcb-pd__countdown-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+/* Biểu tượng đồng hồ nhỏ */
+.pcb-pd__countdown-icon {
+  font-size: 0.875rem;
+}
+
+/* Hàng ngang chứa các đơn vị thời gian */
+.pcb-pd__countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mỗi ô đơn vị thời gian (ngày/giờ/phút/giây) */
+.pcb-pd__countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-bg-white);
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-light);
+  min-width: 56px;
+}
+
+/* Số đếm ngược (font số nổi bật) */
+.pcb-pd__countdown-num {
+  font-family: var(--font-family-heading);
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+}
+
+/* Nhãn đơn vị nhỏ bên dưới số */
+.pcb-pd__countdown-unit-label {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Dấu phân cách ":" giữa các đơn vị */
+.pcb-pd__countdown-colon {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* Trạng thái khẩn cấp: đỏ khi còn dưới 1 giờ */
+.pcb-pd__countdown--urgent .pcb-pd__countdown-num {
+  color: #DC2626;
+}
+
+.pcb-pd__countdown--urgent .pcb-pd__countdown-unit {
+  border-color: rgba(220, 38, 38, 0.3);
+  background-color: rgba(220, 38, 38, 0.04);
+}
+
+/* Thông báo phiên đấu giá đã kết thúc */
+.pcb-pd__countdown-ended {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #DC2626;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   8. SO SÁNH GIÁ (PRICE COMPARISON)
+   ========================================================================== */
+
+/* Hàng ngang so sánh 2 cột giá */
+.pcb-pd__price-compare {
+  display: flex;
+  gap: 0;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Mỗi khối giá */
+.pcb-pd__price-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+}
+
+/* Đường kẻ dọc phân cách 2 khối giá */
+.pcb-pd__price-divider {
+  width: 1px;
+  background-color: var(--color-border-light);
+  margin: 12px 0;
+}
+
+/* Nhãn tiêu đề mỗi khối giá */
+.pcb-pd__price-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Giá trị số tiền */
+.pcb-pd__price-value {
+  font-family: var(--font-family-heading);
+  font-size: 1.1875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Giá thị trường: xám có gạch ngang */
+.pcb-pd__price-value--market {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  font-size: 1rem;
+}
+
+/* Giá đấu hiện tại: màu cam nổi bật */
+.pcb-pd__price-value--current {
+  color: var(--color-primary);
+  font-size: 1.375rem;
+}
+
+/* Phần trăm giảm giá so với thị trường */
+.pcb-pd__price-discount {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #16A34A;
+  background-color: #DCFCE7;
+  border-radius: 4px;
+  padding: 2px 6px;
+  align-self: flex-start;
+}
+
+/* Thông tin số lượt trả giá và bước giá */
+.pcb-pd__bid-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Số lượt trả giá nổi bật */
+.pcb-pd__bid-count-num {
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-size: 1rem;
+}
+
+/* ==========================================================================
+   9. HỘP ĐẶT GIÁ (BIDDING BOX)
+   ========================================================================== */
+
+/* Khung hộp đặt giá chính */
+.pcb-pd__bidbox {
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(11, 28, 48, 0.07);
+}
+
+/* Phần đầu hộp đặt giá */
+.pcb-pd__bidbox-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Tiêu đề hộp đặt giá */
+.pcb-pd__bidbox-title {
+  font-family: var(--font-family-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+/* Vùng nhập số tiền đặt giá */
+.pcb-pd__input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Nhãn ô nhập giá */
+.pcb-pd__input-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+/* Hàng chứa ô nhập + ký hiệu đơn vị */
+.pcb-pd__input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Ô nhập số tiền đặt giá */
+.pcb-pd__input {
+  width: 100%;
+  padding: 12px 48px 12px 14px;
+  border: 2px solid var(--color-border-medium);
+  border-radius: 10px;
+  font-family: var(--font-family-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  background-color: var(--color-bg-body);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -moz-appearance: textfield;
+}
+
+/* Ẩn mũi tên tăng/giảm mặc định của input number */
+.pcb-pd__input::-webkit-outer-spin-button,
+.pcb-pd__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* Trạng thái focus cho ô nhập giá */
+.pcb-pd__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+  background-color: var(--color-bg-white);
+}
+
+/* Trạng thái lỗi cho ô nhập giá */
+.pcb-pd__input--error {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Ký hiệu đồng tiền đặt ở góc phải ô nhập */
+.pcb-pd__input-unit {
+  position: absolute;
+  right: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Gợi ý nhỏ bên dưới ô nhập */
+.pcb-pd__input-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* Thông báo lỗi xác thực đặt giá */
+.pcb-pd__input-error {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #DC2626;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Hàng chứa các nút nhảy giá nhanh */
+.pcb-pd__quick-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Mỗi nút nhảy giá nhanh */
+.pcb-pd__quick-btn {
+  flex: 1;
+  min-width: calc(50% - 4px);
+  padding: 9px 10px;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 8px;
+  font-family: var(--font-family-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+  text-align: center;
+}
+
+/* Hiệu ứng khi di chuột vào nút nhảy giá */
+.pcb-pd__quick-btn:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.pcb-pd__quick-btn:active {
+  transform: translateY(0);
+}
+
+/* Nút xác nhận đặt giá (nút lớn chính) */
+.pcb-pd__submit-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-family-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+/* Hiệu ứng hover nút đặt giá chính */
+.pcb-pd__submit-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
+}
+
+.pcb-pd__submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+}
+
+/* Trạng thái vô hiệu (phiên kết thúc) */
+.pcb-pd__submit-btn:disabled {
+  background-color: var(--color-text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Nút thêm vào danh sách theo dõi (Watchlist) */
+.pcb-pd__watchlist-btn {
+  width: 100%;
+  padding: 11px 24px;
+  background-color: transparent;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Trạng thái đã thêm vào watchlist */
+.pcb-pd__watchlist-btn--active {
+  border-color: #E11D48;
+  color: #E11D48;
+  background-color: #FFF1F2;
+}
+
+.pcb-pd__watchlist-btn:hover:not(.pcb-pd__watchlist-btn--active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+/* ==========================================================================
+   10. THẺ THÔNG TIN NGƯỜI BÁN
+   ========================================================================== */
+
+/* Thẻ thông tin người bán */
+.pcb-pd__seller-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+}
+
+/* Vòng tròn avatar chữ cái người bán */
+.pcb-pd__seller-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ký tự chữ cái đại diện trong avatar */
+.pcb-pd__seller-avatar-char {
+  font-family: var(--font-family-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* Vùng thông tin tên người bán */
+.pcb-pd__seller-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Nhãn "Người bán" */
+.pcb-pd__seller-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* Tên tài khoản người bán */
+.pcb-pd__seller-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+/* Nhãn "Đã xác thực" màu xanh lá */
+.pcb-pd__seller-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16A34A;
+  background-color: #DCFCE7;
+  padding: 4px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   11. PHẦN THÂN DƯỚI: THÔNG SỐ / MÔ TẢ / LỊCH SỬ (TAB PANEL)
+   ========================================================================== */
+
+/* Vùng chứa nội dung phần dưới trang */
+.pcb-pd__body {
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(11, 28, 48, 0.05);
+}
+
+/* Thanh điều hướng tab ngang */
+.pcb-pd__tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-border-light);
+  background-color: var(--color-bg-body);
+  padding: 0 24px;
+  gap: 0;
+}
+
+/* Mỗi nút tab */
+.pcb-pd__tab {
+  position: relative;
+  padding: 16px 20px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Tab đang được chọn */
+.pcb-pd__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.pcb-pd__tab:hover:not(.pcb-pd__tab--active) {
+  color: var(--color-text-main);
+}
+
+/* Huy hiệu số lượt trên tab Lịch sử */
+.pcb-pd__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Nội dung mỗi panel tab */
+.pcb-pd__panel {
+  padding: 28px 32px;
+}
+
+/* ==========================================================================
+   12. BẢNG THÔNG SỐ KỸ THUẬT
+   ========================================================================== */
+
+/* Bảng thông số toàn chiều rộng */
+.pcb-pd__specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Hàng thông số (xen kẽ nền) */
+.pcb-pd__specs-table tr:nth-child(odd) {
+  background-color: var(--color-bg-body);
+}
+
+/* Mỗi ô trong bảng thông số */
+.pcb-pd__specs-table td {
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+/* Cột nhãn tên thông số (cột trái) */
+.pcb-pd__specs-table td:first-child {
+  font-weight: 600;
+  color: var(--color-text-main);
+  width: 36%;
+  white-space: nowrap;
+}
+
+/* Cột giá trị thông số (cột phải) */
+.pcb-pd__specs-table td:last-child {
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   13. MÔ TẢ NGƯỜI BÁN
+   ========================================================================== */
+
+/* Vùng hiển thị mô tả từ người bán */
+.pcb-pd__desc-content {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   14. BẢNG LỊCH SỬ ĐẶT GIÁ
+   ========================================================================== */
+
+/* Bảng lịch sử toàn chiều rộng */
+.pcb-pd__history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Tiêu đề cột bảng lịch sử */
+.pcb-pd__history-th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--color-border-light);
+  background-color: var(--color-bg-body);
+}
+
+/* Cột số tiền đặt - căn phải */
+.pcb-pd__history-th--amount {
+  text-align: right;
+}
+
+/* Các ô dữ liệu trong bảng lịch sử */
+.pcb-pd__history-table td {
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-muted);
+  vertical-align: middle;
+}
+
+/* Hàng dẫn đầu (lượt cao nhất) được tô sáng */
+.pcb-pd__history-row--top {
+  background-color: rgba(234, 88, 12, 0.05);
+}
+
+/* Tên người đặt giá trong lịch sử */
+.pcb-pd__history-bidder {
+  font-weight: 600;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Huy hiệu dẫn đầu (#1) */
+.pcb-pd__history-bidder-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Số tiền trong lịch sử đặt giá */
+.pcb-pd__history-amount {
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: right;
+}
+
+/* Thời gian đặt giá */
+.pcb-pd__history-time {
+  font-size: 0.8125rem;
+  color: var(--color-text-subtle);
+}
+
+/* Thông báo khi chưa có lịch sử đặt giá */
+.pcb-pd__history-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* ==========================================================================
+   15. MODAL ĐẶT GIÁ THÀNH CÔNG
+   ========================================================================== */
+
+/* Lớp phủ toàn màn hình của modal */
+.pcb-pd-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Nền mờ đằng sau modal */
+.pcb-pd-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(11, 28, 48, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Thẻ nội dung modal nổi lên trên overlay */
+.pcb-pd-modal__card {
+  position: relative;
+  z-index: 1;
+  background-color: var(--color-bg-white);
+  border-radius: 20px;
+  padding: 36px 40px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(11, 28, 48, 0.2);
+  animation: pcbPdModalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hiệu ứng trượt vào của modal */
+@keyframes pcbPdModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Biểu tượng lớn ở đầu modal */
+.pcb-pd-modal__icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+/* Tiêu đề modal */
+.pcb-pd-modal__title {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 8px;
+}
+
+/* Mô tả ngắn trong modal */
+.pcb-pd-modal__desc {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+/* Tên sản phẩm trong modal */
+.pcb-pd-modal__product-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 16px;
+}
+
+/* Khung hiển thị số tiền đã đặt trong modal */
+.pcb-pd-modal__amount-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-bg-body);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+/* Nhãn "Số tiền đặt giá" trong modal */
+.pcb-pd-modal__amount-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Số tiền lớn trong modal */
+.pcb-pd-modal__amount {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+/* Ghi chú cuối modal */
+.pcb-pd-modal__note {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* Nút đóng modal */
+.pcb-pd-modal__close-btn {
+  width: 100%;
+  padding: 14px 24px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.pcb-pd-modal__close-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   16. TOAST THÔNG BÁO NHANH
+   ========================================================================== */
+
+/* Toast hiển thị góc dưới phải màn hình */
+.pcb-pd-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background-color: var(--color-text-main);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(11, 28, 48, 0.25);
+  animation: pcbPdToastIn 0.3s ease;
+  max-width: 380px;
+}
+
+/* Hiệu ứng trượt vào của toast */
+@keyframes pcbPdToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toast thành công (màu xanh lá) */
+.pcb-pd-toast--success {
+  background-color: #15803D;
+}
+
+/* Toast lỗi (màu đỏ) */
+.pcb-pd-toast--error {
+  background-color: #DC2626;
+}
+
+/* Biểu tượng trong toast */
+.pcb-pd-toast__icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   17. RESPONSIVE - THIẾT BỊ DI ĐỘNG
+   ========================================================================== */
+
+/* Tablet (màn hình <= 1024px): thu hẹp khoảng cách */
+@media (max-width: 1024px) {
+  .pcb-pd__layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .pcb-pd__gallery {
+    position: static;
+  }
+}
+
+/* Mobile (màn hình <= 768px): xếp 1 cột dọc */
+@media (max-width: 768px) {
+  .pcb-product-detail {
+    padding: 16px 0 48px;
+  }
+
+  /* Chuyển sang bố cục 1 cột dọc trên mobile */
+  .pcb-pd__layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* Thu nhỏ gallery */
+  .pcb-pd__gallery-main {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+  }
+
+  /* Thu nhỏ tiêu đề */
+  .pcb-pd__title {
+    font-size: 1.25rem;
+  }
+
+  /* Xếp giá thị trường vs giá hiện tại theo chiều dọc */
+  .pcb-pd__price-compare {
+    flex-direction: column;
+  }
+
+  .pcb-pd__price-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0 12px;
+  }
+
+  /* Điều chỉnh panel tab trên mobile */
+  .pcb-pd__panel {
+    padding: 20px 16px;
+  }
+
+  /* Cuộn ngang thanh tab khi không đủ chỗ */
+  .pcb-pd__tabs {
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pcb-pd__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Modal full màn hình trên mobile */
+  .pcb-pd-modal__card {
+    padding: 28px 24px;
+  }
+
+  /* Toast xuống dưới, căn giữa */
+  .pcb-pd-toast {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+
+  /* Nút nhảy giá nhỏ hơn */
+  .pcb-pd__quick-btn {
+    min-width: calc(50% - 4px);
+    font-size: 0.75rem;
+    padding: 8px 6px;
+  }
+
+  /* Countdown đơn vị ngày ẩn trên màn nhỏ nếu còn nhiều ngày */
+  .pcb-pd__countdown-unit {
+    min-width: 46px;
+    padding: 6px 10px;
+  }
+
+  .pcb-pd__countdown-num {
+    font-size: 1.375rem;
+  }
+}
+
+/* Màn hình rất nhỏ (< 400px) */
+@media (max-width: 400px) {
+  .pcb-pd__bidbox {
+    padding: 16px;
+  }
+
+  .pcb-pd__title {
+    font-size: 1.125rem;
+  }
+}

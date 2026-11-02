@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="PCBid - Chi tiết phiên đấu giá linh kiện máy tính cũ. Xem thông số, đặt giá và theo dõi bảng lịch sử trả giá trực tiếp.">
+  <title>Chi Tiết Phiên Đấu Giá | PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
+
+  <!-- Nạp phông chữ Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Định kiểu hệ thống cốt lõi và Header / Footer dùng chung -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="components/header/header.css">
+  <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Định kiểu riêng cho Trang chi tiết sản phẩm đấu giá -->
+  <link rel="stylesheet" href="css/product-detail.css">
+</head>
+
+<body id="product-detail-page">
+
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
+  <div id="app-header"></div>
+
+  <!-- ==================== NỘI DUNG CHÍNH ==================== -->
+  <main class="pcb-product-detail">
+    <div class="container">
+
+      <!-- ===== ĐƯỜNG DẪN ĐIỀU HƯỚNG (BREADCRUMB) ===== -->
+      <nav class="pcb-pd__breadcrumb" aria-label="Điều hướng trang">
+        <ol class="pcb-pd__breadcrumb-list">
+          <li class="pcb-pd__breadcrumb-item">
+            <a href="index.html" class="pcb-pd__breadcrumb-link">Trang chủ</a>
+          </li>
+          <li class="pcb-pd__breadcrumb-item pcb-pd__breadcrumb-item--sep" aria-hidden="true">/</li>
+          <li class="pcb-pd__breadcrumb-item">
+            <a href="products.html" class="pcb-pd__breadcrumb-link">Danh sách đấu giá</a>
+          </li>
+          <li class="pcb-pd__breadcrumb-item pcb-pd__breadcrumb-item--sep" aria-hidden="true">/</li>
+          <li class="pcb-pd__breadcrumb-item pcb-pd__breadcrumb-item--current" aria-current="page">
+            <span id="pcb-pd-breadcrumb-name">Đang tải...</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- ===== VÙNG TRẠNG THÁI NẠP (LOADING STATE) ===== -->
+      <div class="pcb-pd__loading" id="pcb-pd-loading" role="status" aria-live="polite">
+        <div class="pcb-pd__loading-spinner" aria-hidden="true"></div>
+        <p class="pcb-pd__loading-text">Đang tải thông tin phiên đấu giá...</p>
+      </div>
+
+      <!-- ===== VÙNG LỖI 404 (ERROR STATE) ===== -->
+      <div class="pcb-pd__error" id="pcb-pd-error" hidden>
+        <div class="pcb-pd__error-icon" aria-hidden="true">&#x26A0;&#xFE0F;</div>
+        <h2 class="pcb-pd__error-title">Không tìm thấy phiên đấu giá</h2>
+        <p class="pcb-pd__error-desc">ID sản phẩm không hợp lệ hoặc phiên đấu giá đã bị gỡ xuống.</p>
+        <a href="products.html" class="pcb-pd__error-btn">&#x2190; Quay về danh sách</a>
+      </div>
+
+      <!-- ===== BỐ CỤC 2 CỘT CHÍNH (MAIN LAYOUT) ===== -->
+      <div class="pcb-pd__layout" id="pcb-pd-layout" hidden>
+
+        <!-- ===== CỘT TRÁI: GALLERY ẢNH SẢN PHẨM ===== -->
+        <aside class="pcb-pd__gallery" aria-label="Hình ảnh sản phẩm">
+          <!-- Khung ảnh chính lớn -->
+          <div class="pcb-pd__gallery-main">
+            <img
+              src=""
+              alt="Ảnh sản phẩm"
+              class="pcb-pd__gallery-main-img"
+              id="pcb-pd-main-img"
+              loading="eager">
+          </div>
+
+          <!-- Hàng thumbnail ảnh nhỏ (cuộn xem thêm) -->
+          <div class="pcb-pd__gallery-thumbs" id="pcb-pd-thumbs" role="list" aria-label="Danh sách ảnh xem thêm">
+            <!-- JS chèn thumbnail động -->
+          </div>
+        </aside>
+
+        <!-- ===== CỘT PHẢI: THÔNG TIN & HỘP ĐẤU GIÁ ===== -->
+        <div class="pcb-pd__info">
+
+          <!-- Nhóm nhãn: Danh mục + Tình trạng sản phẩm -->
+          <div class="pcb-pd__badges">
+            <span class="pcb-pd__badge pcb-pd__badge--category" id="pcb-pd-category">---</span>
+            <span class="pcb-pd__badge pcb-pd__badge--condition" id="pcb-pd-condition-badge">---</span>
+          </div>
+
+          <!-- Tên sản phẩm -->
+          <h1 class="pcb-pd__title" id="pcb-pd-title">Đang tải...</h1>
+
+          <!-- Mô tả tình trạng cụ thể -->
+          <p class="pcb-pd__condition-text" id="pcb-pd-condition-text"></p>
+
+          <!-- ===== ĐỒNG HỒ ĐẾM NGƯỢC ===== -->
+          <div class="pcb-pd__countdown-wrap" id="pcb-pd-countdown-wrap">
+            <div class="pcb-pd__countdown-label">
+              <span class="pcb-pd__countdown-icon" aria-hidden="true">&#x23F1;</span>
+              Thời gian còn lại
+            </div>
+            <div class="pcb-pd__countdown" id="pcb-pd-countdown" role="timer" aria-live="off">
+              <div class="pcb-pd__countdown-unit">
+                <span class="pcb-pd__countdown-num" id="pcb-cd-days">--</span>
+                <span class="pcb-pd__countdown-unit-label">ngày</span>
+              </div>
+              <span class="pcb-pd__countdown-colon" aria-hidden="true">:</span>
+              <div class="pcb-pd__countdown-unit">
+                <span class="pcb-pd__countdown-num" id="pcb-cd-hours">--</span>
+                <span class="pcb-pd__countdown-unit-label">giờ</span>
+              </div>
+              <span class="pcb-pd__countdown-colon" aria-hidden="true">:</span>
+              <div class="pcb-pd__countdown-unit">
+                <span class="pcb-pd__countdown-num" id="pcb-cd-minutes">--</span>
+                <span class="pcb-pd__countdown-unit-label">phút</span>
+              </div>
+              <span class="pcb-pd__countdown-colon" aria-hidden="true">:</span>
+              <div class="pcb-pd__countdown-unit">
+                <span class="pcb-pd__countdown-num" id="pcb-cd-seconds">--</span>
+                <span class="pcb-pd__countdown-unit-label">giây</span>
+              </div>
+            </div>
+            <p class="pcb-pd__countdown-ended" id="pcb-pd-ended-msg" hidden>&#x1F514; Phiên đấu giá đã kết thúc</p>
+          </div>
+
+          <!-- ===== SO SÁNH GIÁ: GIÁ THỊ TRƯỜNG vs GIÁ ĐẤU HIỆN TẠI ===== -->
+          <div class="pcb-pd__price-compare">
+            <div class="pcb-pd__price-block pcb-pd__price-block--market">
+              <span class="pcb-pd__price-label">Giá thị trường (mới)</span>
+              <span class="pcb-pd__price-value pcb-pd__price-value--market" id="pcb-pd-market-price">---</span>
+            </div>
+            <div class="pcb-pd__price-divider" aria-hidden="true"></div>
+            <div class="pcb-pd__price-block pcb-pd__price-block--current">
+              <span class="pcb-pd__price-label">Giá đấu hiện tại</span>
+              <span class="pcb-pd__price-value pcb-pd__price-value--current" id="pcb-pd-current-bid">---</span>
+              <span class="pcb-pd__price-discount" id="pcb-pd-discount-pct"></span>
+            </div>
+          </div>
+
+          <!-- Thông tin bước giá & số lượt -->
+          <p class="pcb-pd__bid-meta">
+            <span class="pcb-pd__bid-count-num" id="pcb-pd-bid-count">0</span>
+            <span class="pcb-pd__bid-meta-sep"> lượt trả giá&#x2002;&#x2022;&#x2002;Bước giá tối thiểu: </span>
+            <strong id="pcb-pd-bid-step">---</strong>
+          </p>
+
+          <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
+          <div class="pcb-pd__bidbox" id="pcb-pd-bidbox">
+            <div class="pcb-pd__bidbox-header">
+              <h2 class="pcb-pd__bidbox-title">Đặt giá của bạn</h2>
+            </div>
+
+            <!-- Ô nhập số tiền -->
+            <div class="pcb-pd__input-wrap">
+              <label for="pcb-pd-bid-input" class="pcb-pd__input-label">Số tiền đặt giá (VNĐ)</label>
+              <div class="pcb-pd__input-row">
+                <input
+                  type="number"
+                  id="pcb-pd-bid-input"
+                  class="pcb-pd__input"
+                  placeholder="Nhập số tiền..."
+                  min="0"
+                  step="1000"
+                  aria-describedby="pcb-pd-bid-hint">
+                <span class="pcb-pd__input-unit" aria-hidden="true">đ</span>
+              </div>
+              <p class="pcb-pd__input-hint" id="pcb-pd-bid-hint">
+                Phải cao hơn giá hiện tại ít nhất <strong id="pcb-pd-bid-step-hint">---</strong>
+              </p>
+              <p class="pcb-pd__input-error" id="pcb-pd-bid-error" role="alert" hidden></p>
+            </div>
+
+            <!-- Nút nhảy giá nhanh -->
+            <div class="pcb-pd__quick-jumps" aria-label="Tăng giá nhanh">
+              <button type="button" class="pcb-pd__quick-btn" data-amount="100000">+100.000&#x111;</button>
+              <button type="button" class="pcb-pd__quick-btn" data-amount="200000">+200.000&#x111;</button>
+              <button type="button" class="pcb-pd__quick-btn" data-amount="500000">+500.000&#x111;</button>
+              <button type="button" class="pcb-pd__quick-btn" data-amount="1000000">+1.000.000&#x111;</button>
+            </div>
+
+            <!-- Nút xác nhận đặt giá lớn -->
+            <button type="button" class="pcb-pd__submit-btn" id="pcb-pd-submit-btn" aria-label="Xác nhận đặt giá">
+              &#x1F528; XÁC NHẬN ĐẶT GIÁ
+            </button>
+
+            <!-- Nút thêm vào danh sách theo dõi -->
+            <button type="button" class="pcb-pd__watchlist-btn" id="pcb-pd-watchlist-btn" aria-pressed="false">
+              <span id="pcb-pd-watchlist-icon" aria-hidden="true">&#x1F90D;</span>
+              <span id="pcb-pd-watchlist-label">Thêm vào Watchlist</span>
+            </button>
+          </div>
+
+          <!-- ===== THÔNG TIN NGƯỜI BÁN ===== -->
+          <div class="pcb-pd__seller-card">
+            <div class="pcb-pd__seller-avatar" aria-hidden="true">
+              <span class="pcb-pd__seller-avatar-char" id="pcb-pd-seller-avatar-char">?</span>
+            </div>
+            <div class="pcb-pd__seller-info">
+              <p class="pcb-pd__seller-label">Người bán</p>
+              <p class="pcb-pd__seller-name" id="pcb-pd-seller-name">---</p>
+            </div>
+            <div class="pcb-pd__seller-badge" aria-label="Xác thực danh tính">
+              &#x2714; Đã xác thực
+            </div>
+          </div>
+
+        </div>
+        <!-- Kết thúc cột phải -->
+
+      </div>
+      <!-- Kết thúc layout 2 cột -->
+
+      <!-- ===== PHẦN THÂN DƯỚI: THÔNG SỐ + MÔ TẢ + LỊCH SỬ ===== -->
+      <div class="pcb-pd__body" id="pcb-pd-body" hidden>
+
+        <!-- Nhóm tab điều hướng nội dung dưới -->
+        <div class="pcb-pd__tabs" role="tablist" aria-label="Thông tin chi tiết sản phẩm">
+          <button
+            class="pcb-pd__tab pcb-pd__tab--active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="pcb-pd-panel-specs"
+            id="pcb-pd-tab-specs"
+            data-tab="specs">
+            Thông số kỹ thuật
+          </button>
+          <button
+            class="pcb-pd__tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="pcb-pd-panel-desc"
+            id="pcb-pd-tab-desc"
+            data-tab="desc">
+            Mô tả người bán
+          </button>
+          <button
+            class="pcb-pd__tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="pcb-pd-panel-history"
+            id="pcb-pd-tab-history"
+            data-tab="history">
+            Lịch sử đặt giá
+            <span class="pcb-pd__tab-badge" id="pcb-pd-history-count">0</span>
+          </button>
+        </div>
+
+        <!-- Panel: Bảng thông số kỹ thuật -->
+        <div
+          class="pcb-pd__panel pcb-pd__panel--active"
+          id="pcb-pd-panel-specs"
+          role="tabpanel"
+          aria-labelledby="pcb-pd-tab-specs">
+          <table class="pcb-pd__specs-table" aria-label="Thông số kỹ thuật sản phẩm">
+            <tbody id="pcb-pd-specs-body">
+              <!-- JS chèn các hàng thông số động -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Panel: Mô tả từ người bán -->
+        <div
+          class="pcb-pd__panel"
+          id="pcb-pd-panel-desc"
+          role="tabpanel"
+          aria-labelledby="pcb-pd-tab-desc"
+          hidden>
+          <div class="pcb-pd__desc-content" id="pcb-pd-desc-content">
+            <!-- JS chèn mô tả động -->
+          </div>
+        </div>
+
+        <!-- Panel: Bảng lịch sử các lượt trả giá -->
+        <div
+          class="pcb-pd__panel"
+          id="pcb-pd-panel-history"
+          role="tabpanel"
+          aria-labelledby="pcb-pd-tab-history"
+          hidden>
+          <table class="pcb-pd__history-table" aria-label="Lịch sử các lượt trả giá">
+            <thead>
+              <tr>
+                <th scope="col" class="pcb-pd__history-th">Người đặt giá</th>
+                <th scope="col" class="pcb-pd__history-th pcb-pd__history-th--amount">Số tiền đặt</th>
+                <th scope="col" class="pcb-pd__history-th">Thời gian</th>
+              </tr>
+            </thead>
+            <tbody id="pcb-pd-history-body">
+              <!-- JS chèn các hàng lịch sử động -->
+            </tbody>
+          </table>
+          <p class="pcb-pd__history-empty" id="pcb-pd-history-empty" hidden>
+            Chưa có lượt đặt giá nào. Hãy là người đầu tiên!
+          </p>
+        </div>
+
+      </div>
+      <!-- Kết thúc pcb-pd__body -->
+
+    </div>
+    <!-- Kết thúc .container -->
+  </main>
+
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
+  <div id="app-footer"></div>
+
+  <!-- ===== MODAL XÁC NHẬN ĐẶT GIÁ THÀNH CÔNG ===== -->
+  <div
+    class="pcb-pd-modal"
+    id="pcb-pd-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="pcb-pd-modal-title"
+    hidden>
+    <div class="pcb-pd-modal__overlay" id="pcb-pd-modal-overlay" aria-hidden="true"></div>
+    <div class="pcb-pd-modal__card">
+      <div class="pcb-pd-modal__icon" aria-hidden="true">&#x1F389;</div>
+      <h2 class="pcb-pd-modal__title" id="pcb-pd-modal-title">Đặt giá thành công!</h2>
+      <p class="pcb-pd-modal__desc">Bạn đã đặt giá thành công cho sản phẩm:</p>
+      <p class="pcb-pd-modal__product-name" id="pcb-pd-modal-product"></p>
+      <div class="pcb-pd-modal__amount-wrap">
+        <span class="pcb-pd-modal__amount-label">Số tiền đặt giá</span>
+        <span class="pcb-pd-modal__amount" id="pcb-pd-modal-amount">---</span>
+      </div>
+      <p class="pcb-pd-modal__note">
+        &#x26A1; Hệ thống sẽ thông báo khi có người đặt giá cao hơn bạn.
+      </p>
+      <button type="button" class="pcb-pd-modal__close-btn" id="pcb-pd-modal-close">
+        Đóng &amp; Tiếp tục xem
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TOAST THÔNG BÁO NHANH ===== -->
+  <div class="pcb-pd-toast" id="pcb-pd-toast" role="alert" aria-live="assertive" aria-atomic="true" hidden>
+    <span class="pcb-pd-toast__icon" id="pcb-pd-toast-icon" aria-hidden="true">&#x2139;&#xFE0F;</span>
+    <span class="pcb-pd-toast__msg" id="pcb-pd-toast-msg"></span>
+  </div>
+
+  <!-- ===== NẠP MODULE JAVASCRIPT ===== -->
+  <!-- Module ứng dụng chính: nạp Header / Footer động -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Module nghiệp vụ riêng cho trang chi tiết sản phẩm đấu giá -->
+  <script type="module" src="js/product-detail.js"></script>
+
+</body>
+
+</html>
