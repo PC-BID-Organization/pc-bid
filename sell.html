@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Đăng bán đấu giá linh kiện máy tính cũ tại PCBid. Chọn mẫu linh kiện chuẩn từ catalogue, chọn ảnh thực tế và bắt đầu phiên đấu giá minh bạch nhanh chóng.">
+  <title>Đăng Bán Đấu Giá Linh Kiện PC | PCBid</title>
+
+  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Định kiểu cốt lõi hệ thống -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Định kiểu thành phần Header/Footer dùng chung -->
+  <link rel="stylesheet" href="components/header/header.css">
+  <link rel="stylesheet" href="components/footer/footer.css">
+
+  <!-- Định kiểu card sản phẩm dùng chung từ home.css để hiển thị xem trước -->
+  <link rel="stylesheet" href="css/home.css">
+
+  <!-- Định kiểu riêng cho trang Đăng bán đấu giá -->
+  <link rel="stylesheet" href="css/sell.css">
+</head>
+
+<body id="sell-page">
+
+  <!-- ==================== KHUNG NẠP ĐỘNG HEADER ==================== -->
+  <div id="app-header"></div>
+
+  <!-- ==================== NỘI DUNG CHÍNH (MAIN) ==================== -->
+  <main class="pcb-sell-page">
+    <div class="container">
+
+      <!-- 1. Thanh điều hướng đường dẫn (Breadcrumb) -->
+      <nav class="pcb-breadcrumb" aria-label="Đường dẫn trang">
+        <div class="pcb-breadcrumb__item">
+          <a href="index.html" class="pcb-breadcrumb__link">Trang chủ</a>
+          <span class="pcb-breadcrumb__separator">/</span>
+        </div>
+        <div class="pcb-breadcrumb__item">
+          <span class="pcb-breadcrumb__current">Tạo phiên đấu giá linh kiện</span>
+        </div>
+      </nav>
+
+      <!-- 2. Banner giới thiệu quy trình đăng phiên đấu giá -->
+      <section class="pcb-sell-hero" aria-labelledby="sell-hero-heading">
+        <div class="pcb-sell-hero__content">
+          <span class="pcb-sell-hero__badge">
+            <span class="pcb-ticker__dot"></span>
+            Hệ thống niêm yết đấu giá PCBid
+          </span>
+          <h1 class="pcb-sell-hero__title" id="sell-hero-heading">
+            Tạo Phiên Đấu Giá Linh Kiện PC Cũ
+          </h1>
+          <p class="pcb-sell-hero__desc">
+            Chọn nhanh thông số từ Catalogue linh kiện chuẩn của sàn, tải ảnh thật và thiết lập bước giá minh bạch. Tiếp cận hàng nghìn người đam mê công nghệ tại UIT.
+          </p>
+        </div>
+        <div class="pcb-sell-steps">
+          <div class="pcb-sell-step pcb-sell-step--active">
+            <span class="pcb-sell-step__num">1</span>
+            <span>Chọn mẫu linh kiện</span>
+          </div>
+          <span style="color:#64748b;">→</span>
+          <div class="pcb-sell-step pcb-sell-step--active">
+            <span class="pcb-sell-step__num">2</span>
+            <span>Thiết lập giá &amp; thời gian</span>
+          </div>
+          <span style="color:#64748b;">→</span>
+          <div class="pcb-sell-step">
+            <span class="pcb-sell-step__num">3</span>
+            <span>Lên sàn đấu</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Khung bố cục 2 cột chính: Form đăng ký và Xem trước trực tiếp -->
+      <div class="pcb-sell-layout">
+
+        <!-- ==================== CỘT TRÁI: FORM NHẬP LIỆU ==================== -->
+        <form class="pcb-sell-form" id="sell-auction-form" novalidate>
+
+          <!-- BƯỚC 1: CHỌN MẪU TỪ CATALOGUE CỦA SÀN -->
+          <div class="pcb-sell-panel">
+            <div class="pcb-sell-panel__head">
+              <span class="pcb-sell-panel__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </span>
+              <div>
+                <h2 class="pcb-sell-panel__title">1. Chọn linh kiện từ Catalogue chuẩn</h2>
+                <p class="pcb-sell-panel__subtitle">Chọn danh mục và mẫu sản phẩm có sẵn để sàn tự động điền thông số kỹ thuật chuẩn.</p>
+              </div>
+            </div>
+
+            <!-- Dropdown Category & Dropdown Model -->
+            <div class="pcb-form-row">
+              <div class="pcb-form-group">
+                <label for="sell-category" class="pcb-form-label pcb-form-label--required">Danh mục linh kiện</label>
+                <select id="sell-category" name="category" class="pcb-form-select" required>
+                  <option value="" disabled selected>-- Chọn danh mục linh kiện --</option>
+                  <option value="GPU">Card màn hình (VGA / GPU)</option>
+                  <option value="CPU">Bộ vi xử lý (CPU)</option>
+                  <option value="Mainboard">Bo mạch chủ (Mainboard)</option>
+                  <option value="RAM">Bộ nhớ RAM</option>
+                  <option value="SSD">Ổ cứng SSD / NVMe</option>
+                  <option value="PSU">Nguồn máy tính (PSU)</option>
+                  <option value="Cooling">Tản nhiệt Khí &amp; AIO</option>
+                  <option value="Case">Vỏ case máy tính</option>
+                </select>
+              </div>
+
+              <div class="pcb-form-group">
+                <label for="sell-model" class="pcb-form-label pcb-form-label--required">Mẫu sản phẩm chuẩn của sàn</label>
+                <select id="sell-model" name="model" class="pcb-form-select" disabled required>
+                  <option value="" disabled selected>-- Vui lòng chọn danh mục trước --</option>
+                </select>
+                <span class="pcb-form-hint">Danh sách được lọc chính xác theo danh mục đã chọn</span>
+              </div>
+            </div>
+
+            <!-- Khối xem trước thông số kỹ thuật tự động điền -->
+            <div class="pcb-form-group">
+              <label class="pcb-form-label">Thông số kỹ thuật chuẩn (Tự động điền theo mẫu)</label>
+              <div class="pcb-spec-box" id="sell-spec-box">
+                <div class="pcb-spec-box__head">
+                  <span class="pcb-spec-box__title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    Thông số phần cứng chi tiết
+                  </span>
+                  <span class="pcb-spec-box__badge" id="spec-source-badge">Dữ liệu chuẩn PCBid</span>
+                </div>
+                <div class="pcb-spec-grid" id="spec-grid-container">
+                  <div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; font-style: italic; padding: 10px 0;">
+                    Vui lòng chọn mẫu sản phẩm ở trên để hiển thị thông số kỹ thuật.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lưới thumbnail ảnh có sẵn trong repo để chọn ảnh đại diện -->
+            <div class="pcb-form-group">
+              <label class="pcb-form-label pcb-form-label--required">
+                <span>Chọn ảnh đại diện cho món hàng</span>
+                <span style="font-size:11px; font-weight:normal; color:#ea580c;">Click chọn ảnh nét nhất</span>
+              </label>
+              <div class="pcb-thumb-grid" id="sell-thumb-grid">
+                <!-- JS nạp các ảnh tương ứng với danh mục và mẫu sản phẩm -->
+              </div>
+              <span class="pcb-form-hint">Ảnh được trích xuất trực tiếp từ kho linh kiện kiểm định thực tế của PCBid.</span>
+            </div>
+          </div>
+
+          <!-- BƯỚC 2: TÌNH TRẠNG THỰC TẾ & KIỂM ĐỊNH -->
+          <div class="pcb-sell-panel">
+            <div class="pcb-sell-panel__head">
+              <span class="pcb-sell-panel__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </span>
+              <div>
+                <h2 class="pcb-sell-panel__title">2. Tình trạng thực tế &amp; Phụ kiện đi kèm</h2>
+                <p class="pcb-sell-panel__subtitle">Mô tả trung thực ngoại quan, tem void và phụ kiện để tạo niềm tin với người đặt giá.</p>
+              </div>
+            </div>
+
+            <div class="pcb-form-row">
+              <div class="pcb-form-group">
+                <label for="sell-condition" class="pcb-form-label pcb-form-label--required">Mức độ mới / Tình trạng</label>
+                <select id="sell-condition" name="condition" class="pcb-form-select" required>
+                  <option value="Like New 99% - Fullbox, Tem Void nguyên vẹn">Like New 99% - Fullbox, Tem Void nguyên vẹn</option>
+                  <option value="Đã sử dụng - Còn bảo hành chính hãng">Đã sử dụng - Còn bảo hành chính hãng</option>
+                  <option value="Đã sử dụng - Hết bảo hành, bao test 7 ngày">Đã sử dụng - Hết bảo hành, bao test 7 ngày</option>
+                  <option value="Mới 100% - Nguyên Seal chưa khui">Mới 100% - Nguyên Seal chưa khui</option>
+                </select>
+              </div>
+
+              <div class="pcb-form-group">
+                <label for="sell-seal" class="pcb-form-label">Chứng nhận kiểm thử (Tùy chọn)</label>
+                <select id="sell-seal" name="seal" class="pcb-form-select">
+                  <option value="Furmark < 75°C">✓ Pass Furmark 15p &lt; 75°C (Đối với VGA)</option>
+                  <option value="MemTest 0 Error">✓ Pass MemTest86 0 Error (Đối với RAM/CPU)</option>
+                  <option value="CrystalDiskInfo 100%">✓ CrystalDiskInfo Sức khỏe 100% (Đối với SSD)</option>
+                  <option value="UIT Lab OK">✓ Đã kiểm định tại UIT Hardware Lab</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pcb-form-group">
+              <label for="sell-description" class="pcb-form-label pcb-form-label--required">Mô tả tình trạng chi tiết &amp; Phụ kiện</label>
+              <textarea id="sell-description" name="description" class="pcb-form-textarea" placeholder="Ví dụ: Hàng người dùng chơi game văn phòng, không trâu cày. Đầy đủ phụ kiện râu anten, chặn main, dây nguồn modular. Bao test 7 ngày lỗi hoàn tiền 100%..." required></textarea>
+              <span class="pcb-form-hint">Mô tả càng chi tiết sẽ càng thu hút nhiều người tham gia đặt giá.</span>
+            </div>
+          </div>
+
+          <!-- BƯỚC 3: THIẾT LẬP GIÁ ĐẤU & THỜI HẠN -->
+          <div class="pcb-sell-panel">
+            <div class="pcb-sell-panel__head">
+              <span class="pcb-sell-panel__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 6v6l4 2"></path>
+                </svg>
+              </span>
+              <div>
+                <h2 class="pcb-sell-panel__title">3. Thiết lập giá đấu &amp; Thời hạn phiên</h2>
+                <p class="pcb-sell-panel__subtitle">Quy định mức giá sàn, bước nhảy tối thiểu và thời gian kết thúc phiên gõ búa.</p>
+              </div>
+            </div>
+
+            <div class="pcb-form-row">
+              <div class="pcb-form-group">
+                <label for="sell-start-price" class="pcb-form-label pcb-form-label--required">Giá khởi điểm (VNĐ)</label>
+                <input type="number" id="sell-start-price" name="startingPrice" class="pcb-form-input" placeholder="Ví dụ: 2000000" min="50000" step="10000" required>
+                <span class="pcb-form-hint" id="start-price-hint">Mức giá người đầu tiên có thể đặt</span>
+              </div>
+
+              <div class="pcb-form-group">
+                <label for="sell-bid-step" class="pcb-form-label pcb-form-label--required">Bước giá tối thiểu (VNĐ)</label>
+                <select id="sell-bid-step" name="bidStep" class="pcb-form-select" required>
+                  <option value="20000">20.000₫</option>
+                  <option value="50000" selected>50.000₫ (Khuyên dùng)</option>
+                  <option value="100000">100.000₫</option>
+                  <option value="200000">200.000₫</option>
+                  <option value="500000">500.000₫</option>
+                </select>
+                <span class="pcb-form-hint">Khoảng tiền tối thiểu giữa 2 lần trả giá kế tiếp</span>
+              </div>
+            </div>
+
+            <div class="pcb-form-row">
+              <div class="pcb-form-group">
+                <label for="sell-duration" class="pcb-form-label pcb-form-label--required">Thời hạn mở phiên đấu giá</label>
+                <select id="sell-duration" name="duration" class="pcb-form-select" required>
+                  <option value="1">1 ngày (24 giờ - Phiên nhanh)</option>
+                  <option value="3" selected>3 ngày (72 giờ - Khuyên dùng)</option>
+                  <option value="5">5 ngày (120 giờ)</option>
+                  <option value="7">7 ngày (1 tuần)</option>
+                </select>
+                <span class="pcb-form-hint">Sau thời gian này, người đặt giá cao nhất sẽ giành chiến thắng</span>
+              </div>
+
+              <div class="pcb-form-group">
+                <label for="sell-market-price" class="pcb-form-label">Giá thị trường mới tham khảo (VNĐ)</label>
+                <input type="number" id="sell-market-price" name="marketPriceNew" class="pcb-form-input" placeholder="Tự động điền theo catalogue" min="0" step="100000">
+                <span class="pcb-form-hint">Dùng để hiển thị tỷ lệ giá hời cho người mua</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NÚT HÀNH ĐỘNG GỬI FORM HOẶC HỦY -->
+          <div class="pcb-sell-actions">
+            <a href="index.html" class="pcb-btn pcb-btn--secondary" id="btn-cancel-sell">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Hủy bỏ (Về Trang chủ)
+            </a>
+            <button type="submit" class="pcb-btn pcb-btn--primary" id="btn-submit-sell">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Xác nhận tạo phiên đấu giá
+            </button>
+          </div>
+
+        </form>
+
+        <!-- ==================== CỘT PHẢI: XEM TRƯỚC CARD SẢN PHẨM ==================== -->
+        <aside class="pcb-sell-preview-col" aria-label="Khối xem trước phiên đấu giá">
+          <div class="pcb-preview-card">
+            <div class="pcb-preview-card__head">
+              <h3 class="pcb-preview-card__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#ea580c">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4M12 8h.01"></path>
+                </svg>
+                Xem trước thẻ đấu giá
+              </h3>
+              <span class="pcb-preview-card__badge">Live Preview</span>
+            </div>
+
+            <!-- Card hiển thị xem trước trực tiếp trên sàn -->
+            <article class="pcb-card" id="sell-live-card" style="margin: 0; box-shadow: none; border: 1.5px solid #cbd5e1;">
+              <div class="pcb-card__media">
+                <div class="pcb-card__countdown" id="preview-countdown">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 15"></polyline>
+                  </svg>
+                  <span class="pcb-countdown-text">72:00:00</span>
+                </div>
+                <span class="pcb-card__condition" id="preview-condition">Like New 99%</span>
+                <img class="pcb-card__img" id="preview-image" src="images/products/gpu/2018-rtx-4070-12gb-1.webp" alt="Ảnh xem trước" loading="lazy">
+              </div>
+
+              <div class="pcb-card__body">
+                <div class="pcb-card__seals">
+                  <span class="pcb-card__seal pcb-card__seal--cat" id="preview-cat">GPU</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass" id="preview-seal">✓ Furmark &lt; 75°C</span>
+                </div>
+
+                <div class="pcb-card__title" id="preview-title" style="pointer-events:none;">
+                  Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC
+                </div>
+
+                <div class="pcb-card__specs" id="preview-specs">
+                  <span class="pcb-card__spec">8GB GDDR6</span>
+                  <span class="pcb-card__spec">Nguồn 650W</span>
+                </div>
+
+                <div class="pcb-card__price-box">
+                  <div class="pcb-card__price-row">
+                    <span class="pcb-card__price-lbl">Giá khởi điểm</span>
+                    <span class="pcb-card__price-val" id="preview-price">4.200.000₫</span>
+                  </div>
+
+                  <div class="pcb-card__market-row">
+                    <span class="pcb-card__market-val" id="preview-market-price">12.500.000₫</span>
+                    <span class="pcb-card__bids-count">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <strong>0</strong> lượt
+                    </span>
+                  </div>
+
+                  <button type="button" class="pcb-card__btn" style="pointer-events:none; opacity: 0.9;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    Đặt giá ngay (Bước: <span id="preview-step">50.000₫</span>)
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Quy định của người bán trên sàn -->
+            <div class="pcb-seller-rules">
+              <h4 class="pcb-seller-rules__title">
+                <span>🛡️ Cam kết sàn PCBid</span>
+              </h4>
+              <ul class="pcb-seller-rules__list">
+                <li>Người bán chịu trách nhiệm hoàn toàn về tình trạng mô tả linh kiện.</li>
+                <li>Bắt buộc cho người mua đồng kiểm ngoại quan khi nhận hàng.</li>
+                <li>Áp dụng chính sách giữ tiền trung gian và bao test 7 ngày an toàn.</li>
+              </ul>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== HỘP THOẠI THÔNG BÁO TẠO PHIÊN THÀNH CÔNG ==================== -->
+  <div class="pcb-modal-overlay" id="sell-success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
+    <div class="pcb-modal-box">
+      <div class="pcb-modal-icon">✓</div>
+      <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
+      <p class="pcb-modal-desc" id="modal-success-desc">
+        Linh kiện của bạn đã được niêm yết lên sàn PCBid thành công. Hệ thống đang tự động chuyển bạn về trang danh sách sản phẩm...
+      </p>
+      <a href="products.html" class="pcb-btn pcb-btn--primary" style="width:100%;">
+        Chuyển đến trang Đấu giá ngay
+      </a>
+    </div>
+  </div>
+
+  <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
+  <div id="app-footer"></div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <!-- Nạp Header/Footer động từ components/ -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Kích hoạt xử lý logic trang đăng bán -->
+  <script type="module" src="js/sell.js"></script>
+</body>
+
+</html>
