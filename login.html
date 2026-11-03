@@ -58,6 +58,31 @@
           <!-- 2. Biểu mẫu đăng nhập thành viên -->
           <form class="pcb-auth-form" id="login-form" novalidate>
 
+            <!-- KHỐI TÀI KHOẢN MẪU PHỤC VỤ BÁO CÁO & THUYẾT TRÌNH (DEMO ACCOUNTS) -->
+            <div class="pcb-auth-demo" style="margin-bottom: 20px; padding: 12px 14px; background: #f0fdf4; border: 1.5px dashed #10b981; border-radius: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 700; color: #065f46; display: flex; align-items: center; gap: 5px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  Tài khoản Demo (Báo cáo &amp; Đấu giá đối kháng):
+                </span>
+                <span style="font-size: 11px; color: #047857; background: #d1fae5; padding: 2px 7px; border-radius: 4px; font-weight: 600;">MK: 123456</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                <button type="button" class="pcb-demo-btn" data-demo-user="bidder1" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
+                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👤 Đấu Giá 1</div>
+                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">bidder1@pcbid.vn</div>
+                </button>
+                <button type="button" class="pcb-demo-btn" data-demo-user="bidder2" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
+                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👤 Đấu Giá 2</div>
+                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">bidder2@pcbid.vn</div>
+                </button>
+                <button type="button" class="pcb-demo-btn" data-demo-user="seller" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
+                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏪 Người Bán</div>
+                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">seller@pcbid.vn</div>
+                </button>
+              </div>
+            </div>
+
             <!-- TRƯỜNG 1: TÊN ĐĂNG NHẬP HOẶC EMAIL -->
             <div class="pcb-auth-form__group">
               <label for="login-username" class="pcb-auth-form__label">

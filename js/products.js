@@ -63,6 +63,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 7. Kích hoạt bộ đếm thời gian đếm ngược thời gian thực
   setInterval(updateLiveCountdowns, 1000);
+
+  // 8. Lắng nghe bfcache và storage để cập nhật giá phiên đấu giá theo thời gian thực
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      loadAllProducts().then(() => {
+        applyFiltersAndRender();
+      });
+    }
+  });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
+      loadAllProducts().then(() => {
+        applyFiltersAndRender();
+      });
+    }
+  });
 });
 
 /* ==========================================================================
@@ -88,6 +105,17 @@ function parseUrlParams() {
   const query = params.get('q');
   if (query) {
     filterState.searchQuery = query.trim().toLowerCase();
+  }
+
+  // Xử lý tham số status từ Header Nav ("Phiên đang Hot 🔥", "Sắp kết thúc")
+  const status = params.get('status');
+  const sortSelect = document.getElementById('sort-select');
+  if (status === 'hot') {
+    filterState.sortBy = 'bids-desc';
+    if (sortSelect) sortSelect.value = 'bids-desc';
+  } else if (status === 'ending') {
+    filterState.sortBy = 'time-asc';
+    if (sortSelect) sortSelect.value = 'time-asc';
   }
 }
 
@@ -128,7 +156,7 @@ function parseStaticCardsFromDOM() {
 }
 
 async function loadAllProducts() {
-  let allLoaded = [];
+  let fetchedItems = [];
 
   // Tải đồng thời tất cả các tệp json danh mục nếu có web server
   try {
@@ -145,27 +173,80 @@ async function loadAllProducts() {
 
     const results = await Promise.all(fetchPromises);
     results.forEach(list => {
-      allLoaded.push(...list);
+      fetchedItems.push(...list);
     });
   } catch (err) {
     // Không làm gián đoạn nếu chạy offline
   }
 
-  // Bổ sung dữ liệu người dùng tự đăng bán từ localStorage nếu có
-  try {
-    const localItems = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-    if (Array.isArray(localItems) && localItems.length > 0) {
-      localItems.forEach(item => {
-        allLoaded.unshift(normalizeProduct(item, item.category || 'PC'));
-      });
-    }
-  } catch (e) {
-    // Bỏ qua lỗi parse
+  if (fetchedItems.length === 0) {
+    fetchedItems = [...rawProducts];
   }
 
-  // Nếu tải JSON thành công, thay thế danh sách thô
-  if (allLoaded.length > 0) {
-    rawProducts = allLoaded;
+  // Đọc dữ liệu cập nhật từ LocalStorage (pcbid_products & pcbid_bids)
+  try {
+    const localItems = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const localMap = new Map(localItems.map(item => [Number(item.id), item]));
+
+    // Đọc lịch sử đặt giá để xác định giá dẫn đầu thực tế
+    const localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+    const bidSummary = new Map();
+    localBids.forEach(b => {
+      const pid = Number(b.productId);
+      const amt = Number(b.amount) || 0;
+      const curr = bidSummary.get(pid) || { maxBid: 0, count: 0 };
+      curr.maxBid = Math.max(curr.maxBid, amt);
+      curr.count += 1;
+      bidSummary.set(pid, curr);
+    });
+
+    // 1. Đồng bộ các sản phẩm đã có từ JSON với giá và lượt bid mới nhất
+    const mergedList = fetchedItems.map(item => {
+      const idNum = Number(item.id);
+      const localUpdated = localMap.get(idNum);
+      const bInfo = bidSummary.get(idNum);
+
+      let curBid = localUpdated?.currentBid !== undefined ? Number(localUpdated.currentBid) : item.currentBid;
+      let bCount = localUpdated?.bidCount !== undefined ? Number(localUpdated.bidCount) : item.bidCount;
+
+      if (bInfo) {
+        if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+        bCount = Math.max(bCount, bInfo.count);
+      }
+
+      return {
+        ...item,
+        currentBid: curBid,
+        bidCount: bCount,
+        marketPriceNew: item.marketPriceNew && item.marketPriceNew > curBid ? item.marketPriceNew : Math.round(curBid * 1.5)
+      };
+    });
+
+    // 2. Bổ sung các sản phẩm mới do người dùng tự đăng bán từ sell.html (chưa có trong JSON)
+    const existingIds = new Set(mergedList.map(item => Number(item.id)));
+    const customUserItems = [];
+    localItems.forEach(item => {
+      const idNum = Number(item.id);
+      if (!existingIds.has(idNum)) {
+        const bInfo = bidSummary.get(idNum);
+        let curBid = Number(item.currentBid || item.startingPrice || 0);
+        let bCount = Number(item.bidCount || 0);
+        if (bInfo) {
+          if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+          bCount = Math.max(bCount, bInfo.count);
+        }
+        customUserItems.push(normalizeProduct({
+          ...item,
+          currentBid: curBid,
+          bidCount: bCount
+        }, item.category || 'PC'));
+      }
+    });
+
+    rawProducts = [...customUserItems, ...mergedList];
+  } catch (e) {
+    console.warn('[PCBid] Lỗi đồng bộ giá products:', e);
+    if (fetchedItems.length > 0) rawProducts = fetchedItems;
   }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar

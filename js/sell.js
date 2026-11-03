@@ -719,6 +719,25 @@ function initFormSubmitHandler() {
       const existing = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
       existing.unshift(newAuctionProduct);
       localStorage.setItem('pcbid_products', JSON.stringify(existing));
+
+      // Đồng bộ đồng thời vào tab "Linh kiện tôi đã đăng bán" (pcbid_my_auctions_selling) của profile.html
+      const mySelling = JSON.parse(localStorage.getItem('pcbid_my_auctions_selling') || '[]');
+      const specsList = newAuctionProduct.specifications
+        ? Object.entries(newAuctionProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
+        : [];
+      mySelling.unshift({
+        id: newAuctionProduct.id,
+        name: newAuctionProduct.name,
+        category: newAuctionProduct.category,
+        startingPrice: newAuctionProduct.startingPrice,
+        currentBid: newAuctionProduct.startingPrice,
+        bidCount: 0,
+        status: 'active',
+        endTimestamp: new Date(newAuctionProduct.endTime).getTime(),
+        images: newAuctionProduct.images,
+        specs: specsList
+      });
+      localStorage.setItem('pcbid_my_auctions_selling', JSON.stringify(mySelling));
     } catch (e) {
       console.error('[Lỗi lưu LocalStorage PCBid]:', e);
     }
