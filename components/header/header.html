@@ -13,6 +13,8 @@
         <a href="mailto:hotro@pcbid.vn" class="header__top-link">Hỗ trợ: hotro@pcbid.vn</a>
         <span class="header__top-divider">•</span>
         <a href="#" class="header__top-link">Quy chế hoạt động</a>
+        <span class="header__top-divider" id="header-top-auth-divider" style="display: none;">•</span>
+        <span id="header-user-status" class="header__top-user-status" style="display: none;"></span>
       </div>
     </div>
   </div>
@@ -40,6 +42,8 @@
               <option value="ram">Bộ nhớ RAM</option>
               <option value="ssd">Ổ cứng SSD/HDD</option>
               <option value="psu">Nguồn máy tính (PSU)</option>
+              <option value="cooling">Tản nhiệt (Khí / AIO)</option>
+              <option value="case">Vỏ case máy tính</option>
             </select>
           </div>
 
@@ -71,7 +75,7 @@
         <!-- Nút danh sách theo dõi (Watchlist) -->
         <a href="profile.html#watchlist" class="header__icon-btn" title="Danh sách theo dõi" aria-label="Danh sách theo dõi">
           <img src="images/icons/icon-bookmark.svg" alt="Theo dõi" class="header__btn-icon-img" width="15" height="16">
-          <span class="header__badge">3</span>
+          <span class="header__badge" id="header-watchlist-badge">0</span>
         </a>
 
         <!-- Nút thông báo đấu giá -->
@@ -80,10 +84,17 @@
           <span class="header__badge">5</span>
         </a>
 
-        <!-- Biểu tượng ảnh đại diện người dùng: kích thước 38x38 -->
-        <a href="profile.html" class="header__user-avatar" title="Tài khoản cá nhân" aria-label="Tài khoản cá nhân">
-          <img src="images/icons/icon-user.svg" alt="Ảnh đại diện" class="header__avatar-icon" width="12" height="12">
-        </a>
+        <!-- Khối người dùng & Menu dropdown đăng nhập / đăng xuất -->
+        <div class="header__user-menu-wrapper" id="header-user-menu-wrapper">
+          <button type="button" class="header__user-avatar" id="header-user-avatar-btn" aria-haspopup="true" aria-expanded="false" title="Tài khoản cá nhân" aria-label="Tài khoản cá nhân">
+            <img src="images/icons/icon-user.svg" alt="Ảnh đại diện" class="header__avatar-icon" width="14" height="14">
+          </button>
+
+          <!-- Dropdown menu tài khoản -->
+          <div class="header__dropdown" id="header-user-dropdown" hidden>
+            <!-- Render động bởi header.js -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -111,10 +122,16 @@
           <a href="products.html?category=ram" class="header__nav-link">Bộ nhớ RAM</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=ssd" class="header__nav-link">Ổ cứng SSD/HDD</a>
+          <a href="products.html?category=Storage" class="header__nav-link">Ổ cứng SSD/HDD</a>
         </li>
         <li class="header__nav-item">
           <a href="products.html?category=psu" class="header__nav-link">Nguồn máy tính (PSU)</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=cooling" class="header__nav-link">Tản nhiệt</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="products.html?category=case" class="header__nav-link">Vỏ case</a>
         </li>
         <li class="header__nav-item">
           <a href="products.html?status=hot" class="header__nav-link">Phiên đang Hot 🔥</a>

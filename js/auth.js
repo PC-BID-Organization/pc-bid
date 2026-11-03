@@ -14,14 +14,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3. Khởi tạo xử lý biểu mẫu đăng nhập
   initLoginForm();
+
+  // 4. Khởi tạo dữ liệu hạt giống 2 tài khoản demo
+  seedSampleAccounts();
 });
 
 /**
  * Khóa lưu trữ thông tin tài khoản người dùng trong LocalStorage
  */
-const STORAGE_KEY_USER = 'pcbid_user';
+const STORAGE_KEY_USER = 'pcbid_currentUser';
 const STORAGE_KEY_USERS = 'pcbid_registered_users';
 const STORAGE_KEY_PREFILL = 'pcbid_prefill_email';
+
+/**
+ * Danh sách 3 tài khoản mẫu dựng sẵn trong mã nguồn phục vụ demo, chấm điểm và kiểm thử phân quyền
+ * Acc 1 (bidder1): Đấu Giá 1 - Tham gia trả giá cạnh tranh, ví 50tr
+ * Acc 2 (bidder2): Đấu Giá 2 - Tham gia trả giá đối kháng để demo vượt giá qua lại, ví 60tr
+ * Acc 3 (seller):  Người Bán - Đăng bán linh kiện PC lên sàn, ví 80tr
+ */
+const SAMPLE_ACCOUNTS = [
+  {
+    id: "user_bidder1_demo",
+    username: "bidder1",
+    password: "123456",
+    fullname: "Nguyễn Văn A (Đấu Giá 1)",
+    email: "bidder1@pcbid.vn",
+    phone: "0901234567",
+    role: "bidder",
+    verified: true,
+    walletBalance: 50000000,
+    depositHold: 3500000,
+    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-bidder.png",
+    rating: 5.0,
+    reviewCount: 38,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 14:32",
+    isLoggedIn: true
+  },
+  {
+    id: "user_bidder2_demo",
+    username: "bidder2",
+    password: "123456",
+    fullname: "Lê Thị C (Đấu Giá 2)",
+    email: "bidder2@pcbid.vn",
+    phone: "0918765432",
+    role: "bidder",
+    verified: true,
+    walletBalance: 60000000,
+    depositHold: 2000000,
+    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-bidder2.png",
+    rating: 4.9,
+    reviewCount: 25,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 11:20",
+    isLoggedIn: true
+  },
+  {
+    id: "user_seller_demo",
+    username: "seller",
+    password: "123456",
+    fullname: "Trần Văn B (Người Bán)",
+    email: "seller@pcbid.vn",
+    phone: "0987654321",
+    role: "seller",
+    verified: true,
+    walletBalance: 80000000,
+    depositHold: 0,
+    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-seller.png",
+    rating: 4.9,
+    reviewCount: 124,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 10:15",
+    isLoggedIn: true
+  }
+];
+
+function seedSampleAccounts() {
+  try {
+    let existing = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    let modified = false;
+    SAMPLE_ACCOUNTS.forEach(demoAcc => {
+      const idx = existing.findIndex(u => u.username === demoAcc.username || u.email === demoAcc.email);
+      if (idx === -1) {
+        existing.push(demoAcc);
+        modified = true;
+      }
+    });
+    if (modified || existing.length === 0) {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(existing.length > 0 ? existing : SAMPLE_ACCOUNTS));
+    }
+  } catch {
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(SAMPLE_ACCOUNTS));
+  }
+}
 
 /**
  * Xử lý sự kiện nhấn nút ẩn/hiện mật khẩu
@@ -76,6 +167,29 @@ function initLoginForm() {
     input.addEventListener('input', () => clearFieldError(input));
   });
 
+  // Lắng nghe sự kiện click nút chọn nhanh tài khoản demo
+  const demoButtons = document.querySelectorAll('.pcb-demo-btn');
+  demoButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const demoKey = btn.getAttribute('data-demo-user');
+      const targetAcc = SAMPLE_ACCOUNTS.find(a => a.username === demoKey) || SAMPLE_ACCOUNTS[0];
+
+      if (inputUsername) inputUsername.value = targetAcc.email;
+      if (inputPassword) inputPassword.value = targetAcc.password;
+
+      clearFieldError(inputUsername, 'err-login-username');
+      clearFieldError(inputPassword, 'err-login-password');
+
+      // Hiệu ứng phản hồi thị giác
+      btn.style.borderColor = '#10b981';
+      btn.style.backgroundColor = '#ecfdf5';
+      setTimeout(() => {
+        btn.style.borderColor = '#a7f3d0';
+        btn.style.backgroundColor = '#ffffff';
+      }, 400);
+    });
+  });
+
   // Lắng nghe sự kiện submit biểu mẫu đăng nhập
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -102,18 +216,48 @@ function initLoginForm() {
 
     if (!isValid) return;
 
-    // Giả lập thông tin đăng nhập thành công
-    const userData = {
-      fullname: 'Nguyễn Văn A',
-      email: usernameVal.includes('@') ? usernameVal : 'user.pcbid@gmail.com',
-      phone: '0912345678',
-      walletBalance: 50000000,
-      walletHold: 0,
-      isLoggedIn: true,
-      loggedInAt: new Date().toISOString()
-    };
+    // Tra cứu tài khoản từ danh sách đăng ký hoặc danh sách tài khoản mẫu có sẵn
+    const registeredUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    const allKnownUsers = [...SAMPLE_ACCOUNTS, ...registeredUsers];
+    const lowerInput = usernameVal.toLowerCase();
 
+    // Tìm kiếm theo username, email, hoặc alias linh hoạt
+    const matched = allKnownUsers.find(u => 
+      (u.email && u.email.toLowerCase() === lowerInput) || 
+      (u.username && u.username.toLowerCase() === lowerInput) ||
+      ((lowerInput === 'bidder' || lowerInput === 'bidder1' || lowerInput === 'pcbuilder99') && u.username === 'bidder1') ||
+      ((lowerInput === 'bidder2' || lowerInput === 'lethic') && u.username === 'bidder2') ||
+      ((lowerInput === 'seller' || lowerInput === 'techguru_hcm') && u.username === 'seller')
+    );
+
+    let userData;
+    if (matched) {
+      userData = {
+        ...matched,
+        isLoggedIn: true,
+        loggedInAt: new Date().toISOString()
+      };
+    } else {
+      const uname = usernameVal.includes('@') ? usernameVal.split('@')[0] : usernameVal;
+      userData = {
+        id: 'user_' + Date.now(),
+        username: uname,
+        fullname: uname,
+        email: usernameVal.includes('@') ? usernameVal : `${uname}@pcbid.vn`,
+        phone: '0912345678',
+        role: 'bidder',
+        verified: true,
+        walletBalance: 50000000,
+        depositHold: 0,
+        address: 'Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh',
+        isLoggedIn: true,
+        loggedInAt: new Date().toISOString()
+      };
+    }
+
+    localStorage.removeItem('pcbid_logged_out');
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
+    localStorage.setItem('pcbid_user', JSON.stringify(userData));
 
     // Chuyển hướng sang trang profile.html (hoặc index.html)
     window.location.href = 'profile.html';
@@ -229,11 +373,16 @@ function initRegisterForm() {
 
     // Tiến hành lưu thông tin tài khoản người dùng vào LocalStorage
     saveUserAccount({
+      id: 'user_' + Date.now(),
+      username: emailVal.split('@')[0],
       fullname: fullnameVal,
       email: emailVal,
       phone: phoneVal,
+      role: 'bidder',
+      verified: true,
       walletBalance: 50000000,
-      walletHold: 0,
+      depositHold: 0,
+      address: 'Trường Đại học Công nghệ Thông tin, TP. Thủ Đức, TP. Hồ Chí Minh',
       registeredAt: new Date().toISOString()
     });
 
