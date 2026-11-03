@@ -29,9 +29,10 @@ Dự án được xây dựng phục vụ yêu cầu học phần IE104 với ti
   * Framework/Thư viện JS: React, Vue, Angular, jQuery,...
   * Backend & Server: Node.js, Express, Python/Django, PHP, Spring Boot,...
   * Cơ sở dữ liệu thật: MySQL, MongoDB, Firebase, Supabase,...
-* **Mô phỏng dữ liệu & Trạng thái:**
+* **Mô phỏng dữ liệu & Trạng thái (SSOT):**
   * Dữ liệu khởi tạo (mock data): Các file `.json` hoặc hằng số dữ liệu trong Javascript (`data/products.json`, `js/data.js`).
-  * Lưu trữ trạng thái phiên người dùng: `localStorage` & `sessionStorage` (phiên đăng nhập, lịch sử đặt giá, các sản phẩm mới đăng, danh sách theo dõi).
+  * Lưu trữ trạng thái phiên người dùng: `localStorage` (`pcbid_products`, `pcbid_bids`, `pcbid_my_auctions_participating`, `pcbid_my_auctions_selling`, `pcbid_registered_users`, `pcbid_logged_in_user`).
+  * Đồng bộ thời gian thực cross-page và cross-tab qua sự kiện `storage` và `pageshow` (hỗ trợ bfcache).
 * **Triển khai (Deployment):** Static Hosting (GitHub Pages).
 
 ---
@@ -44,11 +45,13 @@ Dự án đã chốt chính xác **8 màn hình** đáp ứng đầy đủ yêu 
    - Hero banner giới thiệu sàn đấu giá linh kiện PC cũ.
    - Danh mục linh kiện nổi bật (GPU, CPU, Mainboard, RAM, SSD/HDD, PSU).
    - Phiên đấu giá Hot nhất, phiên sắp kết thúc (Live Countdown).
+   - Đặt giá nhanh (Quick Bid) 1-chạm cập nhật giá thời gian thực.
    - Cam kết sàn (Bao test 7 ngày, kiểm định Furmark, MemTest86).
 2. **Danh sách sản phẩm & Bộ lọc (`products.html`)**:
    - Bộ lọc linh kiện đa năng (danh mục, khoảng giá, tình trạng New/Like New/Used).
    - Sắp xếp (giá tăng/giảm, sắp hết hạn, lượt bid nhiều nhất).
    - Tìm kiếm từ khóa thời gian thực.
+   - Đồng bộ giá hiện tại và số lượt bid từ storage.
 3. **Chi tiết phiên đấu giá (`product-detail.html`)**:
    - Gallery ảnh linh kiện và kiểm định thực tế.
    - Thông số kỹ thuật chi tiết, đánh giá tình trạng linh kiện.
@@ -56,17 +59,20 @@ Dự án đã chốt chính xác **8 màn hình** đáp ứng đầy đủ yêu 
    - Bộ đếm thời gian ngược (Live Countdown).
    - Khung đặt giá (Bidding Box): Kiểm tra hợp lệ bước giá, tự động cập nhật giá cao nhất.
    - Lịch sử đặt giá (Bid history log).
+   - Chặn người bán tự đấu giá sản phẩm của chính mình (Anti self-bidding).
 4. **Tạo phiên đấu giá mới (`sell.html`)**:
    - Biểu mẫu đăng linh kiện đấu giá: Tên, loại linh kiện, thông số, ảnh demo, giá khởi điểm, bước giá, hạn kết thúc.
    - Form validation chuẩn HTML5/JS và lưu dữ liệu phiên vào `localStorage`.
+   - Gắn đúng người bán (`sellerName`, `sellerId`) và đồng bộ vào danh sách đang bán.
 5. **Đăng nhập (`login.html`)**:
    - Xác thực tài khoản mô phỏng, lưu trạng thái phiên đăng nhập vào `localStorage`.
+   - Tích hợp 3 nút chọn nhanh tài khoản demo 1-chạm (`Đấu giá 1`, `Đấu giá 2`, `Người bán`).
 6. **Đăng ký tài khoản (`register.html`)**:
    - Form đăng ký thành viên mới, khởi tạo số dư ví ảo mô phỏng ban đầu.
 7. **Hồ sơ cá nhân & Đấu giá của tôi (`profile.html`)**:
    - Thông tin cá nhân người dùng, số dư ví ảo mô phỏng.
-   - Tab quản lý phiên đấu giá đang tham gia (dẫn đầu / bị vượt giá).
-   - Tab quản lý các phiên do chính người dùng đăng bán.
+   - Tab quản lý phiên đấu giá đang tham gia: Tự động đối soát trạng thái đang dẫn đầu (Lead) hoặc bị vượt giá (Outbid), tính toán nút trả giá tiếp chính xác.
+   - Tab quản lý các phiên do chính người dùng đăng bán (đồng bộ từ `sell.html`).
    - Tab danh sách theo dõi (Watchlist).
 8. **Trang thông báo lỗi 404 (`404.html`)**:
    - Giao diện báo lỗi trang không tồn tại thân thiện, kèm nút điều hướng về Trang chủ.
@@ -79,9 +85,9 @@ Dự án đã chốt chính xác **8 màn hình** đáp ứng đầy đủ yêu 
 pc-bid/
 ├── components/
 │   ├── header/
-│   │   ├── header.html        # Template HTML Header (Top bar, Search, Categories Nav)
-│   │   ├── header.css         # Style BEM riêng cho Header
-│   │   └── header.js          # Logic Header (Search, Active menu link, Category sync)
+│   │   ├── header.html        # Template HTML Header (Top bar, Search, Avatar Dropdown, Categories Nav)
+│   │   ├── header.css         # Style BEM riêng cho Header & Dropdown menu
+│   │   └── header.js          # Logic Header (Auth state, Avatar Dropdown, Search, Active link)
 │   └── footer/
 │       ├── footer.html        # Template HTML Footer 4 cột
 │       └── footer.css         # Style BEM riêng cho Footer
@@ -98,11 +104,12 @@ pc-bid/
 │   ├── data.js                # Mock dataset ban đầu (sản phẩm, tài khoản mẫu)
 │   ├── storage.js             # Wrapper tiện ích đọc/ghi localStorage
 │   ├── main.js                # Nạp component động (#app-header, #app-footer)
-│   ├── products.js            # Logic bộ lọc, tìm kiếm, phân trang
-│   ├── product-detail.js      # Logic đặt giá, validate bước giá, countdown
-│   ├── sell.js                # Logic đăng bán sản phẩm mới
-│   ├── auth.js                # Logic xác thực đăng nhập/đăng ký
-│   └── profile.js             # Logic tab quản lý đấu giá & ví ảo
+│   ├── index.js               # Logic trang chủ, sync giá & Quick Bid thời gian thực
+│   ├── products.js            # Logic bộ lọc, tìm kiếm, phân trang, sync giá
+│   ├── product-detail.js      # Logic đặt giá, validate bước giá, countdown, anti self-bidding
+│   ├── sell.js                # Logic đăng bán sản phẩm mới, gắn seller session
+│   ├── auth.js                # Logic xác thực, seed sẵn 3 tài khoản demo
+│   └── profile.js             # Logic tab quản lý đấu giá, ví ảo, tự tính Lead/Outbid
 ├── images/
 │   ├── logo/                  # Logo PCBid các kích thước
 │   ├── icons/                 # Vector SVG icon trích xuất từ Figma
@@ -165,6 +172,7 @@ pc-bid/
 
 ## 7. Hướng dẫn chạy & Kiểm thử
 
+### 7.1. Khởi chạy dự án
 1. Clone repository về máy:
    ```bash
    git clone https://github.com/PC-BID-Organization/pc-bid.git
@@ -174,3 +182,12 @@ pc-bid/
 3. Cài đặt tiện ích mở rộng **Live Server** trên VS Code.
 4. Click chuột phải vào file `index.html` và chọn **Open with Live Server** (cần thiết để nạp component Header/Footer qua HTTP request cục bộ tránh lỗi CORS).
 5. Dự án thuần Frontend, không cần cài đặt `npm` hay server backend.
+
+### 7.2. Tài khoản mẫu để kiểm thử (Demo Accounts)
+Hệ thống đã tạo sẵn 3 tài khoản trong code (có thể click nút đăng nhập nhanh ở trang `login.html`):
+
+| Tài khoản | Tên hiển thị | Vai trò | Số dư ví | Mật khẩu |
+| :--- | :--- | :--- | :--- | :--- |
+| `bidder1@pcbid.vn` | **Nguyễn Văn A (Đấu Giá 1)** | Người mua | 50.000.000 đ | `123456` |
+| `bidder2@pcbid.vn` | **Lê Thị C (Đấu Giá 2)** | Người mua | 60.000.000 đ | `123456` |
+| `seller@pcbid.vn` | **Trần Văn B (Người Bán)** | Người bán | 80.000.000 đ | `123456` |
