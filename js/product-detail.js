@@ -18,11 +18,6 @@ const NGUON_DU_LIEU = [
   'data/psu.json',
   'data/cooling.json',
   'data/case.json',
-  // File cũ (đường dẫn gộp) để tương thích ngược
-  'data/cpu-gpu.json',
-  'data/mainboard-ram.json',
-  'data/storage-psu.json',
-  'data/case-cooling.json',
 ];
 
 // Dữ liệu dự phòng khi fetch thất bại (mở qua giao thức file:/// hoặc mạng lỗi)
@@ -176,20 +171,6 @@ function cheKhuatTen(tenNguoiDung) {
  * @returns {Promise<Array>} Mảng sản phẩm đã nạp
  */
 async function nạpTatCaSanPham() {
-  // Ưu tiên 1: Đọc từ localStorage nếu đã có dữ liệu được khởi tạo trước
-  const duLieuLuu = localStorage.getItem('pcbid_products');
-  if (duLieuLuu) {
-    try {
-      const danhSach = JSON.parse(duLieuLuu);
-      if (Array.isArray(danhSach) && danhSach.length > 0) {
-        return danhSach;
-      }
-    } catch {
-      // localStorage bị hỏng, tiếp tục thử fetch
-    }
-  }
-
-  // Ưu tiên 2: Fetch từ các file JSON tĩnh trong project
   const ketQuaFetch = [];
   for (const duongDan of NGUON_DU_LIEU) {
     try {
@@ -205,15 +186,81 @@ async function nạpTatCaSanPham() {
     }
   }
 
-  if (ketQuaFetch.length > 0) {
-    // Lưu vào localStorage để các lần sau dùng lại
-    localStorage.setItem('pcbid_products', JSON.stringify(ketQuaFetch));
-    return ketQuaFetch;
+  let danhSachGoc = ketQuaFetch;
+  if (danhSachGoc.length === 0) {
+    danhSachGoc = SAN_PHAM_DU_PHONG;
   }
 
-  // Ưu tiên 3 (dự phòng): Dùng dữ liệu mock cứng trong code
-  console.warn('[PCBid] Không fetch được file JSON, dùng dữ liệu dự phòng.');
-  return SAN_PHAM_DU_PHONG;
+  // Đọc dữ liệu cập nhật từ LocalStorage (pcbid_products & pcbid_bids)
+  let localItems = [];
+  try {
+    localItems = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+  } catch {
+    localItems = [];
+  }
+  const localMap = new Map(localItems.map(item => [Number(item.id), item]));
+
+  let localBids = [];
+  try {
+    localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+  } catch {
+    localBids = [];
+  }
+  const bidSummary = new Map();
+  localBids.forEach(b => {
+    const pid = Number(b.productId);
+    const amt = Number(b.amount) || 0;
+    const curr = bidSummary.get(pid) || { maxBid: 0, count: 0 };
+    curr.maxBid = Math.max(curr.maxBid, amt);
+    curr.count += 1;
+    bidSummary.set(pid, curr);
+  });
+
+  // Đồng bộ sản phẩm từ catalog
+  const mergedList = danhSachGoc.map(sp => {
+    const idNum = Number(sp.id);
+    const localUpdated = localMap.get(idNum);
+    const bInfo = bidSummary.get(idNum);
+
+    let curBid = localUpdated?.currentBid !== undefined ? Number(localUpdated.currentBid) : Number(sp.currentBid || sp.startingPrice || 0);
+    let bCount = localUpdated?.bidCount !== undefined ? Number(localUpdated.bidCount) : Number(sp.bidCount || 0);
+
+    if (bInfo) {
+      if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+      bCount = Math.max(bCount, bInfo.count);
+    }
+
+    return {
+      ...sp,
+      ...(localUpdated || {}),
+      id: idNum,
+      currentBid: curBid,
+      bidCount: bCount
+    };
+  });
+
+  // Bổ sung các sản phẩm do người dùng tự đăng bán từ sell.html (chưa có trong JSON)
+  const existingIds = new Set(mergedList.map(sp => Number(sp.id)));
+  localItems.forEach(item => {
+    const idNum = Number(item.id);
+    if (!existingIds.has(idNum)) {
+      const bInfo = bidSummary.get(idNum);
+      let curBid = Number(item.currentBid || item.startingPrice || 0);
+      let bCount = Number(item.bidCount || 0);
+      if (bInfo) {
+        if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+        bCount = Math.max(bCount, bInfo.count);
+      }
+      mergedList.unshift({
+        ...item,
+        id: idNum,
+        currentBid: curBid,
+        bidCount: bCount
+      });
+    }
+  });
+
+  return mergedList;
 }
 
 /**
@@ -223,7 +270,23 @@ async function nạpTatCaSanPham() {
  */
 async function timSanPhamTheoId(id) {
   const danhSach = await nạpTatCaSanPham();
-  return danhSach.find(sp => sp.id === id) || null;
+  const idNum = Number(id);
+  const found = danhSach.find(sp => Number(sp.id) === idNum) || null;
+  if (found) {
+    // Đảm bảo giá đấu luôn khớp với lượt bid cao nhất trong pcbid_bids
+    try {
+      const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+      const spBids = bids.filter(b => Number(b.productId) === idNum);
+      if (spBids.length > 0) {
+        const maxBid = Math.max(...spBids.map(b => Number(b.amount) || 0));
+        if (maxBid > (found.currentBid || 0)) {
+          found.currentBid = maxBid;
+        }
+        found.bidCount = Math.max(found.bidCount || 0, spBids.length);
+      }
+    } catch {}
+  }
+  return found;
 }
 
 /* ==========================================================================
@@ -679,7 +742,9 @@ function xuLyDatGia() {
   }
 
   // Kiểm tra người dùng không tự đấu với chính họ
-  if (nguoiDung.username === sanPhamHienTai.seller) {
+  if (nguoiDung.username === sanPhamHienTai.seller ||
+      nguoiDung.fullname === sanPhamHienTai.seller ||
+      nguoiDung.email === sanPhamHienTai.seller) {
     hienThiLoi(oLoi, oNhapGia, 'Bạn không thể đặt giá cho sản phẩm chính mình đăng bán.');
     return;
   }
@@ -739,6 +804,36 @@ function thucHienDatGia(nguoiDung, soTien) {
     oNhapGia.classList.remove('pcb-pd__input--error');
   }
 
+  // Đồng bộ phiên vừa đặt giá vào tab "Phiên đang tham gia" (pcbid_my_auctions_participating) của profile.html
+  try {
+    let participating = JSON.parse(localStorage.getItem('pcbid_my_auctions_participating') || '[]');
+    const pIndex = participating.findIndex(p => p.id === sanPhamHienTai.id);
+    const specsList = sanPhamHienTai.specifications
+      ? Object.entries(sanPhamHienTai.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
+      : [];
+    const partItem = {
+      id: sanPhamHienTai.id,
+      name: sanPhamHienTai.name,
+      category: sanPhamHienTai.category,
+      currentBid: soTien,
+      myBid: soTien,
+      bidCount: sanPhamHienTai.bidCount,
+      status: 'lead',
+      bidStep: sanPhamHienTai.bidStep || 100000,
+      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+      specs: specsList
+    };
+    if (pIndex >= 0) {
+      participating[pIndex] = partItem;
+    } else {
+      participating.unshift(partItem);
+    }
+    localStorage.setItem('pcbid_my_auctions_participating', JSON.stringify(participating));
+  } catch (e) {
+    console.warn('[PCBid] Không thể đồng bộ phiên tham gia vào profile:', e);
+  }
+
   // Làm mới bảng lịch sử
   renderLichSu(sanPhamHienTai.id);
 
@@ -753,11 +848,13 @@ function thucHienDatGia(nguoiDung, soTien) {
 function capNhatSanPhamTrongLocalStorage(sanPham) {
   try {
     const danhSach = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-    const chiSo = danhSach.findIndex(sp => sp.id === sanPham.id);
+    const chiSo = danhSach.findIndex(sp => Number(sp.id) === Number(sanPham.id));
     if (chiSo !== -1) {
       danhSach[chiSo] = { ...danhSach[chiSo], ...sanPham };
-      localStorage.setItem('pcbid_products', JSON.stringify(danhSach));
+    } else {
+      danhSach.push(sanPham);
     }
+    localStorage.setItem('pcbid_products', JSON.stringify(danhSach));
   } catch {
     // Bỏ qua lỗi localStorage
   }
@@ -841,7 +938,7 @@ function capNhatNutWatchlist(idSanPham) {
   let watchlist = [];
   try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
 
-  const daCoTrong = watchlist.includes(idSanPham);
+  const daCoTrong = watchlist.some(item => (typeof item === "object" ? item.id : item) === idSanPham);
   if (nut) {
     nut.setAttribute('aria-pressed', daCoTrong ? 'true' : 'false');
     nut.classList.toggle('pcb-pd__watchlist-btn--active', daCoTrong);
@@ -858,17 +955,34 @@ function batTatWatchlist(idSanPham) {
   let watchlist = [];
   try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
 
-  const daCoTrong = watchlist.includes(idSanPham);
+  const daCoTrong = watchlist.some(item => (typeof item === 'object' ? item.id : item) === idSanPham);
   if (daCoTrong) {
-    watchlist = watchlist.filter(id => id !== idSanPham);
+    watchlist = watchlist.filter(item => (typeof item === 'object' ? item.id : item) !== idSanPham);
     hienThiToast('Đã xóa khỏi danh sách theo dõi.', 'info');
   } else {
-    watchlist.push(idSanPham);
+    const specsList = sanPhamHienTai?.specifications
+      ? Object.entries(sanPhamHienTai.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
+      : [];
+    const itemObj = {
+      id: sanPhamHienTai.id,
+      name: sanPhamHienTai.name,
+      category: sanPhamHienTai.category,
+      currentBid: sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice,
+      marketPriceNew: sanPhamHienTai.marketPriceNew || Math.round((sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) * 1.5),
+      bidCount: sanPhamHienTai.bidCount || 0,
+      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+      specs: specsList
+    };
+    watchlist.unshift(itemObj);
     hienThiToast('Đã thêm vào danh sách theo dõi!', 'success');
   }
 
   localStorage.setItem('pcbid_watchlist', JSON.stringify(watchlist));
   capNhatNutWatchlist(idSanPham);
+
+  const headerBadge = document.getElementById('header-watchlist-badge');
+  if (headerBadge) headerBadge.textContent = watchlist.length;
 }
 
 /* ==========================================================================
@@ -1017,3 +1131,20 @@ async function khoiDong() {
 
 // Chạy module sau khi DOM đã nạp xong
 document.addEventListener('DOMContentLoaded', khoiDong);
+
+// Lắng nghe khi quay lại trang qua back/forward cache hoặc có lượt đặt giá từ tab khác
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && sanPhamHienTai) {
+    timSanPhamTheoId(sanPhamHienTai.id).then(sp => {
+      if (sp) hienThiSanPham(sp);
+    });
+  }
+});
+
+window.addEventListener('storage', (e) => {
+  if ((e.key === 'pcbid_products' || e.key === 'pcbid_bids') && sanPhamHienTai) {
+    timSanPhamTheoId(sanPhamHienTai.id).then(sp => {
+      if (sp) hienThiSanPham(sp);
+    });
+  }
+});
