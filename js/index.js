@@ -251,6 +251,86 @@ function playBidSuccessSound() {
    3. NẠP DỮ LIỆU SẢN PHẨM (HYBRID DATA LOADER)
    ========================================================================== */
 
+/**
+ * Đồng bộ dữ liệu danh sách sản phẩm với LocalStorage (pcbid_products và pcbid_bids)
+ * Giữ cho giá đấu hiện tại và số lượt bid luôn khớp hoàn toàn giữa các trang
+ */
+function syncProductsWithStorage(rawList) {
+  let localProducts = [];
+  try {
+    localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+  } catch (e) {
+    localProducts = [];
+  }
+  const localMap = new Map(localProducts.map(p => [Number(p.id), p]));
+
+  let localBids = [];
+  try {
+    localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+  } catch (e) {
+    localBids = [];
+  }
+  const bidSummary = new Map();
+  localBids.forEach(b => {
+    const pid = Number(b.productId);
+    const amt = Number(b.amount) || 0;
+    const curr = bidSummary.get(pid) || { maxBid: 0, count: 0 };
+    curr.maxBid = Math.max(curr.maxBid, amt);
+    curr.count += 1;
+    bidSummary.set(pid, curr);
+  });
+
+  // 1. Cập nhật các sản phẩm đã có từ JSON
+  const merged = rawList.map(p => {
+    const idNum = Number(p.id);
+    const local = localMap.get(idNum);
+    const bInfo = bidSummary.get(idNum);
+
+    let curBid = local?.currentBid !== undefined ? Number(local.currentBid) : Number(p.currentBid || p.startingPrice || 0);
+    let bCount = local?.bidCount !== undefined ? Number(local.bidCount) : Number(p.bidCount || 0);
+
+    if (bInfo) {
+      if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+      bCount = Math.max(bCount, bInfo.count);
+    }
+
+    return {
+      ...p,
+      currentBid: curBid,
+      bidCount: bCount,
+      marketPriceNew: p.marketPriceNew && p.marketPriceNew > curBid ? p.marketPriceNew : Math.round(curBid * 1.5)
+    };
+  });
+
+  // 2. Bổ sung các sản phẩm mới do người dùng tự đăng bán từ sell.html (chưa có trong JSON)
+  const existingIds = new Set(merged.map(p => Number(p.id)));
+  const customUserProducts = [];
+  localProducts.forEach(lp => {
+    const idNum = Number(lp.id);
+    if (!existingIds.has(idNum)) {
+      const bInfo = bidSummary.get(idNum);
+      let curBid = Number(lp.currentBid || lp.startingPrice || 0);
+      let bCount = Number(lp.bidCount || 0);
+      if (bInfo) {
+        if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
+        bCount = Math.max(bCount, bInfo.count);
+      }
+      customUserProducts.push({
+        ...lp,
+        id: idNum,
+        name: fixMojibake(lp.name || 'Linh kiện máy tính'),
+        condition: fixMojibake(lp.condition || 'Đã sử dụng'),
+        currentBid: curBid,
+        bidCount: bCount,
+        endTimestamp: lp.endTime ? new Date(lp.endTime).getTime() : Date.now() + 86400000 * 3,
+        marketPriceNew: Number(lp.marketPriceNew) || Math.round(curBid * 1.5)
+      });
+    }
+  });
+
+  return [...customUserProducts, ...merged];
+}
+
 async function loadProducts() {
   try {
     const fetches = DATA_SOURCES.map(async src => {
@@ -264,9 +344,7 @@ async function loadProducts() {
     const flattened = results.flat();
 
     if (flattened && flattened.length > 0) {
-      allProducts = flattened.map(p => {
-        // Dùng endTime gốc trong dữ liệu JSON (2026-11-15T00:00:00+07:00)
-        // Tán xạ nhẹ 0-48 giờ quanh mốc kết thúc gốc để các phiên lệch nhau thực tế
+      const mapped = flattened.map(p => {
         const baseTime = new Date(p.endTime).getTime();
         const spreadHours = (p.id % 48) + ((p.id % 7) * 0.5);
         const endTimestamp = isNaN(baseTime) ? (Date.now() + 86400000 * 7) : (baseTime - spreadHours * 3600 * 1000);
@@ -279,6 +357,7 @@ async function loadProducts() {
           marketPriceNew: p.marketPriceNew || Math.round(p.currentBid * 1.85)
         };
       });
+      allProducts = syncProductsWithStorage(mapped);
       return;
     }
   } catch (err) {
@@ -286,10 +365,11 @@ async function loadProducts() {
   }
 
   // Dự phòng hạt giống
-  allProducts = FALLBACK_PRODUCTS.map(p => ({
+  const mapped = FALLBACK_PRODUCTS.map(p => ({
     ...p,
     endTimestamp: new Date(p.endTime).getTime()
   }));
+  allProducts = syncProductsWithStorage(mapped);
 }
 
 /* ==========================================================================
@@ -639,9 +719,9 @@ function executeQuickBid() {
   currentModalProduct.currentBid = newBid;
   currentModalProduct.bidCount = (currentModalProduct.bidCount || 0) + 1;
 
-  // Cập nhật trực quan trên thẻ card ở giao diện
-  const card = document.getElementById(`card-${currentModalProduct.id}`);
-  if (card) {
+  // Cập nhật trực quan trên tất cả các thẻ card cùng sản phẩm này ở giao diện
+  const matchingCards = document.querySelectorAll(`.pcb-card[data-id="${currentModalProduct.id}"]`);
+  matchingCards.forEach(card => {
     const valEl = card.querySelector('[data-field="currentBid"]');
     const cntEl = card.querySelector('[data-field="bidCount"]');
     if (valEl) valEl.textContent = formatVnd(newBid);
@@ -654,6 +734,63 @@ function executeQuickBid() {
       card.style.borderColor = '';
       card.style.boxShadow = '';
     }, 1200);
+  });
+
+  // Đồng bộ trong mảng allProducts đang chạy
+  const inMemory = allProducts.find(p => Number(p.id) === Number(currentModalProduct.id));
+  if (inMemory) {
+    inMemory.currentBid = newBid;
+    inMemory.bidCount = currentModalProduct.bidCount;
+  }
+
+  // Đồng bộ lưu lượt đặt giá vào LocalStorage (pcbid_bids, pcbid_products & pcbid_my_auctions_participating)
+  try {
+    const user = JSON.parse(localStorage.getItem('pcbid_currentUser') || localStorage.getItem('pcbid_user') || '{"username":"pcbuilder99"}');
+    const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+    bids.unshift({
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+      productId: currentModalProduct.id,
+      bidderName: user.username || 'pcbuilder99',
+      amount: newBid,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('pcbid_bids', JSON.stringify(bids));
+
+    // Đồng bộ vào pcbid_products để các trang products.html và product-detail.html luôn khớp giá
+    const localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const lpIdx = localProducts.findIndex(p => Number(p.id) === Number(currentModalProduct.id));
+    if (lpIdx >= 0) {
+      localProducts[lpIdx].currentBid = newBid;
+      localProducts[lpIdx].bidCount = currentModalProduct.bidCount;
+    } else {
+      localProducts.push({
+        ...currentModalProduct,
+        currentBid: newBid,
+        bidCount: currentModalProduct.bidCount
+      });
+    }
+    localStorage.setItem('pcbid_products', JSON.stringify(localProducts));
+
+    const participating = JSON.parse(localStorage.getItem('pcbid_my_auctions_participating') || '[]');
+    const pIdx = participating.findIndex(p => Number(p.id) === Number(currentModalProduct.id));
+    const pItem = {
+      id: currentModalProduct.id,
+      name: currentModalProduct.name,
+      category: currentModalProduct.category,
+      currentBid: newBid,
+      myBid: newBid,
+      bidCount: currentModalProduct.bidCount,
+      status: 'lead',
+      bidStep: currentModalProduct.bidStep || 100000,
+      endTimestamp: currentModalProduct.endTime ? new Date(currentModalProduct.endTime).getTime() : Date.now() + 86400000,
+      images: currentModalProduct.images || [],
+      specs: currentModalProduct.specifications ? Object.entries(currentModalProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
+    };
+    if (pIdx >= 0) participating[pIdx] = pItem;
+    else participating.unshift(pItem);
+    localStorage.setItem('pcbid_my_auctions_participating', JSON.stringify(participating));
+  } catch (e) {
+    console.warn('[PCBid] Không thể lưu lượt đặt giá nhanh:', e);
   }
 
   // Phát âm thanh & Thông báo thành công
@@ -803,6 +940,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target.closest('[data-action="close-lightbox"]') || e.target.id === 'pcb-lightbox-modal') {
       closeLightbox();
       return;
+    }
+  });
+
+  // Lắng nghe khi quay lại trang qua back/forward cache của trình duyệt (bfcache)
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      loadProducts().then(() => {
+        renderEndingSoonShelf();
+        renderHotAuctionsShelf();
+        renderNewListingsShelf();
+      });
+    }
+  });
+
+  // Lắng nghe thay đổi dữ liệu đấu giá từ các tab/cửa sổ khác (Storage Event)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
+      loadProducts().then(() => {
+        renderEndingSoonShelf();
+        renderHotAuctionsShelf();
+        renderNewListingsShelf();
+      });
     }
   });
 
