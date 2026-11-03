@@ -16,22 +16,76 @@ const STORAGE_KEYS = {
   WATCHLIST: 'pcbid_watchlist'
 };
 
-// Người dùng mẫu mặc định
-const DEFAULT_USER = {
-  id: "user_01",
-  username: "pcbuilder99",
-  fullname: "Nguyễn Văn A",
-  email: "nguyenvana@example.com",
-  phone: "0912345678",
-  role: "bidder",
-  verified: true,
-  walletBalance: 50000000,
-  depositHold: 3500000,
-  address: "Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-  pref_sms: true,
-  pref_email: true,
-  lastUpdated: "Hôm nay, 14:32"
-};
+/**
+ * Danh sách 3 tài khoản mẫu dựng sẵn phục vụ demo, chấm điểm và kiểm thử phân quyền
+ * Acc 1 (bidder1): Đấu Giá 1 - Tham gia trả giá cạnh tranh, ví 50tr
+ * Acc 2 (bidder2): Đấu Giá 2 - Tham gia trả giá đối kháng để demo vượt giá qua lại, ví 60tr
+ * Acc 3 (seller):  Người Bán - Đăng bán linh kiện PC lên sàn, ví 80tr
+ */
+const SAMPLE_ACCOUNTS = [
+  {
+    id: "user_bidder1_demo",
+    username: "bidder1",
+    password: "123456",
+    fullname: "Nguyễn Văn A (Đấu Giá 1)",
+    email: "bidder1@pcbid.vn",
+    phone: "0901234567",
+    role: "bidder",
+    verified: true,
+    walletBalance: 50000000,
+    depositHold: 3500000,
+    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-bidder.png",
+    rating: 5.0,
+    reviewCount: 38,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 14:32",
+    isLoggedIn: true
+  },
+  {
+    id: "user_bidder2_demo",
+    username: "bidder2",
+    password: "123456",
+    fullname: "Lê Thị C (Đấu Giá 2)",
+    email: "bidder2@pcbid.vn",
+    phone: "0918765432",
+    role: "bidder",
+    verified: true,
+    walletBalance: 60000000,
+    depositHold: 2000000,
+    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-bidder2.png",
+    rating: 4.9,
+    reviewCount: 25,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 11:20",
+    isLoggedIn: true
+  },
+  {
+    id: "user_seller_demo",
+    username: "seller",
+    password: "123456",
+    fullname: "Trần Văn B (Người Bán)",
+    email: "seller@pcbid.vn",
+    phone: "0987654321",
+    role: "seller",
+    verified: true,
+    walletBalance: 80000000,
+    depositHold: 0,
+    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
+    avatar: "images/avatars/avatar-seller.png",
+    rating: 4.9,
+    reviewCount: 124,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: "Hôm nay, 10:15",
+    isLoggedIn: true
+  }
+];
+
+const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
 // Danh sách phiên đang tham gia mẫu
 const DEFAULT_PARTICIPATING = [
@@ -190,7 +244,8 @@ const DEFAULT_WATCHLIST = [
  * Định dạng số tiền sang định dạng tiền tệ Việt Nam Đồng (VND)
  */
 function formatVnd(amount) {
-  return `${new Intl.NumberFormat('vi-VN').format(amount)} đ`;
+  const num = (typeof amount !== 'number' || isNaN(amount)) ? (Number(amount) || 0) : amount;
+  return `${new Intl.NumberFormat('vi-VN').format(num)} đ`;
 }
 
 /**
@@ -255,11 +310,17 @@ function showToast(message, isSuccess = true) {
 function getCurrentUser() {
   const raw = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
   if (!raw) {
+    // Nếu chưa có tài khoản trong storage nhưng không bị cấm đăng xuất thì khởi tạo tài khoản mẫu
+    if (localStorage.getItem('pcbid_logged_out') === 'true') {
+      return null;
+    }
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(DEFAULT_USER));
     return DEFAULT_USER;
   }
   try {
-    return JSON.parse(raw);
+    const user = JSON.parse(raw);
+    if (!user || user.isLoggedIn === false) return null;
+    return user;
   } catch {
     return DEFAULT_USER;
   }
@@ -271,15 +332,70 @@ function saveCurrentUser(user) {
 
 function getParticipatingBids() {
   const raw = localStorage.getItem(STORAGE_KEYS.PARTICIPATING_BIDS);
+  let list = [];
   if (!raw) {
-    localStorage.setItem(STORAGE_KEYS.PARTICIPATING_BIDS, JSON.stringify(DEFAULT_PARTICIPATING));
-    return DEFAULT_PARTICIPATING;
+    list = DEFAULT_PARTICIPATING;
+  } else {
+    try {
+      list = JSON.parse(raw);
+      if (!Array.isArray(list)) list = DEFAULT_PARTICIPATING;
+    } catch {
+      list = DEFAULT_PARTICIPATING;
+    }
   }
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return DEFAULT_PARTICIPATING;
-  }
+
+  const currentUser = getCurrentUser();
+  const currentUsername = currentUser ? (currentUser.username || currentUser.fullname) : 'bidder1';
+
+  // Đọc danh sách sản phẩm và lịch sử đặt giá mới nhất từ localStorage
+  let localProducts = [];
+  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
+  const prodMap = new Map(localProducts.map(p => [Number(p.id), p]));
+
+  let localBids = [];
+  try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
+
+  // Tự động kiểm tra trạng thái Dẫn đầu (lead) vs Bị vượt giá (outbid) theo người dùng hiện tại
+  return list.map(item => {
+    const idNum = Number(item.id);
+    const prod = prodMap.get(idNum);
+
+    // Tìm các lượt bid của người dùng hiện tại trên sản phẩm này
+    const myBidsOnItem = localBids.filter(b => 
+      Number(b.productId) === idNum && 
+      (b.bidderName === currentUsername || b.bidderName === currentUser?.username || b.bidderName === currentUser?.email)
+    );
+
+    let myHighestBid = Number(item.myBid) || Number(item.currentBid) || 1000000;
+    if (myBidsOnItem.length > 0) {
+      myHighestBid = Math.max(...myBidsOnItem.map(b => Number(b.amount) || 0));
+    }
+
+    let currentHighestBid = prod ? Number(prod.currentBid) : Number(item.currentBid || myHighestBid);
+    const allBidsOnItem = localBids.filter(b => Number(b.productId) === idNum);
+    if (allBidsOnItem.length > 0) {
+      const topBid = Math.max(...allBidsOnItem.map(b => Number(b.amount) || 0));
+      if (topBid > currentHighestBid) currentHighestBid = topBid;
+    }
+
+    // Nếu giá cao nhất hiện tại lớn hơn giá tôi đã đặt, hoặc người dẫn đầu không phải tôi -> BỊ VƯỢT GIÁ (outbid)
+    let isLead = false;
+    if (allBidsOnItem.length > 0) {
+      isLead = (allBidsOnItem[0].bidderName === currentUsername || allBidsOnItem[0].bidderName === currentUser?.username) && (myHighestBid >= currentHighestBid);
+    } else {
+      isLead = item.status === 'lead' || item.status === 'leading';
+    }
+
+    return {
+      ...item,
+      id: idNum,
+      bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
+      myBid: myHighestBid,
+      currentBid: currentHighestBid,
+      bidCount: prod?.bidCount !== undefined ? prod.bidCount : Math.max(item.bidCount || 1, allBidsOnItem.length),
+      status: isLead ? 'lead' : 'outbid'
+    };
+  });
 }
 
 function saveParticipatingBids(items) {
@@ -306,7 +422,28 @@ function getWatchlistItems() {
     return DEFAULT_WATCHLIST;
   }
   try {
-    return JSON.parse(raw);
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return DEFAULT_WATCHLIST;
+    return list.map(item => {
+      if (typeof item === 'number' || typeof item === 'string') {
+        const idNum = Number(item);
+        const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
+        return sample || {
+          id: idNum,
+          name: 'Linh kiện #' + idNum,
+          category: 'GPU',
+          currentBid: 2500000,
+          marketPriceNew: 4000000,
+          bidCount: 5,
+          endTimestamp: Date.now() + 86400000,
+          images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+          specs: ['Đã qua kiểm định Furmark']
+        };
+      }
+      if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
+      if (!item.category) item.category = 'Khác';
+      return item;
+    });
   } catch {
     return DEFAULT_WATCHLIST;
   }
@@ -325,7 +462,7 @@ function saveWatchlistItems(items) {
  * Yêu cầu: Badge xanh lá (Đang dẫn đầu), Badge đỏ (Đã bị vượt giá kèm nút Trả giá tiếp)
  */
 function renderParticipatingCard(item) {
-  const isLead = item.status === 'lead';
+  const isLead = item.status === 'lead' || item.status === 'leading';
   const detailUrl = `product-detail.html?id=${item.id}`;
   const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/products/gpu/2018-rtx-4070-12gb-1.webp';
 
@@ -598,6 +735,11 @@ let currentMultiplier = 1;
  */
 function syncUserInfoUI() {
   const user = getCurrentUser();
+  if (!user) {
+    // Người dùng đã đăng xuất: chuyển hướng đến trang đăng nhập
+    window.location.href = 'login.html';
+    return;
+  }
 
   // Sidebar
   const nameEl = document.getElementById('sidebar-user-name');
@@ -846,6 +988,10 @@ function setupQuickBid(productId) {
   const item = list.find(x => x.id === Number(productId));
   if (!item) return;
 
+  item.currentBid = Number(item.currentBid) || Number(item.myBid) || 1000000;
+  item.bidStep = Number(item.bidStep) || 100000;
+  item.bidCount = Number(item.bidCount) || 1;
+
   activeQuickBidItem = item;
   currentMultiplier = 1;
 
@@ -884,7 +1030,10 @@ function setupQuickBid(productId) {
 
 function updateQuickBidCalculations() {
   if (!activeQuickBidItem) return;
-  const newPrice = activeQuickBidItem.currentBid + (currentMultiplier * activeQuickBidItem.bidStep);
+  const curBid = Number(activeQuickBidItem.currentBid) || 0;
+  const step = Number(activeQuickBidItem.bidStep) || 100000;
+  const mult = Number(currentMultiplier) || 1;
+  const newPrice = curBid + (mult * step);
   const newPriceEl = document.getElementById('qb-new-price');
   if (newPriceEl) {
     newPriceEl.textContent = formatVnd(newPrice);
@@ -1020,8 +1169,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSubmitBid.addEventListener('click', () => {
       if (!activeQuickBidItem) return;
 
-      const user = getCurrentUser();
-      const newBidAmount = activeQuickBidItem.currentBid + (currentMultiplier * activeQuickBidItem.bidStep);
+      const user = getCurrentUser() || DEFAULT_USER;
+      const curBid = Number(activeQuickBidItem.currentBid) || 0;
+      const step = Number(activeQuickBidItem.bidStep) || 100000;
+      const mult = Number(currentMultiplier) || 1;
+      const newBidAmount = curBid + (mult * step);
 
       // Kiểm tra số dư ví cọc tối thiểu (10% giá trị bid)
       const requiredDeposit = Math.round(newBidAmount * 0.1);
@@ -1035,11 +1187,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Cập nhật danh sách phiên đang tham gia
       const list = getParticipatingBids();
       const index = list.findIndex(x => x.id === activeQuickBidItem.id);
+      const updatedBidCount = (activeQuickBidItem.bidCount || 0) + 1;
       if (index !== -1) {
         list[index].currentBid = newBidAmount;
         list[index].myBid = newBidAmount;
         list[index].status = 'lead'; // Chuyển sang ĐANG DẪN ĐẦU (Badge Xanh lá)
-        list[index].bidCount = (list[index].bidCount || 0) + 1;
+        list[index].bidCount = updatedBidCount;
         saveParticipatingBids(list);
       }
 
@@ -1047,6 +1200,45 @@ document.addEventListener('DOMContentLoaded', () => {
       user.depositHold = (user.depositHold || 0) + requiredDeposit;
       user.walletBalance = Math.max(0, user.walletBalance - requiredDeposit);
       saveCurrentUser(user);
+
+      // Đồng bộ vào pcbid_bids
+      try {
+        const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
+        bids.unshift({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          productId: activeQuickBidItem.id,
+          bidderName: user.username || 'pcbuilder99',
+          amount: newBidAmount,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('pcbid_bids', JSON.stringify(bids));
+      } catch (e) {
+        console.warn('[PCBid] Không thể lưu lượt bid từ profile:', e);
+      }
+
+      // Đồng bộ vào pcbid_products để index.html, products.html và product-detail.html cập nhật giá ngay lập tức
+      try {
+        const localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+        const pIdx = localProducts.findIndex(p => Number(p.id) === Number(activeQuickBidItem.id));
+        if (pIdx >= 0) {
+          localProducts[pIdx].currentBid = newBidAmount;
+          localProducts[pIdx].bidCount = updatedBidCount;
+        } else {
+          localProducts.push({
+            id: activeQuickBidItem.id,
+            name: activeQuickBidItem.name,
+            category: activeQuickBidItem.category,
+            currentBid: newBidAmount,
+            bidCount: updatedBidCount,
+            bidStep: step,
+            endTime: activeQuickBidItem.endTime || (activeQuickBidItem.endTimestamp ? new Date(activeQuickBidItem.endTimestamp).toISOString() : null),
+            images: activeQuickBidItem.images || []
+          });
+        }
+        localStorage.setItem('pcbid_products', JSON.stringify(localProducts));
+      } catch (e) {
+        console.warn('[PCBid] Không thể cập nhật pcbid_products từ profile:', e);
+      }
 
       syncUserInfoUI();
       renderCurrentAuctionTab();
@@ -1152,13 +1344,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // 14. Nút Đăng xuất
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
+    btnLogout.addEventListener('click', (e) => {
+      e.preventDefault();
       if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?')) {
-        showToast('Đã đăng xuất tài khoản!');
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+        localStorage.removeItem('pcbid_user');
+        localStorage.setItem('pcbid_logged_out', 'true');
+        showToast('Đã đăng xuất tài khoản thành công!');
         setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 800);
+          window.location.href = 'login.html';
+        }, 500);
       }
     });
   }
+
+  // Lắng nghe bfcache và storage để làm mới dữ liệu tab quản lý đấu giá
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      renderCurrentAuctionTab();
+      syncUserInfoUI();
+    }
+  });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'pcbid_my_auctions_participating' || e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
+      renderCurrentAuctionTab();
+      syncUserInfoUI();
+    }
+  });
 });
