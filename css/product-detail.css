@@ -917,6 +917,19 @@
    14. BẢNG LỊCH SỬ ĐẶT GIÁ
    ========================================================================== */
 
+/* Khung cuộn dọc giới hạn chiều cao bảng lịch sử (hiển thị đủ toàn bộ lượt đặt giá) */
+.pcb-pd__history-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* Giữ hàng tiêu đề cố định khi cuộn bảng lịch sử */
+.pcb-pd__history-scroll .pcb-pd__history-th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 /* Bảng lịch sử toàn chiều rộng */
 .pcb-pd__history-table {
   width: 100%;
@@ -1210,7 +1223,7 @@
 
   /* Chuyển sang bố cục 1 cột dọc trên mobile */
   .pcb-pd__layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
 
@@ -1291,5 +1304,30 @@
 
   .pcb-pd__title {
     font-size: 1.125rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ĐIỆN THOẠI (≤ 576px): bảng thông số và thanh tab không bị cắt chữ
+   -------------------------------------------------------------------------- */
+@media (max-width: 576px) {
+  .pcb-pd__tab {
+    padding: 14px 12px;
+    white-space: nowrap;
+  }
+
+  .pcb-pd__specs-table {
+    table-layout: fixed;
+  }
+
+  .pcb-pd__specs-table td {
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .pcb-pd__specs-table td:first-child {
+    width: 42%;
+    white-space: normal;
   }
 }

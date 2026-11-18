@@ -43,7 +43,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 50000000,
-    depositHold: 3500000,
     address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder.png",
     rating: 5.0,
@@ -63,7 +62,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 60000000,
-    depositHold: 2000000,
     address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder2.png",
     rating: 4.9,
@@ -83,7 +81,6 @@ const SAMPLE_ACCOUNTS = [
     role: "seller",
     verified: true,
     walletBalance: 80000000,
-    depositHold: 0,
     address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-seller.png",
     rating: 4.9,
@@ -248,7 +245,6 @@ function initLoginForm() {
         role: 'bidder',
         verified: true,
         walletBalance: 50000000,
-        depositHold: 0,
         address: 'Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh',
         isLoggedIn: true,
         loggedInAt: new Date().toISOString()
@@ -381,7 +377,6 @@ function initRegisterForm() {
       role: 'bidder',
       verified: true,
       walletBalance: 50000000,
-      depositHold: 0,
       address: 'Trường Đại học Công nghệ Thông tin, TP. Thủ Đức, TP. Hồ Chí Minh',
       registeredAt: new Date().toISOString()
     });

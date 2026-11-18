@@ -4,6 +4,14 @@
  * Tuân thủ quy chuẩn IE104 - UIT & Chỉ thị AGENTS.md
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
+// Module ví ảo & tiền cọc dùng chung
+import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
+// Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
+import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
+
+
 /* ==========================================================================
    1. KHỞI TẠO HẰNG SỐ & DỮ LIỆU MẪU MẶC ĐỊNH (SEED MOCK DATA)
    ========================================================================== */
@@ -33,7 +41,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 50000000,
-    depositHold: 3500000,
     address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder.png",
     rating: 5.0,
@@ -53,7 +60,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 60000000,
-    depositHold: 2000000,
     address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder2.png",
     rating: 4.9,
@@ -73,7 +79,6 @@ const SAMPLE_ACCOUNTS = [
     role: "seller",
     verified: true,
     walletBalance: 80000000,
-    depositHold: 0,
     address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-seller.png",
     rating: 4.9,
@@ -87,65 +92,7 @@ const SAMPLE_ACCOUNTS = [
 
 const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
-// Danh sách phiên đang tham gia mẫu
-const DEFAULT_PARTICIPATING = [
-  {
-    id: 2001,
-    name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
-    category: "GPU",
-    status: "lead", // 'lead': Đang dẫn đầu | 'outbid': Đã bị vượt giá
-    currentBid: 5800000,
-    myBid: 5800000,
-    bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
-    endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000, // 2h 45m
-    images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
-    specs: ["8GB GDDR6", "Furmark 65°C"]
-  },
-  {
-    id: 1001,
-    name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
-    category: "CPU",
-    status: "outbid", // Bị vượt giá
-    currentBid: 5100000,
-    myBid: 4900000,
-    bidStep: 100000,
-    bidCount: 22,
-    marketPriceNew: 8900000,
-    endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000, // 4h 15m
-    images: ["images/products/cpu/1005-i7-11700k-1.jpg"],
-    specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
-  },
-  {
-    id: 3013,
-    name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
-    category: "Mainboard",
-    status: "lead", // Đang dẫn đầu
-    currentBid: 5800000,
-    myBid: 5800000,
-    bidStep: 100000,
-    bidCount: 7,
-    marketPriceNew: 7690000,
-    endTimestamp: Date.now() + 18 * 3600 * 1000, // 18h
-    images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-    specs: ["LGA 1700", "Micro-ATX"]
-  },
-  {
-    id: 4011,
-    name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
-    category: "RAM",
-    status: "outbid", // Bị vượt giá
-    currentBid: 3250000,
-    myBid: 3100000,
-    bidStep: 50000,
-    bidCount: 9,
-    marketPriceNew: 3990000,
-    endTimestamp: Date.now() + 52 * 60 * 1000, // 52 phút
-    images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
-    specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
-  }
-];
+// Dữ liệu phiên tham gia mẫu (DEFAULT_PARTICIPATING_BY_USER) đã chuyển sang js/wallet.js
 
 // Danh sách linh kiện tự đăng bán mẫu
 const DEFAULT_SELLING = [
@@ -172,11 +119,11 @@ const DEFAULT_SELLING = [
     highestBidder: "nguon_pc_chat",
     bidCount: 13,
     soldDate: "28/10/2026",
-    images: ["images/products/psu/6013-nzxt-c750-gold-1.png"],
+    images: ["images/products/psu/6001-corsair-rm850x-1.jpg"],
     specs: ["850W", "80 Plus Gold"]
   },
   {
-    id: 7001,
+    id: 7005,
     name: "Vỏ máy tính Lian Li O11 Dynamic Mini Snow White",
     category: "Case",
     status: "ended", // Đã kết thúc
@@ -191,7 +138,7 @@ const DEFAULT_SELLING = [
 // Danh sách theo dõi (Watchlist) mẫu
 const DEFAULT_WATCHLIST = [
   {
-    id: 1002,
+    id: 1012,
     name: "Bộ vi xử lý Intel Core i5-13600K (14C/20T, Up to 5.1GHz)",
     category: "CPU",
     currentBid: 5600000,
@@ -202,7 +149,7 @@ const DEFAULT_WATCHLIST = [
     specs: ["LGA 1700", "5.1 GHz Max"]
   },
   {
-    id: 2002,
+    id: 2028,
     name: "Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB",
     category: "GPU",
     currentBid: 12800000,
@@ -213,7 +160,7 @@ const DEFAULT_WATCHLIST = [
     specs: ["16GB GDDR6", "256-bit"]
   },
   {
-    id: 8001,
+    id: 8007,
     name: "Tản nhiệt khí Noctua NH-D15 chromax.black Dual Fan",
     category: "Cooling",
     currentBid: 2200000,
@@ -331,126 +278,72 @@ function saveCurrentUser(user) {
 }
 
 function getParticipatingBids() {
-  const raw = localStorage.getItem(STORAGE_KEYS.PARTICIPATING_BIDS);
-  let list = [];
-  if (!raw) {
-    list = DEFAULT_PARTICIPATING;
-  } else {
-    try {
-      list = JSON.parse(raw);
-      if (!Array.isArray(list)) list = DEFAULT_PARTICIPATING;
-    } catch {
-      list = DEFAULT_PARTICIPATING;
-    }
-  }
-
-  const currentUser = getCurrentUser();
-  const currentUsername = currentUser ? (currentUser.username || currentUser.fullname) : 'bidder1';
-
-  // Đọc danh sách sản phẩm và lịch sử đặt giá mới nhất từ localStorage
-  let localProducts = [];
-  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
-  const prodMap = new Map(localProducts.map(p => [Number(p.id), p]));
-
-  let localBids = [];
-  try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
-
-  // Tự động kiểm tra trạng thái Dẫn đầu (lead) vs Bị vượt giá (outbid) theo người dùng hiện tại
-  return list.map(item => {
-    const idNum = Number(item.id);
-    const prod = prodMap.get(idNum);
-
-    // Tìm các lượt bid của người dùng hiện tại trên sản phẩm này
-    const myBidsOnItem = localBids.filter(b => 
-      Number(b.productId) === idNum && 
-      (b.bidderName === currentUsername || b.bidderName === currentUser?.username || b.bidderName === currentUser?.email)
-    );
-
-    let myHighestBid = Number(item.myBid) || Number(item.currentBid) || 1000000;
-    if (myBidsOnItem.length > 0) {
-      myHighestBid = Math.max(...myBidsOnItem.map(b => Number(b.amount) || 0));
-    }
-
-    let currentHighestBid = prod ? Number(prod.currentBid) : Number(item.currentBid || myHighestBid);
-    const allBidsOnItem = localBids.filter(b => Number(b.productId) === idNum);
-    if (allBidsOnItem.length > 0) {
-      const topBid = Math.max(...allBidsOnItem.map(b => Number(b.amount) || 0));
-      if (topBid > currentHighestBid) currentHighestBid = topBid;
-    }
-
-    // Nếu giá cao nhất hiện tại lớn hơn giá tôi đã đặt, hoặc người dẫn đầu không phải tôi -> BỊ VƯỢT GIÁ (outbid)
-    let isLead = false;
-    if (allBidsOnItem.length > 0) {
-      isLead = (allBidsOnItem[0].bidderName === currentUsername || allBidsOnItem[0].bidderName === currentUser?.username) && (myHighestBid >= currentHighestBid);
-    } else {
-      isLead = item.status === 'lead' || item.status === 'leading';
-    }
-
-    return {
-      ...item,
-      id: idNum,
-      bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
-      myBid: myHighestBid,
-      currentBid: currentHighestBid,
-      bidCount: prod?.bidCount !== undefined ? prod.bidCount : Math.max(item.bidCount || 1, allBidsOnItem.length),
-      status: isLead ? 'lead' : 'outbid'
-    };
-  });
+  // Logic tổng hợp đã chuyển sang module dùng chung js/wallet.js
+  return getParticipatingAuctions(getCurrentUser());
 }
 
 function saveParticipatingBids(items) {
   localStorage.setItem(STORAGE_KEYS.PARTICIPATING_BIDS, JSON.stringify(items));
 }
 
-function getSellingItems() {
-  const raw = localStorage.getItem(STORAGE_KEYS.SELLING_ITEMS);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEYS.SELLING_ITEMS, JSON.stringify(DEFAULT_SELLING));
-    return DEFAULT_SELLING;
-  }
+/**
+ * Lấy các phiên do chính tài khoản này đăng bán từ dữ liệu cũ dùng chung (trước khi tách theo tài khoản)
+ * để không bị mất phiên đã đăng. Chỉ nhận phiên có seller trùng với tài khoản trong pcbid_products.
+ * @param {Object} user - Người dùng hiện tại
+ * @returns {Array}
+ */
+function getLegacySellingItems(user) {
   try {
-    return JSON.parse(raw);
+    const legacy = JSON.parse(localStorage.getItem(STORAGE_KEYS.SELLING_ITEMS) || '[]');
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const owners = new Map(products.map(p => [Number(p.id), p.seller]));
+    const userKey = getUserKey(user);
+    return Array.isArray(legacy)
+      ? legacy.filter(item => owners.get(Number(item.id)) === userKey || owners.get(Number(item.id)) === user?.fullname)
+      : [];
   } catch {
-    return DEFAULT_SELLING;
+    return [];
   }
+}
+
+function getSellingItems() {
+  const user = getCurrentUser();
+  // Dữ liệu mẫu chỉ dành cho tài khoản người bán demo; tài khoản khác bắt đầu với danh sách trống
+  const seed = [
+    ...getLegacySellingItems(user),
+    ...(user?.username === 'seller' ? DEFAULT_SELLING : [])
+  ];
+  return readUserList(USER_LIST_KEYS.SELLING, user, seed);
 }
 
 function getWatchlistItems() {
-  const raw = localStorage.getItem(STORAGE_KEYS.WATCHLIST);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEYS.WATCHLIST, JSON.stringify(DEFAULT_WATCHLIST));
-    return DEFAULT_WATCHLIST;
-  }
-  try {
-    const list = JSON.parse(raw);
-    if (!Array.isArray(list)) return DEFAULT_WATCHLIST;
-    return list.map(item => {
-      if (typeof item === 'number' || typeof item === 'string') {
-        const idNum = Number(item);
-        const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
-        return sample || {
-          id: idNum,
-          name: 'Linh kiện #' + idNum,
-          category: 'GPU',
-          currentBid: 2500000,
-          marketPriceNew: 4000000,
-          bidCount: 5,
-          endTimestamp: Date.now() + 86400000,
-          images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-          specs: ['Đã qua kiểm định Furmark']
-        };
-      }
-      if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
-      if (!item.category) item.category = 'Khác';
-      return item;
-    });
-  } catch {
-    return DEFAULT_WATCHLIST;
-  }
+  const user = getCurrentUser();
+  // Watchlist mẫu chỉ nạp cho tài khoản demo; tài khoản mới đăng ký bắt đầu với watchlist trống
+  const list = readUserList(USER_LIST_KEYS.WATCHLIST, user, isDemoUser(user) ? DEFAULT_WATCHLIST : []);
+  return list.map(item => {
+    if (typeof item === 'number' || typeof item === 'string') {
+      const idNum = Number(item);
+      const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
+      return sample || {
+        id: idNum,
+        name: 'Linh kiện #' + idNum,
+        category: 'GPU',
+        currentBid: 2500000,
+        marketPriceNew: 4000000,
+        bidCount: 5,
+        endTimestamp: getAuctionEndTimestamp({ id: idNum }),
+        images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+        specs: ['Đã qua kiểm định Furmark']
+      };
+    }
+    if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
+    if (!item.category) item.category = 'Khác';
+    return item;
+  });
 }
 
 function saveWatchlistItems(items) {
-  localStorage.setItem(STORAGE_KEYS.WATCHLIST, JSON.stringify(items));
+  writeUserList(USER_LIST_KEYS.WATCHLIST, getCurrentUser(), items);
 }
 
 /* ==========================================================================
@@ -520,9 +413,9 @@ function renderParticipatingCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-            <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+            <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+              <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
             </span>
           </div>
 
@@ -622,9 +515,9 @@ function renderSellingCard(item) {
           ${item.status === 'active' ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-              <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
               </span>
             </div>
           ` : `
@@ -691,9 +584,9 @@ function renderWatchlistCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-            <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+            <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+              <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
             </span>
           </div>
 
@@ -749,8 +642,9 @@ function syncUserInfoUI() {
 
   if (nameEl) nameEl.textContent = user.fullname || user.username;
   if (uidEl) uidEl.textContent = `UID: #${user.id.toUpperCase()}-IE104`;
-  if (walletEl) walletEl.textContent = formatVnd(user.walletBalance);
-  if (holdEl) holdEl.textContent = formatVnd(user.depositHold);
+  // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
+  if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
+  if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
 
   // Form Account
   const fnInput = document.getElementById('input-fullname');
@@ -787,6 +681,14 @@ function updateCounters() {
   if (countSellEl) countSellEl.textContent = selling.length;
   if (countWatchEl) countWatchEl.textContent = watchlist.length;
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
+
+  // Số thông báo chưa đọc
+  const navNotifyEl = document.getElementById('nav-notifications-count');
+  if (navNotifyEl) {
+    const unread = getUnreadNotificationCount(getCurrentUser());
+    navNotifyEl.textContent = unread;
+    navNotifyEl.hidden = unread === 0;
+  }
 }
 
 /**
@@ -933,11 +835,110 @@ function switchSection(sectionId) {
     if (sectionId === 'section-auctions') breadcrumbCurrent.textContent = 'Quản lý đấu giá';
     else if (sectionId === 'section-account') breadcrumbCurrent.textContent = 'Thông tin tài khoản';
     else if (sectionId === 'section-security') breadcrumbCurrent.textContent = 'Bảo mật & Đổi mật khẩu';
+    else if (sectionId === 'section-notifications') breadcrumbCurrent.textContent = 'Thông báo đấu giá';
   }
 
   if (sectionId === 'section-auctions') {
     renderCurrentAuctionTab();
+  } else if (sectionId === 'section-notifications') {
+    renderNotifications();
   }
+
+  // Đồng bộ hash trên thanh địa chỉ với mục đang xem
+  const sectionHash = {
+    'section-auctions': `#${currentActiveTab}`,
+    'section-account': '#account',
+    'section-security': '#security',
+    'section-notifications': '#notifications'
+  }[sectionId];
+  if (sectionHash) updateHash(sectionHash);
+}
+
+/**
+ * Cập nhật hash trên thanh địa chỉ mà không tạo sự kiện hashchange
+ * để lần bấm link header tiếp theo (ví dụ #watchlist) luôn được nhận diện là thay đổi
+ * @param {string} hash - Hash mới, ví dụ '#watchlist'
+ */
+function updateHash(hash) {
+  if (window.location.hash.toLowerCase() !== hash) {
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
+  }
+}
+
+/**
+ * Mở đúng mục / tab theo hash hiện tại trên URL (profile.html#watchlist, #notifications, ...)
+ * Được gọi khi tải trang và mỗi khi hash thay đổi (bấm link header khi đang ở profile.html)
+ */
+function applyHashRoute() {
+  const hash = window.location.hash.toLowerCase();
+  if (hash === '#watchlist') {
+    switchSection('section-auctions');
+    switchAuctionTab('watchlist');
+  } else if (hash === '#selling') {
+    switchSection('section-auctions');
+    switchAuctionTab('selling');
+  } else if (hash === '#notifications') {
+    switchSection('section-notifications');
+  } else if (hash === '#account') {
+    switchSection('section-account');
+  } else if (hash === '#security') {
+    switchSection('section-security');
+  } else {
+    // Mặc định (#participating, #my-auctions hoặc không có hash): tab đấu giá đang tham gia
+    switchSection('section-auctions');
+    switchAuctionTab('participating');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Render danh sách thông báo đấu giá của tài khoản hiện tại
+ */
+function renderNotifications() {
+  const listEl = document.getElementById('notification-list');
+  const emptyEl = document.getElementById('empty-notifications');
+  if (!listEl) return;
+
+  const notifications = getUserNotifications(getCurrentUser());
+  const icons = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
+  const readAllBtn = document.getElementById('btn-notify-read-all');
+  if (readAllBtn) readAllBtn.disabled = !notifications.some(n => !n.read);
+
+  if (notifications.length === 0) {
+    listEl.innerHTML = '';
+    listEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+
+  listEl.style.display = 'flex';
+  if (emptyEl) emptyEl.style.display = 'none';
+  listEl.innerHTML = notifications.map(n => `
+    <li class="pcb-notify pcb-notify--${n.type} ${n.read ? 'pcb-notify--read' : 'pcb-notify--unread'}" data-notify-id="${escapeHtml(n.id)}">
+      <span class="pcb-notify__icon" aria-hidden="true">${icons[n.type] || '🔔'}</span>
+      <div class="pcb-notify__body">
+        <h3 class="pcb-notify__title">
+          ${n.read ? '' : '<span class="pcb-notify__dot" aria-hidden="true"></span><span class="pcb-notify__sr">Chưa đọc: </span>'}${escapeHtml(n.title)}
+        </h3>
+        <p class="pcb-notify__message">${escapeHtml(n.message)}</p>
+      </div>
+      <div class="pcb-notify__actions">
+        <a class="pcb-notify__link" href="product-detail.html?id=${n.productId}" data-notify-open>Xem phiên</a>
+        ${n.read ? '' : '<button type="button" class="pcb-notify__mark" data-notify-mark>Đã đọc</button>'}
+      </div>
+    </li>
+  `).join('');
+}
+
+/**
+ * Đánh dấu thông báo đã đọc rồi cập nhật lại danh sách và các bộ đếm
+ * @param {Array<string>} ids - ID các thông báo cần đánh dấu
+ */
+function handleMarkNotificationsRead(ids) {
+  if (!ids.length) return;
+  markNotificationsRead(getCurrentUser(), ids);
+  renderNotifications();
+  updateCounters();
 }
 
 /**
@@ -961,6 +962,9 @@ function switchAuctionTab(tabName) {
 
   renderFilterChips();
   renderCurrentAuctionTab();
+
+  // Đồng bộ hash với tab đang xem
+  updateHash({ watchlist: '#watchlist', selling: '#selling', participating: '#participating' }[tabName] || '#participating');
 }
 
 /* ==========================================================================
@@ -1001,7 +1005,7 @@ function setupQuickBid(productId) {
   const newPriceEl = document.getElementById('qb-new-price');
   const detailLink = document.getElementById('qb-goto-detail');
 
-  const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/products/cpu/1005-i7-11700k-1.jpg';
+  const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/products/cpu/1023-ryzen-7-5800x3d-1.jpg';
 
   if (infoContainer) {
     infoContainer.innerHTML = `
@@ -1062,30 +1066,69 @@ function startLiveCountdown() {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Tự động dọn dẹp ảnh cũ bị lưu sai trong LocalStorage từ các phiên trước
+  try {
+    ['pcbid_products', 'pcbid_my_auctions_participating'].forEach(key => {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          let changed = false;
+          arr.forEach(item => {
+            if (item.name && item.name.toLowerCase().includes('5800x3d')) {
+              if (!item.images || item.images[0] !== 'images/products/cpu/1023-ryzen-7-5800x3d-1.jpg') {
+                item.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+                changed = true;
+              }
+            }
+          });
+          if (changed) localStorage.setItem(key, JSON.stringify(arr));
+        }
+      }
+    });
+  } catch (e) {}
+
   // 1. Đồng bộ thông tin người dùng & đếm số lượng
   syncUserInfoUI();
   updateCounters();
 
-  // 2. Kiểm tra URL Hash để mở đúng Tab (ví dụ: profile.html#watchlist)
-  const hash = window.location.hash.toLowerCase();
-  if (hash === '#watchlist') {
-    switchSection('section-auctions');
-    switchAuctionTab('watchlist');
-  } else if (hash === '#selling') {
-    switchSection('section-auctions');
-    switchAuctionTab('selling');
-  } else if (hash === '#participating' || hash === '#my-auctions') {
-    switchSection('section-auctions');
-    switchAuctionTab('participating');
-  } else if (hash === '#account') {
-    switchSection('section-account');
-  } else if (hash === '#security') {
-    switchSection('section-security');
-  } else {
-    // Mặc định vào tab đấu giá đang tham gia
-    switchSection('section-auctions');
-    switchAuctionTab('participating');
+  // 2. Mở đúng mục theo URL Hash (ví dụ: profile.html#watchlist) khi tải trang
+  //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
+  applyHashRoute();
+  window.addEventListener('hashchange', applyHashRoute);
+
+  // Đánh dấu thông báo đã đọc: từng thông báo, khi bấm Xem phiên, hoặc tất cả
+  const notifyList = document.getElementById('notification-list');
+  if (notifyList) {
+    notifyList.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-notify-id]');
+      if (!item) return;
+      if (e.target.closest('[data-notify-mark]')) {
+        handleMarkNotificationsRead([item.dataset.notifyId]);
+      } else if (e.target.closest('[data-notify-open]')) {
+        // Ghi nhận đã đọc trước khi chuyển sang trang chi tiết
+        markNotificationsRead(getCurrentUser(), [item.dataset.notifyId]);
+      }
+    });
   }
+  const readAllBtn = document.getElementById('btn-notify-read-all');
+  if (readAllBtn) {
+    readAllBtn.addEventListener('click', () => {
+      handleMarkNotificationsRead(getUserNotifications(getCurrentUser()).filter(n => !n.read).map(n => n.id));
+      showToast('Đã đánh dấu tất cả thông báo là đã đọc.');
+    });
+  }
+
+  // Bấm lại link trỏ đúng hash hiện tại (không phát sinh hashchange) vẫn chuyển về mục đó
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href*="profile.html#"]');
+    if (!link) return;
+    const url = new URL(link.href, window.location.href);
+    if (url.pathname === window.location.pathname && url.hash.toLowerCase() === window.location.hash.toLowerCase()) {
+      e.preventDefault();
+      applyHashRoute();
+    }
+  });
 
   // 3. Khởi động đồng hồ đếm ngược
   startLiveCountdown();
@@ -1175,10 +1218,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const mult = Number(currentMultiplier) || 1;
       const newBidAmount = curBid + (mult * step);
 
-      // Kiểm tra số dư ví cọc tối thiểu (10% giá trị bid)
-      const requiredDeposit = Math.round(newBidAmount * 0.1);
-      if (user.walletBalance < requiredDeposit) {
-        alert(`Số dư ví khả dụng (${formatVnd(user.walletBalance)}) không đủ giữ cọc 10% (${formatVnd(requiredDeposit)}). Vui lòng nạp thêm tiền vào ví!`);
+      // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới (cọc cũ của phiên này được trả lại trước)
+      const depositCheck = checkBidDeposit(user, activeQuickBidItem.id, newBidAmount);
+      if (!depositCheck.ok) {
+        alert(`Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Vui lòng nạp thêm tiền vào ví!`);
         closeModal('modal-quick-bid');
         openModal('modal-deposit');
         return;
@@ -1196,10 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveParticipatingBids(list);
       }
 
-      // Cập nhật số tiền giữ cọc trong ví
-      user.depositHold = (user.depositHold || 0) + requiredDeposit;
-      user.walletBalance = Math.max(0, user.walletBalance - requiredDeposit);
-      saveCurrentUser(user);
+      // Tiền cọc không trừ trực tiếp vào ví: được tính lại tự động từ các phiên đang dẫn đầu (js/wallet.js)
 
       // Đồng bộ vào pcbid_bids
       try {
@@ -1231,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentBid: newBidAmount,
             bidCount: updatedBidCount,
             bidStep: step,
-            endTime: activeQuickBidItem.endTime || (activeQuickBidItem.endTimestamp ? new Date(activeQuickBidItem.endTimestamp).toISOString() : null),
+            endTime: getAuctionEndTimeIso(activeQuickBidItem),
             images: activeQuickBidItem.images || []
           });
         }
@@ -1370,6 +1410,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'pcbid_my_auctions_participating' || e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
       renderCurrentAuctionTab();
       syncUserInfoUI();
+      updateCounters();
+      if (currentActiveSection === 'section-notifications') renderNotifications();
     }
   });
 });

@@ -2,9 +2,16 @@
  * LOGIC ĐIỀU KHIỂN THÀNH PHẦN HEADER
  * Quản lý tương tác tìm kiếm, đồng bộ danh mục và kích hoạt tab đang xem
  */
+
+// Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
+import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet.js';
+// Đếm watchlist riêng của tài khoản đang đăng nhập
+import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
+
 export function initHeader() {
   initSearchHandler();
   initActiveNavLink();
+  initMobileNavToggle();
   initCategorySelectSync();
   initHeaderUserStatus();
 }
@@ -69,6 +76,63 @@ function initActiveNavLink() {
 }
 
 /**
+ * Cập nhật huy hiệu số thông báo chưa đọc trên biểu tượng chuông; ẩn huy hiệu khi bằng 0
+ */
+function refreshNotificationBadge() {
+  const notifyBadge = document.getElementById('header-notification-badge');
+  if (!notifyBadge) return;
+  let count = 0;
+  try {
+    const loggedIn = readLoggedInUser();
+    count = loggedIn ? getUnreadNotificationCount(loggedIn) : 0;
+  } catch {
+    count = 0;
+  }
+  notifyBadge.textContent = count;
+  notifyBadge.hidden = count === 0;
+}
+
+/**
+ * Nút "Danh mục" trên di động: bấm để mở / đóng thanh điều hướng theo chiều dọc
+ * Tự đóng khi chọn một mục, bấm ra ngoài hoặc nhấn phím Escape
+ */
+function initMobileNavToggle() {
+  const toggle = document.getElementById('header-nav-toggle');
+  const list = document.getElementById('header-nav-list');
+  if (!toggle || !list) return;
+
+  // Hiển thị tên mục đang xem bên cạnh chữ "Danh mục"
+  const current = document.getElementById('header-nav-current');
+  const activeLink = list.querySelector('.header__nav-link--active');
+  if (current && activeLink) current.textContent = activeLink.textContent.trim();
+
+  const setOpen = (open) => {
+    list.classList.toggle('header__nav-list--open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  list.addEventListener('click', (e) => {
+    if (e.target.closest('.header__nav-link')) setOpen(false);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.header__nav-bar')) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+}
+
+/**
  * Quản lý trạng thái đăng nhập và số lượng Watchlist hiển thị trên Header
  */
 const SAMPLE_ACCOUNTS = [
@@ -81,7 +145,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 50000000,
-    depositHold: 3500000,
     address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
   },
   {
@@ -93,7 +156,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 60000000,
-    depositHold: 2000000,
     address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
   },
   {
@@ -105,7 +167,6 @@ const SAMPLE_ACCOUNTS = [
     role: "seller",
     verified: true,
     walletBalance: 80000000,
-    depositHold: 0,
     address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh"
   }
 ];
@@ -115,11 +176,25 @@ function initHeaderUserStatus() {
   const badge = document.getElementById('header-watchlist-badge');
   if (badge) {
     try {
-      const watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]');
+      const loggedIn = readLoggedInUser();
+      const watchlist = loggedIn
+        ? JSON.parse(localStorage.getItem(userStorageKey(USER_LIST_KEYS.WATCHLIST, loggedIn)) || '[]')
+        : [];
       badge.textContent = watchlist.length;
     } catch {
       badge.textContent = '0';
     }
+  }
+
+  // Số thông báo chưa đọc của tài khoản đang đăng nhập
+  refreshNotificationBadge();
+  if (!window.__pcbidNotifyBadgeBound) {
+    window.__pcbidNotifyBadgeBound = true;
+    // Cập nhật khi đánh dấu đã đọc trên cùng trang, hoặc khi tab khác đặt giá / đọc thông báo
+    window.addEventListener('pcbid:notifications-updated', refreshNotificationBadge);
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'pcbid_bids' || e.key.startsWith('pcbid_notifications_read')) refreshNotificationBadge();
+    });
   }
 
   // Đọc thông tin người dùng đang đăng nhập
@@ -182,7 +257,7 @@ function initHeaderUserStatus() {
         </div>
         <div class="header__dropdown-wallet">
           <span class="header__dropdown-wallet-label">Ví khả dụng:</span>
-          <span class="header__dropdown-wallet-val">${formatHeaderVnd(user.walletBalance || 0)}</span>
+          <span class="header__dropdown-wallet-val">${formatHeaderVnd(getAvailableBalance(user))}</span>
         </div>
       </div>
 

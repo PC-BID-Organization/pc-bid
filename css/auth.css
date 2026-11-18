@@ -629,3 +629,33 @@
     padding: 28px 20px 24px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   KHU VỰC 3 NÚT ĐĂNG NHẬP DEMO
+   -------------------------------------------------------------------------- */
+.pcb-auth-demo__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pcb-auth-demo__grid .pcb-demo-btn {
+  min-width: 0;
+}
+
+/* Email tài khoản demo: cắt bằng dấu ba chấm thay vì đẩy nút tràn ra ngoài */
+.pcb-auth-demo__email {
+  margin-top: 2px;
+  font-size: 10px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Điện thoại nhỏ: mỗi nút demo một hàng để đọc rõ email */
+@media (max-width: 420px) {
+  .pcb-auth-demo__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
