@@ -39,7 +39,7 @@ const SAN_PHAM_DU_PHONG = [
     specifications: { 'VRAM': '8GB GDDR6', 'Nhiệt độ Furmark': '67°C', 'Chuẩn kết nối': 'PCIe 4.0 x16', 'Cổng xuất hình': '3x DisplayPort 1.4 + 1x HDMI 2.1' }
   },
   {
-    id: 1001,
+    id: 1023,
     name: 'Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)',
     category: 'CPU',
     condition: 'Đã sử dụng - Chân Socket AM4 hoàn hảo, bao test 7 ngày',

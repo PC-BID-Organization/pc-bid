@@ -37,7 +37,7 @@ const FALLBACK_PRODUCTS = [
     specifications: { "VRAM": "8GB GDDR6", "Nhiệt độ test": "Furmark 65°C" }
   },
   {
-    id: 1001,
+    id: 1023,
     name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
     category: "CPU",
     condition: "Đã sử dụng - Chân Socket AM4 hoàn hảo, bao test 7 ngày",
