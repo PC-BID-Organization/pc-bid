@@ -6,6 +6,8 @@
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp } from './auction-time.js';
+// Module ví ảo & tiền cọc dùng chung
+import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
 
 
 /* ==========================================================================
@@ -731,6 +733,30 @@ function updateModalTotal(total) {
   if (submitBtn) {
     submitBtn.textContent = `Xác nhận đặt giá ${formatVnd(total)}`;
   }
+  updateModalWalletStatus(total);
+}
+
+/**
+ * Hiển thị số dư khả dụng và số tiền cọc 10% cần giữ trong modal đặt giá nhanh
+ * @param {number} total - Mức giá đang chọn
+ */
+function updateModalWalletStatus(total) {
+  const statusEl = document.getElementById('pcb-modal-wallet-status');
+  const labelEl = document.getElementById('pcb-modal-wallet-label');
+  if (!statusEl || !currentModalProduct) return;
+
+  const user = readCurrentUser();
+  if (!user) {
+    if (labelEl) labelEl.textContent = 'Ví cọc tạm ứng mô phỏng:';
+    statusEl.textContent = 'Đăng nhập để đặt giá';
+    statusEl.style.color = '';
+    return;
+  }
+
+  const check = checkBidDeposit(user, currentModalProduct.id, total);
+  if (labelEl) labelEl.textContent = `Khả dụng ${formatVnd(getAvailableBalance(user))} • Cọc 10%:`;
+  statusEl.textContent = `${formatVnd(check.required)} ${check.ok ? '(Đủ điều kiện)' : '(Không đủ số dư)'}`;
+  statusEl.style.color = check.ok ? '' : '#dc2626';
 }
 
 function closeQuickBidModal() {
@@ -743,6 +769,19 @@ function executeQuickBid() {
   if (!currentModalProduct) return;
 
   const newBid = currentModalProduct.currentBid + currentBidIncrement;
+
+  // Bắt buộc đăng nhập và đủ số dư khả dụng để giữ cọc 10% trước khi đặt giá
+  const bidUser = readCurrentUser();
+  if (!bidUser) {
+    showToast('Bạn cần đăng nhập để đặt giá. Đang chuyển hướng...', 'error');
+    setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    return;
+  }
+  const depositCheck = checkBidDeposit(bidUser, currentModalProduct.id, newBid);
+  if (!depositCheck.ok) {
+    showToast(`Số dư khả dụng ${formatVnd(depositCheck.available)} không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Hãy nạp thêm tiền ở trang Hồ sơ.`, 'error');
+    return;
+  }
   currentModalProduct.currentBid = newBid;
   currentModalProduct.bidCount = (currentModalProduct.bidCount || 0) + 1;
 

@@ -6,6 +6,8 @@
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
+// Module ví ảo & tiền cọc dùng chung
+import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit } from './wallet.js';
 
 
 /* ==========================================================================
@@ -37,7 +39,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 50000000,
-    depositHold: 3500000,
     address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder.png",
     rating: 5.0,
@@ -57,7 +58,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 60000000,
-    depositHold: 2000000,
     address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-bidder2.png",
     rating: 4.9,
@@ -77,7 +77,6 @@ const SAMPLE_ACCOUNTS = [
     role: "seller",
     verified: true,
     walletBalance: 80000000,
-    depositHold: 0,
     address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
     avatar: "images/avatars/avatar-seller.png",
     rating: 4.9,
@@ -91,128 +90,7 @@ const SAMPLE_ACCOUNTS = [
 
 const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
-// Danh sách phiên đang tham gia mẫu chuẩn cho từng tài khoản demo
-// Giúp mô phỏng hoàn hảo kịch bản 2 tài khoản (bidder1 và bidder2) trả giá đối kháng vượt giá nhau
-const DEFAULT_PARTICIPATING_BY_USER = {
-  bidder1: [
-    {
-      id: 2011,
-      name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
-      category: "GPU",
-      status: "lead", // Đang dẫn đầu
-      currentBid: 8400000,
-      myBid: 8400000,
-      bidStep: 100000,
-      bidCount: 19,
-      marketPriceNew: 15000000,
-      endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
-      images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
-      specs: ["8GB GDDR6", "Furmark 65°C"]
-    },
-    {
-      id: 1023,
-      name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
-      category: "CPU",
-      status: "outbid", // Đã bị bidder2 vượt giá
-      currentBid: 8100000,
-      myBid: 7900000,
-      bidStep: 100000,
-      bidCount: 25,
-      marketPriceNew: 9500000,
-      endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
-      images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
-      specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
-    },
-    {
-      id: 3013,
-      name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
-      category: "Mainboard",
-      status: "lead", // Đang dẫn đầu
-      currentBid: 5800000,
-      myBid: 5800000,
-      bidStep: 100000,
-      bidCount: 7,
-      marketPriceNew: 7690000,
-      endTimestamp: Date.now() + 18 * 3600 * 1000,
-      images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-      specs: ["LGA 1700", "Micro-ATX"]
-    },
-    {
-      id: 4011,
-      name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
-      category: "RAM",
-      status: "outbid", // Bị vượt giá
-      currentBid: 3050000,
-      myBid: 2950000,
-      bidStep: 50000,
-      bidCount: 9,
-      marketPriceNew: 3990000,
-      endTimestamp: Date.now() + 52 * 60 * 1000,
-      images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
-      specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
-    }
-  ],
-  bidder2: [
-    {
-      id: 4011,
-      name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
-      category: "RAM",
-      status: "lead", // Đang dẫn đầu (trả 3tr05 cao hơn bidder1)
-      currentBid: 3050000,
-      myBid: 3050000,
-      bidStep: 50000,
-      bidCount: 9,
-      marketPriceNew: 3990000,
-      endTimestamp: Date.now() + 52 * 60 * 1000,
-      images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
-      specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
-    },
-    {
-      id: 1023,
-      name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
-      category: "CPU",
-      status: "lead", // Đang dẫn đầu (trả 8tr1 cao hơn bidder1)
-      currentBid: 8100000,
-      myBid: 8100000,
-      bidStep: 100000,
-      bidCount: 25,
-      marketPriceNew: 9500000,
-      endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
-      images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
-      specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
-    },
-    {
-      id: 2011,
-      name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
-      category: "GPU",
-      status: "outbid", // Bị bidder1 vượt giá (8tr2 vs 8tr4)
-      currentBid: 8400000,
-      myBid: 8200000,
-      bidStep: 100000,
-      bidCount: 19,
-      marketPriceNew: 15000000,
-      endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
-      images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
-      specs: ["8GB GDDR6", "Furmark 65°C"]
-    },
-    {
-      id: 3013,
-      name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
-      category: "Mainboard",
-      status: "outbid", // Bị bidder1 vượt giá (5tr6 vs 5tr8)
-      currentBid: 5800000,
-      myBid: 5600000,
-      bidStep: 100000,
-      bidCount: 7,
-      marketPriceNew: 7690000,
-      endTimestamp: Date.now() + 18 * 3600 * 1000,
-      images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-      specs: ["LGA 1700", "Micro-ATX"]
-    }
-  ]
-};
-
-const DEFAULT_PARTICIPATING = DEFAULT_PARTICIPATING_BY_USER.bidder1;
+// Dữ liệu phiên tham gia mẫu (DEFAULT_PARTICIPATING_BY_USER) đã chuyển sang js/wallet.js
 
 // Danh sách linh kiện tự đăng bán mẫu
 const DEFAULT_SELLING = [
@@ -398,114 +276,8 @@ function saveCurrentUser(user) {
 }
 
 function getParticipatingBids() {
-  const currentUser = getCurrentUser();
-  const currentUsername = currentUser ? (currentUser.username || currentUser.fullname) : 'bidder1';
-
-  // 1. Lấy danh sách sản phẩm mẫu theo đúng tài khoản đang đăng nhập (bidder1 hoặc bidder2)
-  const defaultList = (DEFAULT_PARTICIPATING_BY_USER && DEFAULT_PARTICIPATING_BY_USER[currentUsername]) 
-    ? DEFAULT_PARTICIPATING_BY_USER[currentUsername] 
-    : DEFAULT_PARTICIPATING;
-
-  // 2. Đọc danh sách sản phẩm và các lượt bid từ localStorage
-  let localProducts = [];
-  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
-  const prodMap = new Map(localProducts.map(p => [Number(p.id), p]));
-
-  let localBids = [];
-  try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
-
-  // 3. Xây dựng bản đồ các sản phẩm tham gia riêng cho người dùng hiện tại
-  const userItemsMap = new Map();
-
-  // Khởi tạo trước với các sản phẩm mẫu của người dùng này
-  defaultList.forEach(item => {
-    userItemsMap.set(Number(item.id), { ...item });
-  });
-
-  // Tìm tất cả sản phẩm mà người dùng hiện tại ĐÃ THỰC SỰ ĐẶT GIÁ trong localBids
-  const userRealBids = localBids.filter(b => 
-    b.bidderName === currentUsername || 
-    b.bidderName === currentUser?.username || 
-    b.bidderName === currentUser?.email
-  );
-
-  userRealBids.forEach(bid => {
-    const pId = Number(bid.productId);
-    if (!userItemsMap.has(pId)) {
-      const prod = prodMap.get(pId);
-      if (prod) {
-        userItemsMap.set(pId, {
-          id: pId,
-          name: prod.name,
-          category: prod.category || 'Linh kiện',
-          currentBid: Number(prod.currentBid) || Number(bid.amount),
-          myBid: Number(bid.amount),
-          bidStep: Number(prod.bidStep) || 100000,
-          bidCount: Number(prod.bidCount) || 1,
-          marketPriceNew: Number(prod.marketPriceNew) || Number(prod.currentBid) * 1.5,
-          endTimestamp: getAuctionEndTimestamp(prod),
-          images: prod.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-          specs: prod.specifications ? Object.entries(prod.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
-        });
-      }
-    }
-  });
-
-  // 4. Với mỗi sản phẩm, tính toán độc lập giá của người này (myBid) và giá cao nhất hiện tại (currentBid)
-  return Array.from(userItemsMap.values()).map(item => {
-    const idNum = Number(item.id);
-    const prod = prodMap.get(idNum);
-
-    // Lấy toàn bộ các lượt bid trên sản phẩm này, sắp xếp giảm dần theo số tiền
-    const allBidsOnItem = localBids
-      .filter(b => Number(b.productId) === idNum)
-      .map(b => ({ ...b, amount: Number(b.amount) }))
-      .sort((a, b) => b.amount - a.amount || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    // Lọc các lượt bid của CHÍNH NGƯỜI DÙNG NÀY trên sản phẩm
-    const myBidsOnItem = allBidsOnItem.filter(b => 
-      b.bidderName === currentUsername || 
-      b.bidderName === currentUser?.username || 
-      b.bidderName === currentUser?.email
-    );
-
-    // Xác định mức giá cao nhất mà người này đã đặt
-    let myHighestBid;
-    if (myBidsOnItem.length > 0) {
-      myHighestBid = myBidsOnItem[0].amount;
-    } else {
-      // Nếu chưa có lượt đặt trong localBids, lấy giá ban đầu của tài khoản này
-      myHighestBid = Number(item.myBid) || 1000000;
-    }
-
-    // Xác định giá cao nhất hiện tại của phiên đấu giá
-    let currentHighestBid = Number(prod?.currentBid) || Number(item.currentBid) || myHighestBid;
-    if (allBidsOnItem.length > 0) {
-      if (allBidsOnItem[0].amount > currentHighestBid) {
-        currentHighestBid = allBidsOnItem[0].amount;
-      }
-    }
-
-    // Đánh giá trạng thái: Ai đang dẫn đầu phiên?
-    let isLead = false;
-    if (allBidsOnItem.length > 0) {
-      const topBidder = allBidsOnItem[0].bidderName;
-      const isTopBidderMe = (topBidder === currentUsername || topBidder === currentUser?.username);
-      isLead = isTopBidderMe && (myHighestBid >= currentHighestBid);
-    } else {
-      isLead = myHighestBid >= currentHighestBid;
-    }
-
-    return {
-      ...item,
-      id: idNum,
-      bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
-      myBid: myHighestBid,
-      currentBid: currentHighestBid,
-      bidCount: prod?.bidCount !== undefined ? prod.bidCount : Math.max(item.bidCount || 1, allBidsOnItem.length),
-      status: isLead ? 'lead' : 'outbid'
-    };
-  });
+  // Logic tổng hợp đã chuyển sang module dùng chung js/wallet.js
+  return getParticipatingAuctions(getCurrentUser());
 }
 
 function saveParticipatingBids(items) {
@@ -859,8 +631,9 @@ function syncUserInfoUI() {
 
   if (nameEl) nameEl.textContent = user.fullname || user.username;
   if (uidEl) uidEl.textContent = `UID: #${user.id.toUpperCase()}-IE104`;
-  if (walletEl) walletEl.textContent = formatVnd(user.walletBalance);
-  if (holdEl) holdEl.textContent = formatVnd(user.depositHold);
+  // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
+  if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
+  if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
 
   // Form Account
   const fnInput = document.getElementById('input-fullname');
@@ -1307,10 +1080,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const mult = Number(currentMultiplier) || 1;
       const newBidAmount = curBid + (mult * step);
 
-      // Kiểm tra số dư ví cọc tối thiểu (10% giá trị bid)
-      const requiredDeposit = Math.round(newBidAmount * 0.1);
-      if (user.walletBalance < requiredDeposit) {
-        alert(`Số dư ví khả dụng (${formatVnd(user.walletBalance)}) không đủ giữ cọc 10% (${formatVnd(requiredDeposit)}). Vui lòng nạp thêm tiền vào ví!`);
+      // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới (cọc cũ của phiên này được trả lại trước)
+      const depositCheck = checkBidDeposit(user, activeQuickBidItem.id, newBidAmount);
+      if (!depositCheck.ok) {
+        alert(`Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Vui lòng nạp thêm tiền vào ví!`);
         closeModal('modal-quick-bid');
         openModal('modal-deposit');
         return;
@@ -1328,10 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveParticipatingBids(list);
       }
 
-      // Cập nhật số tiền giữ cọc trong ví
-      user.depositHold = (user.depositHold || 0) + requiredDeposit;
-      user.walletBalance = Math.max(0, user.walletBalance - requiredDeposit);
-      saveCurrentUser(user);
+      // Tiền cọc không trừ trực tiếp vào ví: được tính lại tự động từ các phiên đang dẫn đầu (js/wallet.js)
 
       // Đồng bộ vào pcbid_bids
       try {

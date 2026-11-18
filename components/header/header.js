@@ -2,6 +2,10 @@
  * LOGIC ĐIỀU KHIỂN THÀNH PHẦN HEADER
  * Quản lý tương tác tìm kiếm, đồng bộ danh mục và kích hoạt tab đang xem
  */
+
+// Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
+import { getAvailableBalance } from '../../js/wallet.js';
+
 export function initHeader() {
   initSearchHandler();
   initActiveNavLink();
@@ -81,7 +85,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 50000000,
-    depositHold: 3500000,
     address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
   },
   {
@@ -93,7 +96,6 @@ const SAMPLE_ACCOUNTS = [
     role: "bidder",
     verified: true,
     walletBalance: 60000000,
-    depositHold: 2000000,
     address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
   },
   {
@@ -105,7 +107,6 @@ const SAMPLE_ACCOUNTS = [
     role: "seller",
     verified: true,
     walletBalance: 80000000,
-    depositHold: 0,
     address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh"
   }
 ];
@@ -182,7 +183,7 @@ function initHeaderUserStatus() {
         </div>
         <div class="header__dropdown-wallet">
           <span class="header__dropdown-wallet-label">Ví khả dụng:</span>
-          <span class="header__dropdown-wallet-val">${formatHeaderVnd(user.walletBalance || 0)}</span>
+          <span class="header__dropdown-wallet-val">${formatHeaderVnd(getAvailableBalance(user))}</span>
         </div>
       </div>
 
