@@ -917,6 +917,19 @@
    14. BẢNG LỊCH SỬ ĐẶT GIÁ
    ========================================================================== */
 
+/* Khung cuộn dọc giới hạn chiều cao bảng lịch sử (hiển thị đủ toàn bộ lượt đặt giá) */
+.pcb-pd__history-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* Giữ hàng tiêu đề cố định khi cuộn bảng lịch sử */
+.pcb-pd__history-scroll .pcb-pd__history-th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 /* Bảng lịch sử toàn chiều rộng */
 .pcb-pd__history-table {
   width: 100%;

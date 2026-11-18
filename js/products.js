@@ -108,14 +108,34 @@ function parseUrlParams() {
   }
 
   // Xử lý tham số status từ Header Nav ("Phiên đang Hot 🔥", "Sắp kết thúc")
+  // và tham số sort từ Trang chủ (ví dụ: products.html?sort=bids cho nút "Cạnh tranh nhất")
   const status = params.get('status');
-  const sortSelect = document.getElementById('sort-select');
-  if (status === 'hot') {
-    filterState.sortBy = 'bids-desc';
-    if (sortSelect) sortSelect.value = 'bids-desc';
+  const sort = (params.get('sort') || '').toLowerCase();
+  const sortAliases = {
+    'bids': 'bids-desc',
+    'bids-desc': 'bids-desc',
+    'hot': 'bids-desc',
+    'ending': 'ending',
+    'time-asc': 'ending',
+    'price-asc': 'price-asc',
+    'price-desc': 'price-desc',
+    'newest': 'newest'
+  };
+
+  let sortValue = null;
+  if (sortAliases[sort]) {
+    sortValue = sortAliases[sort];
+  } else if (status === 'hot') {
+    sortValue = 'bids-desc';
   } else if (status === 'ending') {
-    filterState.sortBy = 'time-asc';
-    if (sortSelect) sortSelect.value = 'time-asc';
+    sortValue = 'ending';
+  }
+
+  if (sortValue) {
+    filterState.sortBy = sortValue;
+    // Đồng bộ giá trị ô chọn sắp xếp trên thanh công cụ
+    const sortSelect = document.getElementById('catalog-sort');
+    if (sortSelect) sortSelect.value = sortValue;
   }
 }
 

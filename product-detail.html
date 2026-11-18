@@ -285,6 +285,8 @@
           role="tabpanel"
           aria-labelledby="pcb-pd-tab-history"
           hidden>
+          <!-- Khung cuộn cho bảng lịch sử khi số lượt đặt giá lớn -->
+          <div class="pcb-pd__history-scroll">
           <table class="pcb-pd__history-table" aria-label="Lịch sử các lượt trả giá">
             <thead>
               <tr>
@@ -297,6 +299,7 @@
               <!-- JS chèn các hàng lịch sử động -->
             </tbody>
           </table>
+          </div>
           <p class="pcb-pd__history-empty" id="pcb-pd-history-empty" hidden>
             Chưa có lượt đặt giá nào. Hãy là người đầu tiên!
           </p>

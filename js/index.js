@@ -533,6 +533,30 @@ function renderHotAuctionsShelf() {
   container.innerHTML = items.map(p => renderProductCard(p, { showCountdown: false })).join('');
 }
 
+/**
+ * Cập nhật thẻ "Cạnh tranh nhất" ở Hero Banner theo sản phẩm có nhiều lượt bid nhất
+ * (tránh hiển thị số liệu ghi cứng không khớp với dữ liệu thực tế)
+ */
+function renderCompetitivePromo() {
+  const card = document.getElementById('hero-promo-competitive');
+  if (!card || allProducts.length === 0) return;
+
+  const top = allProducts.reduce((best, p) => ((p.bidCount || 0) > (best.bidCount || 0) ? p : best), allProducts[0]);
+  if (!top) return;
+
+  // Rút gọn tên sản phẩm: bỏ tiền tố loại linh kiện để vừa khung thẻ
+  const shortName = String(top.name || '')
+    .replace(/^(Card màn hình|Bộ vi xử lý|CPU|Bo mạch chủ|Mainboard|Bộ nguồn|Nguồn|RAM|Ổ cứng|Tản nhiệt|Vỏ case|Case)\s+/i, '');
+
+  const titleEl = card.querySelector('[data-promo-title]');
+  const subEl = card.querySelector('[data-promo-sub]');
+  const imgEl = card.querySelector('[data-promo-img]');
+
+  if (titleEl) titleEl.textContent = shortName;
+  if (subEl) subEl.textContent = `${top.bidCount || 0} lượt bid • Xem ngay →`;
+  if (imgEl && top.images && top.images[0]) imgEl.src = encodePath(top.images[0]);
+}
+
 function renderNewListingsShelf() {
   const container = document.getElementById('pcb-new-grid');
   if (!container) return;
@@ -841,6 +865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderEndingSoonShelf();
   renderHotAuctionsShelf();
   renderNewListingsShelf();
+  renderCompetitivePromo();
 
   // 3. Khởi tạo băng chuyền hoạt động sàn
   initLiveTicker();
@@ -950,6 +975,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderEndingSoonShelf();
         renderHotAuctionsShelf();
         renderNewListingsShelf();
+        renderCompetitivePromo();
       });
     }
   });
@@ -961,6 +987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderEndingSoonShelf();
         renderHotAuctionsShelf();
         renderNewListingsShelf();
+        renderCompetitivePromo();
       });
     }
   });
