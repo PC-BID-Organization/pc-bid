@@ -644,8 +644,6 @@ function renderLichSu(idSanPham) {
     return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
   });
 
-  tatCaLichSu = tatCaLichSu.slice(0, 15);
-
   // Cập nhật huy hiệu tổng số lượt đặt giá trên tab
   const tongSoLuot = Math.max(tatCaLichSu.length, sanPhamHienTai?.bidCount || 0);
   if (huyHieuSoLuot) huyHieuSoLuot.textContent = tongSoLuot;
@@ -698,6 +696,18 @@ function taoLichSuMau(idSanPham, lichSuSanPham = []) {
   const buocGia = Number(sanPhamHienTai.bidStep) || 100000;
   const giaKhoiDiem = Number(sanPhamHienTai.startingPrice) || 1000000;
 
+  // Số lượt mẫu cần sinh = tổng lượt bid của sản phẩm trừ đi số lượt bid thực tế đã lưu
+  const tongSoLuot = Number(sanPhamHienTai.bidCount) || 0;
+  const soLuotCanSinh = Math.max(0, tongSoLuot - lichSuSanPham.length);
+  if (soLuotCanSinh === 0) return [];
+
+  // Bộ sinh số giả ngẫu nhiên theo ID sản phẩm để lịch sử không bị thay đổi mỗi lần render lại
+  let hatGiong = (Number(idSanPham) || 1) * 9301 + 49297;
+  const ngauNhien = () => {
+    hatGiong = (hatGiong * 9301 + 49297) % 233280;
+    return hatGiong / 233280;
+  };
+
   // Xác định điểm xuất phát để sinh các lượt đặt giá mẫu lùi dần về quá khứ
   let giaBatDauMau;
   let thoiGianBatDauMau;
@@ -708,35 +718,49 @@ function taoLichSuMau(idSanPham, lichSuSanPham = []) {
     giaBatDauMau = lowestRealBid.amount - buocGia;
     thoiGianBatDauMau = new Date(lowestRealBid.timestamp).getTime();
   } else {
-    // Nếu chưa có lượt bid thực tế nào: bắt đầu từ giá hiện tại lùi lại
-    const giaHienTai = Number(sanPhamHienTai.currentBid) || (giaKhoiDiem + buocGia * 3);
-    giaBatDauMau = giaHienTai;
-    thoiGianBatDauMau = Date.now();
+    // Nếu chưa có lượt bid thực tế nào: lượt mẫu cao nhất chính là giá hiện tại
+    giaBatDauMau = Number(sanPhamHienTai.currentBid) || (giaKhoiDiem + buocGia * 3);
+    // Mốc thời gian lượt cao nhất: không vượt quá thời điểm kết thúc phiên
+    const thoiDiemKetThuc = Number(sanPhamHienTai.endTimestamp) || new Date(sanPhamHienTai.endTime).getTime();
+    thoiGianBatDauMau = Math.min(Date.now(), Number.isFinite(thoiDiemKetThuc) ? thoiDiemKetThuc : Date.now());
   }
 
   const lichSuMau = [];
   let giaTam = giaBatDauMau;
   let thoiGianTam = thoiGianBatDauMau;
-
-  // Sinh thêm các lượt mẫu để lấp đầy bảng lịch sử (tối đa 7 dòng)
-  const soLuotCanSinh = Math.max(0, 7 - lichSuSanPham.length);
+  let tenTruocDo = '';
 
   for (let i = 0; i < soLuotCanSinh; i++) {
     if (giaTam < giaKhoiDiem) break; // Tuyệt đối không sinh giá thấp hơn giá khởi điểm
 
-    // Mỗi lượt trước lùi lại từ 15 đến 45 phút so với lượt kế tiếp
-    thoiGianTam -= (Math.floor(Math.random() * 30) + 15) * 60 * 1000;
+    // Lượt đầu tiên (cao nhất) giữ nguyên mốc thời gian, các lượt trước lùi lại 15 - 45 phút
+    if (i > 0) {
+      thoiGianTam -= (Math.floor(ngauNhien() * 30) + 15) * 60 * 1000;
+    }
+
+    // Chọn tên người đặt giá khác với lượt liền kề (không tự vượt giá chính mình)
+    let tenHienTai = tenNguoiMau[Math.floor(ngauNhien() * tenNguoiMau.length)];
+    if (tenHienTai === tenTruocDo) {
+      tenHienTai = tenNguoiMau[(tenNguoiMau.indexOf(tenHienTai) + 1) % tenNguoiMau.length];
+    }
+    tenTruocDo = tenHienTai;
 
     lichSuMau.push({
       id: `mock_${idSanPham}_${i}`,
       productId: idSanPham,
-      bidderName: tenNguoiMau[i % tenNguoiMau.length],
+      bidderName: tenHienTai,
       amount: giaTam,
       timestamp: new Date(thoiGianTam).toISOString()
     });
 
-    // Lùi 1 bước giá cho lượt kế tiếp trong quá khứ
-    giaTam -= buocGia;
+    // Tính bước nhảy giá cho lượt kế tiếp trong quá khứ:
+    // chia đều khoảng giá còn lại cho số lượt còn lại để lượt cuối không thấp hơn giá khởi điểm
+    const soLuotConLai = soLuotCanSinh - i - 1;
+    if (soLuotConLai <= 0) break;
+    const soBuocConLai = Math.floor((giaTam - giaKhoiDiem) / buocGia);
+    const soBuocToiDa = Math.max(1, Math.floor(soBuocConLai / soLuotConLai));
+    const soBuocNhay = 1 + Math.floor(ngauNhien() * soBuocToiDa);
+    giaTam -= soBuocNhay * buocGia;
   }
 
   return lichSuMau;
