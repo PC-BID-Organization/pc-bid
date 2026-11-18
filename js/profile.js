@@ -1168,6 +1168,28 @@ function startLiveCountdown() {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Tự động dọn dẹp ảnh cũ bị lưu sai trong LocalStorage từ các phiên trước
+  try {
+    ['pcbid_products', 'pcbid_my_auctions_participating'].forEach(key => {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          let changed = false;
+          arr.forEach(item => {
+            if (item.name && item.name.toLowerCase().includes('5800x3d')) {
+              if (!item.images || item.images[0] !== 'images/products/cpu/1023-ryzen-7-5800x3d-1.jpg') {
+                item.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+                changed = true;
+              }
+            }
+          });
+          if (changed) localStorage.setItem(key, JSON.stringify(arr));
+        }
+      }
+    });
+  } catch (e) {}
+
   // 1. Đồng bộ thông tin người dùng & đếm số lượng
   syncUserInfoUI();
   updateCounters();
