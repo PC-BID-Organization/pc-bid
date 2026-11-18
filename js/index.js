@@ -22,18 +22,18 @@ const DATA_SOURCES = [
 // Dữ liệu dự phòng phong phú (Fallback Seed Data) khi mở qua giao thức file:/// hoặc fetch lỗi
 const FALLBACK_PRODUCTS = [
   {
-    id: 2001,
+    id: 2011,
     name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
     category: "GPU",
     condition: "Like New 99% - Fullbox, Tem Void SPC nguyên vẹn",
-    startingPrice: 4200000,
-    currentBid: 5800000,
+    startingPrice: 6500000,
+    currentBid: 8400000,
     bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
+    bidCount: 19,
+    marketPriceNew: 15000000,
     endTime: new Date(Date.now() + 18 * 60 * 1000).toISOString(),
-    seller: "hoanglong_pc",
-    images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
+    seller: "tuananh_pc",
+    images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
     specifications: { "VRAM": "8GB GDDR6", "Nhiệt độ test": "Furmark 65°C" }
   },
   {
