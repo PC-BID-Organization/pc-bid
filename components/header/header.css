@@ -827,3 +827,8 @@
     background-color: #fff7ed;
   }
 }
+
+/* Ẩn huy hiệu số khi không còn thông báo chưa đọc */
+.header__badge[hidden] {
+  display: none;
+}

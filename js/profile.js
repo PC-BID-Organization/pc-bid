@@ -7,7 +7,7 @@
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
-import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications } from './wallet.js';
+import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 
@@ -682,9 +682,13 @@ function updateCounters() {
   if (countWatchEl) countWatchEl.textContent = watchlist.length;
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
 
-  // Số thông báo cần chú ý (bị vượt giá, phiên sắp kết thúc)
+  // Số thông báo chưa đọc
   const navNotifyEl = document.getElementById('nav-notifications-count');
-  if (navNotifyEl) navNotifyEl.textContent = getUserNotifications(getCurrentUser()).filter(n => n.important).length;
+  if (navNotifyEl) {
+    const unread = getUnreadNotificationCount(getCurrentUser());
+    navNotifyEl.textContent = unread;
+    navNotifyEl.hidden = unread === 0;
+  }
 }
 
 /**
@@ -897,6 +901,8 @@ function renderNotifications() {
 
   const notifications = getUserNotifications(getCurrentUser());
   const icons = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
+  const readAllBtn = document.getElementById('btn-notify-read-all');
+  if (readAllBtn) readAllBtn.disabled = !notifications.some(n => !n.read);
 
   if (notifications.length === 0) {
     listEl.innerHTML = '';
@@ -908,15 +914,31 @@ function renderNotifications() {
   listEl.style.display = 'flex';
   if (emptyEl) emptyEl.style.display = 'none';
   listEl.innerHTML = notifications.map(n => `
-    <li class="pcb-notify pcb-notify--${n.type}">
+    <li class="pcb-notify pcb-notify--${n.type} ${n.read ? 'pcb-notify--read' : 'pcb-notify--unread'}" data-notify-id="${escapeHtml(n.id)}">
       <span class="pcb-notify__icon" aria-hidden="true">${icons[n.type] || '🔔'}</span>
       <div class="pcb-notify__body">
-        <h3 class="pcb-notify__title">${escapeHtml(n.title)}</h3>
+        <h3 class="pcb-notify__title">
+          ${n.read ? '' : '<span class="pcb-notify__dot" aria-hidden="true"></span><span class="pcb-notify__sr">Chưa đọc: </span>'}${escapeHtml(n.title)}
+        </h3>
         <p class="pcb-notify__message">${escapeHtml(n.message)}</p>
       </div>
-      <a class="pcb-notify__link" href="product-detail.html?id=${n.productId}">Xem phiên</a>
+      <div class="pcb-notify__actions">
+        <a class="pcb-notify__link" href="product-detail.html?id=${n.productId}" data-notify-open>Xem phiên</a>
+        ${n.read ? '' : '<button type="button" class="pcb-notify__mark" data-notify-mark>Đã đọc</button>'}
+      </div>
     </li>
   `).join('');
+}
+
+/**
+ * Đánh dấu thông báo đã đọc rồi cập nhật lại danh sách và các bộ đếm
+ * @param {Array<string>} ids - ID các thông báo cần đánh dấu
+ */
+function handleMarkNotificationsRead(ids) {
+  if (!ids.length) return;
+  markNotificationsRead(getCurrentUser(), ids);
+  renderNotifications();
+  updateCounters();
 }
 
 /**
@@ -1074,6 +1096,28 @@ document.addEventListener('DOMContentLoaded', () => {
   //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
   applyHashRoute();
   window.addEventListener('hashchange', applyHashRoute);
+
+  // Đánh dấu thông báo đã đọc: từng thông báo, khi bấm Xem phiên, hoặc tất cả
+  const notifyList = document.getElementById('notification-list');
+  if (notifyList) {
+    notifyList.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-notify-id]');
+      if (!item) return;
+      if (e.target.closest('[data-notify-mark]')) {
+        handleMarkNotificationsRead([item.dataset.notifyId]);
+      } else if (e.target.closest('[data-notify-open]')) {
+        // Ghi nhận đã đọc trước khi chuyển sang trang chi tiết
+        markNotificationsRead(getCurrentUser(), [item.dataset.notifyId]);
+      }
+    });
+  }
+  const readAllBtn = document.getElementById('btn-notify-read-all');
+  if (readAllBtn) {
+    readAllBtn.addEventListener('click', () => {
+      handleMarkNotificationsRead(getUserNotifications(getCurrentUser()).filter(n => !n.read).map(n => n.id));
+      showToast('Đã đánh dấu tất cả thông báo là đã đọc.');
+    });
+  }
 
   // Bấm lại link trỏ đúng hash hiện tại (không phát sinh hashchange) vẫn chuyển về mục đó
   document.addEventListener('click', (e) => {

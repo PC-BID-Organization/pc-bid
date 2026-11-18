@@ -13,6 +13,8 @@
    ========================================================================== */
 
 import { getAuctionEndTimestamp } from './auction-time.js';
+// Lưu trạng thái đã đọc của thông báo theo từng tài khoản
+import { USER_LIST_KEYS, readUserList, writeUserList } from './user-data.js';
 
 // Tỷ lệ tiền cọc trên mỗi mức giá đặt
 export const DEPOSIT_RATE = 0.1;
@@ -356,7 +358,7 @@ export function getUserNotifications(user) {
     // Phiên đã kết thúc
     if (remaining <= 0) {
       return item.status === 'lead'
-        ? { ...base, id: `won_${item.id}`, type: 'success', important: false,
+        ? { ...base, id: `won_${item.id}_${item.myBid}`, type: 'success', important: false,
             title: 'Bạn đã thắng phiên đấu giá',
             message: `${item.name} — giá chốt ${formatVnd(item.myBid)}.` }
         : { ...base, id: `ended_${item.id}`, type: 'muted', important: false,
@@ -366,24 +368,56 @@ export function getUserNotifications(user) {
 
     // Bị vượt giá: cần hành động
     if (item.status !== 'lead') {
-      return { ...base, id: `outbid_${item.id}`, type: 'danger', important: true,
+      return { ...base, id: `outbid_${item.id}_${item.currentBid}`, type: 'danger', important: true,
         title: 'Bạn đã bị vượt giá',
         message: `${item.name} — giá cao nhất hiện tại ${formatVnd(item.currentBid)}, bạn đã đặt ${formatVnd(item.myBid)}.` };
     }
 
     // Đang dẫn đầu nhưng phiên sắp kết thúc
     if (remaining <= ENDING_SOON_MS) {
-      return { ...base, id: `ending_${item.id}`, type: 'warning', important: true,
+      return { ...base, id: `ending_${item.id}_${item.myBid}`, type: 'warning', important: true,
         title: 'Phiên sắp kết thúc — bạn đang dẫn đầu',
         message: `${item.name} — còn chưa đến ${Math.max(1, Math.ceil(remaining / 60000))} phút, giá của bạn ${formatVnd(item.myBid)}.` };
     }
 
     // Đang dẫn đầu
-    return { ...base, id: `lead_${item.id}`, type: 'success', important: false,
+    return { ...base, id: `lead_${item.id}_${item.myBid}`, type: 'success', important: false,
       title: 'Bạn đang dẫn đầu',
       message: `${item.name} — giá của bạn ${formatVnd(item.myBid)}, đang tạm giữ cọc ${formatVnd(calcDeposit(item.myBid))}.` };
   });
 
-  // Thông báo cần hành động lên đầu, sau đó theo thời gian kết thúc gần nhất
-  return notifications.sort((a, b) => (b.important - a.important) || (a.endTimestamp - b.endTimestamp));
+  // Gắn trạng thái đã đọc. ID thông báo chứa mức giá liên quan nên khi tình huống thay đổi
+  // (ví dụ bị vượt giá ở mức mới) sẽ sinh thông báo mới, chưa đọc
+  const readIds = new Set(readUserList(USER_LIST_KEYS.NOTIFICATIONS_READ, user));
+  notifications.forEach(n => { n.read = readIds.has(n.id); });
+
+  // Chưa đọc lên trước, rồi thông báo cần hành động, sau đó theo thời gian kết thúc gần nhất
+  return notifications.sort((a, b) =>
+    (a.read - b.read) || (b.important - a.important) || (a.endTimestamp - b.endTimestamp));
+}
+
+/**
+ * Đếm số thông báo chưa đọc của người dùng (hiển thị trên chuông Header và menu Hồ sơ)
+ * @param {Object|null} user - Người dùng hiện tại
+ * @returns {number}
+ */
+export function getUnreadNotificationCount(user) {
+  return getUserNotifications(user).filter(n => !n.read).length;
+}
+
+/**
+ * Đánh dấu một hoặc nhiều thông báo là đã đọc.
+ * Chỉ giữ lại ID của các thông báo còn tồn tại để dữ liệu không phình to theo thời gian.
+ * @param {Object|null} user - Người dùng hiện tại
+ * @param {Array<string>} ids - Danh sách ID thông báo cần đánh dấu
+ */
+export function markNotificationsRead(user, ids) {
+  if (!user) return;
+  const currentIds = new Set(getUserNotifications(user).map(n => n.id));
+  const readIds = new Set(readUserList(USER_LIST_KEYS.NOTIFICATIONS_READ, user));
+  ids.forEach(id => readIds.add(id));
+  writeUserList(USER_LIST_KEYS.NOTIFICATIONS_READ, user, [...readIds].filter(id => currentIds.has(id)));
+
+  // Báo cho Header và các thành phần khác trên cùng trang cập nhật lại số chưa đọc
+  window.dispatchEvent(new CustomEvent('pcbid:notifications-updated'));
 }
