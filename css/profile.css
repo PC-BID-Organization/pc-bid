@@ -1636,6 +1636,98 @@
   background-color: var(--color-primary-light);
 }
 
+/* Ẩn huy hiệu số ở menu bên trái khi không còn thông báo chưa đọc */
+.pcb-profile-nav__badge[hidden] {
+  display: none;
+}
+
+/* Thông báo chưa đọc: nền nhạt nổi bật, có chấm cam trước tiêu đề */
+.pcb-notify--unread {
+  background-color: #fffaf5;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
+}
+
+/* Thông báo đã đọc: chữ nhạt hơn */
+.pcb-notify--read {
+  background-color: #ffffff;
+}
+
+.pcb-notify--read .pcb-notify__title {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.pcb-notify__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  vertical-align: middle;
+}
+
+/* Chữ "Chưa đọc" chỉ dành cho trình đọc màn hình */
+.pcb-notify__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Cụm nút bên phải mỗi thông báo */
+.pcb-notify__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.pcb-notify__mark {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-notify__mark:hover,
+.pcb-notify__mark:focus-visible {
+  color: var(--color-text-main);
+  border-color: #cbd5e1;
+}
+
+/* Nút đánh dấu tất cả đã đọc ở tiêu đề mục */
+.pcb-notify-readall {
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pcb-notify-readall:hover:not(:disabled),
+.pcb-notify-readall:focus-visible {
+  background-color: var(--color-primary-light);
+}
+
+.pcb-notify-readall:disabled {
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: default;
+}
+
 /* Màn hình nhỏ: nút xuống dòng dưới nội dung (responsive mobile) */
 @media (max-width: 576px) {
   .pcb-notify {
@@ -1647,7 +1739,8 @@
     flex: 1 1 calc(100% - 50px);
   }
 
-  .pcb-notify__link {
+  .pcb-notify__actions {
+    flex-direction: row;
     margin-left: 50px;
   }
 }

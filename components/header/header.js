@@ -4,7 +4,7 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
-import { getAvailableBalance, getUserNotifications } from '../../js/wallet.js';
+import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 
@@ -73,6 +73,23 @@ function initActiveNavLink() {
       link.classList.add('header__nav-link--active');
     }
   });
+}
+
+/**
+ * Cập nhật huy hiệu số thông báo chưa đọc trên biểu tượng chuông; ẩn huy hiệu khi bằng 0
+ */
+function refreshNotificationBadge() {
+  const notifyBadge = document.getElementById('header-notification-badge');
+  if (!notifyBadge) return;
+  let count = 0;
+  try {
+    const loggedIn = readLoggedInUser();
+    count = loggedIn ? getUnreadNotificationCount(loggedIn) : 0;
+  } catch {
+    count = 0;
+  }
+  notifyBadge.textContent = count;
+  notifyBadge.hidden = count === 0;
 }
 
 /**
@@ -169,15 +186,15 @@ function initHeaderUserStatus() {
     }
   }
 
-  // Số thông báo cần chú ý (bị vượt giá, phiên sắp kết thúc) của tài khoản đang đăng nhập
-  const notifyBadge = document.getElementById('header-notification-badge');
-  if (notifyBadge) {
-    try {
-      const loggedIn = readLoggedInUser();
-      notifyBadge.textContent = loggedIn ? getUserNotifications(loggedIn).filter(n => n.important).length : 0;
-    } catch {
-      notifyBadge.textContent = '0';
-    }
+  // Số thông báo chưa đọc của tài khoản đang đăng nhập
+  refreshNotificationBadge();
+  if (!window.__pcbidNotifyBadgeBound) {
+    window.__pcbidNotifyBadgeBound = true;
+    // Cập nhật khi đánh dấu đã đọc trên cùng trang, hoặc khi tab khác đặt giá / đọc thông báo
+    window.addEventListener('pcbid:notifications-updated', refreshNotificationBadge);
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'pcbid_bids' || e.key.startsWith('pcbid_notifications_read')) refreshNotificationBadge();
+    });
   }
 
   // Đọc thông tin người dùng đang đăng nhập

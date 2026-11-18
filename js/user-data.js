@@ -10,7 +10,9 @@
 // Các key gốc của danh sách cá nhân
 export const USER_LIST_KEYS = {
   WATCHLIST: 'pcbid_watchlist',
-  SELLING: 'pcbid_my_auctions_selling'
+  SELLING: 'pcbid_my_auctions_selling',
+  // Danh sách ID thông báo đã đọc của từng tài khoản
+  NOTIFICATIONS_READ: 'pcbid_notifications_read'
 };
 
 // Các tài khoản demo dựng sẵn được nạp dữ liệu mẫu ở lần đầu
