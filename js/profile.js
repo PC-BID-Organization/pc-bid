@@ -96,11 +96,11 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
       category: "GPU",
       status: "lead", // Đang dẫn đầu
-      currentBid: 5800000,
-      myBid: 5800000,
+      currentBid: 8400000,
+      myBid: 8400000,
       bidStep: 100000,
-      bidCount: 16,
-      marketPriceNew: 12500000,
+      bidCount: 19,
+      marketPriceNew: 15000000,
       endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
       images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
       specs: ["8GB GDDR6", "Furmark 65°C"]
@@ -110,11 +110,11 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
       category: "CPU",
       status: "outbid", // Đã bị bidder2 vượt giá
-      currentBid: 5100000,
-      myBid: 4900000,
+      currentBid: 8100000,
+      myBid: 7900000,
       bidStep: 100000,
-      bidCount: 22,
-      marketPriceNew: 8900000,
+      bidCount: 25,
+      marketPriceNew: 9500000,
       endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
       images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
       specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
@@ -138,8 +138,8 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
       category: "RAM",
       status: "outbid", // Bị vượt giá
-      currentBid: 3250000,
-      myBid: 3100000,
+      currentBid: 3050000,
+      myBid: 2950000,
       bidStep: 50000,
       bidCount: 9,
       marketPriceNew: 3990000,
@@ -153,9 +153,9 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       id: 4011,
       name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
       category: "RAM",
-      status: "lead", // Đang dẫn đầu (trả 3tr25 cao hơn bidder1)
-      currentBid: 3250000,
-      myBid: 3250000,
+      status: "lead", // Đang dẫn đầu (trả 3tr05 cao hơn bidder1)
+      currentBid: 3050000,
+      myBid: 3050000,
       bidStep: 50000,
       bidCount: 9,
       marketPriceNew: 3990000,
@@ -167,12 +167,12 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       id: 1023,
       name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
       category: "CPU",
-      status: "lead", // Đang dẫn đầu (trả 5tr1 cao hơn bidder1)
-      currentBid: 5100000,
-      myBid: 5100000,
+      status: "lead", // Đang dẫn đầu (trả 8tr1 cao hơn bidder1)
+      currentBid: 8100000,
+      myBid: 8100000,
       bidStep: 100000,
-      bidCount: 22,
-      marketPriceNew: 8900000,
+      bidCount: 25,
+      marketPriceNew: 9500000,
       endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
       images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
       specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
@@ -181,12 +181,12 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       id: 2011,
       name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
       category: "GPU",
-      status: "outbid", // Bị bidder1 vượt giá (5tr6 vs 5tr8)
-      currentBid: 5800000,
-      myBid: 5600000,
+      status: "outbid", // Bị bidder1 vượt giá (8tr2 vs 8tr4)
+      currentBid: 8400000,
+      myBid: 8200000,
       bidStep: 100000,
-      bidCount: 16,
-      marketPriceNew: 12500000,
+      bidCount: 19,
+      marketPriceNew: 15000000,
       endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
       images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
       specs: ["8GB GDDR6", "Furmark 65°C"]
