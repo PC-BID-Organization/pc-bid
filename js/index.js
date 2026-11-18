@@ -4,6 +4,10 @@
  * 100% Vanilla JavaScript (ES6+), Không framework bên ngoài.
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp } from './auction-time.js';
+
+
 /* ==========================================================================
    1. CẤU HÌNH & TẬP DỮ LIỆU
    ========================================================================== */
@@ -322,7 +326,7 @@ function syncProductsWithStorage(rawList) {
         condition: fixMojibake(lp.condition || 'Đã sử dụng'),
         currentBid: curBid,
         bidCount: bCount,
-        endTimestamp: lp.endTime ? new Date(lp.endTime).getTime() : Date.now() + 86400000 * 3,
+        endTimestamp: getAuctionEndTimestamp(lp),
         marketPriceNew: Number(lp.marketPriceNew) || Math.round(curBid * 1.5)
       });
     }
@@ -345,9 +349,8 @@ async function loadProducts() {
 
     if (flattened && flattened.length > 0) {
       const mapped = flattened.map(p => {
-        const baseTime = new Date(p.endTime).getTime();
-        const spreadHours = (p.id % 48) + ((p.id % 7) * 0.5);
-        const endTimestamp = isNaN(baseTime) ? (Date.now() + 86400000 * 7) : (baseTime - spreadHours * 3600 * 1000);
+        // Thời điểm kết thúc thống nhất với trang chi tiết và trang hồ sơ
+        const endTimestamp = getAuctionEndTimestamp(p);
 
         return {
           ...p,
@@ -367,7 +370,7 @@ async function loadProducts() {
   // Dự phòng hạt giống
   const mapped = FALLBACK_PRODUCTS.map(p => ({
     ...p,
-    endTimestamp: new Date(p.endTime).getTime()
+    endTimestamp: getAuctionEndTimestamp(p)
   }));
   allProducts = syncProductsWithStorage(mapped);
 }
@@ -806,7 +809,7 @@ function executeQuickBid() {
       bidCount: currentModalProduct.bidCount,
       status: 'lead',
       bidStep: currentModalProduct.bidStep || 100000,
-      endTimestamp: currentModalProduct.endTime ? new Date(currentModalProduct.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(currentModalProduct),
       images: currentModalProduct.images || [],
       specs: currentModalProduct.specifications ? Object.entries(currentModalProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
     };

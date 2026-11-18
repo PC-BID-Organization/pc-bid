@@ -5,6 +5,10 @@
  * Toàn bộ chú thích bằng Tiếng Việt có dấu theo quy định AGENTS.md.
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp } from './auction-time.js';
+
+
 /* ==========================================================================
    1. CẤU HÌNH & NGUỒN DỮ LIỆU SẢN PHẨM
    ========================================================================== */
@@ -164,7 +168,7 @@ function parseStaticCardsFromDOM() {
       currentBid: price,
       marketPriceNew: price * 1.5,
       bidCount: bids,
-      endTimestamp: Date.now() + (Math.floor(Math.random() * 8) + 1) * 3600 * 1000,
+      endTimestamp: getAuctionEndTimestamp({ id }),
       images: [image],
       specifications: {}
     });
@@ -278,13 +282,13 @@ async function loadAllProducts() {
  */
 function normalizeProduct(p, defaultCategory) {
   const cat = p.category || defaultCategory || 'Khác';
-  const endTimeStr = p.endTime || new Date(Date.now() + 2 * 3600 * 1000).toISOString();
-  const endTimestamp = new Date(endTimeStr).getTime();
+  // Thời điểm kết thúc thống nhất với trang chi tiết và trang hồ sơ
+  const endTimestamp = getAuctionEndTimestamp(p);
 
   return {
     ...p,
     category: cat,
-    endTimestamp: isNaN(endTimestamp) ? Date.now() + 3600 * 1000 : endTimestamp,
+    endTimestamp,
     currentBid: Number(p.currentBid || p.startingPrice || 0),
     marketPriceNew: Number(p.marketPriceNew || (p.currentBid ? p.currentBid * 1.5 : 2000000)),
     bidCount: Number(p.bidCount || 0)

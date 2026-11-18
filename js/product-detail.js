@@ -4,6 +4,10 @@
  * lịch sử trả giá, watchlist — 100% Vanilla JavaScript (ES6+).
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp } from './auction-time.js';
+
+
 /* ==========================================================================
    1. CẤU HÌNH & NGUỒN DỮ LIỆU
    ========================================================================== */
@@ -278,6 +282,10 @@ async function timSanPhamTheoId(id) {
   const idNum = Number(id);
   const found = danhSach.find(sp => Number(sp.id) === idNum) || null;
   if (found) {
+    // Chuẩn hóa thời điểm kết thúc phiên theo hàm dùng chung (khớp với profile.html, products.html)
+    found.endTimestamp = getAuctionEndTimestamp(found);
+    found.endTime = new Date(found.endTimestamp).toISOString();
+
     // Đảm bảo giá đấu luôn khớp với lượt bid cao nhất trong pcbid_bids
     try {
       const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
@@ -893,7 +901,7 @@ function thucHienDatGia(nguoiDung, soTien) {
       bidCount: sanPhamHienTai.bidCount,
       status: 'lead',
       bidStep: sanPhamHienTai.bidStep || 100000,
-      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
       images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
       specs: specsList
     };
@@ -1043,7 +1051,7 @@ function batTatWatchlist(idSanPham) {
       currentBid: sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice,
       marketPriceNew: sanPhamHienTai.marketPriceNew || Math.round((sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) * 1.5),
       bidCount: sanPhamHienTai.bidCount || 0,
-      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
       images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
       specs: specsList
     };
