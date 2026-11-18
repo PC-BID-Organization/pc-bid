@@ -50,7 +50,7 @@ const SAN_PHAM_DU_PHONG = [
     marketPriceNew: 8900000,
     endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
     seller: 'gaming_zone_vn',
-    images: ['images/products/cpu/1019-ryzen-5-5600-1.jpg'],
+    images: ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'],
     description: 'CPU gaming số 1 AM4 với 96MB V-Cache. Dùng trên main B550 trong 8 tháng, nhiệt độ idle 38°C. Bao test MemTest86 và Cinebench, chân pin nguyên vẹn không cong.',
     specifications: { 'Socket': 'AM4', 'Nhân / Luồng': '8C / 16T', 'Cache L3': '96MB 3D V-Cache', 'TDP': '105W', 'Xung cơ sở': '3.4 GHz', 'Xung boost': '4.5 GHz' }
   },
@@ -599,7 +599,7 @@ function renderLichSu(idSanPham) {
 
   if (!tbody) return;
 
-  // Đọc lịch sử thực từ localStorage
+  // 1. Đọc danh sách các lượt đặt giá thực tế từ localStorage (pcbid_bids)
   let lichSuLuu = [];
   try {
     lichSuLuu = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
@@ -607,19 +607,39 @@ function renderLichSu(idSanPham) {
     lichSuLuu = [];
   }
 
-  // Lọc chỉ lấy lượt của sản phẩm hiện tại
-  const lichSuSanPham = lichSuLuu
-    .filter(luot => luot.productId === idSanPham)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // 2. Lọc các lượt đặt giá thuộc sản phẩm hiện tại
+  let lichSuSanPham = lichSuLuu
+    .filter(luot => Number(luot.productId) === Number(idSanPham))
+    .map(luot => ({
+      ...luot,
+      amount: Number(luot.amount),
+      timestamp: luot.timestamp || new Date().toISOString()
+    }));
 
-  // Tạo mock data mẫu nếu chưa có lịch sử thực nào
-  const lichSuMau = taoLichSuMau(idSanPham);
+  // Sắp xếp lượt đặt giá thật: mức giá cao nhất và thời gian mới nhất lên trên
+  lichSuSanPham.sort((a, b) => b.amount - a.amount || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  // Kết hợp: lịch sử thực đặt trước, mock data mẫu đặt sau
-  const tatCaLichSu = [...lichSuSanPham, ...lichSuMau].slice(0, 15);
+  // 3. Tạo các lượt đặt giá giả lập ở quá khứ (lùi dần đều về cả giá tiền và mốc thời gian)
+  const lichSuMau = taoLichSuMau(idSanPham, lichSuSanPham);
 
-  // Cập nhật huy hiệu số lượt trên tab
-  if (huyHieuSoLuot) huyHieuSoLuot.textContent = tatCaLichSu.length;
+  // 4. Gộp toàn bộ lịch sử đấu giá
+  let tatCaLichSu = [...lichSuSanPham, ...lichSuMau];
+
+  // 5. Sắp xếp toàn bộ lịch sử theo quy tắc chuẩn mực đấu giá:
+  // - Lượt đặt giá cao nhất (mới nhất) LUÔN NẰM TRÊN CÙNG
+  // - Các lượt trước đó giảm dần đều về số tiền và lùi dần về quá khứ
+  tatCaLichSu.sort((a, b) => {
+    if (b.amount !== a.amount) {
+      return b.amount - a.amount;
+    }
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
+  tatCaLichSu = tatCaLichSu.slice(0, 15);
+
+  // Cập nhật huy hiệu tổng số lượt đặt giá trên tab
+  const tongSoLuot = Math.max(tatCaLichSu.length, sanPhamHienTai?.bidCount || 0);
+  if (huyHieuSoLuot) huyHieuSoLuot.textContent = tongSoLuot;
 
   if (tatCaLichSu.length === 0) {
     tbody.innerHTML = '';
@@ -653,11 +673,12 @@ function renderLichSu(idSanPham) {
 
 /**
  * Tạo danh sách lịch sử đặt giá mẫu (mock data) cho sản phẩm
- * Mô phỏng nhiều người dùng đã tham gia trước đó
+ * Đảm bảo các lượt lùi dần đều về số tiền và thời gian, không bao giờ nhảy giá lung tung
  * @param {number} idSanPham - ID sản phẩm
- * @returns {Array} Mảng các lượt đặt giá mẫu
+ * @param {Array} lichSuSanPham - Các lượt đặt giá thực tế hiện có
+ * @returns {Array} Mảng các lượt đặt giá mẫu hợp lệ
  */
-function taoLichSuMau(idSanPham) {
+function taoLichSuMau(idSanPham, lichSuSanPham = []) {
   if (!sanPhamHienTai) return [];
 
   const tenNguoiMau = [
@@ -665,29 +686,48 @@ function taoLichSuMau(idSanPham) {
     'hardware_shop', 'ngoc_tech', 'viet_pc', 'minhnhat_dng'
   ];
 
-  const giaHienTai = sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice || 0;
-  const buocGia = sanPhamHienTai.bidStep || 50000;
-  const soLuotMau = Math.min(7, sanPhamHienTai.bidCount || 0);
+  const buocGia = Number(sanPhamHienTai.bidStep) || 100000;
+  const giaKhoiDiem = Number(sanPhamHienTai.startingPrice) || 1000000;
+
+  // Xác định điểm xuất phát để sinh các lượt đặt giá mẫu lùi dần về quá khứ
+  let giaBatDauMau;
+  let thoiGianBatDauMau;
+
+  if (lichSuSanPham.length > 0) {
+    // Nếu đã có lượt bid thực tế: lượt mẫu cao nhất phải THẤP HƠN lượt thật thấp nhất
+    const lowestRealBid = lichSuSanPham[lichSuSanPham.length - 1];
+    giaBatDauMau = lowestRealBid.amount - buocGia;
+    thoiGianBatDauMau = new Date(lowestRealBid.timestamp).getTime();
+  } else {
+    // Nếu chưa có lượt bid thực tế nào: bắt đầu từ giá hiện tại lùi lại
+    const giaHienTai = Number(sanPhamHienTai.currentBid) || (giaKhoiDiem + buocGia * 3);
+    giaBatDauMau = giaHienTai;
+    thoiGianBatDauMau = Date.now();
+  }
 
   const lichSuMau = [];
-  let giaTam = giaHienTai;
-  const thoiGianKetThuc = new Date(sanPhamHienTai.endTime).getTime();
+  let giaTam = giaBatDauMau;
+  let thoiGianTam = thoiGianBatDauMau;
 
-  for (let i = 0; i < soLuotMau; i++) {
-    // Tính thời gian giả lập ngược từ thời điểm kết thúc
-    const khoangCachMs = (i + 1) * Math.floor(Math.random() * 30 + 10) * 60 * 1000;
-    const thoiGianDat = new Date(thoiGianKetThuc - khoangCachMs - (24 * 60 * 60 * 1000));
+  // Sinh thêm các lượt mẫu để lấp đầy bảng lịch sử (tối đa 7 dòng)
+  const soLuotCanSinh = Math.max(0, 7 - lichSuSanPham.length);
+
+  for (let i = 0; i < soLuotCanSinh; i++) {
+    if (giaTam < giaKhoiDiem) break; // Tuyệt đối không sinh giá thấp hơn giá khởi điểm
+
+    // Mỗi lượt trước lùi lại từ 15 đến 45 phút so với lượt kế tiếp
+    thoiGianTam -= (Math.floor(Math.random() * 30) + 15) * 60 * 1000;
 
     lichSuMau.push({
       id: `mock_${idSanPham}_${i}`,
       productId: idSanPham,
       bidderName: tenNguoiMau[i % tenNguoiMau.length],
       amount: giaTam,
-      timestamp: thoiGianDat.toISOString()
+      timestamp: new Date(thoiGianTam).toISOString()
     });
 
-    // Mỗi lượt trước thấp hơn một bước giá (cuộn ngược về quá khứ)
-    giaTam = Math.max(giaTam - buocGia, sanPhamHienTai.startingPrice);
+    // Lùi 1 bước giá cho lượt kế tiếp trong quá khứ
+    giaTam -= buocGia;
   }
 
   return lichSuMau;

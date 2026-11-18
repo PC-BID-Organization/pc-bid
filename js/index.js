@@ -48,7 +48,7 @@ const FALLBACK_PRODUCTS = [
     marketPriceNew: 8900000,
     endTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
     seller: "gaming_zone_vn",
-    images: ["images/products/cpu/1019-ryzen-5-5600-1.jpg"],
+    images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
     specifications: { "Socket": "AM4", "TDP": "105W" }
   },
   {
