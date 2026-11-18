@@ -51,7 +51,7 @@
 /* Bố cục lưới 2 cột: Sidebar 320px + Content chính linh hoạt */
 .pcb-profile__layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: 28px;
   align-items: flex-start;
 }
@@ -365,6 +365,8 @@
    -------------------------------------------------------------------------- */
 
 .pcb-profile__main-panel {
+  /* Cho phép khung nội dung co theo màn hình, tránh tràn ngang */
+  min-width: 0;
   background-color: #ffffff;
   border: 1px solid var(--color-border-light, rgba(226, 191, 178, 0.4));
   border-radius: 16px;
@@ -1484,7 +1486,7 @@
 
 @media (max-width: 1024px) {
   .pcb-profile__layout {
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 280px minmax(0, 1fr);
     gap: 20px;
   }
 
@@ -1501,7 +1503,7 @@
 
 @media (max-width: 768px) {
   .pcb-profile__layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pcb-profile__main-panel {
@@ -1647,5 +1649,31 @@
 
   .pcb-notify__link {
     margin-left: 50px;
+  }
+}
+
+/* Điện thoại: modal không sát mép, nút trong chân modal tự xuống hàng */
+@media (max-width: 576px) {
+  .pcb-modal__card {
+    padding: 20px 16px;
+  }
+
+  .pcb-modal__footer {
+    flex-wrap: wrap;
+  }
+
+  .pcb-modal__footer > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  /* Hai nút trên thẻ phiên chia đều chiều ngang, chữ không bị xuống dòng */
+  .pcb-auction-card__actions {
+    width: 100%;
+  }
+
+  .pcb-auction-card__actions > * {
+    flex: 1 1 0;
+    justify-content: center;
+    white-space: nowrap;
   }
 }

@@ -664,3 +664,58 @@
     padding: 0;
   }
 }
+
+/* --------------------------------------------------------------------------
+   ĐIỆN THOẠI (≤ 576px): Logo và cụm nút nằm cùng một hàng, nút Đăng bán chỉ còn
+   biểu tượng, ô tìm kiếm chiếm trọn hàng bên dưới để không bị tràn ngang
+   -------------------------------------------------------------------------- */
+@media (max-width: 576px) {
+  .header__main-inner {
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .header__logo,
+  .header__logo-img {
+    width: 108px;
+    height: 48px;
+  }
+
+  .header__actions {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .header__actions-divider {
+    display: none;
+  }
+
+  /* Nút Đăng bán chỉ hiện biểu tượng dấu cộng, chữ vẫn được đọc bởi trình đọc màn hình */
+  .header__btn-sell {
+    padding: 9px;
+    gap: 0;
+  }
+
+  .header__btn-sell span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Ô tìm kiếm: thu gọn bộ chọn danh mục và nút tìm kiếm chỉ còn biểu tượng */
+  .header__search-input {
+    min-width: 0;
+  }
+
+  .header__search-button {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .header__search-button span {
+    display: none;
+  }
+}
