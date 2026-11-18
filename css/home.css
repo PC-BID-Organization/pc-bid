@@ -642,6 +642,34 @@
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
 }
 
+/* Tên sản phẩm tâm điểm dạng liên kết sang trang chi tiết */
+.hero-v2__spotlight-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hero-v2__spotlight-name-link:hover,
+.hero-v2__spotlight-name-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* Liên kết phụ "Xem chi tiết phiên" bên dưới nút trả giá */
+.hero-v2__spotlight-detail {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fdba74;
+  text-decoration: none;
+}
+
+.hero-v2__spotlight-detail:hover,
+.hero-v2__spotlight-detail:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 /* --- 2.3 Cột Phải: 4 Thẻ Đấu Giá Nổi Bật Thu Nhỏ (Curated Promos) --- */
 .hero-v2__promos {
   display: flex;
