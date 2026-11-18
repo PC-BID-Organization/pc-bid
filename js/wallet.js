@@ -146,12 +146,13 @@ export const DEFAULT_PARTICIPATING_BY_USER = {
  * @returns {Array}
  */
 export function getParticipatingAuctions(currentUser) {
-  const currentUsername = currentUser ? (currentUser.username || currentUser.fullname) : 'bidder1';
+  // Chưa đăng nhập: không có phiên nào đang tham gia
+  if (!currentUser) return [];
+  const currentUsername = currentUser.username || currentUser.fullname;
 
-  // 1. Lấy danh sách sản phẩm mẫu theo đúng tài khoản đang đăng nhập (bidder1 hoặc bidder2)
-  const defaultList = (DEFAULT_PARTICIPATING_BY_USER && DEFAULT_PARTICIPATING_BY_USER[currentUsername]) 
-    ? DEFAULT_PARTICIPATING_BY_USER[currentUsername] 
-    : DEFAULT_PARTICIPATING;
+  // 1. Lấy danh sách phiên mẫu riêng của tài khoản demo (bidder1 hoặc bidder2).
+  //    Tài khoản mới đăng ký / tài khoản khác bắt đầu với danh sách trống, chỉ có các phiên tự đặt giá
+  const defaultList = DEFAULT_PARTICIPATING_BY_USER[currentUsername] || [];
 
   // 2. Đọc danh sách sản phẩm và các lượt bid từ localStorage
   let localProducts = [];
@@ -254,9 +255,6 @@ export function getParticipatingAuctions(currentUser) {
     };
   });
 }
-
-// Danh sách mặc định khi tài khoản không có dữ liệu mẫu riêng (giữ nguyên hành vi cũ của profile.html)
-export const DEFAULT_PARTICIPATING = DEFAULT_PARTICIPATING_BY_USER.bidder1;
 
 /**
  * Đọc người dùng đang đăng nhập từ localStorage

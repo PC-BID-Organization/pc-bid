@@ -6,6 +6,10 @@
  * Toàn bộ chú thích bằng Tiếng Việt có dấu theo quy định AGENTS.md.
  */
 
+// Lưu phiên đã đăng bán riêng theo từng tài khoản
+import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
+
+
 /* ==========================================================================
    1. KHO DỮ LIỆU CATALOGUE LINH KIỆN CHUẨN CỦA SÀN (STANDARD CATALOGUE)
    ========================================================================== */
@@ -721,7 +725,9 @@ function initFormSubmitHandler() {
       localStorage.setItem('pcbid_products', JSON.stringify(existing));
 
       // Đồng bộ đồng thời vào tab "Linh kiện tôi đã đăng bán" (pcbid_my_auctions_selling) của profile.html
-      const mySelling = JSON.parse(localStorage.getItem('pcbid_my_auctions_selling') || '[]');
+      // Danh sách đăng bán lưu riêng theo tài khoản người bán
+      const sellerUser = readLoggedInUser();
+      const mySelling = readUserList(USER_LIST_KEYS.SELLING, sellerUser);
       const specsList = newAuctionProduct.specifications
         ? Object.entries(newAuctionProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
         : [];
@@ -737,7 +743,7 @@ function initFormSubmitHandler() {
         images: newAuctionProduct.images,
         specs: specsList
       });
-      localStorage.setItem('pcbid_my_auctions_selling', JSON.stringify(mySelling));
+      writeUserList(USER_LIST_KEYS.SELLING, sellerUser, mySelling);
     } catch (e) {
       console.error('[Lỗi lưu LocalStorage PCBid]:', e);
     }

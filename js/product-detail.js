@@ -8,6 +8,8 @@
 import { getAuctionEndTimestamp } from './auction-time.js';
 // Kiểm tra tiền cọc 10% trước khi đặt giá
 import { checkBidDeposit } from './wallet.js';
+// Watchlist lưu riêng theo từng tài khoản
+import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 
 
 /* ==========================================================================
@@ -1027,8 +1029,7 @@ function capNhatNutWatchlist(idSanPham) {
   const icon = document.getElementById('pcb-pd-watchlist-icon');
   const nhan = document.getElementById('pcb-pd-watchlist-label');
 
-  let watchlist = [];
-  try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
+  const watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, readLoggedInUser());
 
   const daCoTrong = watchlist.some(item => (typeof item === "object" ? item.id : item) === idSanPham);
   if (nut) {
@@ -1044,8 +1045,14 @@ function capNhatNutWatchlist(idSanPham) {
  * @param {number} idSanPham - ID sản phẩm cần toggle
  */
 function batTatWatchlist(idSanPham) {
-  let watchlist = [];
-  try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
+  // Bắt buộc đăng nhập để watchlist gắn với đúng tài khoản
+  const nguoiDung = readLoggedInUser();
+  if (!nguoiDung) {
+    hienThiToast('Bạn cần đăng nhập để theo dõi phiên đấu giá.', 'info');
+    setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    return;
+  }
+  let watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung);
 
   const daCoTrong = watchlist.some(item => (typeof item === 'object' ? item.id : item) === idSanPham);
   if (daCoTrong) {
@@ -1070,7 +1077,7 @@ function batTatWatchlist(idSanPham) {
     hienThiToast('Đã thêm vào danh sách theo dõi!', 'success');
   }
 
-  localStorage.setItem('pcbid_watchlist', JSON.stringify(watchlist));
+  writeUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung, watchlist);
   capNhatNutWatchlist(idSanPham);
 
   const headerBadge = document.getElementById('header-watchlist-badge');
@@ -1159,8 +1166,11 @@ function ganSuKien() {
 
   // Nút thêm/bỏ watchlist
   const nutWatchlist = document.getElementById('pcb-pd-watchlist-btn');
-  if (nutWatchlist && sanPhamHienTai) {
-    nutWatchlist.addEventListener('click', () => batTatWatchlist(sanPhamHienTai.id));
+  // Lưu ý: ganSuKien() chạy trước khi sản phẩm nạp xong, nên kiểm tra sanPhamHienTai ngay lúc bấm
+  if (nutWatchlist) {
+    nutWatchlist.addEventListener('click', () => {
+      if (sanPhamHienTai) batTatWatchlist(sanPhamHienTai.id);
+    });
   }
 
   // Xóa lỗi khi người dùng gõ vào ô nhập giá

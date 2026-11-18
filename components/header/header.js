@@ -5,6 +5,8 @@
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
 import { getAvailableBalance } from '../../js/wallet.js';
+// Đếm watchlist riêng của tài khoản đang đăng nhập
+import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -116,7 +118,10 @@ function initHeaderUserStatus() {
   const badge = document.getElementById('header-watchlist-badge');
   if (badge) {
     try {
-      const watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]');
+      const loggedIn = readLoggedInUser();
+      const watchlist = loggedIn
+        ? JSON.parse(localStorage.getItem(userStorageKey(USER_LIST_KEYS.WATCHLIST, loggedIn)) || '[]')
+        : [];
       badge.textContent = watchlist.length;
     } catch {
       badge.textContent = '0';
