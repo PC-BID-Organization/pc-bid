@@ -333,3 +333,57 @@ export function checkBidDeposit(user, productId, amount) {
   const available = Math.max(0, (Number(user?.walletBalance) || 0) - getDepositHold(user, productId));
   return { ok: available >= required, required, available };
 }
+
+// Ngưỡng coi là "sắp kết thúc" để nhắc người dùng: 60 phút
+const ENDING_SOON_MS = 60 * 60 * 1000;
+
+/**
+ * Sinh danh sách thông báo đấu giá của người dùng từ các phiên đang tham gia
+ * (dữ liệu được tính lại mỗi lần gọi nên luôn khớp với trạng thái mới nhất)
+ * @param {Object|null} user - Người dùng hiện tại
+ * @returns {Array<{id:string, type:string, title:string, message:string, productId:number, endTimestamp:number, important:boolean}>}
+ */
+export function getUserNotifications(user) {
+  if (!user) return [];
+  const now = Date.now();
+  const formatVnd = value => `${Math.round(Number(value) || 0).toLocaleString('vi-VN')}đ`;
+
+  const notifications = getParticipatingAuctions(user).map(item => {
+    const endTimestamp = getAuctionEndTimestamp(item);
+    const remaining = endTimestamp - now;
+    const base = { productId: Number(item.id), endTimestamp };
+
+    // Phiên đã kết thúc
+    if (remaining <= 0) {
+      return item.status === 'lead'
+        ? { ...base, id: `won_${item.id}`, type: 'success', important: false,
+            title: 'Bạn đã thắng phiên đấu giá',
+            message: `${item.name} — giá chốt ${formatVnd(item.myBid)}.` }
+        : { ...base, id: `ended_${item.id}`, type: 'muted', important: false,
+            title: 'Phiên đấu giá đã kết thúc',
+            message: `${item.name} — bạn không thắng phiên này, tiền cọc đã được hoàn về ví.` };
+    }
+
+    // Bị vượt giá: cần hành động
+    if (item.status !== 'lead') {
+      return { ...base, id: `outbid_${item.id}`, type: 'danger', important: true,
+        title: 'Bạn đã bị vượt giá',
+        message: `${item.name} — giá cao nhất hiện tại ${formatVnd(item.currentBid)}, bạn đã đặt ${formatVnd(item.myBid)}.` };
+    }
+
+    // Đang dẫn đầu nhưng phiên sắp kết thúc
+    if (remaining <= ENDING_SOON_MS) {
+      return { ...base, id: `ending_${item.id}`, type: 'warning', important: true,
+        title: 'Phiên sắp kết thúc — bạn đang dẫn đầu',
+        message: `${item.name} — còn chưa đến ${Math.max(1, Math.ceil(remaining / 60000))} phút, giá của bạn ${formatVnd(item.myBid)}.` };
+    }
+
+    // Đang dẫn đầu
+    return { ...base, id: `lead_${item.id}`, type: 'success', important: false,
+      title: 'Bạn đang dẫn đầu',
+      message: `${item.name} — giá của bạn ${formatVnd(item.myBid)}, đang tạm giữ cọc ${formatVnd(calcDeposit(item.myBid))}.` };
+  });
+
+  // Thông báo cần hành động lên đầu, sau đó theo thời gian kết thúc gần nhất
+  return notifications.sort((a, b) => (b.important - a.important) || (a.endTimestamp - b.endTimestamp));
+}

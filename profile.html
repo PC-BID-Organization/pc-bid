@@ -131,6 +131,19 @@
               </li>
 
               <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn" data-section="section-notifications">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Thông báo đấu giá</span>
+                  <span class="pcb-profile-nav__badge" id="nav-notifications-count">0</span>
+                </button>
+              </li>
+
+              <li class="pcb-profile-nav__item">
                 <button type="button" class="pcb-profile-nav__btn" data-section="section-account">
                   <span class="pcb-profile-nav__btn-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -319,6 +332,31 @@
           </div>
 
           <!-- #################### SECTION 2: THÔNG TIN TÀI KHOẢN (CHUẨN FIGMA) #################### -->
+          <!-- ============ SECTION: THÔNG BÁO ĐẤU GIÁ (sinh động từ các phiên đang tham gia) ============ -->
+          <div class="pcb-section" id="section-notifications" style="display: none;">
+            <div class="pcb-section__header">
+              <div class="pcb-section__title-group">
+                <div class="pcb-section__indicator"></div>
+                <div>
+                  <h2 class="pcb-section__title">Thông báo đấu giá</h2>
+                  <p class="pcb-section__subtitle">
+                    Cập nhật khi bạn bị vượt giá, phiên sắp kết thúc hoặc kết quả các phiên bạn tham gia.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <ul class="pcb-notify-list" id="notification-list">
+              <!-- JS render danh sách thông báo -->
+            </ul>
+
+            <div class="pcb-empty-state" id="empty-notifications" style="display: none;">
+              <h3 class="pcb-empty-state__title">Chưa có thông báo nào</h3>
+              <p class="pcb-empty-state__desc">Hãy tham gia đặt giá một phiên đấu giá để nhận thông báo khi có người vượt giá hoặc phiên sắp kết thúc.</p>
+              <a href="products.html" class="pcb-btn-primary">Xem các phiên đấu giá</a>
+            </div>
+          </div>
+
           <div class="pcb-section" id="section-account" style="display: none;">
             <div class="pcb-section__header">
               <div class="pcb-section__title-group">
