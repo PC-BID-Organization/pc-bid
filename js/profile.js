@@ -8,6 +8,8 @@
 import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit } from './wallet.js';
+// Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
+import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 
 
 /* ==========================================================================
@@ -284,55 +286,64 @@ function saveParticipatingBids(items) {
   localStorage.setItem(STORAGE_KEYS.PARTICIPATING_BIDS, JSON.stringify(items));
 }
 
-function getSellingItems() {
-  const raw = localStorage.getItem(STORAGE_KEYS.SELLING_ITEMS);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEYS.SELLING_ITEMS, JSON.stringify(DEFAULT_SELLING));
-    return DEFAULT_SELLING;
-  }
+/**
+ * Lấy các phiên do chính tài khoản này đăng bán từ dữ liệu cũ dùng chung (trước khi tách theo tài khoản)
+ * để không bị mất phiên đã đăng. Chỉ nhận phiên có seller trùng với tài khoản trong pcbid_products.
+ * @param {Object} user - Người dùng hiện tại
+ * @returns {Array}
+ */
+function getLegacySellingItems(user) {
   try {
-    return JSON.parse(raw);
+    const legacy = JSON.parse(localStorage.getItem(STORAGE_KEYS.SELLING_ITEMS) || '[]');
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const owners = new Map(products.map(p => [Number(p.id), p.seller]));
+    const userKey = getUserKey(user);
+    return Array.isArray(legacy)
+      ? legacy.filter(item => owners.get(Number(item.id)) === userKey || owners.get(Number(item.id)) === user?.fullname)
+      : [];
   } catch {
-    return DEFAULT_SELLING;
+    return [];
   }
+}
+
+function getSellingItems() {
+  const user = getCurrentUser();
+  // Dữ liệu mẫu chỉ dành cho tài khoản người bán demo; tài khoản khác bắt đầu với danh sách trống
+  const seed = [
+    ...getLegacySellingItems(user),
+    ...(user?.username === 'seller' ? DEFAULT_SELLING : [])
+  ];
+  return readUserList(USER_LIST_KEYS.SELLING, user, seed);
 }
 
 function getWatchlistItems() {
-  const raw = localStorage.getItem(STORAGE_KEYS.WATCHLIST);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEYS.WATCHLIST, JSON.stringify(DEFAULT_WATCHLIST));
-    return DEFAULT_WATCHLIST;
-  }
-  try {
-    const list = JSON.parse(raw);
-    if (!Array.isArray(list)) return DEFAULT_WATCHLIST;
-    return list.map(item => {
-      if (typeof item === 'number' || typeof item === 'string') {
-        const idNum = Number(item);
-        const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
-        return sample || {
-          id: idNum,
-          name: 'Linh kiện #' + idNum,
-          category: 'GPU',
-          currentBid: 2500000,
-          marketPriceNew: 4000000,
-          bidCount: 5,
-          endTimestamp: getAuctionEndTimestamp({ id: idNum }),
-          images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-          specs: ['Đã qua kiểm định Furmark']
-        };
-      }
-      if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
-      if (!item.category) item.category = 'Khác';
-      return item;
-    });
-  } catch {
-    return DEFAULT_WATCHLIST;
-  }
+  const user = getCurrentUser();
+  // Watchlist mẫu chỉ nạp cho tài khoản demo; tài khoản mới đăng ký bắt đầu với watchlist trống
+  const list = readUserList(USER_LIST_KEYS.WATCHLIST, user, isDemoUser(user) ? DEFAULT_WATCHLIST : []);
+  return list.map(item => {
+    if (typeof item === 'number' || typeof item === 'string') {
+      const idNum = Number(item);
+      const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
+      return sample || {
+        id: idNum,
+        name: 'Linh kiện #' + idNum,
+        category: 'GPU',
+        currentBid: 2500000,
+        marketPriceNew: 4000000,
+        bidCount: 5,
+        endTimestamp: getAuctionEndTimestamp({ id: idNum }),
+        images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+        specs: ['Đã qua kiểm định Furmark']
+      };
+    }
+    if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
+    if (!item.category) item.category = 'Khác';
+    return item;
+  });
 }
 
 function saveWatchlistItems(items) {
-  localStorage.setItem(STORAGE_KEYS.WATCHLIST, JSON.stringify(items));
+  writeUserList(USER_LIST_KEYS.WATCHLIST, getCurrentUser(), items);
 }
 
 /* ==========================================================================
