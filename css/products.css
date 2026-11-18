@@ -378,6 +378,8 @@
 .pcb-catalog__main {
   display: flex;
   flex-direction: column;
+  /* Cho phép cột nội dung co lại theo màn hình, tránh tràn ngang */
+  min-width: 0;
 }
 
 /* Thanh công cụ sắp xếp & kết quả (Toolbar) */
@@ -611,7 +613,7 @@
 /* Breakpoint màn hình máy tính bảng (Tablet - 992px) */
 @media (max-width: 992px) {
   .pcb-catalog {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pcb-filter {
@@ -659,6 +661,8 @@
   }
 
   .pcb-toolbar__controls {
+    flex-wrap: wrap;
+    gap: 8px;
     width: 100%;
     justify-content: space-between;
   }
@@ -672,6 +676,20 @@
 /* Breakpoint di động nhỏ (Mobile Small - 420px) */
 @media (max-width: 420px) {
   .pcb-catalog__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Sidebar bộ lọc không rộng hơn màn hình điện thoại */
+  .pcb-filter {
+    width: 88vw;
+  }
+}
+
+/* Điện thoại: ô chọn sắp xếp chiếm trọn chiều ngang, không tràn khỏi thanh công cụ */
+@media (max-width: 640px) {
+  .pcb-toolbar__sort-select {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 }
