@@ -1544,3 +1544,107 @@
     flex-direction: column;
   }
 }
+
+/* --------------------------------------------------------------------------
+   THÔNG BÁO ĐẤU GIÁ (NOTIFICATIONS)
+   -------------------------------------------------------------------------- */
+
+/* Danh sách thông báo dạng cột */
+.pcb-notify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Một thông báo: viền trái màu theo loại */
+.pcb-notify {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background-color: var(--color-bg-white);
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8;
+  border-radius: 12px;
+}
+
+.pcb-notify--danger { border-left-color: #dc2626; }
+.pcb-notify--warning { border-left-color: #f59e0b; }
+.pcb-notify--success { border-left-color: #16a34a; }
+.pcb-notify--muted { border-left-color: #94a3b8; opacity: 0.85; }
+
+/* Biểu tượng tròn bên trái */
+.pcb-notify__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  background-color: #f1f5f9;
+}
+
+.pcb-notify--danger .pcb-notify__icon { background-color: #fee2e2; }
+.pcb-notify--warning .pcb-notify__icon { background-color: #fef3c7; }
+.pcb-notify--success .pcb-notify__icon { background-color: #dcfce7; }
+
+/* Nội dung chữ */
+.pcb-notify__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pcb-notify__title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-notify__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* Nút xem chi tiết phiên */
+.pcb-notify__link {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-light);
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pcb-notify__link:hover,
+.pcb-notify__link:focus-visible {
+  background-color: var(--color-primary-light);
+}
+
+/* Màn hình nhỏ: nút xuống dòng dưới nội dung (responsive mobile) */
+@media (max-width: 576px) {
+  .pcb-notify {
+    flex-wrap: wrap;
+  }
+
+  /* Nội dung chiếm trọn hàng (trừ phần biểu tượng) để nút xuống dòng dưới */
+  .pcb-notify__body {
+    flex: 1 1 calc(100% - 50px);
+  }
+
+  .pcb-notify__link {
+    margin-left: 50px;
+  }
+}

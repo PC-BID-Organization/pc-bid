@@ -4,7 +4,7 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
-import { getAvailableBalance } from '../../js/wallet.js';
+import { getAvailableBalance, getUserNotifications } from '../../js/wallet.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 
@@ -125,6 +125,17 @@ function initHeaderUserStatus() {
       badge.textContent = watchlist.length;
     } catch {
       badge.textContent = '0';
+    }
+  }
+
+  // Số thông báo cần chú ý (bị vượt giá, phiên sắp kết thúc) của tài khoản đang đăng nhập
+  const notifyBadge = document.getElementById('header-notification-badge');
+  if (notifyBadge) {
+    try {
+      const loggedIn = readLoggedInUser();
+      notifyBadge.textContent = loggedIn ? getUserNotifications(loggedIn).filter(n => n.important).length : 0;
+    } catch {
+      notifyBadge.textContent = '0';
     }
   }
 

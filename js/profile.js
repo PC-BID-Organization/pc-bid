@@ -7,7 +7,7 @@
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
-import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit } from './wallet.js';
+import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 
@@ -681,6 +681,10 @@ function updateCounters() {
   if (countSellEl) countSellEl.textContent = selling.length;
   if (countWatchEl) countWatchEl.textContent = watchlist.length;
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
+
+  // Số thông báo cần chú ý (bị vượt giá, phiên sắp kết thúc)
+  const navNotifyEl = document.getElementById('nav-notifications-count');
+  if (navNotifyEl) navNotifyEl.textContent = getUserNotifications(getCurrentUser()).filter(n => n.important).length;
 }
 
 /**
@@ -827,11 +831,92 @@ function switchSection(sectionId) {
     if (sectionId === 'section-auctions') breadcrumbCurrent.textContent = 'Quản lý đấu giá';
     else if (sectionId === 'section-account') breadcrumbCurrent.textContent = 'Thông tin tài khoản';
     else if (sectionId === 'section-security') breadcrumbCurrent.textContent = 'Bảo mật & Đổi mật khẩu';
+    else if (sectionId === 'section-notifications') breadcrumbCurrent.textContent = 'Thông báo đấu giá';
   }
 
   if (sectionId === 'section-auctions') {
     renderCurrentAuctionTab();
+  } else if (sectionId === 'section-notifications') {
+    renderNotifications();
   }
+
+  // Đồng bộ hash trên thanh địa chỉ với mục đang xem
+  const sectionHash = {
+    'section-auctions': `#${currentActiveTab}`,
+    'section-account': '#account',
+    'section-security': '#security',
+    'section-notifications': '#notifications'
+  }[sectionId];
+  if (sectionHash) updateHash(sectionHash);
+}
+
+/**
+ * Cập nhật hash trên thanh địa chỉ mà không tạo sự kiện hashchange
+ * để lần bấm link header tiếp theo (ví dụ #watchlist) luôn được nhận diện là thay đổi
+ * @param {string} hash - Hash mới, ví dụ '#watchlist'
+ */
+function updateHash(hash) {
+  if (window.location.hash.toLowerCase() !== hash) {
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
+  }
+}
+
+/**
+ * Mở đúng mục / tab theo hash hiện tại trên URL (profile.html#watchlist, #notifications, ...)
+ * Được gọi khi tải trang và mỗi khi hash thay đổi (bấm link header khi đang ở profile.html)
+ */
+function applyHashRoute() {
+  const hash = window.location.hash.toLowerCase();
+  if (hash === '#watchlist') {
+    switchSection('section-auctions');
+    switchAuctionTab('watchlist');
+  } else if (hash === '#selling') {
+    switchSection('section-auctions');
+    switchAuctionTab('selling');
+  } else if (hash === '#notifications') {
+    switchSection('section-notifications');
+  } else if (hash === '#account') {
+    switchSection('section-account');
+  } else if (hash === '#security') {
+    switchSection('section-security');
+  } else {
+    // Mặc định (#participating, #my-auctions hoặc không có hash): tab đấu giá đang tham gia
+    switchSection('section-auctions');
+    switchAuctionTab('participating');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Render danh sách thông báo đấu giá của tài khoản hiện tại
+ */
+function renderNotifications() {
+  const listEl = document.getElementById('notification-list');
+  const emptyEl = document.getElementById('empty-notifications');
+  if (!listEl) return;
+
+  const notifications = getUserNotifications(getCurrentUser());
+  const icons = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
+
+  if (notifications.length === 0) {
+    listEl.innerHTML = '';
+    listEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+
+  listEl.style.display = 'flex';
+  if (emptyEl) emptyEl.style.display = 'none';
+  listEl.innerHTML = notifications.map(n => `
+    <li class="pcb-notify pcb-notify--${n.type}">
+      <span class="pcb-notify__icon" aria-hidden="true">${icons[n.type] || '🔔'}</span>
+      <div class="pcb-notify__body">
+        <h3 class="pcb-notify__title">${escapeHtml(n.title)}</h3>
+        <p class="pcb-notify__message">${escapeHtml(n.message)}</p>
+      </div>
+      <a class="pcb-notify__link" href="product-detail.html?id=${n.productId}">Xem phiên</a>
+    </li>
+  `).join('');
 }
 
 /**
@@ -855,6 +940,9 @@ function switchAuctionTab(tabName) {
 
   renderFilterChips();
   renderCurrentAuctionTab();
+
+  // Đồng bộ hash với tab đang xem
+  updateHash({ watchlist: '#watchlist', selling: '#selling', participating: '#participating' }[tabName] || '#participating');
 }
 
 /* ==========================================================================
@@ -982,26 +1070,21 @@ document.addEventListener('DOMContentLoaded', () => {
   syncUserInfoUI();
   updateCounters();
 
-  // 2. Kiểm tra URL Hash để mở đúng Tab (ví dụ: profile.html#watchlist)
-  const hash = window.location.hash.toLowerCase();
-  if (hash === '#watchlist') {
-    switchSection('section-auctions');
-    switchAuctionTab('watchlist');
-  } else if (hash === '#selling') {
-    switchSection('section-auctions');
-    switchAuctionTab('selling');
-  } else if (hash === '#participating' || hash === '#my-auctions') {
-    switchSection('section-auctions');
-    switchAuctionTab('participating');
-  } else if (hash === '#account') {
-    switchSection('section-account');
-  } else if (hash === '#security') {
-    switchSection('section-security');
-  } else {
-    // Mặc định vào tab đấu giá đang tham gia
-    switchSection('section-auctions');
-    switchAuctionTab('participating');
-  }
+  // 2. Mở đúng mục theo URL Hash (ví dụ: profile.html#watchlist) khi tải trang
+  //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
+  applyHashRoute();
+  window.addEventListener('hashchange', applyHashRoute);
+
+  // Bấm lại link trỏ đúng hash hiện tại (không phát sinh hashchange) vẫn chuyển về mục đó
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href*="profile.html#"]');
+    if (!link) return;
+    const url = new URL(link.href, window.location.href);
+    if (url.pathname === window.location.pathname && url.hash.toLowerCase() === window.location.hash.toLowerCase()) {
+      e.preventDefault();
+      applyHashRoute();
+    }
+  });
 
   // 3. Khởi động đồng hồ đếm ngược
   startLiveCountdown();
@@ -1283,6 +1366,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'pcbid_my_auctions_participating' || e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
       renderCurrentAuctionTab();
       syncUserInfoUI();
+      updateCounters();
+      if (currentActiveSection === 'section-notifications') renderNotifications();
     }
   });
 });
