@@ -719,3 +719,111 @@
     display: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   NÚT DANH MỤC TRÊN DI ĐỘNG: thay thanh điều hướng ngang bằng danh sách dọc
+   (máy tính vẫn giữ thanh ngang như cũ, nút này bị ẩn)
+   -------------------------------------------------------------------------- */
+.header__nav-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .header__nav-container {
+    position: relative;
+    padding: 0 16px;
+  }
+
+  .header__nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 0;
+    background: none;
+    border: none;
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b1c30;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  /* Biểu tượng 3 gạch ngang */
+  .header__nav-toggle-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 18px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  .header__nav-toggle-icon span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background-color: #ea580c;
+  }
+
+  /* Tên mục đang xem, hiển thị mờ bên cạnh chữ "Danh mục" */
+  .header__nav-toggle-current {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: #a33900;
+  }
+
+  .header__nav-toggle-current:not(:empty)::before {
+    content: "· ";
+    color: #94a3b8;
+  }
+
+  .header__nav-toggle-arrow {
+    flex-shrink: 0;
+    color: #565e74;
+    transition: transform 0.2s ease;
+  }
+
+  .header__nav-toggle[aria-expanded="true"] .header__nav-toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  /* Danh sách mặc định ẩn, mở ra theo chiều dọc khi bấm nút */
+  .header__nav-list {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 4px 0 10px;
+    overflow: visible;
+    white-space: normal;
+    border-top: 1px solid rgba(226, 191, 178, 0.4);
+  }
+
+  .header__nav-list--open {
+    display: flex;
+  }
+
+  .header__nav-item {
+    display: block;
+  }
+
+  .header__nav-link {
+    padding: 11px 12px;
+    font-size: 14px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .header__nav-link--active {
+    border-bottom: none;
+    border-left-color: #a33900;
+    background-color: #fff7ed;
+  }
+}

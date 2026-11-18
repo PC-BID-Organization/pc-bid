@@ -11,6 +11,7 @@ import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-
 export function initHeader() {
   initSearchHandler();
   initActiveNavLink();
+  initMobileNavToggle();
   initCategorySelectSync();
   initHeaderUserStatus();
 }
@@ -70,6 +71,46 @@ function initActiveNavLink() {
       link.classList.add('header__nav-link--active');
     } else if (!currentCategory && !currentStatus && href === currentPath) {
       link.classList.add('header__nav-link--active');
+    }
+  });
+}
+
+/**
+ * Nút "Danh mục" trên di động: bấm để mở / đóng thanh điều hướng theo chiều dọc
+ * Tự đóng khi chọn một mục, bấm ra ngoài hoặc nhấn phím Escape
+ */
+function initMobileNavToggle() {
+  const toggle = document.getElementById('header-nav-toggle');
+  const list = document.getElementById('header-nav-list');
+  if (!toggle || !list) return;
+
+  // Hiển thị tên mục đang xem bên cạnh chữ "Danh mục"
+  const current = document.getElementById('header-nav-current');
+  const activeLink = list.querySelector('.header__nav-link--active');
+  if (current && activeLink) current.textContent = activeLink.textContent.trim();
+
+  const setOpen = (open) => {
+    list.classList.toggle('header__nav-list--open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  list.addEventListener('click', (e) => {
+    if (e.target.closest('.header__nav-link')) setOpen(false);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.header__nav-bar')) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
     }
   });
 }
