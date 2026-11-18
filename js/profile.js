@@ -92,7 +92,7 @@ const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 const DEFAULT_PARTICIPATING_BY_USER = {
   bidder1: [
     {
-      id: 2001,
+      id: 2011,
       name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
       category: "GPU",
       status: "lead", // Đang dẫn đầu
@@ -102,7 +102,7 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       bidCount: 16,
       marketPriceNew: 12500000,
       endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
-      images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
+      images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
       specs: ["8GB GDDR6", "Furmark 65°C"]
     },
     {
@@ -178,7 +178,7 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
     },
     {
-      id: 2001,
+      id: 2011,
       name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
       category: "GPU",
       status: "outbid", // Bị bidder1 vượt giá (5tr6 vs 5tr8)
@@ -188,7 +188,7 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       bidCount: 16,
       marketPriceNew: 12500000,
       endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
-      images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
+      images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
       specs: ["8GB GDDR6", "Furmark 65°C"]
     },
     {
@@ -235,11 +235,11 @@ const DEFAULT_SELLING = [
     highestBidder: "nguon_pc_chat",
     bidCount: 13,
     soldDate: "28/10/2026",
-    images: ["images/products/psu/6013-nzxt-c750-gold-1.png"],
+    images: ["images/products/psu/6001-corsair-rm850x-1.jpg"],
     specs: ["850W", "80 Plus Gold"]
   },
   {
-    id: 7001,
+    id: 7005,
     name: "Vỏ máy tính Lian Li O11 Dynamic Mini Snow White",
     category: "Case",
     status: "ended", // Đã kết thúc
@@ -254,7 +254,7 @@ const DEFAULT_SELLING = [
 // Danh sách theo dõi (Watchlist) mẫu
 const DEFAULT_WATCHLIST = [
   {
-    id: 1002,
+    id: 1012,
     name: "Bộ vi xử lý Intel Core i5-13600K (14C/20T, Up to 5.1GHz)",
     category: "CPU",
     currentBid: 5600000,
@@ -265,7 +265,7 @@ const DEFAULT_WATCHLIST = [
     specs: ["LGA 1700", "5.1 GHz Max"]
   },
   {
-    id: 2002,
+    id: 2028,
     name: "Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB",
     category: "GPU",
     currentBid: 12800000,
@@ -276,7 +276,7 @@ const DEFAULT_WATCHLIST = [
     specs: ["16GB GDDR6", "256-bit"]
   },
   {
-    id: 8001,
+    id: 8007,
     name: "Tản nhiệt khí Noctua NH-D15 chromax.black Dual Fan",
     category: "Cooling",
     currentBid: 2200000,

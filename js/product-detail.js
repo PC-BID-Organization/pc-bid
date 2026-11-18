@@ -23,18 +23,18 @@ const NGUON_DU_LIEU = [
 // Dữ liệu dự phòng khi fetch thất bại (mở qua giao thức file:/// hoặc mạng lỗi)
 const SAN_PHAM_DU_PHONG = [
   {
-    id: 2001,
+    id: 2011,
     name: 'Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC',
     category: 'GPU',
     condition: 'Like New 99% - Fullbox, Tem Void SPC nguyên vẹn, chưa phá seal',
-    startingPrice: 4200000,
-    currentBid: 5800000,
+    startingPrice: 6500000,
+    currentBid: 8400000,
     bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
+    bidCount: 19,
+    marketPriceNew: 15000000,
     endTime: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
-    seller: 'hoanglong_pc',
-    images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+    seller: 'tuananh_pc',
+    images: ['images/products/gpu/2011-rtx-3070-8gb-1.webp'],
     description: 'Card còn mới gần như 100%, mua về không hợp socket. Box đầy đủ phụ kiện, chạy Furmark 30 phút ổn định 67°C. Bao test 48 giờ, ship toàn quốc.',
     specifications: { 'VRAM': '8GB GDDR6', 'Nhiệt độ Furmark': '67°C', 'Chuẩn kết nối': 'PCIe 4.0 x16', 'Cổng xuất hình': '3x DisplayPort 1.4 + 1x HDMI 2.1' }
   },
@@ -1143,10 +1143,10 @@ async function khoiDong() {
   ganSuKien();
   khoiDongHeTongTab();
 
-  // Đọc ID sản phẩm từ tham số URL (?id=2001). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2001
+  // Đọc ID sản phẩm từ tham số URL (?id=2011). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2011 (RTX 3070)
   const thamSoUrl = new URLSearchParams(window.location.search);
   const idChuoi = thamSoUrl.get('id');
-  const idSanPham = (idChuoi && !isNaN(parseInt(idChuoi, 10))) ? parseInt(idChuoi, 10) : 2001;
+  const idSanPham = (idChuoi && !isNaN(parseInt(idChuoi, 10))) ? parseInt(idChuoi, 10) : 2011;
 
   const vungLoading = document.getElementById('pcb-pd-loading');
   const vungLoi = document.getElementById('pcb-pd-error');
