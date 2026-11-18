@@ -230,13 +230,18 @@ async function nạpTatCaSanPham() {
       bCount = Math.max(bCount, bInfo.count);
     }
 
-    return {
+    const mergedItem = {
       ...sp,
       ...(localUpdated || {}),
       id: idNum,
       currentBid: curBid,
       bidCount: bCount
     };
+    // Đảm bảo AMD Ryzen 7 5800X3D luôn nhận đúng ảnh chip AMD, không bị cache i7 cũ đè lên
+    if (mergedItem.name && mergedItem.name.toLowerCase().includes('5800x3d')) {
+      mergedItem.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+    }
+    return mergedItem;
   });
 
   // Bổ sung các sản phẩm do người dùng tự đăng bán từ sell.html (chưa có trong JSON)
@@ -298,6 +303,10 @@ async function timSanPhamTheoId(id) {
  * @param {Object} sanPham - Đối tượng sản phẩm cần hiển thị
  */
 function hienThiSanPham(sanPham) {
+  // Tự động sửa lỗi nếu cache LocalStorage cũ lưu sai ảnh cho CPU AMD Ryzen 7 5800X3D
+  if (sanPham && sanPham.name && sanPham.name.toLowerCase().includes('5800x3d')) {
+    sanPham.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+  }
   sanPhamHienTai = sanPham;
 
   // Cập nhật tiêu đề tab trình duyệt
