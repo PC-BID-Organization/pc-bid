@@ -87,65 +87,128 @@ const SAMPLE_ACCOUNTS = [
 
 const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
-// Danh sách phiên đang tham gia mẫu
-const DEFAULT_PARTICIPATING = [
-  {
-    id: 2001,
-    name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
-    category: "GPU",
-    status: "lead", // 'lead': Đang dẫn đầu | 'outbid': Đã bị vượt giá
-    currentBid: 5800000,
-    myBid: 5800000,
-    bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
-    endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000, // 2h 45m
-    images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
-    specs: ["8GB GDDR6", "Furmark 65°C"]
-  },
-  {
-    id: 1001,
-    name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
-    category: "CPU",
-    status: "outbid", // Bị vượt giá
-    currentBid: 5100000,
-    myBid: 4900000,
-    bidStep: 100000,
-    bidCount: 22,
-    marketPriceNew: 8900000,
-    endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000, // 4h 15m
-    images: ["images/products/cpu/1005-i7-11700k-1.jpg"],
-    specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
-  },
-  {
-    id: 3013,
-    name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
-    category: "Mainboard",
-    status: "lead", // Đang dẫn đầu
-    currentBid: 5800000,
-    myBid: 5800000,
-    bidStep: 100000,
-    bidCount: 7,
-    marketPriceNew: 7690000,
-    endTimestamp: Date.now() + 18 * 3600 * 1000, // 18h
-    images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-    specs: ["LGA 1700", "Micro-ATX"]
-  },
-  {
-    id: 4011,
-    name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
-    category: "RAM",
-    status: "outbid", // Bị vượt giá
-    currentBid: 3250000,
-    myBid: 3100000,
-    bidStep: 50000,
-    bidCount: 9,
-    marketPriceNew: 3990000,
-    endTimestamp: Date.now() + 52 * 60 * 1000, // 52 phút
-    images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
-    specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
-  }
-];
+// Danh sách phiên đang tham gia mẫu chuẩn cho từng tài khoản demo
+// Giúp mô phỏng hoàn hảo kịch bản 2 tài khoản (bidder1 và bidder2) trả giá đối kháng vượt giá nhau
+const DEFAULT_PARTICIPATING_BY_USER = {
+  bidder1: [
+    {
+      id: 2001,
+      name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
+      category: "GPU",
+      status: "lead", // Đang dẫn đầu
+      currentBid: 5800000,
+      myBid: 5800000,
+      bidStep: 100000,
+      bidCount: 16,
+      marketPriceNew: 12500000,
+      endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
+      images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
+      specs: ["8GB GDDR6", "Furmark 65°C"]
+    },
+    {
+      id: 1001,
+      name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
+      category: "CPU",
+      status: "outbid", // Đã bị bidder2 vượt giá
+      currentBid: 5100000,
+      myBid: 4900000,
+      bidStep: 100000,
+      bidCount: 22,
+      marketPriceNew: 8900000,
+      endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
+      images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
+      specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
+    },
+    {
+      id: 3013,
+      name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
+      category: "Mainboard",
+      status: "lead", // Đang dẫn đầu
+      currentBid: 5800000,
+      myBid: 5800000,
+      bidStep: 100000,
+      bidCount: 7,
+      marketPriceNew: 7690000,
+      endTimestamp: Date.now() + 18 * 3600 * 1000,
+      images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
+      specs: ["LGA 1700", "Micro-ATX"]
+    },
+    {
+      id: 4011,
+      name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
+      category: "RAM",
+      status: "outbid", // Bị vượt giá
+      currentBid: 3250000,
+      myBid: 3100000,
+      bidStep: 50000,
+      bidCount: 9,
+      marketPriceNew: 3990000,
+      endTimestamp: Date.now() + 52 * 60 * 1000,
+      images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
+      specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
+    }
+  ],
+  bidder2: [
+    {
+      id: 4011,
+      name: "RAM Corsair Vengeance RGB 32GB (2x16GB) 6000MHz DDR5 Black",
+      category: "RAM",
+      status: "lead", // Đang dẫn đầu (trả 3tr25 cao hơn bidder1)
+      currentBid: 3250000,
+      myBid: 3250000,
+      bidStep: 50000,
+      bidCount: 9,
+      marketPriceNew: 3990000,
+      endTimestamp: Date.now() + 52 * 60 * 1000,
+      images: ["images/products/ram/4011-corsair-vengeance-rgb-ddr5-black-1.jpg"],
+      specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
+    },
+    {
+      id: 1001,
+      name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
+      category: "CPU",
+      status: "lead", // Đang dẫn đầu (trả 5tr1 cao hơn bidder1)
+      currentBid: 5100000,
+      myBid: 5100000,
+      bidStep: 100000,
+      bidCount: 22,
+      marketPriceNew: 8900000,
+      endTimestamp: Date.now() + 4 * 3600 * 1000 + 15 * 60 * 1000,
+      images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
+      specs: ["Socket AM4", "3.4GHz - 4.5GHz"]
+    },
+    {
+      id: 2001,
+      name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
+      category: "GPU",
+      status: "outbid", // Bị bidder1 vượt giá (5tr6 vs 5tr8)
+      currentBid: 5800000,
+      myBid: 5600000,
+      bidStep: 100000,
+      bidCount: 16,
+      marketPriceNew: 12500000,
+      endTimestamp: Date.now() + 2 * 3600 * 1000 + 45 * 60 * 1000,
+      images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
+      specs: ["8GB GDDR6", "Furmark 65°C"]
+    },
+    {
+      id: 3013,
+      name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
+      category: "Mainboard",
+      status: "outbid", // Bị bidder1 vượt giá (5tr6 vs 5tr8)
+      currentBid: 5800000,
+      myBid: 5600000,
+      bidStep: 100000,
+      bidCount: 7,
+      marketPriceNew: 7690000,
+      endTimestamp: Date.now() + 18 * 3600 * 1000,
+      images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
+      specs: ["LGA 1700", "Micro-ATX"]
+    }
+  ]
+};
+
+const DEFAULT_PARTICIPATING = DEFAULT_PARTICIPATING_BY_USER.bidder1;
 
 // Danh sách linh kiện tự đăng bán mẫu
 const DEFAULT_SELLING = [
@@ -331,23 +394,15 @@ function saveCurrentUser(user) {
 }
 
 function getParticipatingBids() {
-  const raw = localStorage.getItem(STORAGE_KEYS.PARTICIPATING_BIDS);
-  let list = [];
-  if (!raw) {
-    list = DEFAULT_PARTICIPATING;
-  } else {
-    try {
-      list = JSON.parse(raw);
-      if (!Array.isArray(list)) list = DEFAULT_PARTICIPATING;
-    } catch {
-      list = DEFAULT_PARTICIPATING;
-    }
-  }
-
   const currentUser = getCurrentUser();
   const currentUsername = currentUser ? (currentUser.username || currentUser.fullname) : 'bidder1';
 
-  // Đọc danh sách sản phẩm và lịch sử đặt giá mới nhất từ localStorage
+  // 1. Lấy danh sách sản phẩm mẫu theo đúng tài khoản đang đăng nhập (bidder1 hoặc bidder2)
+  const defaultList = (DEFAULT_PARTICIPATING_BY_USER && DEFAULT_PARTICIPATING_BY_USER[currentUsername]) 
+    ? DEFAULT_PARTICIPATING_BY_USER[currentUsername] 
+    : DEFAULT_PARTICIPATING;
+
+  // 2. Đọc danh sách sản phẩm và các lượt bid từ localStorage
   let localProducts = [];
   try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
   const prodMap = new Map(localProducts.map(p => [Number(p.id), p]));
@@ -355,35 +410,86 @@ function getParticipatingBids() {
   let localBids = [];
   try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
 
-  // Tự động kiểm tra trạng thái Dẫn đầu (lead) vs Bị vượt giá (outbid) theo người dùng hiện tại
-  return list.map(item => {
+  // 3. Xây dựng bản đồ các sản phẩm tham gia riêng cho người dùng hiện tại
+  const userItemsMap = new Map();
+
+  // Khởi tạo trước với các sản phẩm mẫu của người dùng này
+  defaultList.forEach(item => {
+    userItemsMap.set(Number(item.id), { ...item });
+  });
+
+  // Tìm tất cả sản phẩm mà người dùng hiện tại ĐÃ THỰC SỰ ĐẶT GIÁ trong localBids
+  const userRealBids = localBids.filter(b => 
+    b.bidderName === currentUsername || 
+    b.bidderName === currentUser?.username || 
+    b.bidderName === currentUser?.email
+  );
+
+  userRealBids.forEach(bid => {
+    const pId = Number(bid.productId);
+    if (!userItemsMap.has(pId)) {
+      const prod = prodMap.get(pId);
+      if (prod) {
+        userItemsMap.set(pId, {
+          id: pId,
+          name: prod.name,
+          category: prod.category || 'Linh kiện',
+          currentBid: Number(prod.currentBid) || Number(bid.amount),
+          myBid: Number(bid.amount),
+          bidStep: Number(prod.bidStep) || 100000,
+          bidCount: Number(prod.bidCount) || 1,
+          marketPriceNew: Number(prod.marketPriceNew) || Number(prod.currentBid) * 1.5,
+          endTimestamp: prod.endTime ? new Date(prod.endTime).getTime() : Date.now() + 86400000,
+          images: prod.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
+          specs: prod.specifications ? Object.entries(prod.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
+        });
+      }
+    }
+  });
+
+  // 4. Với mỗi sản phẩm, tính toán độc lập giá của người này (myBid) và giá cao nhất hiện tại (currentBid)
+  return Array.from(userItemsMap.values()).map(item => {
     const idNum = Number(item.id);
     const prod = prodMap.get(idNum);
 
-    // Tìm các lượt bid của người dùng hiện tại trên sản phẩm này
-    const myBidsOnItem = localBids.filter(b => 
-      Number(b.productId) === idNum && 
-      (b.bidderName === currentUsername || b.bidderName === currentUser?.username || b.bidderName === currentUser?.email)
+    // Lấy toàn bộ các lượt bid trên sản phẩm này, sắp xếp giảm dần theo số tiền
+    const allBidsOnItem = localBids
+      .filter(b => Number(b.productId) === idNum)
+      .map(b => ({ ...b, amount: Number(b.amount) }))
+      .sort((a, b) => b.amount - a.amount || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    // Lọc các lượt bid của CHÍNH NGƯỜI DÙNG NÀY trên sản phẩm
+    const myBidsOnItem = allBidsOnItem.filter(b => 
+      b.bidderName === currentUsername || 
+      b.bidderName === currentUser?.username || 
+      b.bidderName === currentUser?.email
     );
 
-    let myHighestBid = Number(item.myBid) || Number(item.currentBid) || 1000000;
+    // Xác định mức giá cao nhất mà người này đã đặt
+    let myHighestBid;
     if (myBidsOnItem.length > 0) {
-      myHighestBid = Math.max(...myBidsOnItem.map(b => Number(b.amount) || 0));
+      myHighestBid = myBidsOnItem[0].amount;
+    } else {
+      // Nếu chưa có lượt đặt trong localBids, lấy giá ban đầu của tài khoản này
+      myHighestBid = Number(item.myBid) || 1000000;
     }
 
-    let currentHighestBid = prod ? Number(prod.currentBid) : Number(item.currentBid || myHighestBid);
-    const allBidsOnItem = localBids.filter(b => Number(b.productId) === idNum);
+    // Xác định giá cao nhất hiện tại của phiên đấu giá
+    let currentHighestBid = Number(prod?.currentBid) || Number(item.currentBid) || myHighestBid;
     if (allBidsOnItem.length > 0) {
-      const topBid = Math.max(...allBidsOnItem.map(b => Number(b.amount) || 0));
-      if (topBid > currentHighestBid) currentHighestBid = topBid;
+      if (allBidsOnItem[0].amount > currentHighestBid) {
+        currentHighestBid = allBidsOnItem[0].amount;
+      }
     }
 
-    // Nếu giá cao nhất hiện tại lớn hơn giá tôi đã đặt, hoặc người dẫn đầu không phải tôi -> BỊ VƯỢT GIÁ (outbid)
+    // Đánh giá trạng thái: Ai đang dẫn đầu phiên?
     let isLead = false;
     if (allBidsOnItem.length > 0) {
-      isLead = (allBidsOnItem[0].bidderName === currentUsername || allBidsOnItem[0].bidderName === currentUser?.username) && (myHighestBid >= currentHighestBid);
+      const topBidder = allBidsOnItem[0].bidderName;
+      const isTopBidderMe = (topBidder === currentUsername || topBidder === currentUser?.username);
+      isLead = isTopBidderMe && (myHighestBid >= currentHighestBid);
     } else {
-      isLead = item.status === 'lead' || item.status === 'leading';
+      isLead = myHighestBid >= currentHighestBid;
     }
 
     return {
@@ -1001,7 +1107,7 @@ function setupQuickBid(productId) {
   const newPriceEl = document.getElementById('qb-new-price');
   const detailLink = document.getElementById('qb-goto-detail');
 
-  const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/products/cpu/1005-i7-11700k-1.jpg';
+  const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/products/cpu/1023-ryzen-7-5800x3d-1.jpg';
 
   if (infoContainer) {
     infoContainer.innerHTML = `
