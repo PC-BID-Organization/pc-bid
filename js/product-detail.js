@@ -6,6 +6,8 @@
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp } from './auction-time.js';
+// Kiểm tra tiền cọc 10% trước khi đặt giá
+import { checkBidDeposit } from './wallet.js';
 
 
 /* ==========================================================================
@@ -827,6 +829,15 @@ function xuLyDatGia() {
       nguoiDung.fullname === sanPhamHienTai.seller ||
       nguoiDung.email === sanPhamHienTai.seller) {
     hienThiLoi(oLoi, oNhapGia, 'Bạn không thể đặt giá cho sản phẩm chính mình đăng bán.');
+    return;
+  }
+
+  // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới
+  const kiemTraCoc = checkBidDeposit(nguoiDung, sanPhamHienTai.id, soTienNhap);
+  if (!kiemTraCoc.ok) {
+    hienThiLoi(oLoi, oNhapGia,
+      `Số dư khả dụng (${dinhDangVnd(kiemTraCoc.available)}) không đủ giữ cọc 10% (${dinhDangVnd(kiemTraCoc.required)}). Vui lòng nạp thêm tiền ở trang Hồ sơ.`
+    );
     return;
   }
 
