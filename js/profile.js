@@ -106,7 +106,7 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       specs: ["8GB GDDR6", "Furmark 65°C"]
     },
     {
-      id: 1001,
+      id: 1023,
       name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
       category: "CPU",
       status: "outbid", // Đã bị bidder2 vượt giá
@@ -164,7 +164,7 @@ const DEFAULT_PARTICIPATING_BY_USER = {
       specs: ["32GB (2x16GB)", "DDR5 6000MHz"]
     },
     {
-      id: 1001,
+      id: 1023,
       name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
       category: "CPU",
       status: "lead", // Đang dẫn đầu (trả 5tr1 cao hơn bidder1)
