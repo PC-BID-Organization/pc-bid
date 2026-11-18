@@ -642,6 +642,34 @@
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
 }
 
+/* Tên sản phẩm tâm điểm dạng liên kết sang trang chi tiết */
+.hero-v2__spotlight-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hero-v2__spotlight-name-link:hover,
+.hero-v2__spotlight-name-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* Liên kết phụ "Xem chi tiết phiên" bên dưới nút trả giá */
+.hero-v2__spotlight-detail {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fdba74;
+  text-decoration: none;
+}
+
+.hero-v2__spotlight-detail:hover,
+.hero-v2__spotlight-detail:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 /* --- 2.3 Cột Phải: 4 Thẻ Đấu Giá Nổi Bật Thu Nhỏ (Curated Promos) --- */
 .hero-v2__promos {
   display: flex;
@@ -2180,6 +2208,10 @@
   .hero-v2 {
     grid-template-columns: 1fr;
   }
+  /* Bảng vàng chốt giá: 2 cột trên máy tính bảng để không tràn ngang */
+  .pcb-wins {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .hero-v2__sidebar {
     display: none; /* Thu gọn sidebar trên tablet để nhường chỗ cho banner */
   }
@@ -2223,8 +2255,10 @@
   .pcb-trust {
     grid-template-columns: 1fr;
   }
-  .pcb-hero-v2__promos {
-    grid-template-columns: 1fr;
+  /* 4 thẻ khuyến mãi xếp 2 cột để chữ không bị bóp dọc */
+  .hero-v2__promos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
   .pcb-wins {
     grid-template-columns: 1fr;
@@ -2240,5 +2274,94 @@
   .pcb-shelf__tools {
     width: 100%;
     justify-content: space-between;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ĐIỆN THOẠI (≤ 640px): chống tràn ngang và chồng chữ trên Trang chủ
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  /* Băng chuyền trực tiếp: ẩn liên kết bên phải để nội dung không đè lên nhau */
+  .pcb-ticker {
+    padding: 8px 12px;
+  }
+
+  .pcb-ticker__link {
+    display: none;
+  }
+
+  /* Thẻ khuyến mãi nhỏ: ảnh nằm trên, chữ bên dưới, không đè lên nhau */
+  .hero-v2__promo-card {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .hero-v2__promo-img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hero-v2__promo-title {
+    white-space: normal;
+  }
+
+  /* Tiêu đề kệ hàng: các tab cuộn ngang, nút "Xem tất cả" xuống hàng riêng */
+  .pcb-shelf__tools {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pcb-shelf__tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pcb-shelf__tab {
+    white-space: nowrap;
+  }
+
+  .pcb-shelf__desc {
+    margin-left: 0;
+  }
+
+  /* Thẻ sản phẩm 2 cột: nhãn giá nằm trên, số tiền bên dưới */
+  .pcb-card__price-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .pcb-card__price-val {
+    font-size: 15px;
+  }
+
+  /* Khối quy trình kiểm định: nút xem phiếu xuống dưới tiêu đề */
+  .pcb-lab {
+    padding: 20px 16px;
+  }
+
+  .pcb-lab__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pcb-lab__grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ô đăng ký nhận tin: ô nhập và nút xếp dọc */
+  .pcb-subscribe__form {
+    flex-direction: column;
+  }
+
+  .pcb-subscribe__input {
+    min-width: 0;
+  }
+
+  .pcb-subscribe__btn {
+    width: 100%;
   }
 }

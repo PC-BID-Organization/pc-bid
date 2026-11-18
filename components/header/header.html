@@ -81,7 +81,7 @@
         <!-- Nút thông báo đấu giá -->
         <a href="profile.html#notifications" class="header__icon-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá">
           <img src="images/icons/icon-bell.svg" alt="Thông báo" class="header__btn-icon-img" width="14" height="17">
-          <span class="header__badge">5</span>
+          <span class="header__badge" id="header-notification-badge">0</span>
         </a>
 
         <!-- Khối người dùng & Menu dropdown đăng nhập / đăng xuất -->
@@ -100,9 +100,21 @@
   </div>
 
   <!-- 3. Thanh điều hướng danh mục linh kiện (Categories Nav Bar) -->
-  <nav class="header__nav-bar">
+  <nav class="header__nav-bar" aria-label="Điều hướng danh mục">
     <div class="container header__nav-container">
-      <ul class="header__nav-list">
+      <!-- Nút mở danh mục dạng dọc, chỉ hiển thị trên thiết bị di động -->
+      <button type="button" class="header__nav-toggle" id="header-nav-toggle" aria-expanded="false" aria-controls="header-nav-list">
+        <span class="header__nav-toggle-icon" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="header__nav-toggle-text">Danh mục</span>
+        <span class="header__nav-toggle-current" id="header-nav-current"></span>
+        <svg class="header__nav-toggle-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      <ul class="header__nav-list" id="header-nav-list">
         <li class="header__nav-item">
           <a href="index.html" class="header__nav-link header__nav-link--active">Trang chủ</a>
         </li>

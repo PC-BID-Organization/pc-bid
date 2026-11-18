@@ -4,6 +4,12 @@
  * 100% Vanilla JavaScript (ES6+), Không framework bên ngoài.
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp } from './auction-time.js';
+// Module ví ảo & tiền cọc dùng chung
+import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
+
+
 /* ==========================================================================
    1. CẤU HÌNH & TẬP DỮ LIỆU
    ========================================================================== */
@@ -22,154 +28,154 @@ const DATA_SOURCES = [
 // Dữ liệu dự phòng phong phú (Fallback Seed Data) khi mở qua giao thức file:/// hoặc fetch lỗi
 const FALLBACK_PRODUCTS = [
   {
-    id: 2001,
+    id: 2011,
     name: "Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC",
     category: "GPU",
-    condition: "Like New 99% - Fullbox, Tem Void SPC nguyên vẹn",
-    startingPrice: 4200000,
-    currentBid: 5800000,
+    condition: "Đã sử dụng - Fullbox phụ kiện, nguyên tem void",
+    startingPrice: 6500000,
+    currentBid: 8400000,
     bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
+    bidCount: 19,
+    marketPriceNew: 15000000,
     endTime: new Date(Date.now() + 18 * 60 * 1000).toISOString(),
-    seller: "hoanglong_pc",
-    images: ["images/products/gpu/2018-rtx-4070-12gb-1.webp"],
-    specifications: { "VRAM": "8GB GDDR6", "Nhiệt độ test": "Furmark 65°C" }
+    seller: "tuananh_pc",
+    images: ["images/products/gpu/2011-rtx-3070-8gb-1.webp"],
+    specifications: { "Dung lượng VRAM / Chuẩn": "8GB GDDR6 (256-bit)", "Băng thông bộ nhớ": "14 Gbps", "Cổng kết nối": "2x HDMI 2.1, 3x DisplayPort 1.4a", "Nguồn đề xuất": "650W (2x 8-pin)" }
   },
   {
-    id: 1001,
+    id: 1023,
     name: "Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)",
     category: "CPU",
-    condition: "Đã sử dụng - Chân Socket AM4 hoàn hảo, bao test 7 ngày",
-    startingPrice: 3800000,
-    currentBid: 4900000,
+    condition: "Đã sử dụng - Hàng hiếm sưu tầm, fullbox like new",
+    startingPrice: 5600000,
+    currentBid: 8100000,
     bidStep: 100000,
-    bidCount: 22,
-    marketPriceNew: 8900000,
+    bidCount: 25,
+    marketPriceNew: 9500000,
     endTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
-    seller: "gaming_zone_vn",
-    images: ["images/products/cpu/1019-ryzen-5-5600-1.jpg"],
-    specifications: { "Socket": "AM4", "TDP": "105W" }
+    seller: "minhduc_hardware",
+    images: ["images/products/cpu/1023-ryzen-7-5800x3d-1.jpg"],
+    specifications: { "Socket": "AM4", "Số nhân / Số luồng": "8 nhân / 16 luồng", "Xung cơ bản / Xung Boost": "3.40 GHz / 4.50 GHz", "Bộ nhớ đệm (Cache)": "96 MB 3D V-Cache", "TDP": "105 W" }
   },
   {
-    id: 3001,
+    id: 3013,
     name: "Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5",
     category: "Mainboard",
-    condition: "Like New 99% - Fullbox phụ kiện râu anten, chặn main",
-    startingPrice: 3500000,
-    currentBid: 4600000,
+    condition: "Đã sử dụng - Còn mới 98%, Fullbox chính hãng, bảo hành 18 tháng",
+    startingPrice: 5100000,
+    currentBid: 5800000,
     bidStep: 100000,
-    bidCount: 11,
-    marketPriceNew: 7200000,
+    bidCount: 7,
+    marketPriceNew: 7690000,
     endTime: new Date(Date.now() + 115 * 60 * 1000).toISOString(),
-    seller: "pc_premium_uit",
+    seller: "tuan_pcbuilder",
     images: ["images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg"],
-    specifications: { "Socket": "LGA 1700", "Chuẩn RAM": "DDR5" }
+    specifications: { "Socket": "LGA 1700", "Chipset": "Intel Z790", "Kích thước chuẩn (Form Factor)": "ATX", "Số khe RAM / Chuẩn RAM hỗ trợ": "4 khe DDR5 (Tối đa 192GB)", "Cổng M.2 NVMe": "4 khe M.2 PCIe 4.0 x4" }
   },
   {
-    id: 4001,
-    name: "RAM G.SKILL Trident Z RGB 32GB (2x16GB) 3600MHz DDR4",
+    id: 4003,
+    name: "RAM G.SKILL Trident Z RGB 16GB (1x16GB) 3600MHz DDR4",
     category: "RAM",
-    condition: "Đã sử dụng - MemTest86 2 lượt 0 error, tản nhôm phay xước",
-    startingPrice: 1100000,
-    currentBid: 1650000,
+    condition: "Đã sử dụng - Like New 99%, tem Mai Hoàng bảo hành 8 tháng",
+    startingPrice: 950000,
+    currentBid: 1300000,
     bidStep: 50000,
-    bidCount: 11,
-    marketPriceNew: 2800000,
+    bidCount: 7,
+    marketPriceNew: 1690000,
     endTime: new Date(Date.now() + 85 * 60 * 1000).toISOString(),
-    seller: "linhkien_chinhhang",
+    seller: "minh_gear99",
     images: ["images/products/ram/4003-gskill-trident-z-rgb-16gb-1.jpg"],
-    specifications: { "Dung lượng": "32GB (2x16GB)", "Bus": "3600MHz" }
+    specifications: { "Dung lượng": "16GB (1 x 16GB)", "Chuẩn RAM": "DDR4", "Bus (Tốc độ)": "3600 MHz", "Độ trễ (CAS Latency / CL)": "CL18", "Tản nhiệt / LED": "Tản nhôm phay xước / LED RGB đa vùng" }
   },
   {
     id: 5001,
-    name: "Ổ cứng SSD Samsung 980 Pro 1TB NVMe PCIe Gen 4.0",
+    name: "SSD Samsung 980 Pro 1TB NVMe M.2 PCIe Gen 4.0",
     category: "Storage",
-    condition: "Like New 99% - Sức khỏe 100%, ghi chưa tới 5TB",
-    startingPrice: 1300000,
+    condition: "Đã sử dụng - Sức khỏe (Health) 99%, chạy 120 giờ, nguyên box",
+    startingPrice: 1600000,
+    currentBid: 1950000,
+    bidStep: 50000,
+    bidCount: 7,
+    marketPriceNew: 2850000,
+    endTime: new Date(Date.now() + 32 * 60 * 1000).toISOString(),
+    seller: "vinh_pc_gear",
+    images: ["images/products/storage/5001-samsung-980-pro-1.png"],
+    specifications: { "Dung lượng": "1TB", "Loại ổ đĩa": "NVMe M.2 PCIe Gen 4", "Tốc độ đọc tối đa": "7000 MB/s", "Tốc độ ghi tối đa": "5000 MB/s", "Độ bền TBW": "600 TBW" }
+  },
+  {
+    id: 6013,
+    name: "Nguồn Máy Tính NZXT C750 Gold 750W",
+    category: "PSU",
+    condition: "Đã sử dụng - Fullbox đẹp 98%, nguyên seal tem",
+    startingPrice: 1600000,
     currentBid: 1850000,
     bidStep: 50000,
-    bidCount: 11,
-    marketPriceNew: 2900000,
-    endTime: new Date(Date.now() + 32 * 60 * 1000).toISOString(),
-    seller: "ssd_speed_fast",
-    images: ["images/products/storage/5001-ssd-samsung-980-pro-1tb-1.jpg"],
-    specifications: { "Tốc độ đọc": "7000 MB/s", "Sức khỏe": "CrystalDisk 100%" }
-  },
-  {
-    id: 6001,
-    name: "Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Modular",
-    category: "PSU",
-    condition: "Đã sử dụng - Còn bảo hành hãng 4 năm, tụ Nhật 105°C",
-    startingPrice: 1500000,
-    currentBid: 2150000,
-    bidStep: 50000,
-    bidCount: 13,
-    marketPriceNew: 3600000,
+    bidCount: 5,
+    marketPriceNew: 2890000,
     endTime: new Date(Date.now() + 140 * 60 * 1000).toISOString(),
-    seller: "nguon_pc_chat",
+    seller: "hoang_minh_store",
     images: ["images/products/psu/6013-nzxt-c750-gold-1.png"],
-    specifications: { "Công suất": "850W", "Chứng nhận": "80 Plus Gold" }
+    specifications: { "Công suất thực": "750W", "Chuẩn hiệu suất": "80 Plus Gold", "Kiểu dây nguồn": "Full Modular", "Kích thước quạt": "120mm" }
   },
   {
-    id: 8001,
-    name: "Tản nhiệt khí Noctua NH-D15 chromax.black Dual Fan",
+    id: 8007,
+    name: "Tản nhiệt Noctua NH-D15S Chromax Black",
     category: "Cooling",
-    condition: "Fullbox - Đầy đủ ngàm Intel LGA1700 & AMD AM5",
-    startingPrice: 1600000,
-    currentBid: 2200000,
+    condition: "Đã sử dụng - Còn mới 95%, còn ốc và gông lắp đặt cơ bản, cần kiểm tra đủ bộ",
+    startingPrice: 1700000,
+    currentBid: 1800000,
     bidStep: 50000,
-    bidCount: 12,
-    marketPriceNew: 3200000,
+    bidCount: 2,
+    marketPriceNew: 2790000,
     endTime: new Date(Date.now() + 75 * 60 * 1000).toISOString(),
-    seller: "noctua_lover",
+    seller: "linh_kien_cu",
     images: ["images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg"],
-    specifications: { "Kích cỡ quạt": "140mm Dual", "TDP": "250W" }
+    specifications: { "Loại tản nhiệt": "Khí", "Màu sắc": "Đen", "Số ống đồng": "Chưa có dữ liệu", "Socket hỗ trợ": "Chưa có dữ liệu", "Đèn LED": "Chưa có dữ liệu" }
   },
   {
-    id: 7001,
-    name: "Vỏ máy tính Lian Li O11 Dynamic Mini Snow White",
+    id: 7005,
+    name: "Vỏ máy tính Lian Li O11D Mini V2 White",
     category: "Case",
-    condition: "Đẹp 98% - Kính cường lực không xước, kèm 3 quạt ARGB",
-    startingPrice: 1200000,
-    currentBid: 1750000,
+    condition: "Đã sử dụng - Còn mới 92%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
+    startingPrice: 1150000,
+    currentBid: 1500000,
     bidStep: 50000,
-    bidCount: 11,
-    marketPriceNew: 2650000,
+    bidCount: 7,
+    marketPriceNew: 2790000,
     endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    seller: "modder_hcm",
+    seller: "thanh_pcgear",
     images: ["images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"],
-    specifications: { "Kính cường lực": "2 mặt", "Hỗ trợ Main": "ATX / M-ATX" }
+    specifications: { "Hỗ trợ Mainboard": "ATX;Micro-ATX;Mini-ITX", "Kích thước case": "423.6 x 273.3 x 391.95", "Màu sắc": "Trắng", "Chất liệu / Kính cường lực": "Thép;Kính cường lực", "Hỗ trợ nguồn (PSU)": "ATX (Under 200mm)", "Hỗ trợ tản nhiệt AIO tối đa": "360 mm", "Kích thước tối đa VGA": "Chưa có dữ liệu", "Số quạt đi kèm": "Chưa có dữ liệu" }
   },
   {
-    id: 2002,
-    name: "Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB",
+    id: 2028,
+    name: "Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB",
     category: "GPU",
-    condition: "Like New 99% - Tem Viễn Sơn, quạt êm nhiệt độ Furmark 62°C",
-    startingPrice: 9500000,
-    currentBid: 12800000,
+    condition: "Đã sử dụng - Fullbox còn bảo hành TLC 31 tháng",
+    startingPrice: 11200000,
+    currentBid: 12400000,
     bidStep: 200000,
-    bidCount: 16,
-    marketPriceNew: 16900000,
+    bidCount: 6,
+    marketPriceNew: 15500000,
     endTime: new Date(Date.now() + 95 * 60 * 1000).toISOString(),
-    seller: "vga_store_vn",
+    seller: "nam_tech99",
     images: ["images/products/gpu/2028-rx-7800-xt-1.jpg"],
-    specifications: { "VRAM": "16GB GDDR6", "Băng thông": "256-bit" }
+    specifications: { "Dung lượng VRAM / Chuẩn": "16GB GDDR6 (256-bit)", "Băng thông bộ nhớ": "19.5 Gbps", "Cổng kết nối": "2x HDMI 2.1a, 2x DisplayPort 2.1", "Nguồn đề xuất": "700W (2x 8-pin)" }
   },
   {
-    id: 1002,
-    name: "Bộ vi xử lý Intel Core i5-13600K (14C/20T, Up to 5.1GHz)",
+    id: 1012,
+    name: "Intel Core i5-13600K",
     category: "CPU",
-    condition: "Like New 99% - Hàng chính hãng Viết Sơn, chân tiếp xúc vàng óng",
-    startingPrice: 4500000,
-    currentBid: 5600000,
+    condition: "Đã sử dụng - Còn bảo hành chính hãng đến 2026",
+    startingPrice: 5100000,
+    currentBid: 6600000,
     bidStep: 100000,
-    bidCount: 11,
-    marketPriceNew: 8100000,
+    bidCount: 15,
+    marketPriceNew: 8200000,
     endTime: new Date(Date.now() + 130 * 60 * 1000).toISOString(),
-    seller: "cpu_uit_zone",
+    seller: "hoanglong_pc",
     images: ["images/products/cpu/1012-i5-13600k-1.jpg"],
-    specifications: { "Socket": "LGA 1700", "Xung nhịp": "5.1 GHz Max" }
+    specifications: { "Socket": "LGA1700", "Số nhân / Số luồng": "14 nhân (6P + 8E) / 20 luồng", "Xung cơ bản / Xung Boost": "3.50 GHz / 5.10 GHz", "Bộ nhớ đệm (Cache)": "24 MB Intel Smart Cache", "TDP": "125 W" }
   }
 ];
 
@@ -322,7 +328,7 @@ function syncProductsWithStorage(rawList) {
         condition: fixMojibake(lp.condition || 'Đã sử dụng'),
         currentBid: curBid,
         bidCount: bCount,
-        endTimestamp: lp.endTime ? new Date(lp.endTime).getTime() : Date.now() + 86400000 * 3,
+        endTimestamp: getAuctionEndTimestamp(lp),
         marketPriceNew: Number(lp.marketPriceNew) || Math.round(curBid * 1.5)
       });
     }
@@ -345,9 +351,8 @@ async function loadProducts() {
 
     if (flattened && flattened.length > 0) {
       const mapped = flattened.map(p => {
-        const baseTime = new Date(p.endTime).getTime();
-        const spreadHours = (p.id % 48) + ((p.id % 7) * 0.5);
-        const endTimestamp = isNaN(baseTime) ? (Date.now() + 86400000 * 7) : (baseTime - spreadHours * 3600 * 1000);
+        // Thời điểm kết thúc thống nhất với trang chi tiết và trang hồ sơ
+        const endTimestamp = getAuctionEndTimestamp(p);
 
         return {
           ...p,
@@ -367,7 +372,7 @@ async function loadProducts() {
   // Dự phòng hạt giống
   const mapped = FALLBACK_PRODUCTS.map(p => ({
     ...p,
-    endTimestamp: new Date(p.endTime).getTime()
+    endTimestamp: getAuctionEndTimestamp(p)
   }));
   allProducts = syncProductsWithStorage(mapped);
 }
@@ -533,6 +538,70 @@ function renderHotAuctionsShelf() {
   container.innerHTML = items.map(p => renderProductCard(p, { showCountdown: false })).join('');
 }
 
+/**
+ * Cập nhật thẻ "Cạnh tranh nhất" ở Hero Banner theo sản phẩm có nhiều lượt bid nhất
+ * (tránh hiển thị số liệu ghi cứng không khớp với dữ liệu thực tế)
+ */
+function renderCompetitivePromo() {
+  const card = document.getElementById('hero-promo-competitive');
+  if (!card || allProducts.length === 0) return;
+
+  const top = allProducts.reduce((best, p) => ((p.bidCount || 0) > (best.bidCount || 0) ? p : best), allProducts[0]);
+  if (!top) return;
+
+  // Rút gọn tên sản phẩm: bỏ tiền tố loại linh kiện để vừa khung thẻ
+  const shortName = String(top.name || '')
+    .replace(/^(Card màn hình|Bộ vi xử lý|CPU|Bo mạch chủ|Mainboard|Bộ nguồn|Nguồn|RAM|Ổ cứng|Tản nhiệt|Vỏ case|Case)\s+/i, '');
+
+  const titleEl = card.querySelector('[data-promo-title]');
+  const subEl = card.querySelector('[data-promo-sub]');
+  const imgEl = card.querySelector('[data-promo-img]');
+
+  if (titleEl) titleEl.textContent = shortName;
+  if (subEl) subEl.textContent = `${top.bidCount || 0} lượt bid • Xem ngay →`;
+  if (imgEl && top.images && top.images[0]) imgEl.src = encodePath(top.images[0]);
+}
+
+/**
+ * Lấy sản phẩm tâm điểm của khung "Đang đấu trực tiếp" theo data-product-id trên HTML
+ * @returns {Object|undefined}
+ */
+function getSpotlightProduct() {
+  const card = document.getElementById('hero-spotlight');
+  const id = Number(card?.dataset.productId) || 2028;
+  return allProducts.find(p => Number(p.id) === id);
+}
+
+/**
+ * Cập nhật khung "Đang đấu trực tiếp" theo dữ liệu thật (tên, ảnh, giá, lượt bid, liên kết chi tiết)
+ * để khớp với trang chi tiết và kết quả tìm kiếm
+ */
+function renderSpotlight() {
+  const card = document.getElementById('hero-spotlight');
+  const product = getSpotlightProduct();
+  if (!card || !product) return;
+
+  const nameEl = card.querySelector('[data-spotlight-name]');
+  const imgEl = card.querySelector('[data-spotlight-img]');
+  const bidEl = card.querySelector('[data-spotlight-bid]');
+  const countEl = card.querySelector('[data-spotlight-count]');
+  const bidBtn = card.querySelector('[data-action="quick-bid"]');
+  const detailUrl = `product-detail.html?id=${product.id}`;
+
+  if (nameEl) {
+    nameEl.textContent = product.name;
+    nameEl.closest('h3')?.setAttribute('title', product.name);
+  }
+  if (imgEl && product.images && product.images[0]) {
+    imgEl.src = encodePath(product.images[0]);
+    imgEl.alt = product.name;
+  }
+  if (bidEl) bidEl.textContent = formatVnd(product.currentBid);
+  if (countEl) countEl.textContent = `${product.bidCount || 0} lượt bid`;
+  if (bidBtn) bidBtn.dataset.id = product.id;
+  card.querySelectorAll('[data-spotlight-link]').forEach(link => { link.href = detailUrl; });
+}
+
 function renderNewListingsShelf() {
   const container = document.getElementById('pcb-new-grid');
   if (!container) return;
@@ -584,10 +653,10 @@ function updateAllCountdowns() {
     }
   });
 
-  // Cập nhật đồng hồ spotlight trên hero theo sản phẩm tâm điểm (ID 2002)
+  // Cập nhật đồng hồ spotlight trên hero theo sản phẩm tâm điểm
   const heroTimer = document.getElementById('hero-spotlight-timer');
   if (heroTimer) {
-    const spotlightItem = allProducts.find(p => p.id === 2002);
+    const spotlightItem = getSpotlightProduct();
     const targetTime = spotlightItem ? spotlightItem.endTimestamp : (now + 18 * 86400000);
     const diff = Math.max(0, targetTime - now);
     const totalSec = Math.floor(diff / 1000);
@@ -704,6 +773,30 @@ function updateModalTotal(total) {
   if (submitBtn) {
     submitBtn.textContent = `Xác nhận đặt giá ${formatVnd(total)}`;
   }
+  updateModalWalletStatus(total);
+}
+
+/**
+ * Hiển thị số dư khả dụng và số tiền cọc 10% cần giữ trong modal đặt giá nhanh
+ * @param {number} total - Mức giá đang chọn
+ */
+function updateModalWalletStatus(total) {
+  const statusEl = document.getElementById('pcb-modal-wallet-status');
+  const labelEl = document.getElementById('pcb-modal-wallet-label');
+  if (!statusEl || !currentModalProduct) return;
+
+  const user = readCurrentUser();
+  if (!user) {
+    if (labelEl) labelEl.textContent = 'Ví cọc tạm ứng mô phỏng:';
+    statusEl.textContent = 'Đăng nhập để đặt giá';
+    statusEl.style.color = '';
+    return;
+  }
+
+  const check = checkBidDeposit(user, currentModalProduct.id, total);
+  if (labelEl) labelEl.textContent = `Khả dụng ${formatVnd(getAvailableBalance(user))} • Cọc 10%:`;
+  statusEl.textContent = `${formatVnd(check.required)} ${check.ok ? '(Đủ điều kiện)' : '(Không đủ số dư)'}`;
+  statusEl.style.color = check.ok ? '' : '#dc2626';
 }
 
 function closeQuickBidModal() {
@@ -716,6 +809,19 @@ function executeQuickBid() {
   if (!currentModalProduct) return;
 
   const newBid = currentModalProduct.currentBid + currentBidIncrement;
+
+  // Bắt buộc đăng nhập và đủ số dư khả dụng để giữ cọc 10% trước khi đặt giá
+  const bidUser = readCurrentUser();
+  if (!bidUser) {
+    showToast('Bạn cần đăng nhập để đặt giá. Đang chuyển hướng...', 'error');
+    setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    return;
+  }
+  const depositCheck = checkBidDeposit(bidUser, currentModalProduct.id, newBid);
+  if (!depositCheck.ok) {
+    showToast(`Số dư khả dụng ${formatVnd(depositCheck.available)} không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Hãy nạp thêm tiền ở trang Hồ sơ.`, 'error');
+    return;
+  }
   currentModalProduct.currentBid = newBid;
   currentModalProduct.bidCount = (currentModalProduct.bidCount || 0) + 1;
 
@@ -782,7 +888,7 @@ function executeQuickBid() {
       bidCount: currentModalProduct.bidCount,
       status: 'lead',
       bidStep: currentModalProduct.bidStep || 100000,
-      endTimestamp: currentModalProduct.endTime ? new Date(currentModalProduct.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(currentModalProduct),
       images: currentModalProduct.images || [],
       specs: currentModalProduct.specifications ? Object.entries(currentModalProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
     };
@@ -795,6 +901,8 @@ function executeQuickBid() {
 
   // Phát âm thanh & Thông báo thành công
   playBidSuccessSound();
+  // Cập nhật khung "Đang đấu trực tiếp" nếu vừa trả giá cho sản phẩm tâm điểm
+  renderSpotlight();
   showToast(`🎉 Trả giá thành công ${formatVnd(newBid)}! Bạn đang dẫn đầu phiên.`);
   closeQuickBidModal();
 }
@@ -841,6 +949,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderEndingSoonShelf();
   renderHotAuctionsShelf();
   renderNewListingsShelf();
+  renderCompetitivePromo();
+  renderSpotlight();
 
   // 3. Khởi tạo băng chuyền hoạt động sàn
   initLiveTicker();
@@ -950,6 +1060,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderEndingSoonShelf();
         renderHotAuctionsShelf();
         renderNewListingsShelf();
+        renderCompetitivePromo();
+        renderSpotlight();
       });
     }
   });
@@ -961,6 +1073,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderEndingSoonShelf();
         renderHotAuctionsShelf();
         renderNewListingsShelf();
+        renderCompetitivePromo();
+        renderSpotlight();
       });
     }
   });

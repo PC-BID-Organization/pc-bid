@@ -4,6 +4,14 @@
  * lịch sử trả giá, watchlist — 100% Vanilla JavaScript (ES6+).
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp } from './auction-time.js';
+// Kiểm tra tiền cọc 10% trước khi đặt giá
+import { checkBidDeposit } from './wallet.js';
+// Watchlist lưu riêng theo từng tài khoản
+import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
+
+
 /* ==========================================================================
    1. CẤU HÌNH & NGUỒN DỮ LIỆU
    ========================================================================== */
@@ -23,68 +31,68 @@ const NGUON_DU_LIEU = [
 // Dữ liệu dự phòng khi fetch thất bại (mở qua giao thức file:/// hoặc mạng lỗi)
 const SAN_PHAM_DU_PHONG = [
   {
-    id: 2001,
+    id: 2011,
     name: 'Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC',
     category: 'GPU',
-    condition: 'Like New 99% - Fullbox, Tem Void SPC nguyên vẹn, chưa phá seal',
-    startingPrice: 4200000,
-    currentBid: 5800000,
+    condition: 'Đã sử dụng - Fullbox phụ kiện, nguyên tem void',
+    startingPrice: 6500000,
+    currentBid: 8400000,
     bidStep: 100000,
-    bidCount: 16,
-    marketPriceNew: 12500000,
+    bidCount: 19,
+    marketPriceNew: 15000000,
     endTime: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
-    seller: 'hoanglong_pc',
-    images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-    description: 'Card còn mới gần như 100%, mua về không hợp socket. Box đầy đủ phụ kiện, chạy Furmark 30 phút ổn định 67°C. Bao test 48 giờ, ship toàn quốc.',
-    specifications: { 'VRAM': '8GB GDDR6', 'Nhiệt độ Furmark': '67°C', 'Chuẩn kết nối': 'PCIe 4.0 x16', 'Cổng xuất hình': '3x DisplayPort 1.4 + 1x HDMI 2.1' }
+    seller: 'tuananh_pc',
+    images: ['images/products/gpu/2011-rtx-3070-8gb-1.webp'],
+    description: 'Bản ROG Strix cao cấp nhất, dải LED RGB viền cực sáng, hiệu năng ép xung sẵn từ nhà máy.',
+    specifications: { 'Dung lượng VRAM / Chuẩn': '8GB GDDR6 (256-bit)', 'Băng thông bộ nhớ': '14 Gbps', 'Cổng kết nối': '2x HDMI 2.1, 3x DisplayPort 1.4a', 'Nguồn đề xuất': '650W (2x 8-pin)' }
   },
   {
-    id: 1001,
+    id: 1023,
     name: 'Bộ vi xử lý AMD Ryzen 7 5800X3D (8C/16T, 96MB V-Cache)',
     category: 'CPU',
-    condition: 'Đã sử dụng - Chân Socket AM4 hoàn hảo, bao test 7 ngày',
-    startingPrice: 3800000,
-    currentBid: 4900000,
+    condition: 'Đã sử dụng - Hàng hiếm sưu tầm, fullbox like new',
+    startingPrice: 5600000,
+    currentBid: 8100000,
     bidStep: 100000,
-    bidCount: 22,
-    marketPriceNew: 8900000,
+    bidCount: 25,
+    marketPriceNew: 9500000,
     endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    seller: 'gaming_zone_vn',
-    images: ['images/products/cpu/1019-ryzen-5-5600-1.jpg'],
-    description: 'CPU gaming số 1 AM4 với 96MB V-Cache. Dùng trên main B550 trong 8 tháng, nhiệt độ idle 38°C. Bao test MemTest86 và Cinebench, chân pin nguyên vẹn không cong.',
-    specifications: { 'Socket': 'AM4', 'Nhân / Luồng': '8C / 16T', 'Cache L3': '96MB 3D V-Cache', 'TDP': '105W', 'Xung cơ sở': '3.4 GHz', 'Xung boost': '4.5 GHz' }
+    seller: 'minhduc_hardware',
+    images: ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'],
+    description: 'Vua chơi game socket AM4 trang bị 96MB bộ nhớ 3D V-Cache độc quyền, đánh bại nhiều chip đời mới.',
+    specifications: { 'Socket': 'AM4', 'Số nhân / Số luồng': '8 nhân / 16 luồng', 'Xung cơ bản / Xung Boost': '3.40 GHz / 4.50 GHz', 'Bộ nhớ đệm (Cache)': '96 MB 3D V-Cache', 'TDP': '105 W' }
   },
   {
-    id: 3001,
+    id: 3013,
     name: 'Bo mạch chủ MSI MAG Z790 TOMAHAWK WIFI DDR5',
     category: 'Mainboard',
-    condition: 'Like New 99% - Fullbox phụ kiện râu anten, chặn main còn nguyên',
-    startingPrice: 3500000,
-    currentBid: 4600000,
+    condition: 'Đã sử dụng - Còn mới 98%, Fullbox chính hãng, bảo hành 18 tháng',
+    startingPrice: 5100000,
+    currentBid: 5800000,
     bidStep: 100000,
-    bidCount: 11,
-    marketPriceNew: 7200000,
+    bidCount: 7,
+    marketPriceNew: 7690000,
     endTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-    seller: 'pc_premium_uit',
+    seller: 'tuan_pcbuilder',
     images: ['images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'],
-    description: 'Main Z790 dùng với i5-13600K được 6 tháng. Nâng cấp lên X, cần thanh lý. Còn đầy đủ phụ kiện cáp SATA, chặn main, anten WiFi. BIOS mới nhất.',
-    specifications: { 'Socket': 'LGA 1700', 'Chipset': 'Intel Z790', 'Chuẩn RAM': 'DDR5', 'Khe RAM': '4 khe (tối đa 192GB)', 'Form Factor': 'ATX', 'Khe M.2': '4 khe PCIe 4.0/5.0' }
+    description: 'Biểu tượng bền bỉ của dòng Tomahawk với tông màu đen tuyền mạnh mẽ, giải pháp tản nhiệt tối ưu và kết nối mạng 2.5G + Wi-Fi 6E.',
+    specifications: { 'Socket': 'LGA 1700', 'Chipset': 'Intel Z790', 'Kích thước chuẩn (Form Factor)': 'ATX', 'Số khe RAM / Chuẩn RAM hỗ trợ': '4 khe DDR5 (Tối đa 192GB)', 'Cổng M.2 NVMe': '4 khe M.2 PCIe 4.0 x4' }
   },
   {
-    id: 4001,
-    name: 'RAM G.SKILL Trident Z RGB 32GB (2x16GB) 3600MHz DDR4',
+    id: 4003,
+    name: 'RAM G.SKILL Trident Z RGB 16GB (1x16GB) 3600MHz DDR4',
     category: 'RAM',
-    condition: 'Đã sử dụng - MemTest86 2 lượt 0 error, tản nhôm phay xước nhẹ',
-    startingPrice: 1100000,
-    currentBid: 1650000,
+    condition: 'Đã sử dụng - Like New 99%, tem Mai Hoàng bảo hành 8 tháng',
+    startingPrice: 950000,
+    currentBid: 1300000,
     bidStep: 50000,
-    bidCount: 11,
-    marketPriceNew: 2800000,
+    bidCount: 7,
+    marketPriceNew: 1690000,
     endTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    seller: 'linhkien_chinhhang',
-    images: ['images/products/ram/4001-gskill-trident-z-rgb-1.jpg'],
-    description: 'RAM DDR4 3600 CL18 kit đôi chạy ổn định với XMP. LED RGB hoạt động đầy đủ. MemTest86 2 lượt không lỗi. Tản nhôm có vài vết xước nhỏ do tháo lắp.',
-    specifications: { 'Dung lượng': '32GB (2x16GB)', 'Chuẩn': 'DDR4', 'Bus': '3600MHz', 'CAS Latency': 'CL18', 'Điện áp': '1.35V', 'LED': 'RGB (có phần mềm điều khiển)' }
+    seller: 'minh_gear99',
+    images: ['images/products/ram/4003-gskill-trident-z-rgb-16gb-1.jpg'],
+    description: 'Dòng RAM huyền thoại với dải đèn LED RGB dạng cầu vồng rực rỡ, bus 3600MHz tối ưu độ trễ cho cả game và công việc nặng.',
+    specifications: { 'Dung lượng': '16GB (1 x 16GB)', 'Chuẩn RAM': 'DDR4', 'Bus (Tốc độ)': '3600 MHz', 'Độ trễ (CAS Latency / CL)': 'CL18', 'Tản nhiệt / LED': 'Tản nhôm phay xước / LED RGB đa vùng' }
   }
 ];
 
@@ -230,13 +238,18 @@ async function nạpTatCaSanPham() {
       bCount = Math.max(bCount, bInfo.count);
     }
 
-    return {
+    const mergedItem = {
       ...sp,
       ...(localUpdated || {}),
       id: idNum,
       currentBid: curBid,
       bidCount: bCount
     };
+    // Đảm bảo AMD Ryzen 7 5800X3D luôn nhận đúng ảnh chip AMD, không bị cache i7 cũ đè lên
+    if (mergedItem.name && mergedItem.name.toLowerCase().includes('5800x3d')) {
+      mergedItem.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+    }
+    return mergedItem;
   });
 
   // Bổ sung các sản phẩm do người dùng tự đăng bán từ sell.html (chưa có trong JSON)
@@ -273,6 +286,10 @@ async function timSanPhamTheoId(id) {
   const idNum = Number(id);
   const found = danhSach.find(sp => Number(sp.id) === idNum) || null;
   if (found) {
+    // Chuẩn hóa thời điểm kết thúc phiên theo hàm dùng chung (khớp với profile.html, products.html)
+    found.endTimestamp = getAuctionEndTimestamp(found);
+    found.endTime = new Date(found.endTimestamp).toISOString();
+
     // Đảm bảo giá đấu luôn khớp với lượt bid cao nhất trong pcbid_bids
     try {
       const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
@@ -298,6 +315,10 @@ async function timSanPhamTheoId(id) {
  * @param {Object} sanPham - Đối tượng sản phẩm cần hiển thị
  */
 function hienThiSanPham(sanPham) {
+  // Tự động sửa lỗi nếu cache LocalStorage cũ lưu sai ảnh cho CPU AMD Ryzen 7 5800X3D
+  if (sanPham && sanPham.name && sanPham.name.toLowerCase().includes('5800x3d')) {
+    sanPham.images = ['images/products/cpu/1023-ryzen-7-5800x3d-1.jpg'];
+  }
   sanPhamHienTai = sanPham;
 
   // Cập nhật tiêu đề tab trình duyệt
@@ -599,7 +620,7 @@ function renderLichSu(idSanPham) {
 
   if (!tbody) return;
 
-  // Đọc lịch sử thực từ localStorage
+  // 1. Đọc danh sách các lượt đặt giá thực tế từ localStorage (pcbid_bids)
   let lichSuLuu = [];
   try {
     lichSuLuu = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
@@ -607,19 +628,37 @@ function renderLichSu(idSanPham) {
     lichSuLuu = [];
   }
 
-  // Lọc chỉ lấy lượt của sản phẩm hiện tại
-  const lichSuSanPham = lichSuLuu
-    .filter(luot => luot.productId === idSanPham)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // 2. Lọc các lượt đặt giá thuộc sản phẩm hiện tại
+  let lichSuSanPham = lichSuLuu
+    .filter(luot => Number(luot.productId) === Number(idSanPham))
+    .map(luot => ({
+      ...luot,
+      amount: Number(luot.amount),
+      timestamp: luot.timestamp || new Date().toISOString()
+    }));
 
-  // Tạo mock data mẫu nếu chưa có lịch sử thực nào
-  const lichSuMau = taoLichSuMau(idSanPham);
+  // Sắp xếp lượt đặt giá thật: mức giá cao nhất và thời gian mới nhất lên trên
+  lichSuSanPham.sort((a, b) => b.amount - a.amount || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  // Kết hợp: lịch sử thực đặt trước, mock data mẫu đặt sau
-  const tatCaLichSu = [...lichSuSanPham, ...lichSuMau].slice(0, 15);
+  // 3. Tạo các lượt đặt giá giả lập ở quá khứ (lùi dần đều về cả giá tiền và mốc thời gian)
+  const lichSuMau = taoLichSuMau(idSanPham, lichSuSanPham);
 
-  // Cập nhật huy hiệu số lượt trên tab
-  if (huyHieuSoLuot) huyHieuSoLuot.textContent = tatCaLichSu.length;
+  // 4. Gộp toàn bộ lịch sử đấu giá
+  let tatCaLichSu = [...lichSuSanPham, ...lichSuMau];
+
+  // 5. Sắp xếp toàn bộ lịch sử theo quy tắc chuẩn mực đấu giá:
+  // - Lượt đặt giá cao nhất (mới nhất) LUÔN NẰM TRÊN CÙNG
+  // - Các lượt trước đó giảm dần đều về số tiền và lùi dần về quá khứ
+  tatCaLichSu.sort((a, b) => {
+    if (b.amount !== a.amount) {
+      return b.amount - a.amount;
+    }
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
+  // Cập nhật huy hiệu tổng số lượt đặt giá trên tab
+  const tongSoLuot = Math.max(tatCaLichSu.length, sanPhamHienTai?.bidCount || 0);
+  if (huyHieuSoLuot) huyHieuSoLuot.textContent = tongSoLuot;
 
   if (tatCaLichSu.length === 0) {
     tbody.innerHTML = '';
@@ -653,11 +692,12 @@ function renderLichSu(idSanPham) {
 
 /**
  * Tạo danh sách lịch sử đặt giá mẫu (mock data) cho sản phẩm
- * Mô phỏng nhiều người dùng đã tham gia trước đó
+ * Đảm bảo các lượt lùi dần đều về số tiền và thời gian, không bao giờ nhảy giá lung tung
  * @param {number} idSanPham - ID sản phẩm
- * @returns {Array} Mảng các lượt đặt giá mẫu
+ * @param {Array} lichSuSanPham - Các lượt đặt giá thực tế hiện có
+ * @returns {Array} Mảng các lượt đặt giá mẫu hợp lệ
  */
-function taoLichSuMau(idSanPham) {
+function taoLichSuMau(idSanPham, lichSuSanPham = []) {
   if (!sanPhamHienTai) return [];
 
   const tenNguoiMau = [
@@ -665,29 +705,74 @@ function taoLichSuMau(idSanPham) {
     'hardware_shop', 'ngoc_tech', 'viet_pc', 'minhnhat_dng'
   ];
 
-  const giaHienTai = sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice || 0;
-  const buocGia = sanPhamHienTai.bidStep || 50000;
-  const soLuotMau = Math.min(7, sanPhamHienTai.bidCount || 0);
+  const buocGia = Number(sanPhamHienTai.bidStep) || 100000;
+  const giaKhoiDiem = Number(sanPhamHienTai.startingPrice) || 1000000;
+
+  // Số lượt mẫu cần sinh = tổng lượt bid của sản phẩm trừ đi số lượt bid thực tế đã lưu
+  const tongSoLuot = Number(sanPhamHienTai.bidCount) || 0;
+  const soLuotCanSinh = Math.max(0, tongSoLuot - lichSuSanPham.length);
+  if (soLuotCanSinh === 0) return [];
+
+  // Bộ sinh số giả ngẫu nhiên theo ID sản phẩm để lịch sử không bị thay đổi mỗi lần render lại
+  let hatGiong = (Number(idSanPham) || 1) * 9301 + 49297;
+  const ngauNhien = () => {
+    hatGiong = (hatGiong * 9301 + 49297) % 233280;
+    return hatGiong / 233280;
+  };
+
+  // Xác định điểm xuất phát để sinh các lượt đặt giá mẫu lùi dần về quá khứ
+  let giaBatDauMau;
+  let thoiGianBatDauMau;
+
+  if (lichSuSanPham.length > 0) {
+    // Nếu đã có lượt bid thực tế: lượt mẫu cao nhất phải THẤP HƠN lượt thật thấp nhất
+    const lowestRealBid = lichSuSanPham[lichSuSanPham.length - 1];
+    giaBatDauMau = lowestRealBid.amount - buocGia;
+    thoiGianBatDauMau = new Date(lowestRealBid.timestamp).getTime();
+  } else {
+    // Nếu chưa có lượt bid thực tế nào: lượt mẫu cao nhất chính là giá hiện tại
+    giaBatDauMau = Number(sanPhamHienTai.currentBid) || (giaKhoiDiem + buocGia * 3);
+    // Mốc thời gian lượt cao nhất: không vượt quá thời điểm kết thúc phiên
+    const thoiDiemKetThuc = Number(sanPhamHienTai.endTimestamp) || new Date(sanPhamHienTai.endTime).getTime();
+    thoiGianBatDauMau = Math.min(Date.now(), Number.isFinite(thoiDiemKetThuc) ? thoiDiemKetThuc : Date.now());
+  }
 
   const lichSuMau = [];
-  let giaTam = giaHienTai;
-  const thoiGianKetThuc = new Date(sanPhamHienTai.endTime).getTime();
+  let giaTam = giaBatDauMau;
+  let thoiGianTam = thoiGianBatDauMau;
+  let tenTruocDo = '';
 
-  for (let i = 0; i < soLuotMau; i++) {
-    // Tính thời gian giả lập ngược từ thời điểm kết thúc
-    const khoangCachMs = (i + 1) * Math.floor(Math.random() * 30 + 10) * 60 * 1000;
-    const thoiGianDat = new Date(thoiGianKetThuc - khoangCachMs - (24 * 60 * 60 * 1000));
+  for (let i = 0; i < soLuotCanSinh; i++) {
+    if (giaTam < giaKhoiDiem) break; // Tuyệt đối không sinh giá thấp hơn giá khởi điểm
+
+    // Lượt đầu tiên (cao nhất) giữ nguyên mốc thời gian, các lượt trước lùi lại 15 - 45 phút
+    if (i > 0) {
+      thoiGianTam -= (Math.floor(ngauNhien() * 30) + 15) * 60 * 1000;
+    }
+
+    // Chọn tên người đặt giá khác với lượt liền kề (không tự vượt giá chính mình)
+    let tenHienTai = tenNguoiMau[Math.floor(ngauNhien() * tenNguoiMau.length)];
+    if (tenHienTai === tenTruocDo) {
+      tenHienTai = tenNguoiMau[(tenNguoiMau.indexOf(tenHienTai) + 1) % tenNguoiMau.length];
+    }
+    tenTruocDo = tenHienTai;
 
     lichSuMau.push({
       id: `mock_${idSanPham}_${i}`,
       productId: idSanPham,
-      bidderName: tenNguoiMau[i % tenNguoiMau.length],
+      bidderName: tenHienTai,
       amount: giaTam,
-      timestamp: thoiGianDat.toISOString()
+      timestamp: new Date(thoiGianTam).toISOString()
     });
 
-    // Mỗi lượt trước thấp hơn một bước giá (cuộn ngược về quá khứ)
-    giaTam = Math.max(giaTam - buocGia, sanPhamHienTai.startingPrice);
+    // Tính bước nhảy giá cho lượt kế tiếp trong quá khứ:
+    // chia đều khoảng giá còn lại cho số lượt còn lại để lượt cuối không thấp hơn giá khởi điểm
+    const soLuotConLai = soLuotCanSinh - i - 1;
+    if (soLuotConLai <= 0) break;
+    const soBuocConLai = Math.floor((giaTam - giaKhoiDiem) / buocGia);
+    const soBuocToiDa = Math.max(1, Math.floor(soBuocConLai / soLuotConLai));
+    const soBuocNhay = 1 + Math.floor(ngauNhien() * soBuocToiDa);
+    giaTam -= soBuocNhay * buocGia;
   }
 
   return lichSuMau;
@@ -746,6 +831,15 @@ function xuLyDatGia() {
       nguoiDung.fullname === sanPhamHienTai.seller ||
       nguoiDung.email === sanPhamHienTai.seller) {
     hienThiLoi(oLoi, oNhapGia, 'Bạn không thể đặt giá cho sản phẩm chính mình đăng bán.');
+    return;
+  }
+
+  // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới
+  const kiemTraCoc = checkBidDeposit(nguoiDung, sanPhamHienTai.id, soTienNhap);
+  if (!kiemTraCoc.ok) {
+    hienThiLoi(oLoi, oNhapGia,
+      `Số dư khả dụng (${dinhDangVnd(kiemTraCoc.available)}) không đủ giữ cọc 10% (${dinhDangVnd(kiemTraCoc.required)}). Vui lòng nạp thêm tiền ở trang Hồ sơ.`
+    );
     return;
   }
 
@@ -820,7 +914,7 @@ function thucHienDatGia(nguoiDung, soTien) {
       bidCount: sanPhamHienTai.bidCount,
       status: 'lead',
       bidStep: sanPhamHienTai.bidStep || 100000,
-      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
       images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
       specs: specsList
     };
@@ -935,8 +1029,7 @@ function capNhatNutWatchlist(idSanPham) {
   const icon = document.getElementById('pcb-pd-watchlist-icon');
   const nhan = document.getElementById('pcb-pd-watchlist-label');
 
-  let watchlist = [];
-  try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
+  const watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, readLoggedInUser());
 
   const daCoTrong = watchlist.some(item => (typeof item === "object" ? item.id : item) === idSanPham);
   if (nut) {
@@ -952,8 +1045,14 @@ function capNhatNutWatchlist(idSanPham) {
  * @param {number} idSanPham - ID sản phẩm cần toggle
  */
 function batTatWatchlist(idSanPham) {
-  let watchlist = [];
-  try { watchlist = JSON.parse(localStorage.getItem('pcbid_watchlist') || '[]'); } catch { watchlist = []; }
+  // Bắt buộc đăng nhập để watchlist gắn với đúng tài khoản
+  const nguoiDung = readLoggedInUser();
+  if (!nguoiDung) {
+    hienThiToast('Bạn cần đăng nhập để theo dõi phiên đấu giá.', 'info');
+    setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+    return;
+  }
+  let watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung);
 
   const daCoTrong = watchlist.some(item => (typeof item === 'object' ? item.id : item) === idSanPham);
   if (daCoTrong) {
@@ -970,7 +1069,7 @@ function batTatWatchlist(idSanPham) {
       currentBid: sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice,
       marketPriceNew: sanPhamHienTai.marketPriceNew || Math.round((sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) * 1.5),
       bidCount: sanPhamHienTai.bidCount || 0,
-      endTimestamp: sanPhamHienTai.endTime ? new Date(sanPhamHienTai.endTime).getTime() : Date.now() + 86400000,
+      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
       images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
       specs: specsList
     };
@@ -978,7 +1077,7 @@ function batTatWatchlist(idSanPham) {
     hienThiToast('Đã thêm vào danh sách theo dõi!', 'success');
   }
 
-  localStorage.setItem('pcbid_watchlist', JSON.stringify(watchlist));
+  writeUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung, watchlist);
   capNhatNutWatchlist(idSanPham);
 
   const headerBadge = document.getElementById('header-watchlist-badge');
@@ -1067,8 +1166,11 @@ function ganSuKien() {
 
   // Nút thêm/bỏ watchlist
   const nutWatchlist = document.getElementById('pcb-pd-watchlist-btn');
-  if (nutWatchlist && sanPhamHienTai) {
-    nutWatchlist.addEventListener('click', () => batTatWatchlist(sanPhamHienTai.id));
+  // Lưu ý: ganSuKien() chạy trước khi sản phẩm nạp xong, nên kiểm tra sanPhamHienTai ngay lúc bấm
+  if (nutWatchlist) {
+    nutWatchlist.addEventListener('click', () => {
+      if (sanPhamHienTai) batTatWatchlist(sanPhamHienTai.id);
+    });
   }
 
   // Xóa lỗi khi người dùng gõ vào ô nhập giá
@@ -1094,10 +1196,10 @@ async function khoiDong() {
   ganSuKien();
   khoiDongHeTongTab();
 
-  // Đọc ID sản phẩm từ tham số URL (?id=2001). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2001
+  // Đọc ID sản phẩm từ tham số URL (?id=2011). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2011 (RTX 3070)
   const thamSoUrl = new URLSearchParams(window.location.search);
   const idChuoi = thamSoUrl.get('id');
-  const idSanPham = (idChuoi && !isNaN(parseInt(idChuoi, 10))) ? parseInt(idChuoi, 10) : 2001;
+  const idSanPham = (idChuoi && !isNaN(parseInt(idChuoi, 10))) ? parseInt(idChuoi, 10) : 2011;
 
   const vungLoading = document.getElementById('pcb-pd-loading');
   const vungLoi = document.getElementById('pcb-pd-error');
