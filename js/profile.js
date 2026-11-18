@@ -4,6 +4,10 @@
  * Tuân thủ quy chuẩn IE104 - UIT & Chỉ thị AGENTS.md
  */
 
+// Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
+import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
+
+
 /* ==========================================================================
    1. KHỞI TẠO HẰNG SỐ & DỮ LIỆU MẪU MẶC ĐỊNH (SEED MOCK DATA)
    ========================================================================== */
@@ -439,7 +443,7 @@ function getParticipatingBids() {
           bidStep: Number(prod.bidStep) || 100000,
           bidCount: Number(prod.bidCount) || 1,
           marketPriceNew: Number(prod.marketPriceNew) || Number(prod.currentBid) * 1.5,
-          endTimestamp: prod.endTime ? new Date(prod.endTime).getTime() : Date.now() + 86400000,
+          endTimestamp: getAuctionEndTimestamp(prod),
           images: prod.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
           specs: prod.specifications ? Object.entries(prod.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`) : []
         });
@@ -541,7 +545,7 @@ function getWatchlistItems() {
           currentBid: 2500000,
           marketPriceNew: 4000000,
           bidCount: 5,
-          endTimestamp: Date.now() + 86400000,
+          endTimestamp: getAuctionEndTimestamp({ id: idNum }),
           images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
           specs: ['Đã qua kiểm định Furmark']
         };
@@ -626,9 +630,9 @@ function renderParticipatingCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-            <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+            <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+              <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
             </span>
           </div>
 
@@ -728,9 +732,9 @@ function renderSellingCard(item) {
           ${item.status === 'active' ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-              <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
               </span>
             </div>
           ` : `
@@ -797,9 +801,9 @@ function renderWatchlistCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-            <span class="pcb-stat-col__countdown" data-timestamp="${item.endTimestamp}">
+            <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span class="countdown-text">${formatTimeRemaining(item.endTimestamp)}</span>
+              <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
             </span>
           </div>
 
@@ -1359,7 +1363,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentBid: newBidAmount,
             bidCount: updatedBidCount,
             bidStep: step,
-            endTime: activeQuickBidItem.endTime || (activeQuickBidItem.endTimestamp ? new Date(activeQuickBidItem.endTimestamp).toISOString() : null),
+            endTime: getAuctionEndTimeIso(activeQuickBidItem),
             images: activeQuickBidItem.images || []
           });
         }
