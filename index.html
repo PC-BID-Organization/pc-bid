@@ -235,8 +235,8 @@
             </div>
           </div>
 
-          <!-- Card Tâm Điểm: Đang Đấu Trực Tiếp -->
-          <div class="hero-v2__spotlight">
+          <!-- Card Tâm Điểm: Đang Đấu Trực Tiếp (JS cập nhật tên, ảnh, giá, lượt bid theo dữ liệu thật của sản phẩm 2028) -->
+          <div class="hero-v2__spotlight" id="hero-spotlight" data-product-id="2028">
             <div class="hero-v2__spotlight-head">
               <span class="hero-v2__spotlight-live">
                 <span class="pcb-ticker__dot"></span>
@@ -247,30 +247,31 @@
               </span>
             </div>
 
-            <div class="hero-v2__spotlight-media">
+            <a class="hero-v2__spotlight-media" href="product-detail.html?id=2028" data-spotlight-link>
               <img class="hero-v2__spotlight-img" src="images/products/gpu/2028-rx-7800-xt-1.jpg"
-                alt="Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB">
-            </div>
+                alt="Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB" data-spotlight-img>
+            </a>
 
-            <h3 class="hero-v2__spotlight-name" title="Gigabyte Radeon RX 7800 XT Gaming OC 16GB">
-              Gigabyte Radeon RX 7800 XT Gaming OC 16GB (Fullbox)
+            <h3 class="hero-v2__spotlight-name" title="Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB">
+              <a class="hero-v2__spotlight-name-link" href="product-detail.html?id=2028" data-spotlight-link data-spotlight-name>Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB</a>
             </h3>
 
             <div class="hero-v2__spotlight-pricebox">
               <div class="hero-v2__spotlight-lbl">
                 <span>Giá đang dẫn đầu:</span>
-                <span style="color:#fdba74;">32 lượt bid</span>
+                <span style="color:#fdba74;" data-spotlight-count>6 lượt bid</span>
               </div>
-              <div class="hero-v2__spotlight-bid">12.800.000đ</div>
+              <div class="hero-v2__spotlight-bid" data-spotlight-bid>12.400.000đ</div>
             </div>
 
-            <button type="button" class="hero-v2__spotlight-action" data-action="quick-bid" data-id="2002">
+            <button type="button" class="hero-v2__spotlight-action" data-action="quick-bid" data-id="2028">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v8M8 12h8" />
               </svg>
               <span>Tham gia trả giá ngay</span>
             </button>
+            <a class="hero-v2__spotlight-detail" href="product-detail.html?id=2028" data-spotlight-link>Xem chi tiết phiên →</a>
           </div>
 
         </div>
