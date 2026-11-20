@@ -1078,3 +1078,65 @@ button.pcb-thumb-item {
   border: 1px dashed #e2e8f0;
   border-radius: 8px;
 }
+
+/* ==========================================================================
+   ĐỒNG HỒ ĐẾM NGƯỢC TRONG POPUP ĐĂNG BÁN THÀNH CÔNG
+   ========================================================================== */
+.pcb-modal-countdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  text-align: left;
+  background-color: #fff7ed;
+  border-radius: 12px;
+}
+
+.pcb-modal-countdown__ring {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+
+.pcb-modal-countdown__track,
+.pcb-modal-countdown__bar {
+  fill: none;
+  stroke-width: 4;
+}
+
+.pcb-modal-countdown__track {
+  stroke: #fed7aa;
+}
+
+/* Chu vi vòng tròn r = 19 ≈ 119.4; độ lệch tăng dần theo thời gian đã trôi qua */
+.pcb-modal-countdown__bar {
+  stroke: var(--pcb-primary, #ea580c);
+  stroke-linecap: round;
+  stroke-dasharray: 119.4;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.pcb-modal-countdown__num {
+  position: absolute;
+  left: 14px;
+  width: 44px;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-modal-countdown__text {
+  font-size: 13px;
+  color: #7c2d12;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-modal-countdown__bar {
+    transition: none;
+  }
+}

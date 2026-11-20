@@ -42,6 +42,8 @@ const filterState = {
   conditions: [],
   seals: [],
   sortBy: 'ending',
+  // ID phiên người bán vừa đăng (products.html?highlight=...), được đưa lên đầu và gắn nhãn
+  highlightId: null,
   searchQuery: ''
 };
 
@@ -115,6 +117,8 @@ function parseUrlParams() {
   // và tham số sort từ Trang chủ (ví dụ: products.html?sort=bids cho nút "Cạnh tranh nhất")
   const status = params.get('status');
   const sort = (params.get('sort') || '').toLowerCase();
+  const highlight = params.get('highlight');
+  if (highlight) filterState.highlightId = String(highlight);
   const sortAliases = {
     'bids': 'bids-desc',
     'bids-desc': 'bids-desc',
@@ -630,7 +634,15 @@ function applyFiltersAndRender() {
   } else if (filterState.sortBy === 'price-desc') {
     list.sort((a, b) => b.currentBid - a.currentBid);
   } else if (filterState.sortBy === 'newest') {
-    list.sort((a, b) => b.id - a.id);
+    // Phiên mới nhất: phiên đăng lại tính theo thời điểm đăng lại, phiên tự đăng có ID theo thời gian
+    const postedAt = p => (p.relistedAt ? new Date(p.relistedAt).getTime() : Number(p.id) || 0);
+    list.sort((a, b) => postedAt(b) - postedAt(a));
+  }
+
+  // Phiên người bán vừa đăng luôn đứng đầu danh sách
+  if (filterState.highlightId) {
+    const idx = list.findIndex(p => String(p.id) === filterState.highlightId);
+    if (idx > 0) list.unshift(list.splice(idx, 1)[0]);
   }
 
   filteredProducts = list;
@@ -763,6 +775,8 @@ function attachCardClickEvents() {
  */
 function renderCatalogProductCard(product) {
   const detailUrl = `product-detail.html?id=${product.id}`;
+  // Phiên người bán vừa đăng: gắn nhãn và viền nổi bật
+  const isJustPosted = filterState.highlightId && String(product.id) === filterState.highlightId;
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
 
@@ -776,7 +790,8 @@ function renderCatalogProductCard(product) {
     : 'images/products/gpu/2018-rtx-4070-12gb-1.webp';
 
   return `
-    <article class="pcb-card" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
+    <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
+      ${isJustPosted ? '<span class="pcb-card__just-posted">✨ Bạn vừa đăng</span>' : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
         <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -420,9 +420,18 @@
       <div class="pcb-modal-icon">✓</div>
       <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
       <p class="pcb-modal-desc" id="modal-success-desc">
-        Linh kiện của bạn đã được niêm yết lên sàn PCBid thành công. Hệ thống đang tự động chuyển bạn về trang danh sách sản phẩm...
+        Linh kiện của bạn đã được niêm yết lên sàn PCBid thành công.
       </p>
-      <a href="products.html" class="pcb-btn pcb-btn--primary" style="width:100%;">
+      <!-- Đồng hồ đếm ngược tự chuyển sang trang Sàn đấu giá -->
+      <div class="pcb-modal-countdown" aria-live="polite">
+        <svg class="pcb-modal-countdown__ring" viewBox="0 0 44 44" aria-hidden="true">
+          <circle class="pcb-modal-countdown__track" cx="22" cy="22" r="19"></circle>
+          <circle class="pcb-modal-countdown__bar" id="sell-countdown-bar" cx="22" cy="22" r="19"></circle>
+        </svg>
+        <span class="pcb-modal-countdown__num" id="sell-countdown-num">10</span>
+        <span class="pcb-modal-countdown__text">Tự động chuyển tới trang Sàn đấu giá sau <strong id="sell-countdown-text">10</strong> giây</span>
+      </div>
+      <a href="products.html" class="pcb-btn pcb-btn--primary" id="sell-success-go" style="width:100%;">
         Chuyển đến trang Đấu giá ngay
       </a>
     </div>

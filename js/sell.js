@@ -1330,11 +1330,34 @@ function initFormSubmitHandler() {
     if (successModal) {
       successModal.classList.add('pcb-modal-overlay--open');
 
-      // Tự động chuyển hướng sau 1.8 giây: đăng lại thì mở thẳng phiên vừa mở lại
-      const nextUrl = relistTarget ? `product-detail.html?id=${newAuctionProduct.id}` : 'products.html';
-      setTimeout(() => {
-        window.location.href = nextUrl;
-      }, 1800);
+      // Sang trang Sàn đấu giá, sắp xếp "Phiên mới lên sàn" và làm nổi bật phiên vừa đăng
+      const nextUrl = `products.html?sort=newest&highlight=${encodeURIComponent(newAuctionProduct.id)}`;
+      const goBtn = document.getElementById('sell-success-go');
+      if (goBtn) {
+        goBtn.href = nextUrl;
+        goBtn.focus();
+      }
+
+      // Đếm ngược 10 giây rồi tự chuyển trang
+      const TOTAL_SECONDS = 10;
+      let remaining = TOTAL_SECONDS;
+      const numEl = document.getElementById('sell-countdown-num');
+      const textEl = document.getElementById('sell-countdown-text');
+      const barEl = document.getElementById('sell-countdown-bar');
+      const paint = () => {
+        if (numEl) numEl.textContent = remaining;
+        if (textEl) textEl.textContent = remaining;
+        if (barEl) barEl.style.strokeDashoffset = String(119.4 * (1 - remaining / TOTAL_SECONDS));
+      };
+      paint();
+      const timer = setInterval(() => {
+        remaining -= 1;
+        paint();
+        if (remaining <= 0) {
+          clearInterval(timer);
+          window.location.href = nextUrl;
+        }
+      }, 1000);
     } else {
       await showAlert({ title: 'Thành công', message: 'Tạo phiên đấu giá thành công! Đang chuyển về sàn...', tone: 'success' });
       window.location.href = 'products.html';
