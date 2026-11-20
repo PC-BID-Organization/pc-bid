@@ -9,6 +9,8 @@ import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
+// Hộp thoại xác nhận dùng chung
+import { showConfirm } from '../../js/dialog.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -278,9 +280,15 @@ function initHeaderUserStatus() {
 
     const logoutBtn = document.getElementById('header-dropdown-logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
+      logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (confirm('Bạn có chắc chắn muốn đăng xuất tài khoản PCBid?')) {
+        const ok = await showConfirm({
+          title: 'Đăng xuất tài khoản?',
+          message: 'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?',
+          confirmText: 'Đăng xuất',
+          tone: 'danger'
+        });
+        if (ok) {
           localStorage.removeItem('pcbid_currentUser');
           localStorage.removeItem('pcbid_user');
           localStorage.setItem('pcbid_logged_out', 'true');

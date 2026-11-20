@@ -242,8 +242,14 @@ export function getParticipatingAuctions(currentUser) {
       isLead = myHighestBid >= currentHighestBid;
     }
 
+    // Phiên bị người bán đóng sớm hoặc đăng bán lại: dùng thời hạn mới trong pcbid_products
+    const lifecycle = prod && (prod.closedEarly || prod.relisted)
+      ? { endTime: prod.endTime, closedEarly: Boolean(prod.closedEarly), relisted: Boolean(prod.relisted) }
+      : {};
+
     return {
       ...item,
+      ...lifecycle,
       id: idNum,
       bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
       myBid: myHighestBid,

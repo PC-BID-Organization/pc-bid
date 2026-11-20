@@ -7,6 +7,9 @@
    - Xuất ảnh vuông 256x256 dạng JPEG để lưu gọn vào localStorage
    ========================================================================== */
 
+// Hộp thoại thông báo dùng chung
+import { showAlert } from './dialog.js';
+
 // Kích thước khung xem trước và ảnh đầu ra (px)
 const VIEW_SIZE = 280;
 const OUTPUT_SIZE = 256;
@@ -39,11 +42,11 @@ function loadImageFile(file) {
  */
 export async function openAvatarCropper(file) {
   if (!file || !/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
-    alert('Vui lòng chọn tệp ảnh định dạng PNG, JPG, WEBP hoặc GIF.');
+    await showAlert({ title: 'Định dạng không hỗ trợ', message: 'Vui lòng chọn tệp ảnh định dạng PNG, JPG, WEBP hoặc GIF.', tone: 'warning' });
     return null;
   }
   if (file.size > MAX_FILE_BYTES) {
-    alert('Ảnh quá lớn. Vui lòng chọn ảnh có dung lượng tối đa 5MB.');
+    await showAlert({ title: 'Ảnh quá lớn', message: 'Vui lòng chọn ảnh có dung lượng tối đa 5MB.', tone: 'warning' });
     return null;
   }
 
@@ -51,7 +54,7 @@ export async function openAvatarCropper(file) {
   try {
     img = await loadImageFile(file);
   } catch {
-    alert('Không thể đọc ảnh này. Vui lòng thử ảnh khác.');
+    await showAlert({ title: 'Không đọc được ảnh', message: 'Không thể đọc ảnh này. Vui lòng thử ảnh khác.', tone: 'warning' });
     return null;
   }
 

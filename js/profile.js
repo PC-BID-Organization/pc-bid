@@ -15,6 +15,8 @@ import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName
   renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
+// Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
+import { showAlert, showConfirm } from './dialog.js';
 
 
 
@@ -272,7 +274,7 @@ function getSellingItems() {
   return list.map(saved => {
     // Phiên mẫu chưa đăng lại: luôn lấy thông tin chuẩn mới nhất (sửa dữ liệu cũ lưu sai ảnh / tên / trạng thái)
     const sample = DEFAULT_SELLING.find(d => d.id === Number(saved.id));
-    const item = sample && !saved.relisted ? { ...saved, ...sample } : { ...saved };
+    const item = sample && !(saved.relisted || saved.closedEarly) ? { ...saved, ...sample } : { ...saved };
 
     if (item.status === 'active') {
       const product = productMap.get(Number(item.id));
@@ -1416,7 +1418,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. Xác nhận Trả giá nhanh (Cập nhật trực tiếp vào trạng thái)
   const btnSubmitBid = document.getElementById('btn-submit-quick-bid');
   if (btnSubmitBid) {
-    btnSubmitBid.addEventListener('click', () => {
+    btnSubmitBid.addEventListener('click', async () => {
       if (!activeQuickBidItem) return;
 
       const user = getCurrentUser() || DEFAULT_USER;
@@ -1428,8 +1430,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới (cọc cũ của phiên này được trả lại trước)
       const depositCheck = checkBidDeposit(user, activeQuickBidItem.id, newBidAmount);
       if (!depositCheck.ok) {
-        alert(`Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Vui lòng nạp thêm tiền vào ví!`);
         closeModal('modal-quick-bid');
+        await showAlert({
+          title: 'Không đủ tiền cọc',
+          message: `Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}).\nVui lòng nạp thêm tiền vào ví.`,
+          tone: 'warning'
+        });
         openModal('modal-deposit');
         return;
       }
@@ -1524,7 +1530,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnConfirmDeposit.addEventListener('click', () => {
       const amount = Number(depositInput.value);
       if (!amount || amount <= 0) {
-        alert('Vui lòng nhập số tiền nạp hợp lệ!');
+        showAlert({ title: 'Số tiền không hợp lệ', message: 'Vui lòng nhập số tiền nạp lớn hơn 0.', tone: 'warning' });
         return;
       }
 
@@ -1541,7 +1547,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. Xử lý Form Cập nhật thông tin tài khoản
   const formAccount = document.getElementById('form-account-info');
   if (formAccount) {
-    formAccount.addEventListener('submit', (e) => {
+    formAccount.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const user = getCurrentUser();
@@ -1552,10 +1558,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const chosen = new Date(birthInput.value);
         const age = (Date.now() - chosen.getTime()) / (365.25 * 24 * 3600 * 1000);
         if (Number.isNaN(chosen.getTime()) || age < 13 || age > 100) {
-          alert('Ngày sinh không hợp lệ (độ tuổi cho phép từ 13 đến 100).');
+          await showAlert({ title: 'Ngày sinh không hợp lệ', message: 'Độ tuổi cho phép từ 13 đến 100.', tone: 'warning' });
           return;
         }
-        const ok = confirm(`Bạn sắp đổi ngày sinh thành ${formatBirthDate(birthInput.value, true)}.\n\nNgày sinh chỉ được thay đổi 1 lần. Sau khi lưu, bạn sẽ KHÔNG thể thay đổi được nữa. Tiếp tục?`);
+        const ok = await showConfirm({
+          title: 'Xác nhận đổi ngày sinh',
+          message: `Bạn sắp đổi ngày sinh thành ${formatBirthDate(birthInput.value, true)}.\n\nNgày sinh chỉ được thay đổi 1 lần. Sau khi lưu, bạn sẽ KHÔNG thể thay đổi được nữa.`,
+          confirmText: 'Đổi ngày sinh',
+          cancelText: 'Để sau',
+          tone: 'danger'
+        });
         if (!ok) return;
         user.birthDate = birthInput.value;
         user.birthDateLocked = true;
@@ -1604,8 +1616,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const removeAvatarBtn = document.getElementById('btn-remove-avatar');
   if (removeAvatarBtn) {
-    removeAvatarBtn.addEventListener('click', () => {
-      if (!confirm('Đặt avatar về mặc định (chữ cái đầu của tên)? Ảnh đại diện hiện tại sẽ bị xóa.')) return;
+    removeAvatarBtn.addEventListener('click', async () => {
+      const ok = await showConfirm({
+        title: 'Đặt avatar thành mặc định?',
+        message: 'Ảnh đại diện hiện tại sẽ bị xóa và avatar quay về chữ cái đầu của tên.',
+        confirmText: 'Đặt mặc định',
+        tone: 'danger'
+      });
+      if (!ok) return;
       const user = getCurrentUser();
       delete user.avatarImage;
       saveCurrentUser(user);
@@ -1641,10 +1659,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 12d. Quyền riêng tư hồ sơ công khai
   const privacyForm = document.getElementById('form-privacy');
+  // Quay lại trang (nút Back / bộ nhớ đệm bfcache): vẽ lại theo dữ liệu đã lưu,
+  // tránh công tắc giữ trạng thái chưa lưu trong khi chữ hiển thị trạng thái cũ
+  window.addEventListener('pageshow', () => {
+    if (privacyForm) syncUserInfoUI();
+  });
+  // Đánh dấu có thay đổi quyền riêng tư chưa lưu
+  let privacyDirty = false;
   if (privacyForm) {
     privacyForm.addEventListener('change', (e) => {
-      if (e.target.matches('.pcb-switch__input')) updateSwitchText(e.target);
+      if (e.target.matches('.pcb-switch__input')) {
+        updateSwitchText(e.target);
+        privacyDirty = true;
+      }
     });
+    // Bấm "Xem hồ sơ công khai" khi còn thay đổi chưa lưu: hỏi lưu trước
+    const publicLink = document.getElementById('sidebar-public-link');
+    if (publicLink) {
+      publicLink.addEventListener('click', async (e) => {
+        if (!privacyDirty) return;
+        e.preventDefault();
+        const save = await showConfirm({
+          title: 'Chưa lưu cài đặt quyền riêng tư',
+          message: 'Bạn vừa thay đổi quyền riêng tư nhưng chưa lưu. Lưu trước khi xem hồ sơ công khai?',
+          confirmText: 'Lưu và xem',
+          cancelText: 'Bỏ thay đổi'
+        });
+        if (save) privacyForm.requestSubmit();
+        else syncUserInfoUI();
+        privacyDirty = false;
+        window.location.href = publicLink.href;
+      });
+    }
     privacyForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const user = getCurrentUser();
@@ -1652,6 +1698,7 @@ document.addEventListener('DOMContentLoaded', () => {
       privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => { privacy[input.name] = input.checked; });
       user.privacy = privacy;
       saveCurrentUser(user);
+      privacyDirty = false;
       showToast('Đã lưu cài đặt quyền riêng tư hồ sơ công khai!');
     });
   }
@@ -1666,17 +1713,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const cf = document.getElementById('input-confirm-pass')?.value;
 
       if (!cur || !nw || !cf) {
-        alert('Vui lòng điền đầy đủ các trường mật khẩu!');
+        showAlert({ title: 'Thiếu thông tin', message: 'Vui lòng điền đầy đủ các trường mật khẩu.', tone: 'warning' });
         return;
       }
 
       if (nw.length < 8) {
-        alert('Mật khẩu mới phải có ít nhất 8 ký tự!');
+        showAlert({ title: 'Mật khẩu quá ngắn', message: 'Mật khẩu mới phải có ít nhất 8 ký tự.', tone: 'warning' });
         return;
       }
 
       if (nw !== cf) {
-        alert('Mật khẩu xác nhận không khớp với mật khẩu mới!');
+        showAlert({ title: 'Mật khẩu không khớp', message: 'Mật khẩu xác nhận không khớp với mật khẩu mới.', tone: 'warning' });
         return;
       }
 
@@ -1688,9 +1735,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 14. Nút Đăng xuất
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) {
-    btnLogout.addEventListener('click', (e) => {
+    btnLogout.addEventListener('click', async (e) => {
       e.preventDefault();
-      if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?')) {
+      const ok = await showConfirm({
+        title: 'Đăng xuất tài khoản?',
+        message: 'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?',
+        confirmText: 'Đăng xuất',
+        tone: 'danger'
+      });
+      if (ok) {
         localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
         localStorage.removeItem('pcbid_user');
         localStorage.setItem('pcbid_logged_out', 'true');

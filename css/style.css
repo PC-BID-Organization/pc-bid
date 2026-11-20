@@ -52,3 +52,121 @@
 #app-footer {
   min-height: 250px;
 }
+
+/* ==========================================================================
+   HỘP THOẠI THÔNG BÁO / XÁC NHẬN DÙNG CHUNG (thay cho alert / confirm của trình duyệt)
+   ========================================================================== */
+.pcb-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(11, 28, 48, 0.55);
+  animation: pcbDialogFade 0.15s ease;
+}
+
+.pcb-dialog__card {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px 22px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(11, 28, 48, 0.25);
+  animation: pcbDialogPop 0.18s ease;
+}
+
+.pcb-dialog__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  border-radius: 50%;
+  color: #1d4ed8;
+  background-color: #dbeafe;
+}
+
+.pcb-dialog__card--warning .pcb-dialog__icon { color: #b45309; background-color: #fef3c7; }
+.pcb-dialog__card--danger .pcb-dialog__icon { color: #b91c1c; background-color: #fee2e2; }
+.pcb-dialog__card--success .pcb-dialog__icon { color: #15803d; background-color: #dcfce7; }
+
+.pcb-dialog__title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-dialog__message {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  white-space: pre-line;
+}
+
+.pcb-dialog__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pcb-dialog__btn {
+  flex: 1;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.pcb-dialog__btn:hover {
+  filter: brightness(0.95);
+}
+
+.pcb-dialog__btn:focus-visible {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.pcb-dialog__btn--ghost {
+  color: var(--color-text-muted);
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.pcb-dialog__btn--primary {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.pcb-dialog__card--danger .pcb-dialog__btn--primary {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+
+@keyframes pcbDialogFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pcbDialogPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-dialog,
+  .pcb-dialog__card {
+    animation: none;
+  }
+}

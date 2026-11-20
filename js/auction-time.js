@@ -60,7 +60,7 @@ export function getAuctionEndTimestamp(product, now = Date.now()) {
 
   // Phiên đã chốt (đã bán / đã kết thúc) hoặc phiên được người bán đăng lại:
   // dùng đúng endTime đã lưu thay cho chu kỳ mô phỏng
-  if ((isAuctionClosed(product) || product.relisted) && Number.isFinite(savedEnd)) {
+  if ((isAuctionClosed(product) || product.relisted || product.closedEarly) && Number.isFinite(savedEnd)) {
     return savedEnd;
   }
 
@@ -100,7 +100,8 @@ export function isAuctionClosed(product) {
  */
 export function mergeLocalProduct(base, local) {
   if (!local) return { ...base };
-  if (local.relisted) return { ...base, ...local };
+  // Phiên đăng bán lại hoặc bị người bán đóng sớm: bản trong localStorage là bản chuẩn
+  if (local.relisted || local.closedEarly) return { ...base, ...local };
   const merged = { ...base, ...local };
   ['status', 'winner', 'endTime'].forEach(key => {
     if (key in base) merged[key] = base[key];
