@@ -5,13 +5,17 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
+import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 // Tài khoản demo, avatar chữ cái và UID dùng chung
-import { DEMO_ACCOUNTS, getAvatarInitial, getUserUid, getGivenName, describeBidder } from './accounts.js';
+import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
+  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount } from './accounts.js';
+// Công cụ cắt ảnh đại diện
+import { openAvatarCropper } from './avatar-cropper.js';
+
 
 
 /* ==========================================================================
@@ -214,6 +218,10 @@ function getCurrentUser() {
 
 function saveCurrentUser(user) {
   localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+  // Đồng bộ vào danh sách tài khoản để hồ sơ công khai luôn thấy thông tin mới nhất
+  saveAccount(user);
+  // Báo cho Header cập nhật lại avatar và tên
+  window.dispatchEvent(new CustomEvent('pcbid:account-updated'));
 }
 
 function getParticipatingBids() {
@@ -610,9 +618,13 @@ function syncUserInfoUI() {
 
   if (nameEl) nameEl.textContent = user.fullname || user.username;
   if (uidEl) uidEl.textContent = `UID: ${getUserUid(user)}`;
-  // Avatar chữ cái đầu của tên, đồng bộ với Header
+  // Avatar: ảnh tự tải lên hoặc chữ cái đầu của tên, đồng bộ với Header
   const avatarEl = document.getElementById('sidebar-user-avatar');
-  if (avatarEl) avatarEl.textContent = getAvatarInitial(user);
+  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(user, 'pcb-user-card__avatar-photo');
+  const removeAvatarBtn = document.getElementById('btn-remove-avatar');
+  if (removeAvatarBtn) removeAvatarBtn.hidden = !user.avatarImage;
+  const publicLink = document.getElementById('sidebar-public-link');
+  if (publicLink) publicLink.href = `profile.html?user=${encodeURIComponent(user.username || '')}`;
   // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
   if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
@@ -633,6 +645,63 @@ function syncUserInfoUI() {
   if (smsInput) smsInput.checked = user.pref_sms !== false;
   if (mailInput) mailInput.checked = user.pref_email !== false;
   if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
+
+  // Giới tính, tiểu sử, ngày sinh
+  const genderInput = document.getElementById('input-gender');
+  const bioInput = document.getElementById('input-bio');
+  if (genderInput) genderInput.value = user.gender || '';
+  if (bioInput) bioInput.value = user.bio || '';
+  renderBirthDate(user);
+
+  // Quyền riêng tư hồ sơ công khai
+  const privacyForm = document.getElementById('form-privacy');
+  if (privacyForm) {
+    const privacy = getPrivacy(user);
+    privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
+      input.checked = privacy[input.name] !== false;
+      updateSwitchText(input);
+    });
+  }
+}
+
+// Trạng thái hiển thị đầy đủ ngày sinh (bấm biểu tượng con mắt)
+let birthDateRevealed = false;
+
+/**
+ * Hiển thị ngày sinh: mặc định chỉ hiện năm; khóa nút thay đổi khi đã đổi 1 lần
+ * @param {Object} user - Người dùng hiện tại
+ */
+function renderBirthDate(user) {
+  const display = document.getElementById('birthdate-display');
+  const eyeBtn = document.getElementById('btn-toggle-birthdate');
+  const changeBtn = document.getElementById('btn-change-birthdate');
+  const tooltip = document.getElementById('birthdate-tooltip');
+  if (!display) return;
+
+  display.textContent = formatBirthDate(user.birthDate, birthDateRevealed);
+  if (eyeBtn) {
+    eyeBtn.hidden = !user.birthDate;
+    eyeBtn.setAttribute('aria-pressed', birthDateRevealed ? 'true' : 'false');
+    eyeBtn.setAttribute('aria-label', birthDateRevealed ? 'Ẩn ngày và tháng sinh' : 'Hiện đầy đủ ngày sinh');
+    eyeBtn.title = eyeBtn.getAttribute('aria-label');
+  }
+  const locked = Boolean(user.birthDateLocked);
+  if (changeBtn) changeBtn.hidden = locked;
+  if (tooltip) {
+    tooltip.dataset.tooltip = locked
+      ? 'Thông tin không thể thay đổi được'
+      : 'Ngày sinh chỉ được thay đổi 1 lần, sau đó không thể thay đổi được nữa';
+    tooltip.setAttribute('aria-label', tooltip.dataset.tooltip);
+  }
+}
+
+/**
+ * Cập nhật nhãn "Công khai" / "Riêng tư" cạnh công tắc quyền riêng tư
+ * @param {HTMLInputElement} input - Công tắc
+ */
+function updateSwitchText(input) {
+  const text = input.closest('.pcb-switch')?.querySelector('.pcb-switch__text');
+  if (text) text.textContent = input.checked ? 'Công khai' : 'Riêng tư';
 }
 
 /**
@@ -912,6 +981,150 @@ function handleMarkNotificationsRead(ids) {
   updateCounters();
 }
 
+/* ==========================================================================
+   HỒ SƠ CÔNG KHAI (profile.html?user=<tên đăng nhập>)
+   Ai cũng xem được, kể cả chưa đăng nhập; tôn trọng cài đặt quyền riêng tư
+   ========================================================================== */
+
+// Các tệp dữ liệu catalog để tìm linh kiện người dùng đã đăng bán
+const CATALOG_FILES = ['cpu', 'gpu', 'mainboard', 'ram', 'storage', 'psu', 'cooling', 'case'];
+
+/**
+ * Nạp toàn bộ sản phẩm (catalog JSON gộp với bản cập nhật trong localStorage)
+ * @returns {Promise<Array>}
+ */
+async function loadAllProductsForPublic() {
+  let localProducts = [];
+  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
+  const localMap = new Map(localProducts.map(p => [Number(p.id), p]));
+  const results = await Promise.all(CATALOG_FILES.map(async name => {
+    try {
+      const res = await fetch(`data/${name}.json`);
+      return res.ok ? await res.json() : [];
+    } catch {
+      return [];
+    }
+  }));
+  const catalog = results.flat().map(p => mergeLocalProduct(p, localMap.get(Number(p.id))));
+  const catalogIds = new Set(catalog.map(p => Number(p.id)));
+  // Phiên người dùng tự đăng (không có trong catalog)
+  const custom = localProducts.filter(p => !catalogIds.has(Number(p.id)));
+  return [...custom, ...catalog];
+}
+
+/**
+ * Thẻ linh kiện rút gọn dùng trong hồ sơ công khai
+ * @param {Object} item - Sản phẩm / phiên
+ * @param {string} badgeHtml - Huy hiệu trạng thái
+ * @returns {string}
+ */
+function renderPublicCard(item, badgeHtml) {
+  const image = item.images && item.images[0] ? item.images[0] : 'images/placeholder-product.svg';
+  return `
+    <a class="pcb-public-card" href="product-detail.html?id=${item.id}">
+      <img class="pcb-public-card__img" src="${escapeHtml(image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+      <span class="pcb-public-card__body">
+        ${badgeHtml}
+        <strong class="pcb-public-card__name">${escapeHtml(item.name)}</strong>
+        <span class="pcb-public-card__meta">${formatVnd(item.currentBid)} · ${Number(item.bidCount || 0)} lượt</span>
+      </span>
+    </a>
+  `;
+}
+
+/**
+ * Hiển thị một khối thông tin của hồ sơ công khai (hoặc thông báo riêng tư / trống)
+ * @param {string} id - ID vùng chứa
+ * @param {boolean} isPublic - Thông tin có được công khai không
+ * @param {Array<string>} cards - Danh sách HTML thẻ
+ * @param {string} emptyText - Thông báo khi không có dữ liệu
+ */
+function fillPublicBlock(id, isPublic, cards, emptyText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!isPublic) {
+    el.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+  } else if (!cards.length) {
+    el.innerHTML = `<p class="pcb-public__empty">${emptyText}</p>`;
+  } else {
+    el.innerHTML = `<div class="pcb-public__grid">${cards.join('')}</div>`;
+  }
+}
+
+/**
+ * Hiển thị hồ sơ công khai của một người dùng
+ * @param {string} username - Tên đăng nhập cần xem
+ */
+async function renderPublicProfile(username) {
+  // Ẩn thanh bên quản lý cá nhân, chỉ hiện khu vực hồ sơ công khai
+  document.body.classList.add('pcb-profile--public');
+  document.querySelectorAll('.pcb-section').forEach(sec => {
+    sec.style.display = sec.id === 'section-public' ? 'block' : 'none';
+  });
+  const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+  if (breadcrumbCurrent) breadcrumbCurrent.textContent = 'Hồ sơ công khai';
+
+  // Thông tin tài khoản: thành viên / tài khoản đã đăng ký / người dùng mẫu; nếu không có thì chỉ biết tên đăng nhập
+  const account = findAccount({ username }) || { username, fullname: username };
+  const privacy = getPrivacy(account);
+  const uid = getUserUid(account.id || `seller_${username}`);
+  let viewer = null;
+  try { viewer = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null'); } catch {}
+
+  document.title = `${account.fullname || username} - Hồ sơ công khai | PCBid`;
+  const avatarEl = document.getElementById('public-avatar');
+  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(account, 'pcb-public__avatar-img');
+  const nameEl = document.getElementById('public-name');
+  if (nameEl) nameEl.textContent = account.fullname || username;
+  const uidEl = document.getElementById('public-uid');
+  if (uidEl) uidEl.textContent = `UID: ${maskUid(uid)}`;
+  const selfNote = document.getElementById('public-self-note');
+  if (selfNote) selfNote.hidden = !(viewer && viewer.isLoggedIn !== false && viewer.username === username);
+
+  // Tiểu sử
+  const bioEl = document.getElementById('public-bio');
+  if (bioEl) {
+    if (!privacy.bio) bioEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+    else bioEl.innerHTML = `<p class="pcb-public__bio">${account.bio ? escapeHtml(account.bio) : 'Người dùng chưa viết tiểu sử.'}</p>`;
+  }
+
+  // Linh kiện đã đăng bán: mọi phiên có người bán là tài khoản này
+  const products = await loadAllProductsForPublic();
+  const now = Date.now();
+  const selling = products.filter(p => p.seller === username);
+  const roleEl = document.getElementById('public-role');
+  if (roleEl) roleEl.textContent = account.role === 'seller' || selling.length ? '🏪 Người bán hàng' : '👤 Đấu giá viên';
+  fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
+    const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
+    const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
+    const mod = p.status === 'sold' ? 'sold' : closed ? 'ended' : 'active';
+    return renderPublicCard(p, `<span class="pcb-public-card__badge pcb-public-card__badge--${mod}">${label}</span>`);
+  }), 'Chưa đăng bán linh kiện nào.');
+
+  // Phiên đang tham gia (chỉ phiên chưa kết thúc)
+  const participating = account.id ? getParticipatingAuctions(account).filter(item => getAuctionEndTimestamp(item) > now) : [];
+  fillPublicBlock('public-participating', privacy.participating, participating.map(item =>
+    renderPublicCard(item, item.status === 'lead'
+      ? '<span class="pcb-public-card__badge pcb-public-card__badge--active">Đang dẫn đầu</span>'
+      : '<span class="pcb-public-card__badge pcb-public-card__badge--outbid">Bị vượt giá</span>')
+  ), 'Hiện không tham gia phiên đấu giá nào.');
+
+  // Danh sách theo dõi: đọc trực tiếp, không tạo dữ liệu mẫu cho tài khoản người khác
+  let watchlist = [];
+  try {
+    const raw = localStorage.getItem(`${USER_LIST_KEYS.WATCHLIST}__${getUserKey(account)}`);
+    watchlist = raw ? JSON.parse(raw) : (isDemoUser(account) ? DEFAULT_WATCHLIST : []);
+  } catch {
+    watchlist = [];
+  }
+  const productMap = new Map(products.map(p => [Number(p.id), p]));
+  const watchCards = (Array.isArray(watchlist) ? watchlist : [])
+    .map(w => productMap.get(Number(typeof w === 'object' ? w.id : w)) || (typeof w === 'object' ? w : null))
+    .filter(Boolean)
+    .map(p => renderPublicCard(p, ''));
+  fillPublicBlock('public-watchlist', privacy.watchlist, watchCards, 'Chưa theo dõi linh kiện nào.');
+}
+
 /**
  * Chuyển đổi giữa các Sub-tabs trong Quản lý đấu giá (Đang tham gia, Đã đăng bán, Watchlist)
  */
@@ -1058,6 +1271,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   } catch (e) {}
+
+  // 0. Chế độ xem hồ sơ công khai của người khác: profile.html?user=<tên đăng nhập>
+  const publicUsername = new URLSearchParams(window.location.search).get('user');
+  if (publicUsername) {
+    renderPublicProfile(publicUsername);
+    return;
+  }
 
   // 1. Đồng bộ thông tin người dùng & đếm số lượng
   syncUserInfoUI();
@@ -1309,6 +1529,27 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const user = getCurrentUser();
+
+      // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
+      const birthInput = document.getElementById('input-birthdate');
+      if (birthInput && !birthInput.hidden && birthInput.value && birthInput.value !== user.birthDate) {
+        const chosen = new Date(birthInput.value);
+        const age = (Date.now() - chosen.getTime()) / (365.25 * 24 * 3600 * 1000);
+        if (Number.isNaN(chosen.getTime()) || age < 13 || age > 100) {
+          alert('Ngày sinh không hợp lệ (độ tuổi cho phép từ 13 đến 100).');
+          return;
+        }
+        const ok = confirm(`Bạn sắp đổi ngày sinh thành ${formatBirthDate(birthInput.value, true)}.\n\nNgày sinh chỉ được thay đổi 1 lần. Sau khi lưu, bạn sẽ KHÔNG thể thay đổi được nữa. Tiếp tục?`);
+        if (!ok) return;
+        user.birthDate = birthInput.value;
+        user.birthDateLocked = true;
+      }
+      if (birthInput) birthInput.hidden = true;
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthHint) birthHint.hidden = true;
+
+      user.gender = document.getElementById('input-gender')?.value || '';
+      user.bio = (document.getElementById('input-bio')?.value || '').trim().slice(0, 300);
       user.fullname = document.getElementById('input-fullname')?.value.trim() || user.fullname;
       // Cập nhật lại tên gọi để avatar chữ cái luôn khớp với họ tên mới
       user.givenName = getGivenName(user.fullname);
@@ -1326,6 +1567,75 @@ document.addEventListener('DOMContentLoaded', () => {
       saveCurrentUser(user);
       syncUserInfoUI();
       showToast('Đã lưu thay đổi thông tin cá nhân thành công!');
+    });
+  }
+
+  // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
+  const avatarInput = document.getElementById('input-avatar-file');
+  if (avatarInput) {
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      avatarInput.value = '';
+      if (!file) return;
+      const dataUrl = await openAvatarCropper(file);
+      if (!dataUrl) return;
+      const user = getCurrentUser();
+      user.avatarImage = dataUrl;
+      saveCurrentUser(user);
+      syncUserInfoUI();
+      showToast('Đã cập nhật ảnh đại diện!');
+    });
+  }
+  const removeAvatarBtn = document.getElementById('btn-remove-avatar');
+  if (removeAvatarBtn) {
+    removeAvatarBtn.addEventListener('click', () => {
+      const user = getCurrentUser();
+      delete user.avatarImage;
+      saveCurrentUser(user);
+      syncUserInfoUI();
+      showToast('Đã xóa ảnh, avatar quay về chữ cái đầu của tên.');
+    });
+  }
+
+  // 12c. Ngày sinh: con mắt hiện / ẩn ngày tháng; nút Thay đổi mở ô chọn ngày
+  const eyeBtn = document.getElementById('btn-toggle-birthdate');
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', () => {
+      birthDateRevealed = !birthDateRevealed;
+      renderBirthDate(getCurrentUser());
+    });
+  }
+  const changeBirthBtn = document.getElementById('btn-change-birthdate');
+  if (changeBirthBtn) {
+    changeBirthBtn.addEventListener('click', () => {
+      const user = getCurrentUser();
+      if (user.birthDateLocked) return;
+      const birthInput = document.getElementById('input-birthdate');
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthInput) {
+        birthInput.hidden = false;
+        birthInput.value = user.birthDate || '';
+        birthInput.max = new Date().toISOString().slice(0, 10);
+        birthInput.focus();
+      }
+      if (birthHint) birthHint.hidden = false;
+    });
+  }
+
+  // 12d. Quyền riêng tư hồ sơ công khai
+  const privacyForm = document.getElementById('form-privacy');
+  if (privacyForm) {
+    privacyForm.addEventListener('change', (e) => {
+      if (e.target.matches('.pcb-switch__input')) updateSwitchText(e.target);
+    });
+    privacyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = getCurrentUser();
+      const privacy = {};
+      privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => { privacy[input.name] = input.checked; });
+      user.privacy = privacy;
+      saveCurrentUser(user);
+      showToast('Đã lưu cài đặt quyền riêng tư hồ sơ công khai!');
     });
   }
 

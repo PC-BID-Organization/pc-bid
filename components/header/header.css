@@ -841,3 +841,17 @@
   line-height: 1;
   color: #ffffff;
 }
+
+/* Ảnh đại diện người dùng tự tải lên (nút tài khoản và menu thả xuống) */
+.header__avatar-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.header__user-avatar--initial,
+.header__dropdown-avatar {
+  overflow: hidden;
+}

@@ -35,6 +35,9 @@ export const DEMO_ACCOUNTS = [
     pref_sms: true,
     pref_email: true,
     lastUpdated: 'Hôm nay, 14:32',
+    gender: 'male',
+    birthDate: '2006-10-12',
+    bio: 'Sinh viên UIT mê build PC gaming. Thường săn card đồ họa và CPU đời cũ giá tốt để nâng cấp dàn máy.',
     isLoggedIn: true
   },
   {
@@ -55,6 +58,9 @@ export const DEMO_ACCOUNTS = [
     pref_sms: true,
     pref_email: true,
     lastUpdated: 'Hôm nay, 11:20',
+    gender: 'male',
+    birthDate: null,
+    bio: 'Thích linh kiện tầm trung hiệu năng tốt trên giá thành, ưu tiên hàng còn bảo hành.',
     isLoggedIn: true
   },
   {
@@ -75,6 +81,9 @@ export const DEMO_ACCOUNTS = [
     pref_sms: true,
     pref_email: true,
     lastUpdated: 'Hôm nay, 09:45',
+    gender: 'male',
+    birthDate: null,
+    bio: 'Đang gom linh kiện cho dàn máy làm đồ họa, quan tâm RAM dung lượng lớn và SSD NVMe.',
     isLoggedIn: true
   },
   {
@@ -95,9 +104,24 @@ export const DEMO_ACCOUNTS = [
     pref_sms: true,
     pref_email: true,
     lastUpdated: 'Hôm nay, 10:15',
+    gender: 'male',
+    birthDate: null,
+    bio: 'Chuyên thanh lý linh kiện PC đã qua kiểm định, cam kết mô tả đúng tình trạng và bao test 7 ngày.',
     isLoggedIn: true
   }
 ];
+
+// Quyền riêng tư mặc định của hồ sơ công khai: tất cả đều công khai
+export const DEFAULT_PRIVACY = { bio: true, selling: true, participating: true, watchlist: true };
+
+/**
+ * Lấy cài đặt quyền riêng tư (true = công khai) của người dùng, mặc định công khai
+ * @param {Object|null} user - Người dùng
+ * @returns {{bio: boolean, selling: boolean, participating: boolean, watchlist: boolean}}
+ */
+export function getPrivacy(user) {
+  return { ...DEFAULT_PRIVACY, ...(user?.privacy || {}) };
+}
 
 /**
  * Người đặt giá mẫu (không phải thành viên nhóm) dùng cho lịch sử đặt giá giả lập.
@@ -189,7 +213,8 @@ export function findAccount({ id, username, email } = {}) {
   } catch {
     registered = [];
   }
-  const all = [...DEMO_ACCOUNTS, ...(Array.isArray(registered) ? registered : []), ...MOCK_BIDDERS];
+  // Ưu tiên bản đã lưu (có ảnh đại diện, tiểu sử, quyền riêng tư người dùng tự cập nhật)
+  const all = [...(Array.isArray(registered) ? registered : []), ...DEMO_ACCOUNTS, ...MOCK_BIDDERS];
   if (id) {
     const byId = all.find(u => u.id === id);
     if (byId) return byId;
@@ -203,6 +228,58 @@ export function findAccount({ id, username, email } = {}) {
     if (byEmail) return byEmail;
   }
   return null;
+}
+
+/**
+ * HTML nội dung avatar: ảnh người dùng tự tải lên nếu có, nếu không là chữ cái đầu của tên
+ * @param {Object|string|null} userOrName - Người dùng hoặc tên
+ * @param {string} [imgClass] - Class CSS cho thẻ ảnh
+ * @returns {string}
+ */
+export function renderAvatarContent(userOrName, imgClass = 'pcb-avatar-img') {
+  const image = typeof userOrName === 'object' ? userOrName?.avatarImage : '';
+  if (image && /^data:image\/(png|jpeg|webp);base64,/.test(image)) {
+    return `<img src="${image}" alt="" class="${imgClass}">`;
+  }
+  return getAvatarInitial(userOrName);
+}
+
+/**
+ * Lưu thay đổi của một tài khoản vào cả phiên đăng nhập hiện tại và danh sách tài khoản đã đăng ký,
+ * để người khác xem hồ sơ công khai cũng thấy ảnh đại diện, tiểu sử, quyền riêng tư mới nhất
+ * @param {Object} user - Tài khoản đã cập nhật
+ */
+export function saveAccount(user) {
+  if (!user) return;
+  try {
+    const current = JSON.parse(localStorage.getItem(STORAGE_KEY_CURRENT) || 'null');
+    if (current && current.id === user.id) {
+      localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(user));
+      localStorage.setItem('pcbid_user', JSON.stringify(user));
+    }
+    const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    const list = Array.isArray(users) ? users : [];
+    const index = list.findIndex(u => u.id === user.id || (u.username && u.username === user.username));
+    // Danh sách công khai không lưu trạng thái đăng nhập
+    const { isLoggedIn, loggedInAt, ...stored } = user;
+    if (index >= 0) list[index] = { ...list[index], ...stored };
+    else list.push(stored);
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(list));
+  } catch {
+    // Bỏ qua khi localStorage không khả dụng hoặc đầy (ảnh quá lớn)
+  }
+}
+
+/**
+ * Định dạng ngày sinh: chỉ năm (mặc định) hoặc đầy đủ ngày/tháng/năm
+ * @param {string|null} birthDate - Ngày sinh dạng YYYY-MM-DD
+ * @param {boolean} [full=false] - Hiển thị đầy đủ
+ * @returns {string}
+ */
+export function formatBirthDate(birthDate, full = false) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate || '');
+  if (!match) return 'Chưa cập nhật';
+  return full ? `${match[3]}/${match[2]}/${match[1]}` : `••/••/${match[1]}`;
 }
 
 /**
@@ -224,16 +301,19 @@ export function describeBidder(bid) {
  * @returns {Object}
  */
 function upgradeDemoAccount(user) {
-  if (!user || user.givenName) return user;
+  if (!user) return user;
   const demo = DEMO_ACCOUNTS.find(d => d.username === user.username);
   if (!demo) return user;
-  return {
-    ...user,
-    id: demo.id,
-    lastName: demo.lastName,
-    givenName: demo.givenName,
-    fullname: demo.fullname
-  };
+  let upgraded = user;
+  // Họ tên mẫu cũ ("Nguyễn Văn A"...) đổi sang họ tên thật của thành viên
+  if (!user.givenName) {
+    upgraded = { ...upgraded, id: demo.id, lastName: demo.lastName, givenName: demo.givenName, fullname: demo.fullname };
+  }
+  // Bổ sung các trường hồ sơ mới (giới tính, ngày sinh, tiểu sử) nếu bản lưu cũ chưa có
+  ['gender', 'birthDate', 'bio'].forEach(key => {
+    if (!(key in upgraded)) upgraded = { ...upgraded, [key]: demo[key] };
+  });
+  return upgraded;
 }
 
 // Chạy một lần khi module được nạp: nâng cấp dữ liệu tài khoản demo cũ trong localStorage

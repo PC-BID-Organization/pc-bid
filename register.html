@@ -86,7 +86,34 @@
                 <span class="pcb-auth-form__error" id="err-givenname"></span>
               </div>
             </div>
-            <p class="pcb-auth-form__hint">Ảnh đại diện mặc định là chữ cái đầu của Tên (ví dụ: Phong → P).</p>
+
+            <!-- TRƯỜNG 1b: GIỚI TÍNH + NGÀY SINH -->
+            <div class="pcb-auth-form__name-row pcb-auth-form__name-row--even">
+              <div class="pcb-auth-form__group">
+                <label for="reg-gender" class="pcb-auth-form__label">
+                  GIỚI TÍNH <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+                </label>
+                <div class="pcb-auth-form__input-wrap">
+                  <select id="reg-gender" name="gender" class="pcb-auth-form__input pcb-auth-form__input--plain" required>
+                    <option value="" disabled selected>-- Chọn giới tính --</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                    <option value="other">Khác</option>
+                  </select>
+                </div>
+                <span class="pcb-auth-form__error" id="err-gender"></span>
+              </div>
+
+              <div class="pcb-auth-form__group">
+                <label for="reg-birthdate" class="pcb-auth-form__label">
+                  NGÀY SINH <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+                </label>
+                <div class="pcb-auth-form__input-wrap">
+                  <input type="date" id="reg-birthdate" name="birthDate" class="pcb-auth-form__input pcb-auth-form__input--plain" required autocomplete="bday">
+                </div>
+                <span class="pcb-auth-form__error" id="err-birthdate"></span>
+              </div>
+            </div>
 
             <!-- TRƯỜNG 2: ĐỊA CHỈ EMAIL -->
             <div class="pcb-auth-form__group">
