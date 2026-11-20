@@ -1538,3 +1538,12 @@ a.pcb-pd__seller-avatar {
 .pcb-pd__owner-btn--danger:focus-visible {
   background-color: #fef2f2;
 }
+
+/* Bảng người bán: nút đóng phiên căn trái, các nút điều hướng dồn sang phải */
+.pcb-pd__owner-btn--danger {
+  margin-right: auto;
+}
+
+#pcb-pd-panel-history {
+  scroll-margin-top: 90px;
+}

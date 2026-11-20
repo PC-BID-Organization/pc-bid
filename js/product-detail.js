@@ -559,8 +559,18 @@ function capNhatCheDoNguoiBan() {
       nutDong.addEventListener('click', dongPhienNgay);
     }
   }
-  const nutHoSo = document.getElementById('pcb-pd-owner-public');
-  if (nutHoSo) nutHoSo.href = `profile.html?user=${encodeURIComponent(sp.seller || '')}`;
+  // Nút xem lịch sử: mở tab Lịch sử đặt giá và cuộn tới bảng
+  const nutLichSu = document.getElementById('pcb-pd-owner-history');
+  if (nutLichSu && !nutLichSu.dataset.bound) {
+    nutLichSu.dataset.bound = '1';
+    nutLichSu.addEventListener('click', () => {
+      const tabLichSu = document.getElementById('pcb-pd-tab-history');
+      if (tabLichSu) tabLichSu.click();
+      const khungLichSu = document.getElementById('pcb-pd-panel-history');
+      (khungLichSu || tabLichSu)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      tabLichSu?.focus({ preventScroll: true });
+    });
+  }
 
   // Người bán không cần nút theo dõi phiên của chính mình
   const nutTheoDoi = document.getElementById('pcb-pd-watchlist-btn');
