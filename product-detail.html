@@ -153,6 +153,38 @@
           </p>
 
           <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
+          <!-- Bảng quản lý dành cho người bán khi xem phiên của chính mình (thay cho khung đặt giá) -->
+          <section class="pcb-pd__owner" id="pcb-pd-owner-panel" aria-labelledby="pcb-pd-owner-title" hidden>
+            <div class="pcb-pd__owner-head">
+              <h2 class="pcb-pd__owner-title" id="pcb-pd-owner-title">Phiên đấu giá của bạn</h2>
+              <span class="pcb-pd__owner-status" id="pcb-pd-owner-status">Đang diễn ra</span>
+            </div>
+            <dl class="pcb-pd__owner-stats">
+              <div class="pcb-pd__owner-stat">
+                <dt>Giá hiện tại</dt>
+                <dd id="pcb-pd-owner-price">---</dd>
+              </div>
+              <div class="pcb-pd__owner-stat">
+                <dt>Lượt đặt giá</dt>
+                <dd id="pcb-pd-owner-count">0</dd>
+              </div>
+              <div class="pcb-pd__owner-stat">
+                <dt>Giá khởi điểm</dt>
+                <dd id="pcb-pd-owner-start">---</dd>
+              </div>
+              <div class="pcb-pd__owner-stat pcb-pd__owner-stat--wide">
+                <dt>Người đang dẫn đầu</dt>
+                <dd id="pcb-pd-owner-leader">Chưa có lượt đặt giá</dd>
+              </div>
+            </dl>
+            <p class="pcb-pd__owner-note">Bạn là người bán của phiên này nên không thể tự đặt giá. Theo dõi diễn biến ở bảng Lịch sử đặt giá bên dưới.</p>
+            <div class="pcb-pd__owner-actions">
+              <a class="pcb-pd__owner-btn pcb-pd__owner-btn--primary" href="profile.html#selling">Quản lý phiên trong hồ sơ</a>
+              <a class="pcb-pd__owner-btn" id="pcb-pd-owner-relist" href="sell.html" hidden>Đăng bán lại</a>
+              <a class="pcb-pd__owner-btn" id="pcb-pd-owner-public" href="profile.html">Xem hồ sơ công khai</a>
+            </div>
+          </section>
+
           <div class="pcb-pd__bidbox" id="pcb-pd-bidbox">
             <div class="pcb-pd__bidbox-header">
               <h2 class="pcb-pd__bidbox-title">Đặt giá của bạn</h2>

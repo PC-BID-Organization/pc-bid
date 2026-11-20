@@ -8,7 +8,7 @@ import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
-import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent } from '../../js/accounts.js';
+import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -211,9 +211,9 @@ function initHeaderUserStatus() {
     const displayName = user.fullname || user.username || 'Thành viên';
     // Avatar mặc định: chữ cái đầu của TÊN, đồng bộ với trang Hồ sơ và trang chi tiết
     const initials = getAvatarInitial(user);
-    const isSeller = user.role === 'seller';
-    const roleText = isSeller ? '🏪 Người bán hàng' : '👤 Đấu giá viên';
-    const roleClass = isSeller ? 'header__dropdown-role-badge--seller' : 'header__dropdown-role-badge--bidder';
+    // Mọi tài khoản đều là thành viên đấu giá (ai cũng có thể đăng bán)
+    const roleText = '👤 Đấu giá viên';
+    const roleClass = 'header__dropdown-role-badge--bidder';
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
     avatarBtn.classList.add('header__user-avatar--initial');
@@ -320,8 +320,8 @@ function initHeaderUserStatus() {
         <div style="display: flex; flex-direction: column; gap: 5px;">
           ${SAMPLE_ACCOUNTS.map(acc => `
           <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
-            <span style="font-weight: 600;">${acc.role === 'seller' ? '🏪' : '👤'} ${escapeHeaderHtml(acc.fullname)}</span>
-            <span style="font-size: 11px; color: #64748b;">(${acc.role === 'seller' ? 'Người bán' : 'Đấu giá'})</span>
+            <span style="font-weight: 600;">👤 ${escapeHeaderHtml(acc.fullname)}</span>
+            <span style="font-size: 11px; color: #64748b;">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
           </button>`).join('')}
         </div>
       </div>
@@ -330,7 +330,8 @@ function initHeaderUserStatus() {
     dropdown.querySelectorAll('.header__dropdown-quick-acc').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-quick-user');
-        const acc = SAMPLE_ACCOUNTS.find(a => a.username === key);
+        // Lấy bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử) nếu có
+        const acc = findAccount({ username: key }) || SAMPLE_ACCOUNTS.find(a => a.username === key);
         if (acc) {
           localStorage.removeItem('pcbid_logged_out');
           localStorage.setItem('pcbid_currentUser', JSON.stringify({ ...acc, isLoggedIn: true }));

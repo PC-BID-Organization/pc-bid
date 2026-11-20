@@ -697,3 +697,17 @@ select.pcb-auth-form__input {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Nút tài khoản demo đang được chọn: giữ viền và nền xanh */
+.pcb-demo-btn.pcb-demo-btn--selected {
+  border-color: #10b981 !important;
+  background-color: #ecfdf5 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+/* Dấu sao bắt buộc cạnh ô đồng ý quy chế */
+.pcb-auth-checkbox__required {
+  margin-left: 2px;
+  font-weight: 700;
+  color: #dc2626;
+}
