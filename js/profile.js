@@ -102,34 +102,34 @@ const DEFAULT_SELLING = [
     category: "Mainboard",
     status: "active", // 'active': Đang diễn ra | 'sold': Đã bán thành công | 'ended': Đã kết thúc
     startingPrice: 2700000,
-    currentBid: 3200000,
-    highestBidder: "tuan_pcbuilder",
+    currentBid: 3100000,
     bidCount: 8,
-    endTimestamp: Date.now() + 14 * 3600 * 1000, // 14 giờ
     images: ["images/products/mainboard/3006-asus-tuf-b760m-plus-wifi-1.jpg"],
     specs: ["LGA 1700", "Micro-ATX"]
   },
   {
     id: 6001,
-    name: "Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Modular",
+    name: "Nguồn Máy Tính Corsair RM850x 850W - 80 Plus Gold",
     category: "PSU",
     status: "sold", // Đã bán thành công
-    startingPrice: 1500000,
-    currentBid: 2150000,
+    startingPrice: 1800000,
+    currentBid: 2200000,
     highestBidder: "nguon_pc_chat",
-    bidCount: 13,
+    bidCount: 8,
     soldDate: "28/10/2026",
-    images: ["images/products/psu/6001-corsair-rm850x-1.jpg"],
+    endTime: "2026-10-28T20:00:00+07:00",
+    images: ["images/products/psu/6001-corsair-rm850x-1.png"],
     specs: ["850W", "80 Plus Gold"]
   },
   {
     id: 7005,
-    name: "Vỏ máy tính Lian Li O11 Dynamic Mini Snow White",
+    name: "Vỏ máy tính Lian Li O11D Mini V2 White",
     category: "Case",
-    status: "ended", // Đã kết thúc
-    startingPrice: 1200000,
-    currentBid: 1750000,
-    bidCount: 11,
+    status: "ended", // Đã kết thúc nhưng không có lượt đặt giá nào (có thể đăng bán lại)
+    startingPrice: 1150000,
+    currentBid: 1150000,
+    bidCount: 0,
+    endTime: "2026-11-05T20:00:00+07:00",
     images: ["images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"],
     specs: ["2 mặt kính", "Snow White"]
   }
@@ -313,7 +313,36 @@ function getSellingItems() {
     ...getLegacySellingItems(user),
     ...(user?.username === 'seller' ? DEFAULT_SELLING : [])
   ];
-  return readUserList(USER_LIST_KEYS.SELLING, user, seed);
+  const list = readUserList(USER_LIST_KEYS.SELLING, user, seed);
+
+  // Đọc giá và lượt bid mới nhất để thẻ đăng bán khớp với trang chi tiết
+  let localProducts = [];
+  let localBids = [];
+  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
+  try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
+  const productMap = new Map(localProducts.map(p => [Number(p.id), p]));
+
+  return list.map(saved => {
+    // Phiên mẫu chưa đăng lại: luôn lấy thông tin chuẩn mới nhất (sửa dữ liệu cũ lưu sai ảnh / tên / trạng thái)
+    const sample = DEFAULT_SELLING.find(d => d.id === Number(saved.id));
+    const item = sample && !saved.relisted ? { ...saved, ...sample } : { ...saved };
+
+    if (item.status === 'active') {
+      const product = productMap.get(Number(item.id));
+      if (product?.relisted || !sample) {
+        if (product?.currentBid !== undefined) item.currentBid = Number(product.currentBid);
+        if (product?.bidCount !== undefined) item.bidCount = Number(product.bidCount);
+      }
+      const bids = localBids.filter(b => Number(b.productId) === Number(item.id));
+      if (bids.length > 0) {
+        item.currentBid = Math.max(Number(item.currentBid) || 0, ...bids.map(b => Number(b.amount) || 0));
+        item.bidCount = Math.max(Number(item.bidCount) || 0, sample && !saved.relisted ? sample.bidCount + bids.length : bids.length);
+      }
+      // Phiên hết hạn mà không có ai đặt giá thì chuyển sang "Đã kết thúc" để có thể đăng bán lại
+      if (getAuctionEndTimestamp(item) <= Date.now()) item.status = Number(item.bidCount || 0) > 0 ? 'sold' : 'ended';
+    }
+    return item;
+  });
 }
 
 function getWatchlistItems() {
@@ -456,7 +485,7 @@ function renderSellingCard(item) {
       Đang diễn ra
     </span>`;
     actionButtonsHtml = `
-      <a href="${detailUrl}" class="pcb-btn-primary" style="padding: 8px 12px; font-size: 12px;">Xem phiên đấu</a>
+      <a href="${detailUrl}" class="pcb-btn-primary pcb-btn-primary--compact">Xem phiên đấu</a>
       <a href="${detailUrl}#edit" class="pcb-btn-detail">Quản lý phiên</a>
     `;
   } else if (item.status === 'sold') {
@@ -486,7 +515,7 @@ function renderSellingCard(item) {
     <article class="pcb-auction-card ${modifierClass}" data-id="${item.id}">
       <a href="${detailUrl}" class="pcb-auction-card__media-link" aria-label="Xem chi tiết ${escapeHtml(item.name)}">
         <span class="pcb-auction-card__category-badge">${escapeHtml(item.category)}</span>
-        <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.src='images/products/mainboard/3006-asus-tuf-b760m-plus-wifi-1.jpg'">
+        <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
       </a>
 
       <div class="pcb-auction-card__body">
@@ -523,7 +552,7 @@ function renderSellingCard(item) {
           ` : `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Người mua thắng</span>
-              <span class="pcb-stat-col__val" style="color:#059669;">${escapeHtml(item.highestBidder || 'Chưa có')}</span>
+              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder || (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
             </div>
           `}
 

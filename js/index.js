@@ -5,7 +5,7 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
 
@@ -287,15 +287,16 @@ function syncProductsWithStorage(rawList) {
   });
 
   // 1. Cập nhật các sản phẩm đã có từ JSON
-  const merged = rawList.map(p => {
-    const idNum = Number(p.id);
-    const local = localMap.get(idNum);
+  const merged = rawList.map(rawItem => {
+    const idNum = Number(rawItem.id);
+    // Gộp với bản trong localStorage (phiên đăng lại / phiên đã chốt được xử lý trong helper)
+    const p = mergeLocalProduct(rawItem, localMap.get(idNum));
     const bInfo = bidSummary.get(idNum);
 
-    let curBid = local?.currentBid !== undefined ? Number(local.currentBid) : Number(p.currentBid || p.startingPrice || 0);
-    let bCount = local?.bidCount !== undefined ? Number(local.bidCount) : Number(p.bidCount || 0);
+    let curBid = Number(p.currentBid || p.startingPrice || 0);
+    let bCount = Number(p.bidCount || 0);
 
-    if (bInfo) {
+    if (bInfo && !isAuctionClosed(p)) {
       if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
       bCount = Math.max(bCount, bInfo.count);
     }
@@ -304,6 +305,7 @@ function syncProductsWithStorage(rawList) {
       ...p,
       currentBid: curBid,
       bidCount: bCount,
+      endTimestamp: getAuctionEndTimestamp(p),
       marketPriceNew: p.marketPriceNew && p.marketPriceNew > curBid ? p.marketPriceNew : Math.round(curBid * 1.5)
     };
   });
@@ -334,7 +336,8 @@ function syncProductsWithStorage(rawList) {
     }
   });
 
-  return [...customUserProducts, ...merged];
+  // Trang chủ chỉ hiển thị các phiên còn mở
+  return [...customUserProducts, ...merged].filter(p => !isAuctionClosed(p));
 }
 
 async function loadProducts() {

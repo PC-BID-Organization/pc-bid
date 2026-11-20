@@ -454,6 +454,14 @@
   white-space: nowrap;
 }
 
+/* Biến thể nút chính cỡ nhỏ trên thẻ phiên: chữ căn giữa nút */
+.pcb-btn-primary--compact {
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-align: center;
+}
+
 .pcb-btn-primary:hover {
   background-color: var(--color-primary-hover, #d94e07);
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);

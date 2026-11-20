@@ -417,13 +417,108 @@ const CATALOGUE_DATA = {
 let currentCategory = "";
 let currentSelectedModel = null;
 let currentSelectedImage = "";
+// Phiên đang được đăng bán lại (null khi tạo phiên mới)
+let relistTarget = null;
+
+// Ánh xạ danh mục sản phẩm sang tệp dữ liệu JSON và khóa danh mục của Catalogue
+const CATEGORY_DATA_FILES = {
+  GPU: 'gpu', CPU: 'cpu', Mainboard: 'mainboard', RAM: 'ram',
+  SSD: 'storage', Storage: 'storage', PSU: 'psu', Cooling: 'cooling', Case: 'case'
+};
+const CATEGORY_CATALOGUE_KEYS = { Storage: 'SSD' };
 
 // Khởi chạy khi tài liệu DOM hoàn tất nạp
 document.addEventListener('DOMContentLoaded', () => {
   initCatalogueEvents();
   initFormInputsSync();
   initFormSubmitHandler();
+  initRelistMode();
 });
+
+/* ==========================================================================
+   CHẾ ĐỘ ĐĂNG BÁN LẠI (sell.html?relist=<id>)
+   Dùng lại đúng phiên cũ (cùng ID, cùng thông tin linh kiện) thay vì tạo bài đăng mới
+   ========================================================================== */
+async function initRelistMode() {
+  const relistId = Number(new URLSearchParams(window.location.search).get('relist'));
+  if (!relistId) return;
+
+  const user = readLoggedInUser();
+  const savedItem = readUserList(USER_LIST_KEYS.SELLING, user).find(item => Number(item.id) === relistId);
+  if (!savedItem) {
+    alert('Không tìm thấy phiên này trong danh sách đăng bán của bạn. Hệ thống sẽ mở form tạo phiên mới.');
+    return;
+  }
+
+  // Lấy đầy đủ thông tin phiên: ưu tiên bản trong localStorage, sau đó tới tệp JSON của danh mục
+  let product = null;
+  try {
+    product = JSON.parse(localStorage.getItem('pcbid_products') || '[]').find(p => Number(p.id) === relistId) || null;
+  } catch {
+    product = null;
+  }
+  const dataFile = CATEGORY_DATA_FILES[savedItem.category];
+  if (dataFile) {
+    try {
+      const res = await fetch(`data/${dataFile}.json`);
+      if (res.ok) {
+        const fromJson = (await res.json()).find(p => Number(p.id) === relistId);
+        if (fromJson) product = { ...fromJson, ...(product?.relisted ? product : {}) };
+      }
+    } catch {
+      // Không fetch được thì dùng dữ liệu đã lưu trong danh sách đăng bán
+    }
+  }
+  product = { ...savedItem, ...(product || {}) };
+
+  relistTarget = { id: relistId, product };
+
+  // Đổ thông tin linh kiện cũ vào form: khóa danh mục và mẫu để giữ đúng phiên
+  const catalogueKey = CATEGORY_CATALOGUE_KEYS[product.category] || product.category;
+  const catSelect = document.getElementById('sell-category');
+  const modelSelect = document.getElementById('sell-model');
+  const relistModel = {
+    id: `relist-${relistId}`,
+    name: product.name,
+    images: product.images && product.images.length ? product.images : (savedItem.images || []),
+    specifications: product.specifications || {},
+    defaultStartingPrice: Number(product.startingPrice) || 0,
+    defaultBidStep: Number(product.bidStep) || 50000,
+    marketPriceNew: Number(product.marketPriceNew) || 0
+  };
+
+  currentCategory = catalogueKey;
+  if (catSelect) {
+    catSelect.value = catalogueKey;
+    catSelect.disabled = true;
+  }
+  if (modelSelect) {
+    modelSelect.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.value = relistModel.id;
+    opt.textContent = relistModel.name;
+    modelSelect.appendChild(opt);
+    modelSelect.value = relistModel.id;
+    modelSelect.disabled = true;
+  }
+  selectModel(relistModel);
+
+  const descInput = document.getElementById('sell-description');
+  if (descInput && product.description) descInput.value = product.description;
+  const conditionSelect = document.getElementById('sell-condition');
+  if (conditionSelect && [...conditionSelect.options].some(o => o.value === product.condition)) {
+    conditionSelect.value = product.condition;
+  }
+  updateLivePreview();
+
+  // Đổi tiêu đề và nút để người bán biết đang đăng lại phiên cũ
+  const heading = document.getElementById('sell-hero-heading');
+  if (heading) heading.textContent = 'Đăng Bán Lại Phiên Đấu Giá';
+  const desc = document.querySelector('.pcb-sell-hero__desc');
+  if (desc) desc.textContent = `Mở lại phiên #${relistId} – ${product.name}. Thông tin linh kiện được giữ nguyên, bạn chỉ cần điều chỉnh giá khởi điểm, bước giá và thời hạn.`;
+  const submitBtn = document.getElementById('btn-submit-sell');
+  if (submitBtn) submitBtn.lastChild.textContent = ' Xác nhận đăng bán lại';
+}
 
 /* ==========================================================================
    3. KHỞI TẠO SỰ KIỆN CHỌN CATALOGUE & MẪU LINH KIỆN
@@ -702,7 +797,8 @@ function initFormSubmitHandler() {
     }
 
     const newAuctionProduct = {
-      id: Date.now(), // Tạo ID độc nhất theo timestamp
+      // Đăng bán lại: giữ nguyên ID phiên cũ; tạo mới: ID độc nhất theo timestamp
+      id: relistTarget ? relistTarget.id : Date.now(),
       name: currentSelectedModel.name,
       category: currentCategory,
       condition: condition,
@@ -718,16 +814,33 @@ function initFormSubmitHandler() {
       specifications: currentSelectedModel.specifications || {}
     };
 
+    if (relistTarget) {
+      // Đánh dấu phiên mở lại để các trang dùng thời hạn mới thay cho trạng thái "đã kết thúc" cũ
+      newAuctionProduct.relisted = true;
+      newAuctionProduct.relistedAt = new Date().toISOString();
+      newAuctionProduct.status = 'active';
+      newAuctionProduct.condition = condition;
+      newAuctionProduct.category = relistTarget.product.category || newAuctionProduct.category;
+    }
+
     // 3. Lưu vào LocalStorage theo chuẩn quy định AGENTS.md (pcbid_products)
     try {
-      const existing = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+      // Khi đăng bán lại: thay bản cũ cùng ID và xóa lượt đặt giá của phiên trước
+      const existing = JSON.parse(localStorage.getItem('pcbid_products') || '[]')
+        .filter(p => Number(p.id) !== Number(newAuctionProduct.id));
       existing.unshift(newAuctionProduct);
+      if (relistTarget) {
+        const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]')
+          .filter(b => Number(b.productId) !== Number(newAuctionProduct.id));
+        localStorage.setItem('pcbid_bids', JSON.stringify(bids));
+      }
       localStorage.setItem('pcbid_products', JSON.stringify(existing));
 
       // Đồng bộ đồng thời vào tab "Linh kiện tôi đã đăng bán" (pcbid_my_auctions_selling) của profile.html
       // Danh sách đăng bán lưu riêng theo tài khoản người bán
       const sellerUser = readLoggedInUser();
-      const mySelling = readUserList(USER_LIST_KEYS.SELLING, sellerUser);
+      const mySelling = readUserList(USER_LIST_KEYS.SELLING, sellerUser)
+        .filter(item => Number(item.id) !== Number(newAuctionProduct.id));
       const specsList = newAuctionProduct.specifications
         ? Object.entries(newAuctionProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
         : [];
@@ -739,6 +852,8 @@ function initFormSubmitHandler() {
         currentBid: newAuctionProduct.startingPrice,
         bidCount: 0,
         status: 'active',
+        relisted: Boolean(relistTarget),
+        endTime: newAuctionProduct.endTime,
         endTimestamp: new Date(newAuctionProduct.endTime).getTime(),
         images: newAuctionProduct.images,
         specs: specsList
@@ -753,9 +868,10 @@ function initFormSubmitHandler() {
     if (successModal) {
       successModal.classList.add('pcb-modal-overlay--open');
 
-      // Tự động chuyển hướng về trang products.html sau 1.8 giây
+      // Tự động chuyển hướng sau 1.8 giây: đăng lại thì mở thẳng phiên vừa mở lại
+      const nextUrl = relistTarget ? `product-detail.html?id=${newAuctionProduct.id}` : 'products.html';
       setTimeout(() => {
-        window.location.href = 'products.html';
+        window.location.href = nextUrl;
       }, 1800);
     } else {
       alert('Tạo phiên đấu giá thành công! Đang chuyển về sàn...');

@@ -107,12 +107,13 @@
     "category": "Case",
     "condition": "Đã sử dụng - Còn mới 92%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
     "startingPrice": 1150000,
-    "currentBid": 1500000,
+    "currentBid": 1150000,
     "bidStep": 50000,
-    "bidCount": 7,
+    "bidCount": 0,
     "marketPriceNew": 2790000,
-    "endTime": "2026-11-15T00:00:00+07:00",
-    "seller": "thanh_pcgear",
+    "endTime": "2026-11-05T20:00:00+07:00",
+    "seller": "seller",
+    "status": "ended",
     "images": [
       "images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"
     ],
