@@ -10,6 +10,8 @@ import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js'
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
+// Tài khoản demo, avatar chữ cái và UID dùng chung
+import { DEMO_ACCOUNTS, getAvatarInitial, getUserUid, getGivenName, describeBidder } from './accounts.js';
 
 
 /* ==========================================================================
@@ -24,71 +26,8 @@ const STORAGE_KEYS = {
   WATCHLIST: 'pcbid_watchlist'
 };
 
-/**
- * Danh sách 3 tài khoản mẫu dựng sẵn phục vụ demo, chấm điểm và kiểm thử phân quyền
- * Acc 1 (bidder1): Đấu Giá 1 - Tham gia trả giá cạnh tranh, ví 50tr
- * Acc 2 (bidder2): Đấu Giá 2 - Tham gia trả giá đối kháng để demo vượt giá qua lại, ví 60tr
- * Acc 3 (seller):  Người Bán - Đăng bán linh kiện PC lên sàn, ví 80tr
- */
-const SAMPLE_ACCOUNTS = [
-  {
-    id: "user_bidder1_demo",
-    username: "bidder1",
-    password: "123456",
-    fullname: "Nguyễn Văn A (Đấu Giá 1)",
-    email: "bidder1@pcbid.vn",
-    phone: "0901234567",
-    role: "bidder",
-    verified: true,
-    walletBalance: 50000000,
-    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder.png",
-    rating: 5.0,
-    reviewCount: 38,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 14:32",
-    isLoggedIn: true
-  },
-  {
-    id: "user_bidder2_demo",
-    username: "bidder2",
-    password: "123456",
-    fullname: "Lê Thị C (Đấu Giá 2)",
-    email: "bidder2@pcbid.vn",
-    phone: "0918765432",
-    role: "bidder",
-    verified: true,
-    walletBalance: 60000000,
-    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder2.png",
-    rating: 4.9,
-    reviewCount: 25,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 11:20",
-    isLoggedIn: true
-  },
-  {
-    id: "user_seller_demo",
-    username: "seller",
-    password: "123456",
-    fullname: "Trần Văn B (Người Bán)",
-    email: "seller@pcbid.vn",
-    phone: "0987654321",
-    role: "seller",
-    verified: true,
-    walletBalance: 80000000,
-    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-seller.png",
-    rating: 4.9,
-    reviewCount: 124,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 10:15",
-    isLoggedIn: true
-  }
-];
+// 4 tài khoản demo lấy từ module dùng chung js/accounts.js
+const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
 const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
@@ -552,7 +491,7 @@ function renderSellingCard(item) {
           ` : `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Người mua thắng</span>
-              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder || (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
+              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
             </div>
           `}
 
@@ -670,7 +609,10 @@ function syncUserInfoUI() {
   const holdEl = document.getElementById('wallet-hold-display');
 
   if (nameEl) nameEl.textContent = user.fullname || user.username;
-  if (uidEl) uidEl.textContent = `UID: #${user.id.toUpperCase()}-IE104`;
+  if (uidEl) uidEl.textContent = `UID: ${getUserUid(user)}`;
+  // Avatar chữ cái đầu của tên, đồng bộ với Header
+  const avatarEl = document.getElementById('sidebar-user-avatar');
+  if (avatarEl) avatarEl.textContent = getAvatarInitial(user);
   // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
   if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
@@ -1276,6 +1218,9 @@ document.addEventListener('DOMContentLoaded', () => {
         bids.unshift({
           id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
           productId: activeQuickBidItem.id,
+          // Định danh người đặt bằng ID tài khoản (không trùng), kèm họ tên để hiển thị
+          bidderId: user.id || null,
+          bidderFullname: user.fullname || user.username || '',
           bidderName: user.username || 'pcbuilder99',
           amount: newBidAmount,
           timestamp: new Date().toISOString()
@@ -1365,6 +1310,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const user = getCurrentUser();
       user.fullname = document.getElementById('input-fullname')?.value.trim() || user.fullname;
+      // Cập nhật lại tên gọi để avatar chữ cái luôn khớp với họ tên mới
+      user.givenName = getGivenName(user.fullname);
+      user.lastName = user.fullname.slice(0, user.fullname.length - user.givenName.length).trim();
       user.email = document.getElementById('input-email')?.value.trim() || user.email;
       user.phone = document.getElementById('input-phone')?.value.trim() || user.phone;
       user.address = document.getElementById('input-address')?.value.trim() || user.address;

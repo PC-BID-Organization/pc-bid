@@ -58,22 +58,35 @@
           <!-- 2. Biểu mẫu đăng ký thành viên -->
           <form class="pcb-auth-form" id="register-form" novalidate>
 
-            <!-- TRƯỜNG 1: HỌ VÀ TÊN -->
-            <div class="pcb-auth-form__group">
-              <label for="reg-fullname" class="pcb-auth-form__label">
-                HỌ VÀ TÊN <span class="pcb-auth-form__required" aria-hidden="true">*</span>
-              </label>
-              <div class="pcb-auth-form__input-wrap">
-                <span class="pcb-auth-form__icon-left" aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </span>
-                <input type="text" id="reg-fullname" name="fullname" class="pcb-auth-form__input" placeholder="Nguyễn Văn A" required autofocus autocomplete="name">
+            <!-- TRƯỜNG 1: HỌ VÀ TÊN ĐỆM + TÊN (tách riêng để avatar lấy đúng chữ đầu của tên) -->
+            <div class="pcb-auth-form__name-row">
+              <div class="pcb-auth-form__group">
+                <label for="reg-lastname" class="pcb-auth-form__label">
+                  HỌ VÀ TÊN ĐỆM <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+                </label>
+                <div class="pcb-auth-form__input-wrap">
+                  <span class="pcb-auth-form__icon-left" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </span>
+                  <input type="text" id="reg-lastname" name="lastName" class="pcb-auth-form__input" placeholder="Nguyễn Hùng" required autofocus autocomplete="family-name">
+                </div>
+                <span class="pcb-auth-form__error" id="err-lastname"></span>
               </div>
-              <span class="pcb-auth-form__error" id="err-fullname"></span>
+
+              <div class="pcb-auth-form__group">
+                <label for="reg-givenname" class="pcb-auth-form__label">
+                  TÊN <span class="pcb-auth-form__required" aria-hidden="true">*</span>
+                </label>
+                <div class="pcb-auth-form__input-wrap">
+                  <input type="text" id="reg-givenname" name="givenName" class="pcb-auth-form__input pcb-auth-form__input--plain" placeholder="Phong" required autocomplete="given-name">
+                </div>
+                <span class="pcb-auth-form__error" id="err-givenname"></span>
+              </div>
             </div>
+            <p class="pcb-auth-form__hint">Ảnh đại diện mặc định là chữ cái đầu của Tên (ví dụ: Phong → P).</p>
 
             <!-- TRƯỜNG 2: ĐỊA CHỈ EMAIL -->
             <div class="pcb-auth-form__group">

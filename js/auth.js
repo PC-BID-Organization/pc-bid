@@ -5,6 +5,9 @@
  * Toàn bộ chú thích được viết bằng tiếng Việt có dấu theo chuẩn quy định
  */
 
+// Tài khoản demo và tiện ích tên / avatar dùng chung
+import { DEMO_ACCOUNTS, getGivenName } from './accounts.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Khởi tạo chức năng ẩn/hiện mật khẩu (dùng chung cho Đăng ký & Đăng nhập)
   initPasswordToggles();
@@ -27,70 +30,12 @@ const STORAGE_KEY_USERS = 'pcbid_registered_users';
 const STORAGE_KEY_PREFILL = 'pcbid_prefill_email';
 
 /**
- * Danh sách 3 tài khoản mẫu dựng sẵn trong mã nguồn phục vụ demo, chấm điểm và kiểm thử phân quyền
- * Acc 1 (bidder1): Đấu Giá 1 - Tham gia trả giá cạnh tranh, ví 50tr
- * Acc 2 (bidder2): Đấu Giá 2 - Tham gia trả giá đối kháng để demo vượt giá qua lại, ví 60tr
- * Acc 3 (seller):  Người Bán - Đăng bán linh kiện PC lên sàn, ví 80tr
+ * Danh sách 4 tài khoản demo gắn với 4 thành viên nhóm, phục vụ demo, chấm điểm và kiểm thử phân quyền
+ * bidder1: Nguyễn Hùng Phong (ví 50tr) · bidder2: Nguyễn Nhật Huy (ví 60tr)
+ * bidder3: Huỳnh Nhật Minh (ví 55tr) · seller: Nguyễn Gia Huy (người bán, ví 80tr)
  */
-const SAMPLE_ACCOUNTS = [
-  {
-    id: "user_bidder1_demo",
-    username: "bidder1",
-    password: "123456",
-    fullname: "Nguyễn Văn A (Đấu Giá 1)",
-    email: "bidder1@pcbid.vn",
-    phone: "0901234567",
-    role: "bidder",
-    verified: true,
-    walletBalance: 50000000,
-    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder.png",
-    rating: 5.0,
-    reviewCount: 38,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 14:32",
-    isLoggedIn: true
-  },
-  {
-    id: "user_bidder2_demo",
-    username: "bidder2",
-    password: "123456",
-    fullname: "Lê Thị C (Đấu Giá 2)",
-    email: "bidder2@pcbid.vn",
-    phone: "0918765432",
-    role: "bidder",
-    verified: true,
-    walletBalance: 60000000,
-    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder2.png",
-    rating: 4.9,
-    reviewCount: 25,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 11:20",
-    isLoggedIn: true
-  },
-  {
-    id: "user_seller_demo",
-    username: "seller",
-    password: "123456",
-    fullname: "Trần Văn B (Người Bán)",
-    email: "seller@pcbid.vn",
-    phone: "0987654321",
-    role: "seller",
-    verified: true,
-    walletBalance: 80000000,
-    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-seller.png",
-    rating: 4.9,
-    reviewCount: 124,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 10:15",
-    isLoggedIn: true
-  }
-];
+// 4 tài khoản demo lấy từ module dùng chung js/accounts.js
+const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
 function seedSampleAccounts() {
   try {
@@ -223,7 +168,8 @@ function initLoginForm() {
       (u.email && u.email.toLowerCase() === lowerInput) || 
       (u.username && u.username.toLowerCase() === lowerInput) ||
       ((lowerInput === 'bidder' || lowerInput === 'bidder1' || lowerInput === 'pcbuilder99') && u.username === 'bidder1') ||
-      ((lowerInput === 'bidder2' || lowerInput === 'lethic') && u.username === 'bidder2') ||
+      (lowerInput === 'bidder2' && u.username === 'bidder2') ||
+      (lowerInput === 'bidder3' && u.username === 'bidder3') ||
       ((lowerInput === 'seller' || lowerInput === 'techguru_hcm') && u.username === 'seller')
     );
 
@@ -267,7 +213,8 @@ function initRegisterForm() {
   const form = document.getElementById('register-form');
   if (!form) return;
 
-  const inputFullname = document.getElementById('reg-fullname');
+  const inputLastname = document.getElementById('reg-lastname');
+  const inputGivenname = document.getElementById('reg-givenname');
   const inputEmail = document.getElementById('reg-email');
   const inputPhone = document.getElementById('reg-phone');
   const inputPassword = document.getElementById('reg-password');
@@ -275,7 +222,7 @@ function initRegisterForm() {
   const checkTerms = document.getElementById('reg-terms');
 
   // Lắng nghe sự kiện người dùng nhập liệu để xóa lỗi đỏ tức thì
-  [inputFullname, inputEmail, inputPhone, inputPassword, inputConfirmPassword].forEach(input => {
+  [inputLastname, inputGivenname, inputEmail, inputPhone, inputPassword, inputConfirmPassword].forEach(input => {
     if (!input) return;
     input.addEventListener('input', () => clearFieldError(input));
   });
@@ -294,17 +241,29 @@ function initRegisterForm() {
 
     let isValid = true;
 
-    // 1. Kiểm tra Họ và tên
-    const fullnameVal = inputFullname ? inputFullname.value.trim() : '';
-    if (!fullnameVal) {
-      showFieldError(inputFullname, 'err-fullname', 'Vui lòng nhập họ và tên của bạn.');
+    // 1. Kiểm tra Họ và tên đệm, Tên (chuẩn hóa khoảng trắng thừa)
+    const lastnameVal = inputLastname ? inputLastname.value.trim().replace(/\s+/g, ' ') : '';
+    const givennameVal = inputGivenname ? inputGivenname.value.trim().replace(/\s+/g, ' ') : '';
+    const nameRegex = /^[\p{L}\s'-]+$/u;
+    if (!lastnameVal) {
+      showFieldError(inputLastname, 'err-lastname', 'Vui lòng nhập họ và tên đệm.');
       isValid = false;
-    } else if (fullnameVal.length < 2) {
-      showFieldError(inputFullname, 'err-fullname', 'Họ và tên cần có ít nhất 2 ký tự.');
+    } else if (!nameRegex.test(lastnameVal)) {
+      showFieldError(inputLastname, 'err-lastname', 'Họ và tên đệm chỉ gồm chữ cái.');
       isValid = false;
     } else {
-      clearFieldError(inputFullname, 'err-fullname');
+      clearFieldError(inputLastname, 'err-lastname');
     }
+    if (!givennameVal) {
+      showFieldError(inputGivenname, 'err-givenname', 'Vui lòng nhập tên của bạn.');
+      isValid = false;
+    } else if (!nameRegex.test(givennameVal) || givennameVal.includes(' ')) {
+      showFieldError(inputGivenname, 'err-givenname', 'Tên là một từ, chỉ gồm chữ cái (ví dụ: Phong).');
+      isValid = false;
+    } else {
+      clearFieldError(inputGivenname, 'err-givenname');
+    }
+    const fullnameVal = `${lastnameVal} ${givennameVal}`.trim();
 
     // 2. Kiểm tra Địa chỉ Email
     const emailVal = inputEmail ? inputEmail.value.trim() : '';
@@ -371,6 +330,8 @@ function initRegisterForm() {
     saveUserAccount({
       id: 'user_' + Date.now(),
       username: emailVal.split('@')[0],
+      lastName: lastnameVal,
+      givenName: givennameVal,
       fullname: fullnameVal,
       email: emailVal,
       phone: phoneVal,

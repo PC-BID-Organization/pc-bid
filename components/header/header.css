@@ -832,3 +832,12 @@
 .header__badge[hidden] {
   display: none;
 }
+
+/* Avatar chữ cái (chữ đầu của tên) trên nút tài khoản khi đã đăng nhập */
+.header__avatar-initial {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
