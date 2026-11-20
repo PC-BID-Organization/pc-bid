@@ -215,6 +215,10 @@ function initRegisterForm() {
 
   const inputLastname = document.getElementById('reg-lastname');
   const inputGivenname = document.getElementById('reg-givenname');
+  const inputGender = document.getElementById('reg-gender');
+  const inputBirthdate = document.getElementById('reg-birthdate');
+  // Không cho chọn ngày sinh trong tương lai
+  if (inputBirthdate) inputBirthdate.max = new Date().toISOString().slice(0, 10);
   const inputEmail = document.getElementById('reg-email');
   const inputPhone = document.getElementById('reg-phone');
   const inputPassword = document.getElementById('reg-password');
@@ -222,7 +226,7 @@ function initRegisterForm() {
   const checkTerms = document.getElementById('reg-terms');
 
   // Lắng nghe sự kiện người dùng nhập liệu để xóa lỗi đỏ tức thì
-  [inputLastname, inputGivenname, inputEmail, inputPhone, inputPassword, inputConfirmPassword].forEach(input => {
+  [inputLastname, inputGivenname, inputGender, inputBirthdate, inputEmail, inputPhone, inputPassword, inputConfirmPassword].forEach(input => {
     if (!input) return;
     input.addEventListener('input', () => clearFieldError(input));
   });
@@ -264,6 +268,27 @@ function initRegisterForm() {
       clearFieldError(inputGivenname, 'err-givenname');
     }
     const fullnameVal = `${lastnameVal} ${givennameVal}`.trim();
+
+    // 1b. Kiểm tra Giới tính và Ngày sinh (độ tuổi từ 13 đến 100)
+    const genderVal = inputGender ? inputGender.value : '';
+    if (!genderVal) {
+      showFieldError(inputGender, 'err-gender', 'Vui lòng chọn giới tính.');
+      isValid = false;
+    } else {
+      clearFieldError(inputGender, 'err-gender');
+    }
+    const birthVal = inputBirthdate ? inputBirthdate.value : '';
+    const birthTime = new Date(birthVal).getTime();
+    const age = (Date.now() - birthTime) / (365.25 * 24 * 3600 * 1000);
+    if (!birthVal) {
+      showFieldError(inputBirthdate, 'err-birthdate', 'Vui lòng chọn ngày sinh.');
+      isValid = false;
+    } else if (Number.isNaN(birthTime) || age < 13 || age > 100) {
+      showFieldError(inputBirthdate, 'err-birthdate', 'Ngày sinh không hợp lệ (độ tuổi từ 13 đến 100).');
+      isValid = false;
+    } else {
+      clearFieldError(inputBirthdate, 'err-birthdate');
+    }
 
     // 2. Kiểm tra Địa chỉ Email
     const emailVal = inputEmail ? inputEmail.value.trim() : '';
@@ -333,6 +358,8 @@ function initRegisterForm() {
       lastName: lastnameVal,
       givenName: givennameVal,
       fullname: fullnameVal,
+      gender: genderVal,
+      birthDate: birthVal,
       email: emailVal,
       phone: phoneVal,
       role: 'bidder',

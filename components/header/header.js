@@ -8,7 +8,7 @@ import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
-import { DEMO_ACCOUNTS, getAvatarInitial } from '../../js/accounts.js';
+import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent } from '../../js/accounts.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -157,6 +157,11 @@ function initHeaderUserStatus() {
 
   // Số thông báo chưa đọc của tài khoản đang đăng nhập
   refreshNotificationBadge();
+  // Trang Hồ sơ đổi ảnh đại diện / họ tên: vẽ lại khu vực tài khoản trên Header
+  if (!window.__pcbidAccountUpdateBound) {
+    window.__pcbidAccountUpdateBound = true;
+    window.addEventListener('pcbid:account-updated', () => initHeaderUserStatus());
+  }
   if (!window.__pcbidNotifyBadgeBound) {
     window.__pcbidNotifyBadgeBound = true;
     // Cập nhật khi đánh dấu đã đọc trên cùng trang, hoặc khi tab khác đặt giá / đọc thông báo
@@ -212,12 +217,14 @@ function initHeaderUserStatus() {
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
     avatarBtn.classList.add('header__user-avatar--initial');
-    avatarBtn.innerHTML = `<span class="header__avatar-initial" aria-hidden="true">${escapeHeaderHtml(initials)}</span>`;
+    avatarBtn.innerHTML = user.avatarImage
+      ? renderAvatarContent(user, 'header__avatar-photo')
+      : `<span class="header__avatar-initial" aria-hidden="true">${escapeHeaderHtml(initials)}</span>`;
 
     dropdown.innerHTML = `
       <div class="header__dropdown-header">
         <div class="header__dropdown-user-info">
-          <div class="header__dropdown-avatar">${escapeHeaderHtml(initials)}</div>
+          <div class="header__dropdown-avatar">${user.avatarImage ? renderAvatarContent(user, 'header__avatar-photo') : escapeHeaderHtml(initials)}</div>
           <div class="header__dropdown-meta">
             <div class="header__dropdown-name">${escapeHeaderHtml(displayName)}</div>
             <span class="header__dropdown-role-badge ${roleClass}">${roleText}</span>

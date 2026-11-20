@@ -69,10 +69,21 @@
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </span>
+              <!-- Nút đổi ảnh đại diện: chọn tệp rồi cắt ảnh -->
+              <label class="pcb-user-card__avatar-edit" for="input-avatar-file" title="Đổi ảnh đại diện">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                <span class="pcb-visually-hidden">Đổi ảnh đại diện</span>
+              </label>
+              <input type="file" id="input-avatar-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
             </div>
+            <button type="button" class="pcb-user-card__avatar-remove" id="btn-remove-avatar" hidden>Xóa ảnh, dùng chữ cái</button>
 
             <h2 class="pcb-user-card__name" id="sidebar-user-name">Nguyễn Hùng Phong</h2>
-            <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #UIT-IE104-9842</p>
+            <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #PCB-00000000</p>
+            <a class="pcb-user-card__public-link" id="sidebar-public-link" href="profile.html">Xem hồ sơ công khai →</a>
 
             <div class="pcb-user-card__tag">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -394,7 +405,47 @@
                     <input type="text" id="input-fullname" name="fullname" class="pcb-input" value="Nguyễn Hùng Phong"
                       required placeholder="Nhập họ và tên đầy đủ">
                   </div>
-                  <span class="pcb-form__hint">Tên này sẽ hiển thị ẩn danh một phần trên bảng giá phiên đấu (VD: N*** A).</span>
+                  <span class="pcb-form__hint">Họ tên hiển thị kèm UID che bớt trong lịch sử đặt giá (VD: Nguyễn Hùng Phong · #PCB-1Q***2T).</span>
+                </div>
+
+                <!-- Trường Giới tính -->
+                <div class="pcb-form__group">
+                  <label for="input-gender" class="pcb-form__label">GIỚI TÍNH</label>
+                  <select id="input-gender" name="gender" class="pcb-input pcb-select">
+                    <option value="">-- Chưa cập nhật --</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                    <option value="other">Khác</option>
+                  </select>
+                </div>
+
+                <!-- Trường Ngày sinh: chỉ hiện năm, bấm biểu tượng con mắt để xem đầy đủ; chỉ đổi được 1 lần -->
+                <div class="pcb-form__group">
+                  <span class="pcb-form__label" id="label-birthdate">
+                    NGÀY SINH
+                    <span class="pcb-tooltip" tabindex="0" role="note" id="birthdate-tooltip"
+                      data-tooltip="Ngày sinh chỉ được thay đổi 1 lần, sau đó không thể thay đổi được nữa">?</span>
+                  </span>
+                  <div class="pcb-birthdate" aria-labelledby="label-birthdate">
+                    <span class="pcb-birthdate__value" id="birthdate-display">••/••/2006</span>
+                    <button type="button" class="pcb-birthdate__eye" id="btn-toggle-birthdate" aria-pressed="false" aria-label="Hiện đầy đủ ngày sinh" title="Hiện đầy đủ ngày sinh">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </button>
+                    <button type="button" class="pcb-birthdate__change" id="btn-change-birthdate">Thay đổi</button>
+                  </div>
+                  <input type="date" id="input-birthdate" class="pcb-input" hidden aria-label="Ngày sinh mới">
+                  <span class="pcb-form__hint" id="birthdate-hint" hidden>Lưu ý: sau khi lưu, ngày sinh sẽ không thể thay đổi thêm lần nào nữa.</span>
+                </div>
+
+                <!-- Trường Tiểu sử (hiển thị trên hồ sơ công khai) -->
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-bio" class="pcb-form__label">TIỂU SỬ</label>
+                  <textarea id="input-bio" name="bio" class="pcb-textarea pcb-textarea--plain" rows="3" maxlength="300"
+                    placeholder="Giới thiệu ngắn về bạn, linh kiện bạn quan tâm hoặc thường đăng bán..."></textarea>
+                  <span class="pcb-form__hint">Tối đa 300 ký tự, hiển thị trên hồ sơ công khai của bạn.</span>
                 </div>
 
                 <!-- Trường Email -->
@@ -551,6 +602,64 @@
                 </button>
               </div>
             </form>
+
+            <!-- Quyền riêng tư của hồ sơ công khai -->
+            <form id="form-privacy" class="pcb-form pcb-privacy">
+              <h3 class="pcb-privacy__title">Quyền riêng tư hồ sơ công khai</h3>
+              <p class="pcb-privacy__desc">Chọn thông tin người khác được xem khi mở hồ sơ của bạn. Mặc định tất cả đều công khai.</p>
+              <ul class="pcb-privacy__list">
+                <li class="pcb-privacy__item">
+                  <span class="pcb-privacy__label">Tiểu sử</span>
+                  <label class="pcb-switch"><input type="checkbox" name="bio" class="pcb-switch__input" checked><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Công khai</span></label>
+                </li>
+                <li class="pcb-privacy__item">
+                  <span class="pcb-privacy__label">Linh kiện đã đăng bán</span>
+                  <label class="pcb-switch"><input type="checkbox" name="selling" class="pcb-switch__input" checked><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Công khai</span></label>
+                </li>
+                <li class="pcb-privacy__item">
+                  <span class="pcb-privacy__label">Phiên đấu giá đang tham gia</span>
+                  <label class="pcb-switch"><input type="checkbox" name="participating" class="pcb-switch__input" checked><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Công khai</span></label>
+                </li>
+                <li class="pcb-privacy__item">
+                  <span class="pcb-privacy__label">Danh sách theo dõi</span>
+                  <label class="pcb-switch"><input type="checkbox" name="watchlist" class="pcb-switch__input" checked><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Công khai</span></label>
+                </li>
+              </ul>
+              <div class="pcb-form__actions">
+                <div></div>
+                <button type="submit" class="pcb-btn-primary">Lưu cài đặt quyền riêng tư</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- #################### SECTION: HỒ SƠ CÔNG KHAI CỦA NGƯỜI DÙNG (profile.html?user=...) #################### -->
+          <div class="pcb-section pcb-public" id="section-public" style="display: none;">
+            <div class="pcb-public__head">
+              <div class="pcb-public__avatar" id="public-avatar" aria-hidden="true">?</div>
+              <div class="pcb-public__meta">
+                <h1 class="pcb-public__name" id="public-name">Người dùng</h1>
+                <p class="pcb-public__uid" id="public-uid"></p>
+                <span class="pcb-public__role" id="public-role"></span>
+              </div>
+            </div>
+            <p class="pcb-public__self-note" id="public-self-note" hidden>Đây là cách người khác nhìn thấy hồ sơ của bạn. <a href="profile.html">Quay lại trang quản lý</a></p>
+
+            <section class="pcb-public__block" aria-labelledby="public-bio-title">
+              <h2 class="pcb-public__block-title" id="public-bio-title">Tiểu sử</h2>
+              <div id="public-bio"></div>
+            </section>
+            <section class="pcb-public__block" aria-labelledby="public-selling-title">
+              <h2 class="pcb-public__block-title" id="public-selling-title">Linh kiện đã đăng bán</h2>
+              <div id="public-selling"></div>
+            </section>
+            <section class="pcb-public__block" aria-labelledby="public-participating-title">
+              <h2 class="pcb-public__block-title" id="public-participating-title">Phiên đấu giá đang tham gia</h2>
+              <div id="public-participating"></div>
+            </section>
+            <section class="pcb-public__block" aria-labelledby="public-watchlist-title">
+              <h2 class="pcb-public__block-title" id="public-watchlist-title">Danh sách theo dõi</h2>
+              <div id="public-watchlist"></div>
+            </section>
           </div>
 
         </section>

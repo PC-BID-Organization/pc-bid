@@ -1332,12 +1332,74 @@
   }
 }
 
-/* UID che bớt hiển thị cạnh họ tên người đặt giá */
+/* UID che bớt hiển thị cạnh họ tên người đặt giá: dạng nhãn nhỏ, cùng font chữ của trang */
 .pcb-pd__history-uid {
   display: inline-block;
   margin-left: 6px;
+  padding: 1px 7px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  vertical-align: 1px;
+}
+
+/* Tên người đặt giá dẫn sang hồ sơ công khai */
+.pcb-pd__history-name {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pcb-pd__history-name:hover,
+.pcb-pd__history-name:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Người bán: tên dạng liên kết, UID che bớt bên dưới */
+a.pcb-pd__seller-name {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.pcb-pd__seller-name:hover,
+a.pcb-pd__seller-name:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+a.pcb-pd__seller-avatar {
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.pcb-pd__seller-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.pcb-pd__seller-uid {
+  margin: 2px 0 0;
   font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  font-family: "Courier New", monospace;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+}
+
+/* Vùng chữ / ảnh trong avatar người bán phủ kín khung tròn */
+.pcb-pd__seller-avatar-char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }

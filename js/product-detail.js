@@ -11,7 +11,7 @@ import { checkBidDeposit } from './wallet.js';
 // Watchlist lưu riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 // Họ tên, UID và avatar chữ cái của người dùng
-import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial } from './accounts.js';
+import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
 
 
 /* ==========================================================================
@@ -475,8 +475,18 @@ function hienThiNguoiBan(tenNguoiBan) {
   // Người bán là thành viên / tài khoản đã đăng ký: hiện họ tên thật; avatar là chữ đầu của tên
   const taiKhoan = findAccount({ username: tenNguoiBan });
   const tenHienThi = taiKhoan?.fullname || tenNguoiBan;
-  if (oTen) oTen.textContent = tenHienThi;
-  if (oAvatar) oAvatar.textContent = getAvatarInitial(taiKhoan || tenNguoiBan);
+  const linkHoSo = `profile.html?user=${encodeURIComponent(tenNguoiBan)}`;
+  if (oTen) {
+    oTen.textContent = tenHienThi;
+    oTen.href = linkHoSo;
+    oTen.title = `Xem hồ sơ của ${tenHienThi}`;
+  }
+  if (oAvatar) oAvatar.innerHTML = renderAvatarContent(taiKhoan || tenNguoiBan, 'pcb-pd__seller-avatar-img');
+  const oLinkAvatar = document.getElementById('pcb-pd-seller-avatar-link');
+  if (oLinkAvatar) oLinkAvatar.href = linkHoSo;
+  // UID che bớt của người bán (người bán ngoài hệ thống dùng UID sinh từ tên đăng nhập)
+  const oUid = document.getElementById('pcb-pd-seller-uid');
+  if (oUid) oUid.textContent = `UID: ${maskUid(getUserUid(taiKhoan?.id || `seller_${tenNguoiBan}`))}`;
 }
 
 /**
@@ -677,7 +687,11 @@ function renderLichSu(idSanPham) {
     const laDanDau = chiSo === 0;
     // Hiển thị họ tên kèm UID che bớt: UID là định danh duy nhất, không trùng như email / họ tên
     const nguoiDat = describeBidder(luot);
-    const tenHienThi = `${maHoaHtml(nguoiDat.name)}${nguoiDat.maskedUid ? ` <span class="pcb-pd__history-uid">${maHoaHtml(nguoiDat.maskedUid)}</span>` : ''}`;
+    const taiKhoanDat = findAccount({ id: luot.bidderId, username: luot.bidderName });
+    const tenDat = taiKhoanDat?.username
+      ? `<a class="pcb-pd__history-name" href="profile.html?user=${encodeURIComponent(taiKhoanDat.username)}">${maHoaHtml(nguoiDat.name)}</a>`
+      : maHoaHtml(nguoiDat.name);
+    const tenHienThi = `${tenDat}${nguoiDat.maskedUid ? ` <span class="pcb-pd__history-uid">${maHoaHtml(nguoiDat.maskedUid)}</span>` : ''}`;
     const soTienHienThi = dinhDangVnd(luot.amount);
     const thoiGianHienThi = dinhDangThoiGian(luot.timestamp);
 
