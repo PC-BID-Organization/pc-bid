@@ -80,49 +80,6 @@
   margin: 0;
 }
 
-/* Các bước quy trình đăng bán (Stepper Indicators) */
-.pcb-sell-steps {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 10px 16px;
-  border-radius: var(--pcb-radius-sm, 8px);
-}
-
-.pcb-sell-step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.pcb-sell-step--active {
-  color: #fb923c;
-}
-
-.pcb-sell-step__num {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.pcb-sell-step--active .pcb-sell-step__num {
-  background: var(--pcb-primary, #ea580c);
-  color: #ffffff;
-}
-
 /* Khung bố cục 2 cột chính: Form đăng ký (Trái) & Xem trước Card thời gian thực (Phải) */
 .pcb-sell-layout {
   display: grid;
@@ -579,17 +536,6 @@
 }
 
 @media (max-width: 640px) {
-  /* Thanh 3 bước trong banner xếp dọc, ẩn mũi tên để chữ không bị bóp */
-  .pcb-sell-steps {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .pcb-sell-steps > span {
-    display: none;
-  }
-
   .pcb-form-row {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -760,4 +706,364 @@ button.pcb-thumb-item {
     width: 78px;
     height: 78px;
   }
+}
+
+/* ==========================================================================
+   ĐƯỜNG DẪN TRANG (BREADCRUMB) – trang Đăng bán không nạp products.css
+   ========================================================================== */
+.pcb-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 4px 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow-x: auto;
+  color: var(--pcb-text-muted, #64748b);
+}
+
+.pcb-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pcb-breadcrumb__link {
+  color: var(--pcb-text-muted, #64748b);
+  text-decoration: none;
+}
+
+.pcb-breadcrumb__link:hover,
+.pcb-breadcrumb__link:focus-visible {
+  color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-breadcrumb__separator {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.pcb-breadcrumb__current {
+  font-weight: 600;
+  color: var(--pcb-text-main, #0f172a);
+}
+
+/* ==========================================================================
+   THANH TIẾN TRÌNH TẠO PHIÊN (bám theo khi cuộn)
+   ========================================================================== */
+.pcb-sell-progress {
+  --progress: 0%;
+  position: sticky;
+  top: 8px;
+  z-index: 40;
+  margin-bottom: 20px;
+  padding: 12px 16px 10px;
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.pcb-sell-progress__list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Đường nối phía sau các bước, phần đã hoàn thành tô màu xanh */
+.pcb-sell-progress__list::before,
+.pcb-sell-progress__list::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: calc(100% / 6);
+  height: 3px;
+  border-radius: 3px;
+}
+
+.pcb-sell-progress__list::before {
+  right: calc(100% / 6);
+  background-color: #e2e8f0;
+}
+
+.pcb-sell-progress__list::after {
+  width: calc((100% - 100% / 3) * var(--progress) / 100%);
+  background-color: #16a34a;
+  transition: width 0.3s ease;
+}
+
+.pcb-sell-progress__item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.pcb-sell-progress__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0 4px;
+  font-family: inherit;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pcb-sell-progress__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #64748b;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.pcb-sell-progress__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pcb-sell-progress__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pcb-sell-progress__state {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+/* Đã hoàn thành: vòng xanh có dấu tích */
+.pcb-sell-progress__step--done .pcb-sell-progress__num {
+  font-size: 0;
+  color: #ffffff;
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+
+.pcb-sell-progress__step--done .pcb-sell-progress__num::before {
+  content: "✓";
+  font-size: 16px;
+}
+
+.pcb-sell-progress__step--done .pcb-sell-progress__state {
+  color: #16a34a;
+}
+
+/* Bước cần hoàn thành tiếp theo: viền cam nét đứt */
+.pcb-sell-progress__step--next .pcb-sell-progress__num {
+  color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #ea580c);
+  border-style: dashed;
+}
+
+.pcb-sell-progress__step--next .pcb-sell-progress__state {
+  color: var(--pcb-primary, #ea580c);
+}
+
+/* Bước đang ở: nền cam đậm, vòng sáng nhẹ */
+.pcb-sell-progress__step--current .pcb-sell-progress__num {
+  color: #ffffff;
+  background-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #ea580c);
+  border-style: solid;
+  box-shadow: 0 0 0 5px rgba(234, 88, 12, 0.18);
+}
+
+.pcb-sell-progress__step--current.pcb-sell-progress__step--done .pcb-sell-progress__num {
+  background-color: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.18);
+}
+
+.pcb-sell-progress__step--current .pcb-sell-progress__label {
+  color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-sell-progress__step--current .pcb-sell-progress__state {
+  color: #0f172a;
+}
+
+.pcb-sell-progress__step:focus-visible {
+  outline: 3px solid rgba(234, 88, 12, 0.35);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.pcb-sell-progress__summary {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: #475569;
+  border-top: 1px dashed #e2e8f0;
+}
+
+/* Khi bấm bước để cuộn tới: chừa chỗ cho thanh tiến trình bám trên cùng */
+.pcb-sell-panel[data-step] {
+  scroll-margin-top: 150px;
+}
+
+@media (max-width: 576px) {
+  .pcb-sell-progress {
+    top: 4px;
+    padding: 10px 8px 8px;
+  }
+
+  .pcb-sell-progress__state {
+    display: none;
+  }
+
+  /* Thanh bám đầu màn hình gọn hơn trên điện thoại: ẩn dòng tóm tắt (vẫn được trình đọc màn hình đọc) */
+  .pcb-sell-progress__summary {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .pcb-sell-progress__label {
+    font-size: 11px;
+  }
+
+  .pcb-sell-progress__num {
+    width: 30px;
+    height: 30px;
+  }
+
+  .pcb-sell-progress__list::before,
+  .pcb-sell-progress__list::after {
+    top: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-sell-progress__list::after,
+  .pcb-sell-progress__num {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   THÔNG SỐ KỸ THUẬT NGƯỜI BÁN TỰ BỔ SUNG
+   ========================================================================== */
+.pcb-custom-specs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.pcb-custom-specs__title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pcb-custom-specs__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-custom-specs__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) 32px;
+  gap: 8px;
+}
+
+.pcb-custom-specs__input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.pcb-custom-specs__input:focus {
+  outline: none;
+  border-color: var(--pcb-primary, #ea580c);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.pcb-custom-specs__remove {
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+  color: #64748b;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-custom-specs__remove:hover,
+.pcb-custom-specs__remove:focus-visible {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.pcb-custom-specs__add {
+  padding: 7px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pcb-primary, #ea580c);
+  background-color: #ffffff;
+  border: 1px dashed #fdba74;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-custom-specs__add:hover,
+.pcb-custom-specs__add:focus-visible {
+  background-color: #fff7ed;
+}
+
+.pcb-custom-specs__add[hidden] {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .pcb-custom-specs__row {
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .pcb-custom-specs__row .pcb-custom-specs__input[data-spec-value] {
+    grid-column: 1 / 2;
+  }
+}
+
+/* Form bị khóa khi chưa đăng nhập */
+.pcb-sell-form--locked {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(0.4);
 }

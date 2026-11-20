@@ -201,8 +201,11 @@ function initLoginForm() {
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
     localStorage.setItem('pcbid_user', JSON.stringify(userData));
 
-    // Chuyển hướng sang trang profile.html (hoặc index.html)
-    window.location.href = 'profile.html';
+    // Chuyển hướng: quay lại trang yêu cầu đăng nhập (?redirect=sell.html...) nếu hợp lệ, mặc định profile.html
+    const redirect = new URLSearchParams(window.location.search).get('redirect') || '';
+    // Chỉ chấp nhận trang nội bộ dạng "ten-trang.html?..." để tránh chuyển hướng ra ngoài
+    const isSafeRedirect = /^[a-z0-9-]+\.html(\?[^#]*)?$/i.test(redirect);
+    window.location.href = isSafeRedirect ? redirect : 'profile.html';
   });
 }
 
