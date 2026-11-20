@@ -9,7 +9,7 @@
 // Lưu phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 // Hộp thoại thông báo dùng chung
-import { showAlert } from './dialog.js';
+import { showAlert, showConfirm } from './dialog.js';
 
 
 /* ==========================================================================
@@ -437,13 +437,227 @@ const CATEGORY_DATA_FILES = {
 const CATEGORY_CATALOGUE_KEYS = { Storage: 'SSD' };
 
 // Khởi chạy khi tài liệu DOM hoàn tất nạp
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Bắt buộc đăng nhập mới được đăng bán
+  if (!readLoggedInUser()) {
+    await requireLoginToSell();
+    return;
+  }
+
   initCatalogueEvents();
   initFormInputsSync();
   initFormSubmitHandler();
   initPhotoPicker();
+  initCustomSpecs();
+  initProgressTracker();
   initRelistMode();
 });
+
+/* ==========================================================================
+   BẮT BUỘC ĐĂNG NHẬP KHI ĐĂNG BÁN
+   ========================================================================== */
+async function requireLoginToSell() {
+  // Khóa toàn bộ form để không nhập được khi chưa đăng nhập
+  const form = document.getElementById('sell-auction-form');
+  if (form) {
+    form.setAttribute('inert', '');
+    form.classList.add('pcb-sell-form--locked');
+  }
+  const goLogin = await showConfirm({
+    title: 'Cần đăng nhập để đăng bán',
+    message: 'Bạn cần đăng nhập tài khoản PCBid trước khi tạo phiên đấu giá.\nSau khi đăng nhập, bạn sẽ được đưa trở lại trang này.',
+    confirmText: 'Đăng nhập',
+    cancelText: 'Về trang chủ',
+    tone: 'info'
+  });
+  const backTo = `${window.location.pathname.split('/').pop() || 'sell.html'}${window.location.search}`;
+  window.location.href = goLogin ? `login.html?redirect=${encodeURIComponent(backTo)}` : 'index.html';
+}
+
+/* ==========================================================================
+   THÔNG SỐ KỸ THUẬT DO NGƯỜI BÁN TỰ BỔ SUNG
+   ========================================================================== */
+// Mỗi phần tử: { key, value }
+let customSpecs = [];
+const MAX_CUSTOM_SPECS = 8;
+
+/**
+ * Gộp thông số bổ sung hợp lệ (có cả tên và giá trị) thành object
+ * @returns {Object}
+ */
+function getCustomSpecsObject() {
+  const result = {};
+  customSpecs.forEach(({ key, value }) => {
+    const k = key.trim();
+    const v = value.trim();
+    if (k && v) result[k] = v;
+  });
+  return result;
+}
+
+/**
+ * Vẽ danh sách dòng thông số bổ sung (ô tên + ô giá trị + nút xóa)
+ * @param {number} [focusIndex] - Dòng cần đặt con trỏ sau khi vẽ
+ */
+function renderCustomSpecs(focusIndex) {
+  const list = document.getElementById('sell-custom-specs');
+  const addBtn = document.getElementById('btn-add-spec');
+  if (!list) return;
+  list.innerHTML = customSpecs.map((spec, idx) => `
+    <li class="pcb-custom-specs__row">
+      <input type="text" class="pcb-custom-specs__input" data-spec-key="${idx}" value="${escapeHtml(spec.key)}"
+        placeholder="Tên thông số (VD: Bảo hành còn lại)" maxlength="40" aria-label="Tên thông số bổ sung ${idx + 1}">
+      <input type="text" class="pcb-custom-specs__input" data-spec-value="${idx}" value="${escapeHtml(spec.value)}"
+        placeholder="Giá trị (VD: 8 tháng)" maxlength="80" aria-label="Giá trị thông số bổ sung ${idx + 1}">
+      <button type="button" class="pcb-custom-specs__remove" data-spec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}">×</button>
+    </li>`).join('');
+  if (addBtn) addBtn.hidden = customSpecs.length >= MAX_CUSTOM_SPECS;
+  if (focusIndex !== undefined) list.querySelector(`[data-spec-key="${focusIndex}"]`)?.focus();
+}
+
+function initCustomSpecs() {
+  const list = document.getElementById('sell-custom-specs');
+  const addBtn = document.getElementById('btn-add-spec');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      if (customSpecs.length >= MAX_CUSTOM_SPECS) return;
+      customSpecs.push({ key: '', value: '' });
+      renderCustomSpecs(customSpecs.length - 1);
+    });
+  }
+  if (list) {
+    list.addEventListener('input', e => {
+      const keyIdx = e.target.dataset.specKey;
+      const valIdx = e.target.dataset.specValue;
+      if (keyIdx !== undefined) customSpecs[Number(keyIdx)].key = e.target.value;
+      if (valIdx !== undefined) customSpecs[Number(valIdx)].value = e.target.value;
+    });
+    list.addEventListener('click', e => {
+      const removeBtn = e.target.closest('[data-spec-remove]');
+      if (!removeBtn) return;
+      customSpecs.splice(Number(removeBtn.dataset.specRemove), 1);
+      renderCustomSpecs();
+    });
+  }
+  renderCustomSpecs();
+}
+
+/* ==========================================================================
+   THANH TIẾN TRÌNH ĐỘNG: BƯỚC ĐANG Ở + BƯỚC CẦN HOÀN THÀNH TIẾP THEO
+   ========================================================================== */
+const PROGRESS_STEP_NAMES = {
+  1: 'Chọn linh kiện',
+  2: 'Tình trạng & phụ kiện',
+  3: 'Giá & thời hạn'
+};
+// Bước người dùng đang thao tác (theo ô đang nhập hoặc khối đang xem)
+let progressCurrentStep = 1;
+// Các bước người dùng đã ghé qua: giá trị điền sẵn theo mẫu chỉ được tính khi người dùng đã xem lại bước đó
+const visitedSteps = new Set([1]);
+
+/**
+ * Kiểm tra từng bước đã đủ thông tin chưa
+ * @returns {{1: boolean, 2: boolean, 3: boolean}}
+ */
+function getStepCompletion() {
+  const value = id => document.getElementById(id)?.value || '';
+  const valid = {
+    1: Boolean(currentCategory && currentSelectedModel && selectedImages.length > 0),
+    2: Boolean(value('sell-condition') && value('sell-description').trim().length >= 10),
+    3: Number(value('sell-start-price')) >= 10000 && Boolean(value('sell-bid-step')) && Boolean(value('sell-duration'))
+  };
+  return { 1: valid[1] && visitedSteps.has(1), 2: valid[2] && visitedSteps.has(2), 3: valid[3] && visitedSteps.has(3) };
+}
+
+/**
+ * Cập nhật giao diện thanh tiến trình theo bước hiện tại và mức độ hoàn thành
+ */
+function updateProgress() {
+  const nav = document.getElementById('sell-progress');
+  if (!nav) return;
+  const done = getStepCompletion();
+  // Bước cần hoàn thành tiếp theo: bước chưa xong đầu tiên, khác bước đang ở
+  const nextStep = [1, 2, 3].find(step => !done[step] && step !== progressCurrentStep) || null;
+
+  nav.querySelectorAll('.pcb-sell-progress__step').forEach(btn => {
+    const step = Number(btn.dataset.step);
+    const isCurrent = step === progressCurrentStep;
+    const isNext = step === nextStep;
+    btn.classList.toggle('pcb-sell-progress__step--done', done[step]);
+    btn.classList.toggle('pcb-sell-progress__step--current', isCurrent);
+    btn.classList.toggle('pcb-sell-progress__step--next', isNext);
+    if (isCurrent) btn.setAttribute('aria-current', 'step');
+    else btn.removeAttribute('aria-current');
+    const stateText = btn.querySelector('[data-state-text]');
+    if (stateText) {
+      stateText.textContent = isCurrent ? (done[step] ? 'Đang ở · Đã đủ' : 'Đang ở bước này')
+        : done[step] ? 'Đã hoàn thành'
+        : isNext ? 'Cần làm tiếp theo'
+        : 'Chưa hoàn thành';
+    }
+  });
+
+  // Đường nối giữa các bước tô màu theo số bước đã hoàn thành liên tiếp
+  const completedInRow = done[1] ? (done[2] ? (done[3] ? 3 : 2) : 1) : 0;
+  nav.style.setProperty('--progress', `${(completedInRow / 3) * 100}%`);
+
+  const summary = document.getElementById('sell-progress-summary');
+  if (summary) {
+    const allDone = done[1] && done[2] && done[3];
+    summary.textContent = allDone
+      ? '✓ Đã đủ thông tin. Bấm "Xác nhận" ở cuối form để đưa phiên lên sàn.'
+      : `Đang ở: Bước ${progressCurrentStep} – ${PROGRESS_STEP_NAMES[progressCurrentStep]}`
+        + (nextStep ? ` · Tiếp theo: Bước ${nextStep} – ${PROGRESS_STEP_NAMES[nextStep]}` : '');
+  }
+}
+
+/**
+ * Theo dõi người dùng đang ở bước nào (ô đang nhập / khối đang hiển thị) và cập nhật thanh tiến trình
+ */
+function initProgressTracker() {
+  const form = document.getElementById('sell-auction-form');
+  const panels = [...document.querySelectorAll('.pcb-sell-panel[data-step]')];
+  if (!form || !panels.length) return;
+
+  const setCurrent = step => {
+    if (step) visitedSteps.add(step);
+    if (step && step !== progressCurrentStep) {
+      progressCurrentStep = step;
+      updateProgress();
+    }
+  };
+
+  // Nhập liệu trong khối nào thì đó là bước hiện tại
+  form.addEventListener('focusin', e => setCurrent(Number(e.target.closest('.pcb-sell-panel[data-step]')?.dataset.step)));
+  form.addEventListener('input', updateProgress);
+  form.addEventListener('change', updateProgress);
+
+  // Cuộn trang: khối chiếm phần lớn vùng nhìn là bước hiện tại (khi không đang nhập ô nào)
+  if ('IntersectionObserver' in window) {
+    const ratios = new Map();
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => ratios.set(Number(entry.target.dataset.step), entry.intersectionRatio));
+      if (form.contains(document.activeElement) && document.activeElement !== form) return;
+      const visible = [...ratios.entries()].sort((a, b) => b[1] - a[1])[0];
+      if (visible && visible[1] > 0) setCurrent(visible[0]);
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '-120px 0px -35% 0px' });
+    panels.forEach(panel => observer.observe(panel));
+  }
+
+  // Bấm vào một bước để cuộn tới khối tương ứng
+  document.querySelectorAll('.pcb-sell-progress__step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const step = Number(btn.dataset.step);
+      const panel = document.getElementById(`sell-step-${step}`);
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setCurrent(step);
+      panel.querySelector('select, input, textarea')?.focus({ preventScroll: true });
+    });
+  });
+
+  updateProgress();
+}
 
 /* ==========================================================================
    CHẾ ĐỘ ĐĂNG BÁN LẠI (sell.html?relist=<id>)
@@ -737,6 +951,9 @@ function renderSelectedPhotos() {
         </li>`).join('');
   }
 
+  // Ảnh thay đổi ảnh hưởng tới mức hoàn thành của bước 1
+  updateProgress();
+
   // Đồng bộ trạng thái chọn trên lưới ảnh đề xuất
   document.querySelectorAll('#sell-thumb-grid .pcb-thumb-item').forEach(item => {
     const active = selectedImages.includes(item.getAttribute('data-src'));
@@ -938,6 +1155,12 @@ function initFormSubmitHandler() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Phiên đăng nhập có thể đã hết (đăng xuất ở tab khác): yêu cầu đăng nhập lại
+    if (!readLoggedInUser()) {
+      await requireLoginToSell();
+      return;
+    }
+
     // 1. Kiểm tra validation cơ bản
     if (!currentCategory) {
       await showAlert({ title: 'Thiếu danh mục', message: 'Vui lòng chọn Danh mục linh kiện.', tone: 'warning' });
@@ -1005,7 +1228,8 @@ function initFormSubmitHandler() {
       seller: sellerName,
       images: selectedImages.length ? [...selectedImages] : [currentSelectedModel.images[0]],
       description: description,
-      specifications: currentSelectedModel.specifications || {}
+      // Thông số chuẩn của mẫu + thông số người bán tự bổ sung
+      specifications: { ...(currentSelectedModel.specifications || {}), ...getCustomSpecsObject() }
     };
 
     if (relistTarget) {

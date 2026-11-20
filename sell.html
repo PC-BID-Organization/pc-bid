@@ -64,23 +64,41 @@
             Chọn nhanh thông số từ Catalogue linh kiện chuẩn của sàn, tải ảnh thật và thiết lập bước giá minh bạch. Tiếp cận hàng nghìn người đam mê công nghệ tại UIT.
           </p>
         </div>
-        <div class="pcb-sell-steps">
-          <div class="pcb-sell-step pcb-sell-step--active">
-            <span class="pcb-sell-step__num">1</span>
-            <span>Chọn mẫu linh kiện</span>
-          </div>
-          <span style="color:#64748b;">→</span>
-          <div class="pcb-sell-step pcb-sell-step--active">
-            <span class="pcb-sell-step__num">2</span>
-            <span>Thiết lập giá &amp; thời gian</span>
-          </div>
-          <span style="color:#64748b;">→</span>
-          <div class="pcb-sell-step">
-            <span class="pcb-sell-step__num">3</span>
-            <span>Lên sàn đấu</span>
-          </div>
-        </div>
       </section>
+
+      <!-- Thanh tiến trình tạo phiên: bám theo khi cuộn, cho biết bước đang ở và bước cần hoàn thành tiếp theo -->
+      <nav class="pcb-sell-progress" id="sell-progress" aria-label="Tiến trình tạo phiên đấu giá">
+        <ol class="pcb-sell-progress__list">
+          <li class="pcb-sell-progress__item">
+            <button type="button" class="pcb-sell-progress__step" data-step="1" title="1. Chọn linh kiện từ Catalogue chuẩn">
+              <span class="pcb-sell-progress__num" aria-hidden="true">1</span>
+              <span class="pcb-sell-progress__text">
+                <span class="pcb-sell-progress__label">Chọn linh kiện</span>
+                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+              </span>
+            </button>
+          </li>
+          <li class="pcb-sell-progress__item">
+            <button type="button" class="pcb-sell-progress__step" data-step="2" title="2. Tình trạng thực tế &amp; Phụ kiện đi kèm">
+              <span class="pcb-sell-progress__num" aria-hidden="true">2</span>
+              <span class="pcb-sell-progress__text">
+                <span class="pcb-sell-progress__label">Tình trạng &amp; phụ kiện</span>
+                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+              </span>
+            </button>
+          </li>
+          <li class="pcb-sell-progress__item">
+            <button type="button" class="pcb-sell-progress__step" data-step="3" title="3. Thiết lập giá đấu &amp; Thời hạn phiên">
+              <span class="pcb-sell-progress__num" aria-hidden="true">3</span>
+              <span class="pcb-sell-progress__text">
+                <span class="pcb-sell-progress__label">Giá &amp; thời hạn</span>
+                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+              </span>
+            </button>
+          </li>
+        </ol>
+        <p class="pcb-sell-progress__summary" id="sell-progress-summary" aria-live="polite"></p>
+      </nav>
 
       <!-- 3. Khung bố cục 2 cột chính: Form đăng ký và Xem trước trực tiếp -->
       <div class="pcb-sell-layout">
@@ -89,7 +107,7 @@
         <form class="pcb-sell-form" id="sell-auction-form" novalidate>
 
           <!-- BƯỚC 1: CHỌN MẪU TỪ CATALOGUE CỦA SÀN -->
-          <div class="pcb-sell-panel">
+          <div class="pcb-sell-panel" id="sell-step-1" data-step="1">
             <div class="pcb-sell-panel__head">
               <span class="pcb-sell-panel__icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -130,7 +148,7 @@
 
             <!-- Khối xem trước thông số kỹ thuật tự động điền -->
             <div class="pcb-form-group">
-              <label class="pcb-form-label">Thông số kỹ thuật chuẩn (Tự động điền theo mẫu)</label>
+              <label class="pcb-form-label">Thông số kỹ thuật (tự động điền theo mẫu, có thể bổ sung)</label>
               <div class="pcb-spec-box" id="sell-spec-box">
                 <div class="pcb-spec-box__head">
                   <span class="pcb-spec-box__title">
@@ -145,6 +163,13 @@
                   <div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; font-style: italic; padding: 10px 0;">
                     Vui lòng chọn mẫu sản phẩm ở trên để hiển thị thông số kỹ thuật.
                   </div>
+                </div>
+
+                <!-- Thông số người bán tự bổ sung (ví dụ: Ngày mua, Bảo hành còn lại, Đã thay keo tản nhiệt) -->
+                <div class="pcb-custom-specs">
+                  <p class="pcb-custom-specs__title">Thông số bổ sung của bạn</p>
+                  <ul class="pcb-custom-specs__list" id="sell-custom-specs"></ul>
+                  <button type="button" class="pcb-custom-specs__add" id="btn-add-spec">+ Thêm thông số</button>
                 </div>
               </div>
             </div>
@@ -182,7 +207,7 @@
           </div>
 
           <!-- BƯỚC 2: TÌNH TRẠNG THỰC TẾ & KIỂM ĐỊNH -->
-          <div class="pcb-sell-panel">
+          <div class="pcb-sell-panel" id="sell-step-2" data-step="2">
             <div class="pcb-sell-panel__head">
               <span class="pcb-sell-panel__icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -225,7 +250,7 @@
           </div>
 
           <!-- BƯỚC 3: THIẾT LẬP GIÁ ĐẤU & THỜI HẠN -->
-          <div class="pcb-sell-panel">
+          <div class="pcb-sell-panel" id="sell-step-3" data-step="3">
             <div class="pcb-sell-panel__head">
               <span class="pcb-sell-panel__icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
