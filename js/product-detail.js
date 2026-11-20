@@ -472,6 +472,67 @@ function renderGallery(mảngAnh) {
   }
 }
 
+// Giới hạn và mức phóng to mặc định của ảnh chính
+const ZOOM_MAC_DINH = 2;
+const ZOOM_TOI_THIEU = 1;
+const ZOOM_TOI_DA = 5;
+
+/**
+ * Phóng to ảnh chính khi rê chuột (zoom tại chỗ, bám theo vị trí con trỏ)
+ * và lăn chuột để tăng / giảm mức phóng to. Chỉ bật trên thiết bị có chuột,
+ * điện thoại / máy tính bảng giữ nguyên thao tác cuộn trang bình thường.
+ */
+function khoiDongZoomAnh() {
+  const khung = document.querySelector('.pcb-pd__gallery-main');
+  const anh = document.getElementById('pcb-pd-main-img');
+  const nhanMuc = document.getElementById('pcb-pd-zoom-level');
+  if (!khung || !anh || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  let mucZoom = ZOOM_MAC_DINH;
+  let anNhanMuc = null;
+
+  // Áp dụng mức phóng to với tâm phóng là vị trí con trỏ trong khung ảnh
+  const apDungZoom = (suKien) => {
+    const khungAnh = khung.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((suKien.clientX - khungAnh.left) / khungAnh.width) * 100));
+    const y = Math.min(100, Math.max(0, ((suKien.clientY - khungAnh.top) / khungAnh.height) * 100));
+    anh.style.transformOrigin = `${x}% ${y}%`;
+    anh.style.transform = `scale(${mucZoom})`;
+  };
+
+  // Hiện nhãn mức phóng to (ví dụ 2.5×) trong chốc lát sau mỗi lần lăn chuột
+  const hienMucZoom = () => {
+    if (!nhanMuc) return;
+    nhanMuc.textContent = `${mucZoom.toFixed(1)}×`;
+    nhanMuc.classList.add('pcb-pd__zoom-level--show');
+    clearTimeout(anNhanMuc);
+    anNhanMuc = setTimeout(() => nhanMuc.classList.remove('pcb-pd__zoom-level--show'), 1200);
+  };
+
+  khung.addEventListener('mouseenter', (e) => {
+    mucZoom = ZOOM_MAC_DINH;
+    khung.classList.add('pcb-pd__gallery-main--zooming');
+    apDungZoom(e);
+  });
+
+  khung.addEventListener('mousemove', apDungZoom);
+
+  khung.addEventListener('mouseleave', () => {
+    khung.classList.remove('pcb-pd__gallery-main--zooming');
+    anh.style.transform = '';
+    anh.style.transformOrigin = '';
+  });
+
+  // Lăn chuột lên để phóng to, lăn xuống để thu nhỏ; chặn cuộn trang khi đang zoom
+  khung.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const heSo = e.deltaY < 0 ? 1.2 : 1 / 1.2;
+    mucZoom = Math.min(ZOOM_TOI_DA, Math.max(ZOOM_TOI_THIEU, mucZoom * heSo));
+    apDungZoom(e);
+    hienMucZoom();
+  }, { passive: false });
+}
+
 /**
  * Hiển thị thông tin người bán lên thẻ seller card
  * @param {string} tenNguoiBan - Tên tài khoản người bán
@@ -1313,6 +1374,7 @@ function ganSuKien() {
 async function khoiDong() {
   // Gắn toàn bộ bộ lắng nghe sự kiện (event listener) và khởi tạo tab ngay từ đầu
   ganSuKien();
+  khoiDongZoomAnh();
   khoiDongHeTongTab();
 
   // Đọc ID sản phẩm từ tham số URL (?id=2011). Nếu người dùng mở trực tiếp, mặc định nạp sản phẩm mẫu 2011 (RTX 3070)
