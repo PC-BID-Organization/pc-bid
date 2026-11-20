@@ -566,7 +566,12 @@ function getStepCompletion() {
     2: Boolean(value('sell-condition') && value('sell-description').trim().length >= 10),
     3: Number(value('sell-start-price')) >= 10000 && Boolean(value('sell-bid-step')) && Boolean(value('sell-duration'))
   };
-  return { 1: valid[1] && visitedSteps.has(1), 2: valid[2] && visitedSteps.has(2), 3: valid[3] && visitedSteps.has(3) };
+  // Hoàn thành theo thứ tự: một bước chỉ được tính xong khi đủ thông tin, đã ghé qua
+  // và mọi bước trước nó cũng đã xong (tránh bước 3 "xong" khi bước 2 còn dở)
+  const done1 = valid[1] && visitedSteps.has(1);
+  const done2 = done1 && valid[2] && visitedSteps.has(2);
+  const done3 = done2 && valid[3] && visitedSteps.has(3);
+  return { 1: done1, 2: done2, 3: done3 };
 }
 
 /**
@@ -597,9 +602,10 @@ function updateProgress() {
     }
   });
 
-  // Đường nối giữa các bước tô màu theo số bước đã hoàn thành liên tiếp
-  const completedInRow = done[1] ? (done[2] ? (done[3] ? 3 : 2) : 1) : 0;
-  nav.style.setProperty('--progress', `${(completedInRow / 3) * 100}%`);
+  // Đường nối: tô xanh từ bước 1 tới bước xa nhất đã xong; nếu bước kế tiếp đang được làm thì tô tới bước đó
+  const completedInRow = done[3] ? 3 : done[2] ? 2 : done[1] ? 1 : 0;
+  const reach = progressCurrentStep === completedInRow + 1 ? progressCurrentStep : Math.max(completedInRow, 1);
+  nav.style.setProperty('--progress-ratio', String((reach - 1) / 2));
 
   const summary = document.getElementById('sell-progress-summary');
   if (summary) {
@@ -813,10 +819,12 @@ function selectModel(model) {
   renderSpecifications(model.specifications);
 
   // 3. Ảnh đề xuất liên quan tới mẫu đã chọn; chọn sẵn ảnh đầu tiên nếu chưa có ảnh nào
-  getSuggestedImages(model).then(images => {
+  getSuggestedImages(model).then(suggestions => {
     if (currentSelectedModel !== model) return;
-    if (selectedImages.length === 0 && images.length) selectedImages = [images[0]];
-    renderThumbnailGrid(images);
+    // Chọn sẵn ảnh liên quan nhất làm ảnh bìa nếu chưa có ảnh nào
+    const first = suggestions.related[0] || suggestions.others[0];
+    if (selectedImages.length === 0 && first) selectedImages = [first];
+    renderThumbnailGrid(suggestions);
     renderSelectedPhotos();
   });
 
@@ -853,14 +861,17 @@ function getModelKeywords(name) {
   const words = String(name || '').toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean);
   const brands = ['ASUS', 'MSI', 'GIGABYTE', 'ASROCK', 'CORSAIR', 'KINGSTON', 'SAMSUNG', 'NZXT', 'NOCTUA', 'DEEPCOOL',
     'SEASONIC', 'INTEL', 'AMD', 'NVIDIA', 'COOLER', 'LIAN', 'HYTE', 'CRUCIAL', 'WD', 'XFX', 'SAPPHIRE', 'ZOTAC', 'EVGA', 'GSKILL'];
-  return words.filter(w => /\d/.test(w) && w.length >= 3).concat(words.filter(w => brands.includes(w)));
+  // Bỏ các cụm chỉ dung lượng / công suất / xung nhịp (8GB, 650W, 3600MHZ...) vì trùng giữa nhiều sản phẩm khác nhau
+  const isSpecUnit = w => /^\d+(GB|TB|MB|MHZ|GHZ|W|MM|HZ|X)$/.test(w) || /^DDR\d$/.test(w) || /^PCIE\d?$/.test(w);
+  return words.filter(w => /\d/.test(w) && w.length >= 3 && !isSpecUnit(w)).concat(words.filter(w => brands.includes(w)));
 }
 
 /**
- * Đề xuất ảnh liên quan tới mẫu đã chọn: ưu tiên sản phẩm trùng mã (3070, 5800X3D...),
- * sau đó cùng hãng, rồi tới ảnh mẫu của catalogue. Loại trùng lặp, tối đa 8 ảnh.
+ * Đề xuất ảnh cho mẫu đã chọn, chia 2 nhóm:
+ * - related: sản phẩm trùng mã nhận diện (3070, 5800X3D, B760M...) → rất liên quan
+ * - others: cùng hãng, ảnh mẫu của catalogue và vài sản phẩm cùng danh mục → có thể liên quan
  * @param {Object} model - Mẫu sản phẩm đã chọn
- * @returns {Promise<Array<string>>}
+ * @returns {Promise<{related: Array<string>, others: Array<string>}>}
  */
 async function getSuggestedImages(model) {
   const file = CATEGORY_DATA_FILES[currentCategory];
@@ -875,28 +886,46 @@ async function getSuggestedImages(model) {
   const products = categoryDataCache[file] || [];
   const keywords = getModelKeywords(model.name);
   const codes = keywords.filter(k => /\d/.test(k));
-  const score = product => {
+  const brands = keywords.filter(k => !/\d/.test(k));
+
+  const relatedScored = [];
+  const sameBrand = [];
+  const sameCategory = [];
+  // Từ thường gặp trong tên mẫu (dòng sản phẩm: TOMAHAWK, STRIX, VENGEANCE...) dùng để xếp hạng trong nhóm liên quan
+  const modelWords = new Set(String(model.name).toUpperCase().split(/[^A-Z0-9]+/).filter(w => w.length >= 4));
+  products.forEach(product => {
     const words = getModelKeywords(product.name);
-    return codes.filter(c => words.includes(c)).length * 10 + keywords.filter(k => !/\d/.test(k) && words.includes(k)).length;
-  };
-  const ranked = products
-    .map(product => ({ product, s: score(product) }))
-    .filter(entry => entry.s > 0)
-    .sort((x, y) => y.s - x.s)
-    .flatMap(entry => entry.product.images || []);
-  return [...new Set([...ranked, ...(model.images || [])])].slice(0, 8);
+    const images = product.images || [];
+    const codeHits = codes.filter(code => words.includes(code)).length;
+    if (codeHits > 0) {
+      const nameWords = String(product.name).toUpperCase().split(/[^A-Z0-9]+/);
+      const wordHits = nameWords.filter(w => modelWords.has(w)).length;
+      relatedScored.push({ images, score: codeHits * 10 + wordHits });
+    } else if (brands.some(brand => words.includes(brand))) sameBrand.push(...images);
+    else sameCategory.push(...images);
+  });
+
+  // Khớp đúng mẫu nhất lên đầu
+  const related = relatedScored.sort((a, b) => b.score - a.score).flatMap(entry => entry.images);
+  const relatedUnique = [...new Set(related)].slice(0, 6);
+  const others = [...new Set([...sameBrand, ...(model.images || []), ...sameCategory])]
+    .filter(src => !relatedUnique.includes(src))
+    .slice(0, 8);
+  return { related: relatedUnique, others };
 }
 
 /**
- * Hiển thị lưới ảnh đề xuất; bấm để thêm / bỏ khỏi danh sách ảnh đã chọn
- * @param {Array<string>} images - Đường dẫn ảnh đề xuất
+ * Vẽ một lưới ảnh đề xuất; bấm để thêm / bỏ khỏi danh sách ảnh đã chọn
+ * @param {string} gridId - ID lưới
+ * @param {Array<string>} images - Đường dẫn ảnh
+ * @param {string} emptyText - Thông báo khi không có ảnh
  */
-function renderThumbnailGrid(images) {
-  const grid = document.getElementById('sell-thumb-grid');
+function renderSuggestionGrid(gridId, images, emptyText) {
+  const grid = document.getElementById(gridId);
   if (!grid) return;
 
   if (!images || images.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px;">Chưa có ảnh đề xuất cho mẫu này.</div>';
+    grid.innerHTML = `<div class="pcb-thumb-grid__empty">${emptyText}</div>`;
     return;
   }
 
@@ -912,6 +941,15 @@ function renderThumbnailGrid(images) {
     item.querySelector('img').addEventListener('error', () => item.remove());
     item.addEventListener('click', () => toggleSelectedImage(item.getAttribute('data-src')));
   });
+}
+
+/**
+ * Hiển thị 2 nhóm ảnh đề xuất: "Có liên quan nhất" và "Ảnh khác"
+ * @param {{related: Array<string>, others: Array<string>}} suggestions - Kết quả đề xuất
+ */
+function renderThumbnailGrid(suggestions) {
+  renderSuggestionGrid('sell-thumb-related', suggestions.related, 'Chưa có ảnh sản phẩm trùng mã trong kho. Hãy tải ảnh thật của bạn hoặc chọn ở mục Ảnh khác.');
+  renderSuggestionGrid('sell-thumb-grid', suggestions.others, 'Chưa có ảnh đề xuất khác.');
 }
 
 /**
@@ -955,7 +993,7 @@ function renderSelectedPhotos() {
   updateProgress();
 
   // Đồng bộ trạng thái chọn trên lưới ảnh đề xuất
-  document.querySelectorAll('#sell-thumb-grid .pcb-thumb-item').forEach(item => {
+  document.querySelectorAll('#sell-thumb-related .pcb-thumb-item, #sell-thumb-grid .pcb-thumb-item').forEach(item => {
     const active = selectedImages.includes(item.getAttribute('data-src'));
     item.classList.toggle('pcb-thumb-item--active', active);
     item.setAttribute('aria-pressed', active ? 'true' : 'false');

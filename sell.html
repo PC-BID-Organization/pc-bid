@@ -66,45 +66,47 @@
         </div>
       </section>
 
-      <!-- Thanh tiến trình tạo phiên: bám theo khi cuộn, cho biết bước đang ở và bước cần hoàn thành tiếp theo -->
-      <nav class="pcb-sell-progress" id="sell-progress" aria-label="Tiến trình tạo phiên đấu giá">
-        <ol class="pcb-sell-progress__list">
-          <li class="pcb-sell-progress__item">
-            <button type="button" class="pcb-sell-progress__step" data-step="1" title="1. Chọn linh kiện từ Catalogue chuẩn">
-              <span class="pcb-sell-progress__num" aria-hidden="true">1</span>
-              <span class="pcb-sell-progress__text">
-                <span class="pcb-sell-progress__label">Chọn linh kiện</span>
-                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
-              </span>
-            </button>
-          </li>
-          <li class="pcb-sell-progress__item">
-            <button type="button" class="pcb-sell-progress__step" data-step="2" title="2. Tình trạng thực tế &amp; Phụ kiện đi kèm">
-              <span class="pcb-sell-progress__num" aria-hidden="true">2</span>
-              <span class="pcb-sell-progress__text">
-                <span class="pcb-sell-progress__label">Tình trạng &amp; phụ kiện</span>
-                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
-              </span>
-            </button>
-          </li>
-          <li class="pcb-sell-progress__item">
-            <button type="button" class="pcb-sell-progress__step" data-step="3" title="3. Thiết lập giá đấu &amp; Thời hạn phiên">
-              <span class="pcb-sell-progress__num" aria-hidden="true">3</span>
-              <span class="pcb-sell-progress__text">
-                <span class="pcb-sell-progress__label">Giá &amp; thời hạn</span>
-                <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
-              </span>
-            </button>
-          </li>
-        </ol>
-        <p class="pcb-sell-progress__summary" id="sell-progress-summary" aria-live="polite"></p>
-      </nav>
+
 
       <!-- 3. Khung bố cục 2 cột chính: Form đăng ký và Xem trước trực tiếp -->
       <div class="pcb-sell-layout">
 
         <!-- ==================== CỘT TRÁI: FORM NHẬP LIỆU ==================== -->
         <form class="pcb-sell-form" id="sell-auction-form" novalidate>
+
+          <!-- Thanh tiến trình tạo phiên (trong cột form, không che cột xem trước): bám theo khi cuộn, cho biết bước đang ở và bước cần hoàn thành tiếp theo -->
+          <nav class="pcb-sell-progress" id="sell-progress" aria-label="Tiến trình tạo phiên đấu giá">
+            <ol class="pcb-sell-progress__list">
+              <li class="pcb-sell-progress__item">
+                <button type="button" class="pcb-sell-progress__step" data-step="1" title="1. Chọn linh kiện từ Catalogue chuẩn">
+                  <span class="pcb-sell-progress__num" aria-hidden="true">1</span>
+                  <span class="pcb-sell-progress__text">
+                    <span class="pcb-sell-progress__label">Chọn linh kiện</span>
+                    <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+                  </span>
+                </button>
+              </li>
+              <li class="pcb-sell-progress__item">
+                <button type="button" class="pcb-sell-progress__step" data-step="2" title="2. Tình trạng thực tế &amp; Phụ kiện đi kèm">
+                  <span class="pcb-sell-progress__num" aria-hidden="true">2</span>
+                  <span class="pcb-sell-progress__text">
+                    <span class="pcb-sell-progress__label">Tình trạng &amp; phụ kiện</span>
+                    <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+                  </span>
+                </button>
+              </li>
+              <li class="pcb-sell-progress__item">
+                <button type="button" class="pcb-sell-progress__step" data-step="3" title="3. Thiết lập giá đấu &amp; Thời hạn phiên">
+                  <span class="pcb-sell-progress__num" aria-hidden="true">3</span>
+                  <span class="pcb-sell-progress__text">
+                    <span class="pcb-sell-progress__label">Giá &amp; thời hạn</span>
+                    <span class="pcb-sell-progress__state" data-state-text>Chưa hoàn thành</span>
+                  </span>
+                </button>
+              </li>
+            </ol>
+            <p class="pcb-sell-progress__summary" id="sell-progress-summary" aria-live="polite"></p>
+          </nav>
 
           <!-- BƯỚC 1: CHỌN MẪU TỪ CATALOGUE CỦA SÀN -->
           <div class="pcb-sell-panel" id="sell-step-1" data-step="1">
@@ -197,9 +199,14 @@
                 </label>
                 <input type="file" id="sell-photo-input" accept="image/png,image/jpeg,image/webp" multiple hidden>
 
-                <p class="pcb-photo-picker__subtitle">Ảnh đề xuất từ kho PCBid <span>(bấm để thêm / bỏ)</span></p>
+                <p class="pcb-photo-picker__subtitle">Có liên quan nhất <span>(cùng mã sản phẩm với mẫu đã chọn · bấm để thêm / bỏ)</span></p>
+                <div class="pcb-thumb-grid" id="sell-thumb-related">
+                  <!-- JS nạp ảnh của các sản phẩm trùng mã (VD: cùng RTX 3070) -->
+                </div>
+
+                <p class="pcb-photo-picker__subtitle">Ảnh khác <span>(có thể liên quan: cùng hãng hoặc cùng danh mục)</span></p>
                 <div class="pcb-thumb-grid" id="sell-thumb-grid">
-                  <!-- JS nạp các ảnh liên quan tới mẫu sản phẩm đã chọn -->
+                  <!-- JS nạp các ảnh có thể liên quan -->
                 </div>
               </div>
               <span class="pcb-form-hint">Ảnh thật do bạn chụp giúp người mua tin tưởng hơn. Ảnh tải lên được thu gọn để lưu trên trình duyệt.</span>
