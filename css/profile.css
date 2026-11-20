@@ -2495,3 +2495,24 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Nút "Xem thêm" cho danh sách dài trong hồ sơ công khai */
+.pcb-public__more {
+  display: block;
+  margin: 14px auto 0;
+  padding: 9px 20px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pcb-primary, #ea580c);
+  cursor: pointer;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-public__more:hover,
+.pcb-public__more:focus-visible {
+  background-color: #ffedd5;
+}
