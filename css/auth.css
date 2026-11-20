@@ -635,7 +635,7 @@
    -------------------------------------------------------------------------- */
 .pcb-auth-demo__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -657,5 +657,33 @@
 @media (max-width: 420px) {
   .pcb-auth-demo__grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   HÀNG NHẬP HỌ VÀ TÊN ĐỆM + TÊN TRÊN TRANG ĐĂNG KÝ
+   -------------------------------------------------------------------------- */
+.pcb-auth-form__name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+/* Ô nhập không có biểu tượng bên trái */
+.pcb-auth-form__input--plain {
+  padding-left: 14px;
+}
+
+.pcb-auth-form__hint {
+  margin: -6px 0 14px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Điện thoại nhỏ: hai ô xếp dọc */
+@media (max-width: 420px) {
+  .pcb-auth-form__name-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 }

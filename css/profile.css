@@ -97,6 +97,15 @@
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
 }
 
+/* Chữ cái đầu của tên hiển thị trong avatar tròn */
+.pcb-user-card__avatar-initial {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
 .pcb-user-card__avatar-img {
   width: 52px;
   height: 52px;

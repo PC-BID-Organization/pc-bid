@@ -10,6 +10,8 @@ import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './au
 import { checkBidDeposit } from './wallet.js';
 // Watchlist lưu riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
+// Họ tên, UID và avatar chữ cái của người dùng
+import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial } from './accounts.js';
 
 
 /* ==========================================================================
@@ -155,19 +157,6 @@ function dinhDangThoiGian(isoString) {
  */
 function taoIdNgauNhien() {
   return `bid_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-}
-
-/**
- * Che bớt tên người dùng để bảo vệ quyền riêng tư trong lịch sử đặt giá
- * Ví dụ: "hoanglong_pc" → "hoa****_pc"
- * @param {string} tenNguoiDung - Tên tài khoản gốc
- * @returns {string} Tên đã được che bớt
- */
-function cheKhuatTen(tenNguoiDung) {
-  if (!tenNguoiDung || tenNguoiDung.length <= 4) return '****';
-  const hienThi = tenNguoiDung.slice(0, 3);
-  const phanCuoi = tenNguoiDung.slice(-3);
-  return `${hienThi}***${phanCuoi}`;
 }
 
 /* ==========================================================================
@@ -483,8 +472,11 @@ function renderGallery(mảngAnh) {
 function hienThiNguoiBan(tenNguoiBan) {
   const oTen = document.getElementById('pcb-pd-seller-name');
   const oAvatar = document.getElementById('pcb-pd-seller-avatar-char');
-  if (oTen) oTen.textContent = tenNguoiBan;
-  if (oAvatar) oAvatar.textContent = tenNguoiBan.charAt(0).toUpperCase();
+  // Người bán là thành viên / tài khoản đã đăng ký: hiện họ tên thật; avatar là chữ đầu của tên
+  const taiKhoan = findAccount({ username: tenNguoiBan });
+  const tenHienThi = taiKhoan?.fullname || tenNguoiBan;
+  if (oTen) oTen.textContent = tenHienThi;
+  if (oAvatar) oAvatar.textContent = getAvatarInitial(taiKhoan || tenNguoiBan);
 }
 
 /**
@@ -590,7 +582,8 @@ function hienThiPhienKetThuc() {
     // Ghi rõ kết quả phiên: người thắng và giá chốt, hoặc không có lượt đặt giá
     const sp = sanPhamHienTai;
     if (sp && sp.winner) {
-      thongBaoKetThuc.textContent = `🔔 Phiên đấu giá đã kết thúc · Người thắng: ${sp.winner} với giá ${dinhDangVnd(sp.currentBid)}`;
+      const nguoiThang = describeBidder({ bidderName: sp.winner });
+      thongBaoKetThuc.textContent = `🔔 Phiên đấu giá đã kết thúc · Người thắng: ${nguoiThang.name} (${nguoiThang.maskedUid || sp.winner}) với giá ${dinhDangVnd(sp.currentBid)}`;
     } else if (sp && Number(sp.bidCount || 0) === 0) {
       thongBaoKetThuc.textContent = '🔔 Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào';
     } else {
@@ -682,7 +675,9 @@ function renderLichSu(idSanPham) {
   // Render từng hàng lịch sử
   tbody.innerHTML = tatCaLichSu.map((luot, chiSo) => {
     const laDanDau = chiSo === 0;
-    const tenHienThi = maHoaHtml(cheKhuatTen(luot.bidderName || 'ẩn danh'));
+    // Hiển thị họ tên kèm UID che bớt: UID là định danh duy nhất, không trùng như email / họ tên
+    const nguoiDat = describeBidder(luot);
+    const tenHienThi = `${maHoaHtml(nguoiDat.name)}${nguoiDat.maskedUid ? ` <span class="pcb-pd__history-uid">${maHoaHtml(nguoiDat.maskedUid)}</span>` : ''}`;
     const soTienHienThi = dinhDangVnd(luot.amount);
     const thoiGianHienThi = dinhDangThoiGian(luot.timestamp);
 
@@ -711,10 +706,8 @@ function renderLichSu(idSanPham) {
 function taoLichSuMau(idSanPham, lichSuSanPham = []) {
   if (!sanPhamHienTai) return [];
 
-  const tenNguoiMau = [
-    'techguru_hcm', 'pcbuilder_99', 'gamervn_pro',
-    'hardware_shop', 'ngoc_tech', 'viet_pc', 'minhnhat_dng'
-  ];
+  // Người đặt giá mẫu lấy từ accounts.js (mỗi người có họ tên và UID cố định)
+  const tenNguoiMau = MOCK_BIDDERS.slice(0, 7).map(nguoi => nguoi.username);
 
   const buocGia = Number(sanPhamHienTai.bidStep) || 100000;
   const giaKhoiDiem = Number(sanPhamHienTai.startingPrice) || 1000000;
@@ -888,6 +881,9 @@ function thucHienDatGia(nguoiDung, soTien) {
   const luotMoi = {
     id: taoIdNgauNhien(),
     productId: sanPhamHienTai.id,
+    // Định danh người đặt bằng ID tài khoản (không trùng), kèm họ tên để hiển thị
+    bidderId: nguoiDung.id || null,
+    bidderFullname: nguoiDung.fullname || nguoiDung.username || '',
     bidderName: nguoiDung.username,
     amount: soTien,
     timestamp: new Date().toISOString()

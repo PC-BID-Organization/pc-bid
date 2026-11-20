@@ -61,8 +61,8 @@
           <div class="pcb-user-card">
             <div class="pcb-user-card__avatar-wrap">
               <div class="pcb-user-card__avatar">
-                <img src="images/icons/icon-user.svg" alt="Ảnh đại diện người dùng" id="sidebar-user-avatar"
-                  class="pcb-user-card__avatar-img">
+                <!-- Avatar mặc định: chữ cái đầu của tên, JS cập nhật theo tài khoản đang đăng nhập -->
+                <span class="pcb-user-card__avatar-initial" id="sidebar-user-avatar" aria-hidden="true">?</span>
               </div>
               <span class="pcb-user-card__verified-badge" title="Tài khoản đã xác thực">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -71,7 +71,7 @@
               </span>
             </div>
 
-            <h2 class="pcb-user-card__name" id="sidebar-user-name">Nguyễn Văn A</h2>
+            <h2 class="pcb-user-card__name" id="sidebar-user-name">Nguyễn Hùng Phong</h2>
             <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #UIT-IE104-9842</p>
 
             <div class="pcb-user-card__tag">
@@ -391,7 +391,7 @@
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    <input type="text" id="input-fullname" name="fullname" class="pcb-input" value="Nguyễn Văn A"
+                    <input type="text" id="input-fullname" name="fullname" class="pcb-input" value="Nguyễn Hùng Phong"
                       required placeholder="Nhập họ và tên đầy đủ">
                   </div>
                   <span class="pcb-form__hint">Tên này sẽ hiển thị ẩn danh một phần trên bảng giá phiên đấu (VD: N*** A).</span>

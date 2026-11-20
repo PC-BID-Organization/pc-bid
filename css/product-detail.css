@@ -1331,3 +1331,13 @@
     white-space: normal;
   }
 }
+
+/* UID che bớt hiển thị cạnh họ tên người đặt giá */
+.pcb-pd__history-uid {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  font-family: "Courier New", monospace;
+}

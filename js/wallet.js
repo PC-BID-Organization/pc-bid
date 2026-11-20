@@ -172,12 +172,14 @@ export function getParticipatingAuctions(currentUser) {
     userItemsMap.set(Number(item.id), { ...item });
   });
 
+  // Lượt bid thuộc về người dùng: so khớp theo ID tài khoản (không trùng);
+  // lượt bid cũ chưa có bidderId thì so theo tên đăng nhập / email như trước
+  const isMyBid = b => (b.bidderId
+    ? b.bidderId === currentUser.id
+    : (b.bidderName === currentUsername || b.bidderName === currentUser?.username || b.bidderName === currentUser?.email));
+
   // Tìm tất cả sản phẩm mà người dùng hiện tại ĐÃ THỰC SỰ ĐẶT GIÁ trong localBids
-  const userRealBids = localBids.filter(b => 
-    b.bidderName === currentUsername || 
-    b.bidderName === currentUser?.username || 
-    b.bidderName === currentUser?.email
-  );
+  const userRealBids = localBids.filter(isMyBid);
 
   userRealBids.forEach(bid => {
     const pId = Number(bid.productId);
@@ -213,11 +215,7 @@ export function getParticipatingAuctions(currentUser) {
       .sort((a, b) => b.amount - a.amount || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     // Lọc các lượt bid của CHÍNH NGƯỜI DÙNG NÀY trên sản phẩm
-    const myBidsOnItem = allBidsOnItem.filter(b => 
-      b.bidderName === currentUsername || 
-      b.bidderName === currentUser?.username || 
-      b.bidderName === currentUser?.email
-    );
+    const myBidsOnItem = allBidsOnItem.filter(isMyBid);
 
     // Xác định mức giá cao nhất mà người này đã đặt
     let myHighestBid;
@@ -239,9 +237,7 @@ export function getParticipatingAuctions(currentUser) {
     // Đánh giá trạng thái: Ai đang dẫn đầu phiên?
     let isLead = false;
     if (allBidsOnItem.length > 0) {
-      const topBidder = allBidsOnItem[0].bidderName;
-      const isTopBidderMe = (topBidder === currentUsername || topBidder === currentUser?.username);
-      isLead = isTopBidderMe && (myHighestBid >= currentHighestBid);
+      isLead = isMyBid(allBidsOnItem[0]) && (myHighestBid >= currentHighestBid);
     } else {
       isLead = myHighestBid >= currentHighestBid;
     }

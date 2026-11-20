@@ -859,6 +859,9 @@ function executeQuickBid() {
     bids.unshift({
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       productId: currentModalProduct.id,
+      // Định danh người đặt bằng ID tài khoản (không trùng), kèm họ tên để hiển thị
+      bidderId: user.id || null,
+      bidderFullname: user.fullname || user.username || '',
       bidderName: user.username || 'pcbuilder99',
       amount: newBid,
       timestamp: new Date().toISOString()
