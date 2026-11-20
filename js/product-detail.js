@@ -5,7 +5,7 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Kiểm tra tiền cọc 10% trước khi đặt giá
 import { checkBidDeposit } from './wallet.js';
 // Watchlist lưu riêng theo từng tài khoản
@@ -227,20 +227,20 @@ async function nạpTatCaSanPham() {
   // Đồng bộ sản phẩm từ catalog
   const mergedList = danhSachGoc.map(sp => {
     const idNum = Number(sp.id);
-    const localUpdated = localMap.get(idNum);
+    // Gộp với bản trong localStorage (phiên đăng lại / phiên đã chốt được xử lý trong helper)
+    const base = mergeLocalProduct(sp, localMap.get(idNum));
     const bInfo = bidSummary.get(idNum);
 
-    let curBid = localUpdated?.currentBid !== undefined ? Number(localUpdated.currentBid) : Number(sp.currentBid || sp.startingPrice || 0);
-    let bCount = localUpdated?.bidCount !== undefined ? Number(localUpdated.bidCount) : Number(sp.bidCount || 0);
+    let curBid = Number(base.currentBid || base.startingPrice || 0);
+    let bCount = Number(base.bidCount || 0);
 
-    if (bInfo) {
+    if (bInfo && !isAuctionClosed(base)) {
       if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
       bCount = Math.max(bCount, bInfo.count);
     }
 
     const mergedItem = {
-      ...sp,
-      ...(localUpdated || {}),
+      ...base,
       id: idNum,
       currentBid: curBid,
       bidCount: bCount
@@ -290,8 +290,8 @@ async function timSanPhamTheoId(id) {
     found.endTimestamp = getAuctionEndTimestamp(found);
     found.endTime = new Date(found.endTimestamp).toISOString();
 
-    // Đảm bảo giá đấu luôn khớp với lượt bid cao nhất trong pcbid_bids
-    try {
+    // Đảm bảo giá đấu luôn khớp với lượt bid cao nhất trong pcbid_bids (phiên đã chốt giữ nguyên giá chốt)
+    if (!isAuctionClosed(found)) try {
       const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]');
       const spBids = bids.filter(b => Number(b.productId) === idNum);
       if (spBids.length > 0) {
@@ -585,7 +585,18 @@ function hienThiPhienKetThuc() {
   const oNhapGia = document.getElementById('pcb-pd-bid-input');
 
   if (demNguoc) demNguoc.hidden = true;
-  if (thongBaoKetThuc) thongBaoKetThuc.hidden = false;
+  if (thongBaoKetThuc) {
+    thongBaoKetThuc.hidden = false;
+    // Ghi rõ kết quả phiên: người thắng và giá chốt, hoặc không có lượt đặt giá
+    const sp = sanPhamHienTai;
+    if (sp && sp.winner) {
+      thongBaoKetThuc.textContent = `🔔 Phiên đấu giá đã kết thúc · Người thắng: ${sp.winner} với giá ${dinhDangVnd(sp.currentBid)}`;
+    } else if (sp && Number(sp.bidCount || 0) === 0) {
+      thongBaoKetThuc.textContent = '🔔 Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào';
+    } else {
+      thongBaoKetThuc.textContent = '🔔 Phiên đấu giá đã kết thúc';
+    }
+  }
   if (nutDatGia) {
     nutDatGia.disabled = true;
     nutDatGia.textContent = 'Phiên đấu giá đã kết thúc';
@@ -752,6 +763,8 @@ function taoLichSuMau(idSanPham, lichSuSanPham = []) {
 
     // Chọn tên người đặt giá khác với lượt liền kề (không tự vượt giá chính mình)
     let tenHienTai = tenNguoiMau[Math.floor(ngauNhien() * tenNguoiMau.length)];
+    // Phiên đã chốt: lượt cao nhất luôn là của người thắng
+    if (i === 0 && lichSuSanPham.length === 0 && sanPhamHienTai.winner) tenHienTai = sanPhamHienTai.winner;
     if (tenHienTai === tenTruocDo) {
       tenHienTai = tenNguoiMau[(tenNguoiMau.indexOf(tenHienTai) + 1) % tenNguoiMau.length];
     }
@@ -795,6 +808,13 @@ function xuLyDatGia() {
   // Xóa lỗi cũ
   if (oLoi) { oLoi.hidden = true; oLoi.textContent = ''; }
   oNhapGia.classList.remove('pcb-pd__input--error');
+
+  // Phiên đã kết thúc hoặc đã chốt: không nhận thêm lượt đặt giá
+  if (isAuctionClosed(sanPhamHienTai) || getAuctionEndTimestamp(sanPhamHienTai) <= Date.now()) {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đấu giá đã kết thúc, không thể đặt giá thêm.');
+    hienThiPhienKetThuc();
+    return;
+  }
 
   const soTienNhap = Number(oNhapGia.value);
   const giaToiThieu = (sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) + sanPhamHienTai.bidStep;

@@ -6,7 +6,7 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 
 
 /* ==========================================================================
@@ -225,15 +225,16 @@ async function loadAllProducts() {
     });
 
     // 1. Đồng bộ các sản phẩm đã có từ JSON với giá và lượt bid mới nhất
-    const mergedList = fetchedItems.map(item => {
-      const idNum = Number(item.id);
-      const localUpdated = localMap.get(idNum);
+    const mergedList = fetchedItems.map(rawItem => {
+      const idNum = Number(rawItem.id);
+      // Gộp với bản trong localStorage (phiên đăng lại / phiên đã chốt được xử lý trong helper)
+      const item = mergeLocalProduct(rawItem, localMap.get(idNum));
       const bInfo = bidSummary.get(idNum);
 
-      let curBid = localUpdated?.currentBid !== undefined ? Number(localUpdated.currentBid) : item.currentBid;
-      let bCount = localUpdated?.bidCount !== undefined ? Number(localUpdated.bidCount) : item.bidCount;
+      let curBid = Number(item.currentBid);
+      let bCount = Number(item.bidCount || 0);
 
-      if (bInfo) {
+      if (bInfo && !isAuctionClosed(item)) {
         if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
         bCount = Math.max(bCount, bInfo.count);
       }
@@ -242,6 +243,7 @@ async function loadAllProducts() {
         ...item,
         currentBid: curBid,
         bidCount: bCount,
+        endTimestamp: getAuctionEndTimestamp(item),
         marketPriceNew: item.marketPriceNew && item.marketPriceNew > curBid ? item.marketPriceNew : Math.round(curBid * 1.5)
       };
     });
@@ -267,10 +269,11 @@ async function loadAllProducts() {
       }
     });
 
-    rawProducts = [...customUserItems, ...mergedList];
+    // Chỉ hiển thị các phiên còn mở trên sàn; phiên đã bán / đã kết thúc vẫn xem được qua link chi tiết
+    rawProducts = [...customUserItems, ...mergedList].filter(p => !isAuctionClosed(p));
   } catch (e) {
     console.warn('[PCBid] Lỗi đồng bộ giá products:', e);
-    if (fetchedItems.length > 0) rawProducts = fetchedItems;
+    if (fetchedItems.length > 0) rawProducts = fetchedItems.filter(p => !isAuctionClosed(p));
   }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar
