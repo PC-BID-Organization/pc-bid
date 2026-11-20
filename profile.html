@@ -79,7 +79,7 @@
               </label>
               <input type="file" id="input-avatar-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
             </div>
-            <button type="button" class="pcb-user-card__avatar-remove" id="btn-remove-avatar" hidden>Xóa ảnh, dùng chữ cái</button>
+            <button type="button" class="pcb-user-card__avatar-remove" id="btn-remove-avatar" hidden>Đặt avatar thành mặc định</button>
 
             <h2 class="pcb-user-card__name" id="sidebar-user-name">Nguyễn Hùng Phong</h2>
             <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #PCB-00000000</p>
@@ -606,11 +606,15 @@
             <!-- Quyền riêng tư của hồ sơ công khai -->
             <form id="form-privacy" class="pcb-form pcb-privacy">
               <h3 class="pcb-privacy__title">Quyền riêng tư hồ sơ công khai</h3>
-              <p class="pcb-privacy__desc">Chọn thông tin người khác được xem khi mở hồ sơ của bạn. Mặc định tất cả đều công khai.</p>
+              <p class="pcb-privacy__desc">Chọn thông tin người khác được xem khi mở hồ sơ của bạn. Mặc định thông tin liên hệ ở chế độ riêng tư, các mục còn lại công khai.</p>
               <ul class="pcb-privacy__list">
                 <li class="pcb-privacy__item">
                   <span class="pcb-privacy__label">Tiểu sử</span>
                   <label class="pcb-switch"><input type="checkbox" name="bio" class="pcb-switch__input" checked><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Công khai</span></label>
+                </li>
+                <li class="pcb-privacy__item">
+                  <span class="pcb-privacy__label">Thông tin liên hệ (email, số điện thoại)</span>
+                  <label class="pcb-switch"><input type="checkbox" name="contact" class="pcb-switch__input"><span class="pcb-switch__track" aria-hidden="true"></span><span class="pcb-switch__text">Riêng tư</span></label>
                 </li>
                 <li class="pcb-privacy__item">
                   <span class="pcb-privacy__label">Linh kiện đã đăng bán</span>
@@ -642,12 +646,21 @@
                 <span class="pcb-public__role" id="public-role"></span>
               </div>
             </div>
-            <p class="pcb-public__self-note" id="public-self-note" hidden>Đây là cách người khác nhìn thấy hồ sơ của bạn. <a href="profile.html">Quay lại trang quản lý</a></p>
+            <div class="pcb-public__self-note" id="public-self-note" hidden>
+              <span>Đây là cách người khác nhìn thấy hồ sơ của bạn.</span>
+              <a class="pcb-public__back-btn" href="profile.html">← Quay lại trang quản lý</a>
+            </div>
 
-            <section class="pcb-public__block" aria-labelledby="public-bio-title">
-              <h2 class="pcb-public__block-title" id="public-bio-title">Tiểu sử</h2>
-              <div id="public-bio"></div>
-            </section>
+            <div class="pcb-public__intro">
+              <section class="pcb-public__block pcb-public__block--bio" aria-labelledby="public-bio-title">
+                <h2 class="pcb-public__block-title" id="public-bio-title">Tiểu sử</h2>
+                <div id="public-bio"></div>
+              </section>
+              <section class="pcb-public__block pcb-public__block--contact" aria-labelledby="public-contact-title">
+                <h2 class="pcb-public__block-title" id="public-contact-title">Liên hệ</h2>
+                <div id="public-contact"></div>
+              </section>
+            </div>
             <section class="pcb-public__block" aria-labelledby="public-selling-title">
               <h2 class="pcb-public__block-title" id="public-selling-title">Linh kiện đã đăng bán</h2>
               <div id="public-selling"></div>

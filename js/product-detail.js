@@ -13,6 +13,9 @@ import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from '.
 // Họ tên, UID và avatar chữ cái của người dùng
 import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
 
+// Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
+let luotDanDauHienTai = null;
+
 
 /* ==========================================================================
    1. CẤU HÌNH & NGUỒN DỮ LIỆU
@@ -490,6 +493,70 @@ function hienThiNguoiBan(tenNguoiBan) {
 }
 
 /**
+ * Kiểm tra người dùng đang đăng nhập có phải người bán của phiên hiện tại không
+ * @returns {boolean}
+ */
+function laNguoiBanHienTai() {
+  if (!sanPhamHienTai) return false;
+  const nguoiDung = readLoggedInUser();
+  if (!nguoiDung) return false;
+  const nguoiBan = sanPhamHienTai.seller;
+  return nguoiDung.username === nguoiBan || nguoiDung.email === nguoiBan || nguoiDung.fullname === nguoiBan;
+}
+
+/**
+ * Người bán xem phiên của chính mình: ẩn khung đặt giá, hiện bảng quản lý phiên
+ */
+function capNhatCheDoNguoiBan() {
+  const bangNguoiBan = document.getElementById('pcb-pd-owner-panel');
+  const hopDatGia = document.getElementById('pcb-pd-bidbox');
+  if (!bangNguoiBan || !hopDatGia || !sanPhamHienTai) return;
+
+  const laChuPhien = laNguoiBanHienTai();
+  bangNguoiBan.hidden = !laChuPhien;
+  hopDatGia.hidden = laChuPhien;
+  if (!laChuPhien) return;
+
+  const sp = sanPhamHienTai;
+  const daKetThuc = isAuctionClosed(sp) || getAuctionEndTimestamp(sp) <= Date.now();
+  const soLuot = Number(sp.bidCount || 0);
+  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : 'Đang diễn ra';
+
+  const oTrangThai = document.getElementById('pcb-pd-owner-status');
+  if (oTrangThai) {
+    oTrangThai.textContent = trangThai;
+    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : 'active';
+  }
+  const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  ganChu('pcb-pd-owner-price', dinhDangVnd(sp.currentBid || sp.startingPrice));
+  ganChu('pcb-pd-owner-count', `${soLuot} lượt`);
+  ganChu('pcb-pd-owner-start', dinhDangVnd(sp.startingPrice));
+
+  const oDanDau = document.getElementById('pcb-pd-owner-leader');
+  if (oDanDau) {
+    if (soLuot > 0 && luotDanDauHienTai) {
+      const nguoi = describeBidder(luotDanDauHienTai);
+      oDanDau.textContent = `${nguoi.name}${nguoi.maskedUid ? ` · ${nguoi.maskedUid}` : ''}`;
+    } else {
+      oDanDau.textContent = 'Chưa có lượt đặt giá';
+    }
+  }
+
+  // Phiên kết thúc mà không ai đặt giá: cho phép đăng bán lại đúng phiên này
+  const nutDangLai = document.getElementById('pcb-pd-owner-relist');
+  if (nutDangLai) {
+    nutDangLai.hidden = !(daKetThuc && soLuot === 0 && sp.status !== 'sold');
+    nutDangLai.href = `sell.html?relist=${sp.id}`;
+  }
+  const nutHoSo = document.getElementById('pcb-pd-owner-public');
+  if (nutHoSo) nutHoSo.href = `profile.html?user=${encodeURIComponent(sp.seller || '')}`;
+
+  // Người bán không cần nút theo dõi phiên của chính mình
+  const nutTheoDoi = document.getElementById('pcb-pd-watchlist-btn');
+  if (nutTheoDoi) nutTheoDoi.hidden = true;
+}
+
+/**
  * Render bảng thông số kỹ thuật từ object specifications
  * @param {Object} thongSo - Object thông số dạng { "Thông số": "Giá trị" }
  */
@@ -673,6 +740,10 @@ function renderLichSu(idSanPham) {
   // Cập nhật huy hiệu tổng số lượt đặt giá trên tab
   const tongSoLuot = Math.max(tatCaLichSu.length, sanPhamHienTai?.bidCount || 0);
   if (huyHieuSoLuot) huyHieuSoLuot.textContent = tongSoLuot;
+
+  // Ghi nhận người đang dẫn đầu rồi cập nhật bảng quản lý của người bán (nếu đang xem phiên của mình)
+  luotDanDauHienTai = tatCaLichSu[0] || null;
+  capNhatCheDoNguoiBan();
 
   if (tatCaLichSu.length === 0) {
     tbody.innerHTML = '';

@@ -508,8 +508,14 @@
   gap: 8px;
   border-bottom: 2px solid #f1f5f9;
   margin-bottom: 20px;
+  /* Cuộn ngang khi hẹp nhưng ẩn thanh cuộn, không để lộ thanh kéo dọc */
   overflow-x: auto;
-  scrollbar-width: thin;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.pcb-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .pcb-tab {
@@ -2385,4 +2391,107 @@
 /* Chỉ hiện nút xóa ảnh khi người dùng đã tải ảnh lên */
 .pcb-user-card__avatar-remove[hidden] {
   display: none;
+}
+
+/* ==========================================================================
+   HỒ SƠ CÔNG KHAI: NÚT QUAY LẠI, KHUNG TIỂU SỬ NỔI BẬT, KHỐI LIÊN HỆ
+   ========================================================================== */
+.pcb-public__self-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pcb-public__self-note[hidden] {
+  display: none;
+}
+
+.pcb-public__back-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-primary, #ea580c);
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pcb-public__back-btn:hover,
+.pcb-public__back-btn:focus-visible {
+  background-color: var(--color-primary-hover, #d94e07);
+}
+
+/* Tiểu sử và liên hệ đặt cạnh nhau trên màn hình rộng */
+.pcb-public__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pcb-public__intro .pcb-public__block {
+  margin-top: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.pcb-public__block--bio {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fed7aa;
+  border-left: 4px solid var(--color-primary, #ea580c);
+}
+
+.pcb-public__block--bio .pcb-public__bio {
+  font-size: 0.95rem;
+  color: #431407;
+}
+
+.pcb-public__block--contact {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.pcb-public__contact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pcb-public__contact li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pcb-public__contact span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.pcb-public__contact a {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0b1c30);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.pcb-public__contact a:hover,
+.pcb-public__contact a:focus-visible {
+  color: var(--color-primary, #ea580c);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .pcb-public__intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

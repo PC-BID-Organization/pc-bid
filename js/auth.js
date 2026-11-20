@@ -122,13 +122,12 @@ function initLoginForm() {
       clearFieldError(inputUsername, 'err-login-username');
       clearFieldError(inputPassword, 'err-login-password');
 
-      // Hiệu ứng phản hồi thị giác
-      btn.style.borderColor = '#10b981';
-      btn.style.backgroundColor = '#ecfdf5';
-      setTimeout(() => {
-        btn.style.borderColor = '#a7f3d0';
-        btn.style.backgroundColor = '#ffffff';
-      }, 400);
+      // Giữ nguyên trạng thái được chọn (viền xanh) cho tới khi chọn tài khoản khác
+      demoButtons.forEach(other => {
+        const selected = other === btn;
+        other.classList.toggle('pcb-demo-btn--selected', selected);
+        other.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
     });
   });
 
@@ -160,7 +159,8 @@ function initLoginForm() {
 
     // Tra cứu tài khoản từ danh sách đăng ký hoặc danh sách tài khoản mẫu có sẵn
     const registeredUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    const allKnownUsers = [...SAMPLE_ACCOUNTS, ...registeredUsers];
+    // Ưu tiên bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử... sau khi đăng xuất / đăng nhập lại)
+    const allKnownUsers = [...registeredUsers, ...SAMPLE_ACCOUNTS];
     const lowerInput = usernameVal.toLowerCase();
 
     // Tìm kiếm theo username, email, hoặc alias linh hoạt

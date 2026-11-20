@@ -658,7 +658,7 @@ function syncUserInfoUI() {
   if (privacyForm) {
     const privacy = getPrivacy(user);
     privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
-      input.checked = privacy[input.name] !== false;
+      input.checked = Boolean(privacy[input.name]);
       updateSwitchText(input);
     });
   }
@@ -1088,12 +1088,28 @@ async function renderPublicProfile(username) {
     else bioEl.innerHTML = `<p class="pcb-public__bio">${account.bio ? escapeHtml(account.bio) : 'Người dùng chưa viết tiểu sử.'}</p>`;
   }
 
+  // Liên hệ: email và số điện thoại (mặc định riêng tư)
+  const contactEl = document.getElementById('public-contact');
+  if (contactEl) {
+    if (!privacy.contact) {
+      contactEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng chưa công khai thông tin liên hệ.</p>';
+    } else if (!account.email && !account.phone) {
+      contactEl.innerHTML = '<p class="pcb-public__empty">Chưa có thông tin liên hệ.</p>';
+    } else {
+      contactEl.innerHTML = `<ul class="pcb-public__contact">
+        ${account.email ? `<li><span>Email</span><a href="mailto:${escapeHtml(account.email)}">${escapeHtml(account.email)}</a></li>` : ''}
+        ${account.phone ? `<li><span>Điện thoại</span><a href="tel:${escapeHtml(account.phone)}">${escapeHtml(account.phone)}</a></li>` : ''}
+      </ul>`;
+    }
+  }
+
   // Linh kiện đã đăng bán: mọi phiên có người bán là tài khoản này
   const products = await loadAllProductsForPublic();
   const now = Date.now();
   const selling = products.filter(p => p.seller === username);
   const roleEl = document.getElementById('public-role');
-  if (roleEl) roleEl.textContent = account.role === 'seller' || selling.length ? '🏪 Người bán hàng' : '👤 Đấu giá viên';
+  // Mọi tài khoản đều là đấu giá viên; nếu có đăng bán thì ghi thêm số phiên
+  if (roleEl) roleEl.textContent = selling.length ? `👤 Đấu giá viên · ${selling.length} phiên đăng bán` : '👤 Đấu giá viên';
   fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
     const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
     const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
@@ -1589,11 +1605,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeAvatarBtn = document.getElementById('btn-remove-avatar');
   if (removeAvatarBtn) {
     removeAvatarBtn.addEventListener('click', () => {
+      if (!confirm('Đặt avatar về mặc định (chữ cái đầu của tên)? Ảnh đại diện hiện tại sẽ bị xóa.')) return;
       const user = getCurrentUser();
       delete user.avatarImage;
       saveCurrentUser(user);
       syncUserInfoUI();
-      showToast('Đã xóa ảnh, avatar quay về chữ cái đầu của tên.');
+      showToast('Đã đặt avatar về mặc định.');
     });
   }
 

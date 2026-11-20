@@ -14,7 +14,8 @@ const STORAGE_KEY_CURRENT = 'pcbid_currentUser';
 
 /**
  * 4 tài khoản demo gắn với 4 thành viên nhóm (mật khẩu chung 123456)
- * bidder1, bidder2, bidder3: người đấu giá · seller: người bán
+ * Mọi tài khoản đều là thành viên đấu giá; ai cũng có thể đăng bán.
+ * Tài khoản "seller" chỉ khác ở chỗ có sẵn các phiên đăng bán mẫu.
  */
 export const DEMO_ACCOUNTS = [
   {
@@ -95,7 +96,7 @@ export const DEMO_ACCOUNTS = [
     fullname: 'Nguyễn Gia Huy',
     email: 'seller@pcbid.vn',
     phone: '0987654321',
-    role: 'seller',
+    role: 'bidder',
     verified: true,
     walletBalance: 80000000,
     address: '45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh',
@@ -112,12 +113,13 @@ export const DEMO_ACCOUNTS = [
 ];
 
 // Quyền riêng tư mặc định của hồ sơ công khai: tất cả đều công khai
-export const DEFAULT_PRIVACY = { bio: true, selling: true, participating: true, watchlist: true };
+// Thông tin liên hệ (email, số điện thoại) mặc định ở chế độ riêng tư
+export const DEFAULT_PRIVACY = { bio: true, selling: true, participating: true, watchlist: true, contact: false };
 
 /**
  * Lấy cài đặt quyền riêng tư (true = công khai) của người dùng, mặc định công khai
  * @param {Object|null} user - Người dùng
- * @returns {{bio: boolean, selling: boolean, participating: boolean, watchlist: boolean}}
+ * @returns {{bio: boolean, selling: boolean, participating: boolean, watchlist: boolean, contact: boolean}}
  */
 export function getPrivacy(user) {
   return { ...DEFAULT_PRIVACY, ...(user?.privacy || {}) };
@@ -302,6 +304,8 @@ export function describeBidder(bid) {
  */
 function upgradeDemoAccount(user) {
   if (!user) return user;
+  // Hợp nhất vai trò: không còn tách "người bán", mọi tài khoản đều là thành viên đấu giá
+  if (user.role === 'seller') user = { ...user, role: 'bidder' };
   const demo = DEMO_ACCOUNTS.find(d => d.username === user.username);
   if (!demo) return user;
   let upgraded = user;
