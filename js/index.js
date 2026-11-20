@@ -8,6 +8,10 @@
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
+// Danh sách phiên và lượt đặt giá thật dùng cho băng chuyền trực tiếp
+import { loadAllAuctions, readAllBids } from './bid-history.js';
+// Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
+import { describeBidder, findAccount } from './accounts.js';
 
 
 /* ==========================================================================
@@ -177,15 +181,6 @@ const FALLBACK_PRODUCTS = [
     images: ["images/products/cpu/1012-i5-13600k-1.jpg"],
     specifications: { "Socket": "LGA1700", "Số nhân / Số luồng": "14 nhân (6P + 8E) / 20 luồng", "Xung cơ bản / Xung Boost": "3.50 GHz / 5.10 GHz", "Bộ nhớ đệm (Cache)": "24 MB Intel Smart Cache", "TDP": "125 W" }
   }
-];
-
-// Danh sách sự kiện trực tiếp cho băng chuyền (Ticker Events)
-const TICKER_EVENTS = [
-  { user: "Đức Long", amount: "5.900.000đ", item: "ASUS ROG Strix RTX 3070 8GB", time: "12 giây trước" },
-  { user: "Văn Minh", amount: "5.000.000đ", item: "Ryzen 7 5800X3D V-Cache", time: "28 giây trước" },
-  { user: "Thanh Tùng", amount: "4.700.000đ", item: "MSI MAG Z790 Tomahawk", time: "45 giây trước" },
-  { user: "Hải Nam", amount: "1.900.000đ", item: "Samsung 980 Pro 1TB NVMe", time: "1 phút trước" },
-  { user: "Quốc Bảo", amount: "1.700.000đ", item: "RAM G.Skill Trident Z RGB 32GB", time: "2 phút trước" }
 ];
 
 let allProducts = [];
@@ -676,22 +671,118 @@ function updateAllCountdowns() {
    7. BĂNG CHUYỀN HOẠT ĐỘNG TRỰC TIẾP (LIVE TICKER CAROUSEL)
    ========================================================================== */
 
+// Số lượt đặt giá mới nhất hiển thị trên băng chuyền
+const TICKER_LIMIT = 12;
 let tickerIndex = 0;
-function initLiveTicker() {
+let tickerProductMap = new Map();
+
+/**
+ * Hiển thị khoảng thời gian tương đối, ví dụ "12 giây trước"
+ * @param {string} iso - Thời điểm dạng ISO
+ * @returns {string}
+ */
+function formatTimeAgo(iso) {
+  const diff = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+  if (diff < 5) return 'vừa xong';
+  if (diff < 60) return `${diff} giây trước`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+  return `${Math.floor(diff / 86400)} ngày trước`;
+}
+
+/**
+ * Lấy các lượt đặt giá thật mới nhất (bot + mọi tài khoản) để hiển thị trên băng chuyền
+ * @returns {Array}
+ */
+function getLatestTickerBids() {
+  return readAllBids()
+    .filter(b => tickerProductMap.has(Number(b.productId)) && b.timestamp)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, TICKER_LIMIT);
+}
+
+/**
+ * Render băng chuyền: tên người đặt mở hồ sơ công khai, tên linh kiện mở trang chi tiết phiên
+ * @param {string|null} [newBidId] - ID lượt vừa đặt để làm nổi bật
+ */
+function renderLiveTicker(newBidId = null) {
+  const track = document.getElementById('pcb-ticker-track');
+  if (!track) return;
+  const bids = getLatestTickerBids();
+
+  if (!bids.length) {
+    track.innerHTML = '<div class="pcb-ticker__item">Đang chờ lượt đặt giá đầu tiên...</div>';
+    tickerIndex = 0;
+    track.style.transform = 'translateY(0)';
+    return;
+  }
+
+  track.innerHTML = bids.map(bid => {
+    const product = tickerProductMap.get(Number(bid.productId));
+    const bidder = describeBidder(bid);
+    const account = findAccount({ id: bid.bidderId, username: bid.bidderName });
+    const nameHtml = account?.username
+      ? `<a class="pcb-ticker__user" href="profile.html?user=${encodeURIComponent(account.username)}">${escapeHtml(bidder.name)}</a>`
+      : `<strong>${escapeHtml(bidder.name)}</strong>`;
+    return `
+      <div class="pcb-ticker__item${bid.id === newBidId ? ' pcb-ticker__item--new' : ''}">
+        <span class="pcb-ticker__text">🔥 ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
+          <a class="pcb-ticker__product" href="product-detail.html?id=${product.id}">${escapeHtml(product.name)}</a></span>
+        <span class="pcb-ticker__time" data-time="${escapeHtml(bid.timestamp)}">• ${formatTimeAgo(bid.timestamp)}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Có lượt mới thì quay về dòng đầu tiên (lượt mới nhất)
+  if (newBidId || tickerIndex >= bids.length) tickerIndex = 0;
+  track.style.transform = `translateY(-${tickerIndex * 22}px)`;
+}
+
+/**
+ * Khởi động băng chuyền hoạt động trực tiếp, cập nhật theo thời gian thực
+ */
+async function initLiveTicker() {
   const track = document.getElementById('pcb-ticker-track');
   if (!track) return;
 
-  track.innerHTML = TICKER_EVENTS.map(evt => `
-    <div class="pcb-ticker__item">
-      <span>🔥 <strong>${escapeHtml(evt.user)}</strong> vừa đặt <span class="pcb-ticker__price">${evt.amount}</span> cho <em>${escapeHtml(evt.item)}</em></span>
-      <span class="pcb-ticker__time">• ${evt.time}</span>
-    </div>
-  `).join('');
+  const auctions = await loadAllAuctions();
+  tickerProductMap = new Map(auctions.map(p => [Number(p.id), p]));
+  renderLiveTicker();
 
+  // Tự cuộn sang lượt tiếp theo; dừng khi người dùng rê chuột để kịp bấm vào liên kết
+  let paused = false;
+  track.addEventListener('mouseenter', () => { paused = true; });
+  track.addEventListener('mouseleave', () => { paused = false; });
+  track.addEventListener('focusin', () => { paused = true; });
+  track.addEventListener('focusout', () => { paused = false; });
   setInterval(() => {
-    tickerIndex = (tickerIndex + 1) % TICKER_EVENTS.length;
+    if (paused) return;
+    const count = track.children.length;
+    if (count <= 1) return;
+    tickerIndex = (tickerIndex + 1) % count;
     track.style.transform = `translateY(-${tickerIndex * 22}px)`;
   }, 3800);
+
+  // Cập nhật nhãn "x giây trước" mỗi 5 giây
+  setInterval(() => {
+    track.querySelectorAll('.pcb-ticker__time[data-time]').forEach(el => {
+      el.textContent = `• ${formatTimeAgo(el.dataset.time)}`;
+    });
+  }, 5000);
+
+  // Lượt đặt mới trong tab này (bot) hoặc từ tab khác (sự kiện storage)
+  const refresh = async (newBidId) => {
+    const latest = await loadAllAuctions();
+    tickerProductMap = new Map(latest.map(p => [Number(p.id), p]));
+    renderLiveTicker(newBidId);
+  };
+  window.addEventListener('pcbid:bid-placed', e => refresh(e.detail?.id || null));
+  window.addEventListener('storage', e => {
+    if (e.key === 'pcbid_bids' && e.isTrusted) {
+      const newest = getLatestTickerBids()[0];
+      refresh(newest ? newest.id : null);
+    }
+  });
 }
 
 /* ==========================================================================

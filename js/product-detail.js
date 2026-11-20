@@ -1365,7 +1365,52 @@ window.addEventListener('pageshow', (event) => {
 window.addEventListener('storage', (e) => {
   if ((e.key === 'pcbid_products' || e.key === 'pcbid_bids') && sanPhamHienTai) {
     timSanPhamTheoId(sanPhamHienTai.id).then(sp => {
-      if (sp) hienThiSanPham(sp);
+      if (!sp) return;
+      // Phiên đổi vòng đời (đóng sớm, đăng lại, đổi thời hạn): render lại toàn bộ;
+      // chỉ có lượt đặt giá mới (bot hoặc tab khác): cập nhật nhẹ, giữ nguyên ảnh và ô nhập
+      const doiVongDoi = sp.endTimestamp !== sanPhamHienTai.endTimestamp
+        || sp.status !== sanPhamHienTai.status
+        || Boolean(sp.closedEarly) !== Boolean(sanPhamHienTai.closedEarly);
+      if (doiVongDoi) hienThiSanPham(sp);
+      else capNhatLuotDatTrucTiep(sp);
     });
   }
 });
+
+/**
+ * Cập nhật giá, số lượt và bảng lịch sử khi có lượt đặt giá mới theo thời gian thực
+ * @param {Object} sp - Bản sản phẩm mới nhất
+ */
+function capNhatLuotDatTrucTiep(sp) {
+  const danDauTruoc = luotDanDauHienTai;
+  const giaTruoc = Number(sanPhamHienTai.currentBid) || 0;
+  if (Number(sp.currentBid) === giaTruoc && Number(sp.bidCount) === Number(sanPhamHienTai.bidCount)) return;
+
+  sanPhamHienTai.currentBid = sp.currentBid;
+  sanPhamHienTai.bidCount = sp.bidCount;
+  capNhatGia(sanPhamHienTai);
+  const soluot = document.getElementById('pcb-pd-bid-count');
+  if (soluot) soluot.textContent = sanPhamHienTai.bidCount || 0;
+
+  // Nâng mức tối thiểu của ô nhập nếu giá vừa bị đẩy lên
+  const giaToiThieu = (Number(sp.currentBid) || 0) + (Number(sanPhamHienTai.bidStep) || 0);
+  const oNhapGia = document.getElementById('pcb-pd-bid-input');
+  if (oNhapGia) {
+    oNhapGia.min = giaToiThieu;
+    if (Number(oNhapGia.value) < giaToiThieu) oNhapGia.value = giaToiThieu;
+  }
+
+  renderLichSu(sanPhamHienTai.id);
+
+  // Thông báo nhanh: bị vượt giá hoặc có người vừa đặt giá
+  const nguoiDung = readLoggedInUser();
+  const laCuaToi = luot => Boolean(nguoiDung && luot && (luot.bidderId ? luot.bidderId === nguoiDung.id : luot.bidderName === nguoiDung.username));
+  const danDauMoi = luotDanDauHienTai;
+  if (!danDauMoi || Number(danDauMoi.amount) <= giaTruoc) return;
+  const tenMoi = describeBidder(danDauMoi).name;
+  if (laCuaToi(danDauTruoc) && !laCuaToi(danDauMoi)) {
+    hienThiToast(`Bạn vừa bị ${tenMoi} vượt giá: ${dinhDangVnd(danDauMoi.amount)}`, 'error', 5000);
+  } else if (!laCuaToi(danDauMoi)) {
+    hienThiToast(`${tenMoi} vừa đặt ${dinhDangVnd(danDauMoi.amount)}`, 'info', 3500);
+  }
+}
