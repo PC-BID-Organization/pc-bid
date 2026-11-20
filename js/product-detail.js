@@ -12,6 +12,8 @@ import { checkBidDeposit } from './wallet.js';
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 // Họ tên, UID và avatar chữ cái của người dùng
 import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
+// Hộp thoại xác nhận dùng chung
+import { showConfirm } from './dialog.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -548,12 +550,91 @@ function capNhatCheDoNguoiBan() {
     nutDangLai.hidden = !(daKetThuc && soLuot === 0 && sp.status !== 'sold');
     nutDangLai.href = `sell.html?relist=${sp.id}`;
   }
+  // Phiên còn đang diễn ra: người bán có thể đóng phiên ngay
+  const nutDong = document.getElementById('pcb-pd-owner-close');
+  if (nutDong) {
+    nutDong.hidden = daKetThuc;
+    if (!nutDong.dataset.bound) {
+      nutDong.dataset.bound = '1';
+      nutDong.addEventListener('click', dongPhienNgay);
+    }
+  }
   const nutHoSo = document.getElementById('pcb-pd-owner-public');
   if (nutHoSo) nutHoSo.href = `profile.html?user=${encodeURIComponent(sp.seller || '')}`;
 
   // Người bán không cần nút theo dõi phiên của chính mình
   const nutTheoDoi = document.getElementById('pcb-pd-watchlist-btn');
   if (nutTheoDoi) nutTheoDoi.hidden = true;
+}
+
+/**
+ * Người bán đóng phiên ngay (không muốn chờ tới hết giờ)
+ * - Có lượt đặt giá: người đang dẫn đầu thắng với giá hiện tại (Đã bán)
+ * - Chưa có lượt nào: phiên kết thúc, người bán có thể đăng bán lại
+ */
+async function dongPhienNgay() {
+  if (!sanPhamHienTai || !laNguoiBanHienTai()) return;
+  const sp = sanPhamHienTai;
+  const soLuot = Number(sp.bidCount || 0);
+  const nguoiThang = soLuot > 0 && luotDanDauHienTai ? describeBidder(luotDanDauHienTai) : null;
+
+  const dongY = await showConfirm({
+    title: 'Đóng phiên đấu giá ngay?',
+    message: nguoiThang
+      ? `Phiên sẽ kết thúc ngay và ${nguoiThang.name} thắng với giá ${dinhDangVnd(sp.currentBid)}.\nThao tác này không thể hoàn tác.`
+      : 'Phiên chưa có lượt đặt giá nào sẽ kết thúc ngay.\nBạn có thể đăng bán lại phiên này sau.',
+    confirmText: 'Đóng phiên',
+    cancelText: 'Tiếp tục đấu giá',
+    tone: 'danger'
+  });
+  if (!dongY) return;
+
+  const ketThucLuc = new Date().toISOString();
+  const tenNguoiThang = nguoiThang ? (luotDanDauHienTai.bidderName || '') : '';
+  const trangThai = nguoiThang ? 'sold' : 'ended';
+
+  // Lưu trạng thái phiên vào pcbid_products (bản chuẩn cho mọi trang)
+  try {
+    const dsSanPham = JSON.parse(localStorage.getItem('pcbid_products') || '[]')
+      .filter(p => Number(p.id) !== Number(sp.id));
+    const banLuu = { ...sp, status: trangThai, endTime: ketThucLuc, closedEarly: true };
+    if (tenNguoiThang) banLuu.winner = tenNguoiThang;
+    else delete banLuu.winner;
+    delete banLuu.endTimestamp;
+    dsSanPham.unshift(banLuu);
+    localStorage.setItem('pcbid_products', JSON.stringify(dsSanPham));
+
+    // Cập nhật thẻ trong tab "Linh kiện tôi đã đăng bán" của người bán
+    const nguoiBan = readLoggedInUser();
+    const dsDangBan = readUserList(USER_LIST_KEYS.SELLING, nguoiBan).map(item => Number(item.id) === Number(sp.id)
+      ? {
+          ...item,
+          status: trangThai,
+          closedEarly: true,
+          endTime: ketThucLuc,
+          currentBid: sp.currentBid,
+          bidCount: soLuot,
+          highestBidder: tenNguoiThang || undefined,
+          soldDate: nguoiThang ? new Date().toLocaleDateString('vi-VN') : undefined
+        }
+      : item);
+    writeUserList(USER_LIST_KEYS.SELLING, nguoiBan, dsDangBan);
+  } catch (e) {
+    console.warn('[PCBid] Không thể đóng phiên:', e);
+    return;
+  }
+
+  // Cập nhật giao diện ngay trên trang
+  sp.status = trangThai;
+  sp.endTime = ketThucLuc;
+  sp.endTimestamp = new Date(ketThucLuc).getTime();
+  sp.closedEarly = true;
+  if (tenNguoiThang) sp.winner = tenNguoiThang;
+  if (idIntervalDemNguoc) clearInterval(idIntervalDemNguoc);
+  hienThiDemNguoc(0, 0, 0, 0);
+  hienThiPhienKetThuc();
+  capNhatCheDoNguoiBan();
+  hienThiToast(nguoiThang ? `Đã đóng phiên. ${nguoiThang.name} thắng phiên đấu giá.` : 'Đã đóng phiên đấu giá.', 'success');
 }
 
 /**

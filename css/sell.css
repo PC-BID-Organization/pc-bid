@@ -608,3 +608,156 @@
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   KHU VỰC ẢNH SẢN PHẨM: ẢNH ĐÃ CHỌN, TẢI ẢNH LÊN, ẢNH ĐỀ XUẤT
+   ========================================================================== */
+.pcb-photo-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background-color: #f8fafc;
+  border: 1px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: 12px;
+}
+
+.pcb-photo-picker__limit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-photo-picker__subtitle {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pcb-photo-picker__subtitle span {
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.pcb-photo-picker__selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-photo-picker__empty {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.pcb-photo-chip {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  padding: 4px;
+  background-color: #ffffff;
+  border: 2px solid var(--pcb-border-light, #e2e8f0);
+  border-radius: 10px;
+}
+
+.pcb-photo-chip--cover {
+  border-color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-photo-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.pcb-photo-chip__badge,
+.pcb-photo-chip__cover {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.pcb-photo-chip__badge {
+  color: #ffffff;
+  background-color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-photo-chip__cover {
+  color: #334155;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+}
+
+.pcb-photo-chip__cover:hover,
+.pcb-photo-chip__cover:focus-visible {
+  color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #ea580c);
+}
+
+.pcb-photo-chip__remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1;
+  color: #ffffff;
+  background-color: #0b1c30;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.pcb-photo-chip__remove:hover,
+.pcb-photo-chip__remove:focus-visible {
+  background-color: #dc2626;
+}
+
+/* Nút tải ảnh từ máy */
+.pcb-photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcb-primary, #ea580c);
+  background-color: #ffffff;
+  border: 1.5px dashed #fdba74;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pcb-photo-upload:hover,
+.pcb-photo-upload:focus-visible {
+  background-color: #fff7ed;
+}
+
+/* Ô ảnh đề xuất là nút bấm: bỏ kiểu mặc định của trình duyệt */
+button.pcb-thumb-item {
+  font: inherit;
+}
+
+@media (max-width: 420px) {
+  .pcb-photo-chip {
+    width: 78px;
+    height: 78px;
+  }
+}

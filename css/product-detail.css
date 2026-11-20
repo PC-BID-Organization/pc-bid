@@ -1524,3 +1524,17 @@ a.pcb-pd__seller-avatar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Nút đóng phiên sớm của người bán */
+.pcb-pd__owner-btn--danger {
+  font-family: inherit;
+  color: #b91c1c;
+  background-color: #ffffff;
+  border-color: #fca5a5;
+  cursor: pointer;
+}
+
+.pcb-pd__owner-btn--danger:hover,
+.pcb-pd__owner-btn--danger:focus-visible {
+  background-color: #fef2f2;
+}

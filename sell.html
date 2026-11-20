@@ -149,16 +149,35 @@
               </div>
             </div>
 
-            <!-- Lưới thumbnail ảnh có sẵn trong repo để chọn ảnh đại diện -->
+            <!-- Ảnh sản phẩm: ảnh người bán tải lên + ảnh đề xuất theo mẫu đã chọn; chọn nhiều ảnh, ảnh đầu là ảnh bìa -->
             <div class="pcb-form-group">
-              <label class="pcb-form-label pcb-form-label--required">
-                <span>Chọn ảnh đại diện cho món hàng</span>
-                <span style="font-size:11px; font-weight:normal; color:#ea580c;">Click chọn ảnh nét nhất</span>
-              </label>
-              <div class="pcb-thumb-grid" id="sell-thumb-grid">
-                <!-- JS nạp các ảnh tương ứng với danh mục và mẫu sản phẩm -->
+              <div class="pcb-form-label pcb-form-label--required">
+                <span>Ảnh sản phẩm</span>
+                <span class="pcb-photo-picker__limit" id="sell-photo-count">0/6 ảnh</span>
               </div>
-              <span class="pcb-form-hint">Ảnh được trích xuất trực tiếp từ kho linh kiện kiểm định thực tế của PCBid.</span>
+              <div class="pcb-photo-picker">
+                <p class="pcb-photo-picker__subtitle">Ảnh đã chọn <span>(ảnh đầu tiên là ảnh bìa)</span></p>
+                <ul class="pcb-photo-picker__selected" id="sell-selected-photos" aria-live="polite">
+                  <!-- JS hiển thị các ảnh đã chọn -->
+                </ul>
+
+                <p class="pcb-photo-picker__subtitle">Tải ảnh của bạn</p>
+                <label class="pcb-photo-upload" for="sell-photo-input">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <span>Chọn ảnh từ máy (có thể chọn nhiều ảnh) · PNG, JPG, WEBP · tối đa 5MB/ảnh</span>
+                </label>
+                <input type="file" id="sell-photo-input" accept="image/png,image/jpeg,image/webp" multiple hidden>
+
+                <p class="pcb-photo-picker__subtitle">Ảnh đề xuất từ kho PCBid <span>(bấm để thêm / bỏ)</span></p>
+                <div class="pcb-thumb-grid" id="sell-thumb-grid">
+                  <!-- JS nạp các ảnh liên quan tới mẫu sản phẩm đã chọn -->
+                </div>
+              </div>
+              <span class="pcb-form-hint">Ảnh thật do bạn chụp giúp người mua tin tưởng hơn. Ảnh tải lên được thu gọn để lưu trên trình duyệt.</span>
             </div>
           </div>
 
