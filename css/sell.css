@@ -753,7 +753,7 @@ button.pcb-thumb-item {
    THANH TIẾN TRÌNH TẠO PHIÊN (bám theo khi cuộn)
    ========================================================================== */
 .pcb-sell-progress {
-  --progress: 0%;
+  --progress-ratio: 0;
   position: sticky;
   top: 8px;
   z-index: 40;
@@ -793,7 +793,7 @@ button.pcb-thumb-item {
 }
 
 .pcb-sell-progress__list::after {
-  width: calc((100% - 100% / 3) * var(--progress) / 100%);
+  width: calc((100% - 100% / 3) * var(--progress-ratio, 0));
   background-color: #16a34a;
   transition: width 0.3s ease;
 }
@@ -1066,4 +1066,15 @@ button.pcb-thumb-item {
   opacity: 0.5;
   pointer-events: none;
   filter: grayscale(0.4);
+}
+
+/* Thông báo khi một nhóm ảnh đề xuất không có ảnh */
+.pcb-thumb-grid__empty {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  background-color: #ffffff;
+  border: 1px dashed #e2e8f0;
+  border-radius: 8px;
 }
