@@ -11,6 +11,8 @@ import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from '../../js/dialog.js';
+// Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
+import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -229,7 +231,7 @@ function initHeaderUserStatus() {
           <div class="header__dropdown-avatar">${user.avatarImage ? renderAvatarContent(user, 'header__avatar-photo') : escapeHeaderHtml(initials)}</div>
           <div class="header__dropdown-meta">
             <div class="header__dropdown-name">${escapeHeaderHtml(displayName)}</div>
-            <span class="header__dropdown-role-badge ${roleClass}">${roleText}</span>
+            <span class="header__dropdown-role-badge ${roleClass}" id="header-dropdown-role">${roleText}</span>
             <div class="header__dropdown-email">${escapeHeaderHtml(user.email || '')}</div>
           </div>
         </div>
@@ -277,6 +279,13 @@ function initHeaderUserStatus() {
         </button>
       </div>
     `;
+
+    // Giống hồ sơ công khai: nếu có đăng bán thì ghi thêm số phiên (nạp catalog bất đồng bộ)
+    loadAllAuctions().then(auctions => {
+      const sellingCount = getSellingAuctions(user.username, auctions).length;
+      const roleEl = document.getElementById('header-dropdown-role');
+      if (roleEl && sellingCount) roleEl.textContent = `${roleText} · ${sellingCount} phiên đăng bán`;
+    }).catch(() => {});
 
     const logoutBtn = document.getElementById('header-dropdown-logout-btn');
     if (logoutBtn) {

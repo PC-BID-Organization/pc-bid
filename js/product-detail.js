@@ -10,8 +10,10 @@ import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './au
 import { checkBidDeposit } from './wallet.js';
 // Watchlist lưu riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
+// Bộ sinh lịch sử đặt giá mẫu dùng chung
+import { buildMockBids } from './bid-history.js';
 // Họ tên, UID và avatar chữ cái của người dùng
-import { MOCK_BIDDERS, describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
+import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 
@@ -881,83 +883,8 @@ function renderLichSu(idSanPham) {
  */
 function taoLichSuMau(idSanPham, lichSuSanPham = []) {
   if (!sanPhamHienTai) return [];
-
-  // Người đặt giá mẫu lấy từ accounts.js (mỗi người có họ tên và UID cố định)
-  const tenNguoiMau = MOCK_BIDDERS.slice(0, 7).map(nguoi => nguoi.username);
-
-  const buocGia = Number(sanPhamHienTai.bidStep) || 100000;
-  const giaKhoiDiem = Number(sanPhamHienTai.startingPrice) || 1000000;
-
-  // Số lượt mẫu cần sinh = tổng lượt bid của sản phẩm trừ đi số lượt bid thực tế đã lưu
-  const tongSoLuot = Number(sanPhamHienTai.bidCount) || 0;
-  const soLuotCanSinh = Math.max(0, tongSoLuot - lichSuSanPham.length);
-  if (soLuotCanSinh === 0) return [];
-
-  // Bộ sinh số giả ngẫu nhiên theo ID sản phẩm để lịch sử không bị thay đổi mỗi lần render lại
-  let hatGiong = (Number(idSanPham) || 1) * 9301 + 49297;
-  const ngauNhien = () => {
-    hatGiong = (hatGiong * 9301 + 49297) % 233280;
-    return hatGiong / 233280;
-  };
-
-  // Xác định điểm xuất phát để sinh các lượt đặt giá mẫu lùi dần về quá khứ
-  let giaBatDauMau;
-  let thoiGianBatDauMau;
-
-  if (lichSuSanPham.length > 0) {
-    // Nếu đã có lượt bid thực tế: lượt mẫu cao nhất phải THẤP HƠN lượt thật thấp nhất
-    const lowestRealBid = lichSuSanPham[lichSuSanPham.length - 1];
-    giaBatDauMau = lowestRealBid.amount - buocGia;
-    thoiGianBatDauMau = new Date(lowestRealBid.timestamp).getTime();
-  } else {
-    // Nếu chưa có lượt bid thực tế nào: lượt mẫu cao nhất chính là giá hiện tại
-    giaBatDauMau = Number(sanPhamHienTai.currentBid) || (giaKhoiDiem + buocGia * 3);
-    // Mốc thời gian lượt cao nhất: không vượt quá thời điểm kết thúc phiên
-    const thoiDiemKetThuc = Number(sanPhamHienTai.endTimestamp) || new Date(sanPhamHienTai.endTime).getTime();
-    thoiGianBatDauMau = Math.min(Date.now(), Number.isFinite(thoiDiemKetThuc) ? thoiDiemKetThuc : Date.now());
-  }
-
-  const lichSuMau = [];
-  let giaTam = giaBatDauMau;
-  let thoiGianTam = thoiGianBatDauMau;
-  let tenTruocDo = '';
-
-  for (let i = 0; i < soLuotCanSinh; i++) {
-    if (giaTam < giaKhoiDiem) break; // Tuyệt đối không sinh giá thấp hơn giá khởi điểm
-
-    // Lượt đầu tiên (cao nhất) giữ nguyên mốc thời gian, các lượt trước lùi lại 15 - 45 phút
-    if (i > 0) {
-      thoiGianTam -= (Math.floor(ngauNhien() * 30) + 15) * 60 * 1000;
-    }
-
-    // Chọn tên người đặt giá khác với lượt liền kề (không tự vượt giá chính mình)
-    let tenHienTai = tenNguoiMau[Math.floor(ngauNhien() * tenNguoiMau.length)];
-    // Phiên đã chốt: lượt cao nhất luôn là của người thắng
-    if (i === 0 && lichSuSanPham.length === 0 && sanPhamHienTai.winner) tenHienTai = sanPhamHienTai.winner;
-    if (tenHienTai === tenTruocDo) {
-      tenHienTai = tenNguoiMau[(tenNguoiMau.indexOf(tenHienTai) + 1) % tenNguoiMau.length];
-    }
-    tenTruocDo = tenHienTai;
-
-    lichSuMau.push({
-      id: `mock_${idSanPham}_${i}`,
-      productId: idSanPham,
-      bidderName: tenHienTai,
-      amount: giaTam,
-      timestamp: new Date(thoiGianTam).toISOString()
-    });
-
-    // Tính bước nhảy giá cho lượt kế tiếp trong quá khứ:
-    // chia đều khoảng giá còn lại cho số lượt còn lại để lượt cuối không thấp hơn giá khởi điểm
-    const soLuotConLai = soLuotCanSinh - i - 1;
-    if (soLuotConLai <= 0) break;
-    const soBuocConLai = Math.floor((giaTam - giaKhoiDiem) / buocGia);
-    const soBuocToiDa = Math.max(1, Math.floor(soBuocConLai / soLuotConLai));
-    const soBuocNhay = 1 + Math.floor(ngauNhien() * soBuocToiDa);
-    giaTam -= soBuocNhay * buocGia;
-  }
-
-  return lichSuMau;
+  // Dùng chung bộ sinh với hồ sơ công khai để "Phiên đang tham gia" khớp đúng bảng lịch sử này
+  return buildMockBids({ ...sanPhamHienTai, id: idSanPham }, lichSuSanPham);
 }
 
 /* ==========================================================================

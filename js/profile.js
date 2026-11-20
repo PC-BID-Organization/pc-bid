@@ -5,7 +5,9 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
+import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed } from './auction-time.js';
+// Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
+import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
@@ -988,32 +990,6 @@ function handleMarkNotificationsRead(ids) {
    Ai cũng xem được, kể cả chưa đăng nhập; tôn trọng cài đặt quyền riêng tư
    ========================================================================== */
 
-// Các tệp dữ liệu catalog để tìm linh kiện người dùng đã đăng bán
-const CATALOG_FILES = ['cpu', 'gpu', 'mainboard', 'ram', 'storage', 'psu', 'cooling', 'case'];
-
-/**
- * Nạp toàn bộ sản phẩm (catalog JSON gộp với bản cập nhật trong localStorage)
- * @returns {Promise<Array>}
- */
-async function loadAllProductsForPublic() {
-  let localProducts = [];
-  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
-  const localMap = new Map(localProducts.map(p => [Number(p.id), p]));
-  const results = await Promise.all(CATALOG_FILES.map(async name => {
-    try {
-      const res = await fetch(`data/${name}.json`);
-      return res.ok ? await res.json() : [];
-    } catch {
-      return [];
-    }
-  }));
-  const catalog = results.flat().map(p => mergeLocalProduct(p, localMap.get(Number(p.id))));
-  const catalogIds = new Set(catalog.map(p => Number(p.id)));
-  // Phiên người dùng tự đăng (không có trong catalog)
-  const custom = localProducts.filter(p => !catalogIds.has(Number(p.id)));
-  return [...custom, ...catalog];
-}
-
 /**
  * Thẻ linh kiện rút gọn dùng trong hồ sơ công khai
  * @param {Object} item - Sản phẩm / phiên
@@ -1034,6 +1010,9 @@ function renderPublicCard(item, badgeHtml) {
   `;
 }
 
+// Số thẻ hiển thị mỗi lần trong một khối của hồ sơ công khai
+const PUBLIC_PAGE_SIZE = 8;
+
 /**
  * Hiển thị một khối thông tin của hồ sơ công khai (hoặc thông báo riêng tư / trống)
  * @param {string} id - ID vùng chứa
@@ -1049,7 +1028,25 @@ function fillPublicBlock(id, isPublic, cards, emptyText) {
   } else if (!cards.length) {
     el.innerHTML = `<p class="pcb-public__empty">${emptyText}</p>`;
   } else {
-    el.innerHTML = `<div class="pcb-public__grid">${cards.join('')}</div>`;
+    // Danh sách dài: hiện trước một số thẻ, phần còn lại mở bằng nút "Xem thêm"
+    const visible = cards.slice(0, PUBLIC_PAGE_SIZE);
+    const rest = cards.length - visible.length;
+    el.innerHTML = `
+      <div class="pcb-public__grid">${visible.join('')}</div>
+      ${rest > 0 ? `<button type="button" class="pcb-public__more">Xem thêm ${rest} phiên</button>` : ''}
+    `;
+    const moreBtn = el.querySelector('.pcb-public__more');
+    if (moreBtn) {
+      let shown = visible.length;
+      moreBtn.addEventListener('click', () => {
+        const next = cards.slice(shown, shown + PUBLIC_PAGE_SIZE);
+        el.querySelector('.pcb-public__grid').insertAdjacentHTML('beforeend', next.join(''));
+        shown += next.length;
+        const left = cards.length - shown;
+        if (left > 0) moreBtn.textContent = `Xem thêm ${left} phiên`;
+        else moreBtn.remove();
+      });
+    }
   }
 }
 
@@ -1106,7 +1103,7 @@ async function renderPublicProfile(username) {
   }
 
   // Linh kiện đã đăng bán: mọi phiên có người bán là tài khoản này
-  const products = await loadAllProductsForPublic();
+  const products = await loadAllAuctions();
   const now = Date.now();
   const selling = products.filter(p => p.seller === username);
   const roleEl = document.getElementById('public-role');
@@ -1120,7 +1117,14 @@ async function renderPublicProfile(username) {
   }), 'Chưa đăng bán linh kiện nào.');
 
   // Phiên đang tham gia (chỉ phiên chưa kết thúc)
-  const participating = account.id ? getParticipatingAuctions(account).filter(item => getAuctionEndTimestamp(item) > now) : [];
+  // Lấy từ chính lịch sử đặt giá của các phiên (lượt thật + lượt mẫu), nên bấm vào phiên
+  // sẽ thấy tên người này trong bảng lịch sử; tài khoản thành viên bổ sung thêm phiên mẫu riêng
+  const fromHistory = getAuctionsFromHistory(account, products);
+  const historyIds = new Set(fromHistory.map(item => Number(item.id)));
+  const ownList = account.id
+    ? getParticipatingAuctions(account).filter(item => !historyIds.has(Number(item.id)) && getAuctionEndTimestamp(item) > now)
+    : [];
+  const participating = [...fromHistory, ...ownList];
   fillPublicBlock('public-participating', privacy.participating, participating.map(item =>
     renderPublicCard(item, item.status === 'lead'
       ? '<span class="pcb-public-card__badge pcb-public-card__badge--active">Đang dẫn đầu</span>'
