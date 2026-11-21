@@ -10,7 +10,7 @@
 import { ORDER_STATUS_LABELS, payOrder, markOrderShipped, confirmOrderReceived } from './settlement.js';
 import { showAlert, showConfirm } from './dialog.js';
 // Mở hộp chat với người bán / người mua của đơn hàng
-import { openChat } from './chat.js';
+import { openChat, CHAT_ICON_SVG } from './chat.js';
 import { readOrders } from './wallet.js';
 
 /**
@@ -140,7 +140,7 @@ export function renderOrderCard(order, role, { showProduct = false } = {}) {
       <div class="pcb-order__actions">
         ${content.action}
         <button type="button" class="pcb-order__btn pcb-order__btn--ghost" data-order-chat="${order.id}">
-          💬 Nhắn tin ${role === 'buyer' ? 'người bán' : 'người mua'}
+          ${CHAT_ICON_SVG} Nhắn tin ${role === 'buyer' ? 'người bán' : 'người mua'}
         </button>
       </div>
     </article>
@@ -172,11 +172,9 @@ export function bindOrderActions(container, onChange) {
       const order = readOrders().find(o => o.id === chatBtn.dataset.orderChat);
       if (order) {
         openChat({
-          productId: order.productId,
-          productName: order.productName,
-          productImage: order.image,
           sellerUsername: order.sellerUsername,
-          buyer: { id: order.buyerId, username: order.buyerUsername, fullname: order.buyerName }
+          buyer: { id: order.buyerId, username: order.buyerUsername, fullname: order.buyerName },
+          product: { id: order.productId, name: order.productName, image: order.image, price: order.finalPrice }
         });
       }
       return;

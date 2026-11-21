@@ -444,6 +444,19 @@
   white-space: nowrap;
 }
 
+/* Biểu tượng chat dùng chung: căn giữa với chữ trên các nút */
+.pcb-chat-icon {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.pcb-order__btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* Nút mở hộp chat ở góc phải dưới */
 .pcb-chat-launcher {
   position: fixed;
@@ -475,7 +488,7 @@
 .pcb-chat-launcher[hidden],
 .pcb-chat[hidden],
 .pcb-chat__form[hidden],
-.pcb-chat__icon-btn[hidden],
+.pcb-chat__popover[hidden],
 .pcb-chat-launcher__badge[hidden] {
   display: none;
 }
@@ -491,16 +504,16 @@
   border-radius: 999px;
 }
 
-/* Khung chat */
+/* Khung chat 2 cột: danh sách bên trái, tin nhắn bên phải */
 .pcb-chat {
   position: fixed;
   right: 20px;
   bottom: 84px;
   z-index: 1500;
-  display: flex;
-  flex-direction: column;
-  width: 360px;
-  height: min(520px, calc(100vh - 120px));
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  width: min(780px, calc(100vw - 40px));
+  height: min(580px, calc(100vh - 110px));
   overflow: hidden;
   font-family: inherit;
   background-color: #ffffff;
@@ -515,69 +528,92 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.pcb-chat__header {
+/* ----- Cột trái ----- */
+.pcb-chat__sidebar {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 12px 12px 16px;
-  color: #ffffff;
-  background-color: var(--color-primary);
-}
-
-.pcb-chat__title-wrap {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.pcb-chat__title {
-  overflow: hidden;
-  font-size: 15px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pcb-chat__subtitle {
-  font-size: 12px;
-  opacity: 0.85;
-}
-
-.pcb-chat__icon-btn {
-  display: inline-flex;
-  padding: 6px;
-  color: inherit;
-  cursor: pointer;
-  background: none;
-  border: none;
-  border-radius: 8px;
-}
-
-.pcb-chat__icon-btn:hover,
-.pcb-chat__icon-btn:focus-visible {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.pcb-chat__body {
-  display: flex;
-  flex: 1;
   flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
-  background-color: #f8fafc;
+  border-right: 1px solid #eef2f7;
 }
 
-.pcb-chat__empty,
-.pcb-chat__hint {
-  margin: 0;
-  padding: 28px 20px;
+.pcb-chat__side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+
+.pcb-chat__side-title {
+  font-size: 16px;
+  color: var(--color-text-main);
+}
+
+.pcb-chat__side-count {
   font-size: 13px;
-  line-height: 1.6;
-  text-align: center;
-  color: var(--color-text-muted);
+  color: var(--color-primary);
 }
 
-/* Danh sách cuộc trò chuyện */
+.pcb-chat__tools {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.pcb-chat__search {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 10px;
+  color: var(--color-text-muted);
+  background-color: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.pcb-chat__search:focus-within {
+  background-color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.pcb-chat__search input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-text-main);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.pcb-chat__filter {
+  flex-shrink: 0;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background-color: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.pcb-chat__filter:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.pcb-chat__list-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .pcb-chat__list {
   margin: 0;
   padding: 6px;
@@ -585,27 +621,39 @@
 }
 
 .pcb-chat__item {
+  position: relative;
   display: flex;
   align-items: center;
+  border-radius: 12px;
+}
+
+.pcb-chat__item:hover,
+.pcb-chat__item:focus-within {
+  background-color: #f8fafc;
+}
+
+.pcb-chat__item--unread {
+  background-color: #fff7ed;
+}
+
+.pcb-chat__item--active,
+.pcb-chat__item--active:hover {
+  background-color: #ffedd5;
+}
+
+.pcb-chat__item-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
   gap: 10px;
-  width: 100%;
-  padding: 10px;
+  min-width: 0;
+  padding: 10px 4px 10px 10px;
   font: inherit;
   text-align: left;
   color: var(--color-text-main);
   cursor: pointer;
   background: none;
   border: none;
-  border-radius: 12px;
-}
-
-.pcb-chat__item:hover,
-.pcb-chat__item:focus-visible {
-  background-color: #ffffff;
-}
-
-.pcb-chat__item--unread {
-  background-color: #fff7ed;
 }
 
 .pcb-chat__avatar {
@@ -615,10 +663,32 @@
   justify-content: center;
   width: 40px;
   height: 40px;
+  overflow: hidden;
   font-weight: 700;
   color: #ffffff;
-  background-color: #0b1c30;
+  background-color: var(--color-primary);
   border-radius: 50%;
+}
+
+.pcb-chat__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pcb-chat__avatar--sm {
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.pcb-chat__avatar--xs,
+.pcb-chat__avatar-gap {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
 }
 
 .pcb-chat__item-body {
@@ -641,6 +711,11 @@
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pcb-chat__pin {
+  margin-right: 3px;
+  font-size: 11px;
 }
 
 .pcb-chat__item-time {
@@ -675,37 +750,179 @@
   border-radius: 999px;
 }
 
-/* Khung tin nhắn */
-.pcb-chat__product {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-main);
-  text-decoration: none;
-  background-color: #ffffff;
-  border-bottom: 1px solid #eef2f7;
+/* Nút ba chấm và menu tùy chọn */
+.pcb-chat__more {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-right: 6px;
+  padding: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  opacity: 0.55;
 }
 
-.pcb-chat__product img {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  object-fit: contain;
+.pcb-chat__item:hover .pcb-chat__more,
+.pcb-chat__more:focus-visible,
+.pcb-chat__more[aria-expanded="true"] {
+  opacity: 1;
+}
+
+.pcb-chat__more:hover,
+.pcb-chat__more:focus-visible {
+  color: var(--color-primary);
+  background-color: #ffffff;
+}
+
+.pcb-chat__menu {
+  position: absolute;
+  top: calc(100% - 6px);
+  right: 8px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: 6px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(11, 28, 48, 0.14);
+}
+
+.pcb-chat__menu button {
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background: none;
+  border: none;
   border-radius: 8px;
 }
 
-.pcb-chat__product span {
+.pcb-chat__menu button:hover,
+.pcb-chat__menu button:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-chat__menu .pcb-chat__menu-danger {
+  color: #dc2626;
+}
+
+.pcb-chat__empty,
+.pcb-chat__hint {
+  margin: 0;
+  padding: 24px 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* ----- Cột phải ----- */
+.pcb-chat__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background-color: #f8fafc;
+}
+
+.pcb-chat__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 16px;
+  color: #ffffff;
+  background-color: var(--color-primary);
+}
+
+.pcb-chat__peer {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pcb-chat__peer-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pcb-chat__peer-name {
   overflow: hidden;
+  font-size: 15px;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pcb-chat__product:hover span,
-.pcb-chat__product:focus-visible span {
-  color: var(--color-primary);
+a.pcb-chat__peer-name:hover,
+a.pcb-chat__peer-name:focus-visible {
+  text-decoration: underline;
+}
+
+.pcb-chat__peer-role {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.pcb-chat__icon-btn {
+  display: inline-flex;
+  padding: 6px;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.pcb-chat__icon-btn:hover,
+.pcb-chat__icon-btn:focus-visible {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.pcb-chat__side-head .pcb-chat__icon-btn:hover,
+.pcb-chat__side-head .pcb-chat__icon-btn:focus-visible {
+  background-color: #f1f5f9;
+}
+
+/* Nút quay lại và nút đóng ở cột trái chỉ dùng trên điện thoại */
+.pcb-chat__back,
+.pcb-chat__close-mobile {
+  display: none;
+}
+
+.pcb-chat__thread {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pcb-chat__placeholder {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.pcb-chat__placeholder p {
+  margin: 0;
 }
 
 .pcb-chat__messages {
@@ -713,19 +930,30 @@
   flex: 1;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
+  padding: 14px;
   overflow-y: auto;
 }
 
 .pcb-chat__msg {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  max-width: 82%;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 80%;
 }
 
 .pcb-chat__msg--mine {
+  flex-direction: row-reverse;
   align-self: flex-end;
+}
+
+.pcb-chat__msg-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.pcb-chat__msg--mine .pcb-chat__msg-col {
   align-items: flex-end;
 }
 
@@ -754,11 +982,94 @@
   color: var(--color-text-muted);
 }
 
+/* Ảnh / video đã gửi */
+.pcb-chat__media {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.pcb-chat__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pcb-chat__media--video {
+  width: 240px;
+  max-width: 100%;
+  background-color: #000000;
+}
+
+/* Thẻ sản phẩm / đơn hàng trong tin nhắn */
+.pcb-chat__card {
+  width: 250px;
+  max-width: 100%;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+}
+
+.pcb-chat__card-label {
+  display: block;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9a3412;
+  background-color: #fff7ed;
+}
+
+.pcb-chat__card-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  color: var(--color-text-main);
+  text-decoration: none;
+}
+
+.pcb-chat__card-body img {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.pcb-chat__card-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pcb-chat__card-name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pcb-chat__card-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.pcb-chat__card-body:hover .pcb-chat__card-name,
+.pcb-chat__card-body:focus-visible .pcb-chat__card-name {
+  color: var(--color-primary);
+}
+
 /* Hiệu ứng "đang soạn tin" */
 .pcb-chat__typing {
   display: inline-flex;
   gap: 4px;
-  align-self: flex-start;
   padding: 10px 12px;
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
@@ -786,7 +1097,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 0 12px 10px;
+  padding: 0 14px 10px;
 }
 
 .pcb-chat__quick-btn {
@@ -805,12 +1116,45 @@
   background-color: #fff7ed;
 }
 
+/* Ô nhập: nút "+" bên trái, nút biểu tượng cảm xúc bên phải */
 .pcb-chat__form {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   padding: 10px;
   background-color: #ffffff;
   border-top: 1px solid #eef2f7;
+}
+
+.pcb-chat__tool-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.pcb-chat__tool-btn:hover,
+.pcb-chat__tool-btn:focus-visible,
+.pcb-chat__tool-btn--active {
+  color: var(--color-primary);
+  background-color: #fff7ed;
+}
+
+/* Nút "+" xoay thành dấu "×" khi đang mở */
+.pcb-chat__tool-btn--active[data-chat-toggle="attach"] svg {
+  transform: rotate(45deg);
+}
+
+.pcb-chat__tool-btn svg {
+  transition: transform 0.2s ease;
 }
 
 .pcb-chat__input {
@@ -831,9 +1175,11 @@
 
 .pcb-chat__send {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 42px;
+  width: 40px;
+  height: 40px;
   color: #ffffff;
   cursor: pointer;
   background-color: var(--color-primary);
@@ -846,14 +1192,208 @@
   background-color: var(--color-primary-hover);
 }
 
+/* Bảng nổi phía trên ô nhập */
+.pcb-chat__popover {
+  position: absolute;
+  right: 10px;
+  bottom: 64px;
+  left: 10px;
+  z-index: 4;
+  max-height: 300px;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(11, 28, 48, 0.16);
+}
+
+.pcb-chat__popover[data-kind="attach"] {
+  right: auto;
+  width: 260px;
+}
+
+.pcb-chat__popover[data-kind="emoji"] {
+  left: auto;
+  width: 290px;
+}
+
+.pcb-chat__attach-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.pcb-chat__attach-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background-color: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+}
+
+.pcb-chat__attach-btn span {
+  font-size: 18px;
+}
+
+.pcb-chat__attach-btn:hover,
+.pcb-chat__attach-btn:focus-visible {
+  color: var(--color-primary);
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.pcb-chat__emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.pcb-chat__emoji-grid button {
+  padding: 4px 0;
+  font-size: 20px;
+  line-height: 1.3;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.pcb-chat__emoji-grid button:hover,
+.pcb-chat__emoji-grid button:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-chat__pop-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--color-text-main);
+}
+
+.pcb-chat__pop-back {
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  background-color: #fff7ed;
+  border: none;
+  border-radius: 8px;
+}
+
+.pcb-chat__pop-empty {
+  margin: 0;
+  padding: 16px 8px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.pcb-chat__pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-chat__pick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.pcb-chat__pick:hover,
+.pcb-chat__pick:focus-visible {
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.pcb-chat__pick img {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.pcb-chat__pick > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pcb-chat__pick-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pcb-chat__pick-meta {
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pcb-chat,
-  .pcb-chat__typing span {
+  .pcb-chat__typing span,
+  .pcb-chat__tool-btn svg {
     animation: none;
+    transition: none;
   }
 }
 
-/* Điện thoại: nút chỉ còn biểu tượng, khung chat gần toàn màn hình */
+/* Máy tính bảng / điện thoại: một cột, chuyển qua lại giữa danh sách và tin nhắn */
+@media (max-width: 720px) {
+  .pcb-chat {
+    grid-template-columns: 1fr;
+  }
+
+  .pcb-chat__sidebar {
+    border-right: none;
+  }
+
+  .pcb-chat__main {
+    display: none;
+  }
+
+  .pcb-chat--thread .pcb-chat__sidebar {
+    display: none;
+  }
+
+  .pcb-chat--thread .pcb-chat__main {
+    display: flex;
+  }
+
+  .pcb-chat__back,
+  .pcb-chat__close-mobile {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 480px) {
   .pcb-chat-launcher {
     right: 14px;
@@ -871,5 +1411,12 @@
     left: 8px;
     width: auto;
     height: calc(100vh - 150px);
+  }
+
+  .pcb-chat__popover[data-kind="attach"],
+  .pcb-chat__popover[data-kind="emoji"] {
+    right: 10px;
+    left: 10px;
+    width: auto;
   }
 }

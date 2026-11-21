@@ -656,10 +656,14 @@ async function lienHeNguoiBan() {
     return;
   }
   openChat({
-    productId: sanPhamHienTai.id,
-    productName: sanPhamHienTai.name,
-    productImage: (sanPhamHienTai.images || [])[0],
-    sellerUsername: sanPhamHienTai.seller
+    sellerUsername: sanPhamHienTai.seller,
+    // Thẻ "Bạn đang trao đổi với Người bán về sản phẩm này" được gửi vào cuộc trò chuyện
+    product: {
+      id: sanPhamHienTai.id,
+      name: sanPhamHienTai.name,
+      image: (sanPhamHienTai.images || [])[0] || '',
+      price: sanPhamHienTai.currentBid
+    }
   });
 }
 
