@@ -1887,3 +1887,256 @@ a.pcb-chat__peer-name:focus-visible {
   color: var(--color-primary);
 }
 
+/* ==========================================================================
+   ICON LUCIDE: tệp SVG trong images/icons/lucide/ dùng làm mặt nạ (mask-image)
+   để icon nhận màu chữ hiện tại (background-color: currentColor)
+   ========================================================================== */
+.pcb-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.pcb-icon--s11 {
+  width: 11px;
+  height: 11px;
+}
+
+.pcb-icon--s12 {
+  width: 12px;
+  height: 12px;
+}
+
+.pcb-icon--s13 {
+  width: 13px;
+  height: 13px;
+}
+
+.pcb-icon--s14 {
+  width: 14px;
+  height: 14px;
+}
+
+.pcb-icon--s15 {
+  width: 15px;
+  height: 15px;
+}
+
+.pcb-icon--s16 {
+  width: 16px;
+  height: 16px;
+}
+
+.pcb-icon--s18 {
+  width: 18px;
+  height: 18px;
+}
+
+.pcb-icon--s20 {
+  width: 20px;
+  height: 20px;
+}
+
+.pcb-icon--s22 {
+  width: 22px;
+  height: 22px;
+}
+
+.pcb-icon--s24 {
+  width: 24px;
+  height: 24px;
+}
+
+.pcb-icon--s40 {
+  width: 40px;
+  height: 40px;
+}
+
+.pcb-icon--bell {
+  -webkit-mask-image: url('../images/icons/lucide/bell.svg');
+  mask-image: url('../images/icons/lucide/bell.svg');
+}
+
+.pcb-icon--check-check {
+  -webkit-mask-image: url('../images/icons/lucide/check-check.svg');
+  mask-image: url('../images/icons/lucide/check-check.svg');
+}
+
+.pcb-icon--circle-check {
+  -webkit-mask-image: url('../images/icons/lucide/circle-check.svg');
+  mask-image: url('../images/icons/lucide/circle-check.svg');
+}
+
+.pcb-icon--circle-dot {
+  -webkit-mask-image: url('../images/icons/lucide/circle-dot.svg');
+  mask-image: url('../images/icons/lucide/circle-dot.svg');
+}
+
+.pcb-icon--circle-x {
+  -webkit-mask-image: url('../images/icons/lucide/circle-x.svg');
+  mask-image: url('../images/icons/lucide/circle-x.svg');
+}
+
+.pcb-icon--clock {
+  -webkit-mask-image: url('../images/icons/lucide/clock.svg');
+  mask-image: url('../images/icons/lucide/clock.svg');
+}
+
+.pcb-icon--flame {
+  -webkit-mask-image: url('../images/icons/lucide/flame.svg');
+  mask-image: url('../images/icons/lucide/flame.svg');
+}
+
+.pcb-icon--gavel {
+  -webkit-mask-image: url('../images/icons/lucide/gavel.svg');
+  mask-image: url('../images/icons/lucide/gavel.svg');
+}
+
+.pcb-icon--heart {
+  -webkit-mask-image: url('../images/icons/lucide/heart.svg');
+  mask-image: url('../images/icons/lucide/heart.svg');
+}
+
+.pcb-icon--heart-filled {
+  -webkit-mask-image: url('../images/icons/lucide/heart-filled.svg');
+  mask-image: url('../images/icons/lucide/heart-filled.svg');
+}
+
+.pcb-icon--hourglass {
+  -webkit-mask-image: url('../images/icons/lucide/hourglass.svg');
+  mask-image: url('../images/icons/lucide/hourglass.svg');
+}
+
+.pcb-icon--image {
+  -webkit-mask-image: url('../images/icons/lucide/image.svg');
+  mask-image: url('../images/icons/lucide/image.svg');
+}
+
+.pcb-icon--info {
+  -webkit-mask-image: url('../images/icons/lucide/info.svg');
+  mask-image: url('../images/icons/lucide/info.svg');
+}
+
+.pcb-icon--lock {
+  -webkit-mask-image: url('../images/icons/lucide/lock.svg');
+  mask-image: url('../images/icons/lucide/lock.svg');
+}
+
+.pcb-icon--mail {
+  -webkit-mask-image: url('../images/icons/lucide/mail.svg');
+  mask-image: url('../images/icons/lucide/mail.svg');
+}
+
+.pcb-icon--map-pin {
+  -webkit-mask-image: url('../images/icons/lucide/map-pin.svg');
+  mask-image: url('../images/icons/lucide/map-pin.svg');
+}
+
+.pcb-icon--message-square {
+  -webkit-mask-image: url('../images/icons/lucide/message-square.svg');
+  mask-image: url('../images/icons/lucide/message-square.svg');
+}
+
+.pcb-icon--microscope {
+  -webkit-mask-image: url('../images/icons/lucide/microscope.svg');
+  mask-image: url('../images/icons/lucide/microscope.svg');
+}
+
+.pcb-icon--package {
+  -webkit-mask-image: url('../images/icons/lucide/package.svg');
+  mask-image: url('../images/icons/lucide/package.svg');
+}
+
+.pcb-icon--pin {
+  -webkit-mask-image: url('../images/icons/lucide/pin.svg');
+  mask-image: url('../images/icons/lucide/pin.svg');
+}
+
+.pcb-icon--pin-off {
+  -webkit-mask-image: url('../images/icons/lucide/pin-off.svg');
+  mask-image: url('../images/icons/lucide/pin-off.svg');
+}
+
+.pcb-icon--receipt {
+  -webkit-mask-image: url('../images/icons/lucide/receipt.svg');
+  mask-image: url('../images/icons/lucide/receipt.svg');
+}
+
+.pcb-icon--shield-check {
+  -webkit-mask-image: url('../images/icons/lucide/shield-check.svg');
+  mask-image: url('../images/icons/lucide/shield-check.svg');
+}
+
+.pcb-icon--shopping-cart {
+  -webkit-mask-image: url('../images/icons/lucide/shopping-cart.svg');
+  mask-image: url('../images/icons/lucide/shopping-cart.svg');
+}
+
+.pcb-icon--smile-plus {
+  -webkit-mask-image: url('../images/icons/lucide/smile-plus.svg');
+  mask-image: url('../images/icons/lucide/smile-plus.svg');
+}
+
+.pcb-icon--sparkles {
+  -webkit-mask-image: url('../images/icons/lucide/sparkles.svg');
+  mask-image: url('../images/icons/lucide/sparkles.svg');
+}
+
+.pcb-icon--tag {
+  -webkit-mask-image: url('../images/icons/lucide/tag.svg');
+  mask-image: url('../images/icons/lucide/tag.svg');
+}
+
+.pcb-icon--timer {
+  -webkit-mask-image: url('../images/icons/lucide/timer.svg');
+  mask-image: url('../images/icons/lucide/timer.svg');
+}
+
+.pcb-icon--trash-2 {
+  -webkit-mask-image: url('../images/icons/lucide/trash-2.svg');
+  mask-image: url('../images/icons/lucide/trash-2.svg');
+}
+
+.pcb-icon--triangle-alert {
+  -webkit-mask-image: url('../images/icons/lucide/triangle-alert.svg');
+  mask-image: url('../images/icons/lucide/triangle-alert.svg');
+}
+
+.pcb-icon--trophy {
+  -webkit-mask-image: url('../images/icons/lucide/trophy.svg');
+  mask-image: url('../images/icons/lucide/trophy.svg');
+}
+
+.pcb-icon--truck {
+  -webkit-mask-image: url('../images/icons/lucide/truck.svg');
+  mask-image: url('../images/icons/lucide/truck.svg');
+}
+
+.pcb-icon--user {
+  -webkit-mask-image: url('../images/icons/lucide/user.svg');
+  mask-image: url('../images/icons/lucide/user.svg');
+}
+
+.pcb-icon--video {
+  -webkit-mask-image: url('../images/icons/lucide/video.svg');
+  mask-image: url('../images/icons/lucide/video.svg');
+}
+
+.pcb-icon--zap {
+  -webkit-mask-image: url('../images/icons/lucide/zap.svg');
+  mask-image: url('../images/icons/lucide/zap.svg');
+}
+
+.pcb-icon--zoom-in {
+  -webkit-mask-image: url('../images/icons/lucide/zoom-in.svg');
+  mask-image: url('../images/icons/lucide/zoom-in.svg');
+}

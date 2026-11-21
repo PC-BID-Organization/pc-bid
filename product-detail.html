@@ -59,7 +59,7 @@
 
       <!-- ===== VÙNG LỖI 404 (ERROR STATE) ===== -->
       <div class="pcb-pd__error" id="pcb-pd-error" hidden>
-        <div class="pcb-pd__error-icon" aria-hidden="true"><svg class="lucide lucide-triangle-alert" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+        <div class="pcb-pd__error-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--triangle-alert pcb-icon--s40" aria-hidden="true"></span></div>
         <h2 class="pcb-pd__error-title">Không tìm thấy phiên đấu giá</h2>
         <p class="pcb-pd__error-desc">ID sản phẩm không hợp lệ hoặc phiên đấu giá đã bị gỡ xuống.</p>
         <a href="products.html" class="pcb-pd__error-btn">&#x2190; Quay về danh sách</a>
@@ -79,7 +79,7 @@
               id="pcb-pd-main-img"
               loading="eager">
             <!-- Gợi ý và mức phóng to khi rê chuột vào ảnh (chỉ hiện trên máy tính có chuột) -->
-            <span class="pcb-pd__zoom-hint" aria-hidden="true"><svg class="lucide lucide-zoom-in" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg> Rê chuột để phóng to · Lăn chuột để zoom</span>
+            <span class="pcb-pd__zoom-hint" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--zoom-in pcb-icon--s14" aria-hidden="true"></span> Rê chuột để phóng to · Lăn chuột để zoom</span>
             <span class="pcb-pd__zoom-level" id="pcb-pd-zoom-level" aria-hidden="true">2.0×</span>
           </div>
 
@@ -131,7 +131,7 @@
                 <span class="pcb-pd__countdown-unit-label">giây</span>
               </div>
             </div>
-            <p class="pcb-pd__countdown-ended" id="pcb-pd-ended-msg" hidden><svg class="lucide lucide-bell" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Phiên đấu giá đã kết thúc</p>
+            <p class="pcb-pd__countdown-ended" id="pcb-pd-ended-msg" hidden><span class="lucide pcb-icon pcb-icon--bell pcb-icon--s16" aria-hidden="true"></span> Phiên đấu giá đã kết thúc</p>
           </div>
 
           <!-- ===== SO SÁNH GIÁ: GIÁ THỊ TRƯỜNG vs GIÁ ĐẤU HIỆN TẠI ===== -->
@@ -228,15 +228,15 @@
 
             <!-- Nút xác nhận đặt giá lớn -->
             <button type="button" class="pcb-pd__submit-btn" id="pcb-pd-submit-btn" aria-label="Xác nhận đặt giá">
-              <svg class="lucide lucide-gavel" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/></svg> XÁC NHẬN ĐẶT GIÁ
+              <span class="lucide pcb-icon pcb-icon--gavel pcb-icon--s18" aria-hidden="true"></span> XÁC NHẬN ĐẶT GIÁ
             </button>
 
             <!-- Công cụ demo: kết thúc phiên ngay để xem quy trình sau khi trúng đấu giá -->
-            <button type="button" class="pcb-pd__demo-end-btn" id="pcb-pd-demo-end" hidden><svg class="lucide lucide-timer" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg> Kết thúc phiên ngay (demo)</button>
+            <button type="button" class="pcb-pd__demo-end-btn" id="pcb-pd-demo-end" hidden><span class="lucide pcb-icon pcb-icon--timer pcb-icon--s15" aria-hidden="true"></span> Kết thúc phiên ngay (demo)</button>
 
             <!-- Nút thêm vào danh sách theo dõi -->
             <button type="button" class="pcb-pd__watchlist-btn" id="pcb-pd-watchlist-btn" aria-pressed="false">
-              <span id="pcb-pd-watchlist-icon" aria-hidden="true"><svg class="lucide lucide-heart" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+              <span id="pcb-pd-watchlist-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--heart pcb-icon--s16" aria-hidden="true"></span></span>
               <span id="pcb-pd-watchlist-label">Thêm vào Watchlist</span>
             </button>
           </div>
@@ -253,13 +253,11 @@
               <p class="pcb-pd__seller-uid" id="pcb-pd-seller-uid"></p>
             </div>
             <div class="pcb-pd__seller-badge" aria-label="Xác thực danh tính">
-              <svg class="lucide lucide-circle-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Đã xác thực
+              <span class="lucide pcb-icon pcb-icon--circle-check pcb-icon--s13" aria-hidden="true"></span> Đã xác thực
             </div>
             <!-- Nhắn tin hỏi người bán về linh kiện (mở hộp chat nổi) -->
             <button type="button" class="pcb-pd__contact-btn" id="pcb-pd-contact-seller">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
+              <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
               Liên hệ người bán
             </button>
           </div>
@@ -377,7 +375,7 @@
     hidden>
     <div class="pcb-pd-modal__overlay" id="pcb-pd-modal-overlay" aria-hidden="true"></div>
     <div class="pcb-pd-modal__card">
-      <div class="pcb-pd-modal__icon" aria-hidden="true"><svg class="lucide lucide-trophy" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
+      <div class="pcb-pd-modal__icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--trophy pcb-icon--s40" aria-hidden="true"></span></div>
       <h2 class="pcb-pd-modal__title" id="pcb-pd-modal-title">Đặt giá thành công!</h2>
       <p class="pcb-pd-modal__desc">Bạn đã đặt giá thành công cho sản phẩm:</p>
       <p class="pcb-pd-modal__product-name" id="pcb-pd-modal-product"></p>
@@ -386,7 +384,7 @@
         <span class="pcb-pd-modal__amount" id="pcb-pd-modal-amount">---</span>
       </div>
       <p class="pcb-pd-modal__note">
-        <svg class="lucide lucide-zap" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> Hệ thống sẽ thông báo khi có người đặt giá cao hơn bạn.
+        <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Hệ thống sẽ thông báo khi có người đặt giá cao hơn bạn.
       </p>
       <button type="button" class="pcb-pd-modal__close-btn" id="pcb-pd-modal-close">
         Đóng &amp; Tiếp tục xem
@@ -396,7 +394,7 @@
 
   <!-- ===== TOAST THÔNG BÁO NHANH ===== -->
   <div class="pcb-pd-toast" id="pcb-pd-toast" role="alert" aria-live="assertive" aria-atomic="true" hidden>
-    <span class="pcb-pd-toast__icon" id="pcb-pd-toast-icon" aria-hidden="true"><svg class="lucide lucide-info" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+    <span class="pcb-pd-toast__icon" id="pcb-pd-toast-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--info pcb-icon--s18" aria-hidden="true"></span></span>
     <span class="pcb-pd-toast__msg" id="pcb-pd-toast-msg"></span>
   </div>
 

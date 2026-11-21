@@ -35,7 +35,7 @@ const MAX_IMAGE_SIDE = 720;
 const MAX_VIDEO_BYTES = 1.5 * 1024 * 1024;
 
 // Biểu tượng chat dùng chung cho mọi nút nhắn tin trên website
-export const CHAT_ICON_SVG = '<svg class="pcb-chat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>';
+export const CHAT_ICON_SVG = icon('message-square', { className: 'pcb-chat-icon' });
 
 // Câu hỏi gợi ý cho tin nhắn đầu tiên
 const QUICK_QUESTIONS = [
@@ -180,10 +180,20 @@ function roleOf(chat, user) {
 function counterpartOf(chat, role) {
   if (role === 'buyer') {
     const account = findAccount({ username: chat.sellerUsername });
-    return { name: account?.fullname || chat.sellerName, account, username: chat.sellerUsername, label: 'Người bán' };
+    return { name: account?.fullname || chat.sellerName, account, username: chat.sellerUsername, label: hasTradeContext(chat) ? 'Người bán' : 'Thành viên PCBid' };
   }
   const account = findAccount({ id: chat.buyerId, username: chat.buyerUsername });
-  return { name: account?.fullname || chat.buyerName, account, username: chat.buyerUsername, label: 'Người mua' };
+  return { name: account?.fullname || chat.buyerName, account, username: chat.buyerUsername, label: hasTradeContext(chat) ? 'Người mua' : 'Thành viên PCBid' };
+}
+
+/**
+ * Cuộc trò chuyện có gắn sản phẩm / đơn hàng chưa (mở từ trang phiên hoặc đơn hàng).
+ * Nhắn trực tiếp từ hồ sơ công khai thì chưa có, khi đó hai bên chỉ là thành viên với nhau.
+ * @param {Object} chat
+ * @returns {boolean}
+ */
+function hasTradeContext(chat) {
+  return chat.messages.some(m => m.type === 'product' || m.type === 'order');
 }
 
 /**
@@ -514,7 +524,7 @@ function ensureWidget() {
   launcher.setAttribute('aria-label', 'Mở tin nhắn');
   launcher.setAttribute('aria-controls', 'pcb-chat');
   launcher.setAttribute('aria-expanded', 'false');
-  launcher.innerHTML = `${CHAT_ICON_SVG.replace('width="16" height="16"', 'width="22" height="22"')}
+  launcher.innerHTML = `${icon('message-square', { size: 22 })}
     <span class="pcb-chat-launcher__text">Tin nhắn</span>
     <span class="pcb-chat-launcher__badge" id="pcb-chat-badge" hidden>0</span>`;
 
@@ -569,7 +579,7 @@ function ensureWidget() {
         <label class="pcb-chat__sr" for="pcb-chat-input">Nội dung tin nhắn</label>
         <input type="text" class="pcb-chat__input" id="pcb-chat-input" maxlength="500" placeholder="Nhập tin nhắn..." autocomplete="off">
         <button type="button" class="pcb-chat__tool-btn" data-chat-toggle="emoji" aria-label="Chèn biểu tượng cảm xúc" aria-expanded="false">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
+          ${icon('smile-plus', { size: 20 })}
         </button>
         <button type="submit" class="pcb-chat__send" aria-label="Gửi tin nhắn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
@@ -891,7 +901,7 @@ function renderThread() {
   if (!chat) {
     state.activeId = null;
     peerEl.innerHTML = '<strong class="pcb-chat__peer-name">Tin nhắn</strong>';
-    thread.innerHTML = `<div class="pcb-chat__placeholder">${CHAT_ICON_SVG.replace('width="16" height="16"', 'width="40" height="40"')}<p>Chọn một cuộc trò chuyện ở bên trái để xem tin nhắn.</p></div>`;
+    thread.innerHTML = `<div class="pcb-chat__placeholder">${icon('message-square', { size: 40 })}<p>Chọn một cuộc trò chuyện ở bên trái để xem tin nhắn.</p></div>`;
     return;
   }
 
@@ -925,7 +935,7 @@ function renderThread() {
       }).join('')}
       ${chat.pendingReplyAt ? `<div class="pcb-chat__msg">${avatarHtml(peer, 'pcb-chat__avatar--xs')}<div class="pcb-chat__typing" aria-label="Đang soạn tin"><span></span><span></span><span></span></div></div>` : ''}
     </div>
-    ${role === 'buyer' && !hasMine ? `<div class="pcb-chat__quick">${QUICK_QUESTIONS.map(q => `<button type="button" class="pcb-chat__quick-btn" data-chat-quick="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>` : ''}
+    ${role === 'buyer' && !hasMine && hasTradeContext(chat) ? `<div class="pcb-chat__quick">${QUICK_QUESTIONS.map(q => `<button type="button" class="pcb-chat__quick-btn" data-chat-quick="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>` : ''}
   `;
   const list = thread.querySelector('.pcb-chat__messages');
   if (list) list.scrollTop = list.scrollHeight;
@@ -1054,6 +1064,32 @@ export function openChat(info) {
   state.open = true;
   state.popover = null;
   // Cuộc trò chuyện đã xóa trước đó: mở lại để tiếp tục nhắn
+  renderChat();
+  document.getElementById('pcb-chat-input')?.focus();
+  return true;
+}
+
+/**
+ * Mở hội thoại với một tài khoản (nút "Nhắn tin" trên hồ sơ công khai).
+ * Nếu hai bên đã từng trò chuyện (dù ai là người mua / người bán) thì mở lại cuộc đó,
+ * nếu chưa thì tạo cuộc mới với người đang xem là người hỏi, tài khoản kia là người bán.
+ * @param {string} username - Tên đăng nhập của tài khoản cần nhắn
+ * @returns {boolean} false nếu chưa đăng nhập hoặc tự nhắn cho chính mình
+ */
+export function openChatWithUser(username) {
+  const user = readLoggedInUser();
+  if (!user || !username || user.username === username) return false;
+  ensureWidget();
+  const target = findAccount({ username });
+  const existing = readChats().find(c => roleOf(c, user) && (
+    c.sellerUsername === username
+    || isSameUser({ id: target?.id, username }, c.buyerId, c.buyerUsername)
+  ));
+  const chat = existing || ensureChat({ sellerUsername: username, buyer: user });
+  if (!chat) return false;
+  state.activeId = chat.id;
+  state.open = true;
+  state.popover = null;
   renderChat();
   document.getElementById('pcb-chat-input')?.focus();
   return true;

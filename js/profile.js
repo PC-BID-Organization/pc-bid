@@ -10,6 +10,8 @@ import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, lockAuct
 import { getOrdersForUser, orderNeedsAction } from './settlement.js';
 // Bộ icon Lucide dùng chung
 import { icon, NOTIFY_ICON_NAMES } from './icons.js';
+// Mở hội thoại với tài khoản đang xem hồ sơ
+import { openChatWithUser } from './chat.js';
 // Sổ địa chỉ nhận hàng
 import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -21,7 +23,8 @@ import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBid
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
-  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone } from './accounts.js';
+  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
+  hashPassword, verifyPassword, accountHasPassword } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
@@ -1053,6 +1056,63 @@ function renderNotifications() {
 }
 
 /**
+ * Kiểm tra một trường liên hệ (email / số điện thoại): đúng định dạng và chưa bị tài khoản khác dùng
+ * @param {'email'|'phone'} field
+ * @param {string} value
+ * @returns {string} Thông báo lỗi, rỗng nếu hợp lệ
+ */
+function validateContactField(field, value) {
+  const user = getCurrentUser();
+  if (field === 'email') {
+    if (!value) return 'Vui lòng nhập địa chỉ email.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return 'Email không đúng định dạng (ví dụ: ten@example.com).';
+    if (findAccountConflict({ email: value, exclude: user })) return 'Địa chỉ email này đã được sử dụng bởi tài khoản khác.';
+    return '';
+  }
+  const phone = normalizePhone(value);
+  if (!phone) return 'Vui lòng nhập số điện thoại.';
+  if (!/^0(3|5|7|8|9)\d{8}$/.test(phone)) return 'Số điện thoại không hợp lệ (10 chữ số, ví dụ: 0901234567).';
+  if (findAccountConflict({ phone, exclude: user })) return 'Số điện thoại này đã được sử dụng bởi tài khoản khác.';
+  return '';
+}
+
+/**
+ * Hiện / xóa dòng lỗi dưới ô email hoặc số điện thoại
+ * @param {'email'|'phone'} field
+ * @returns {boolean} true nếu hợp lệ
+ */
+function showContactFieldError(field) {
+  const input = document.getElementById(`input-${field}`);
+  const errEl = document.getElementById(`err-input-${field}`);
+  if (!input) return true;
+  const message = validateContactField(field, input.value.trim());
+  if (errEl) errEl.textContent = message;
+  input.classList.toggle('pcb-input--error', Boolean(message));
+  input.setAttribute('aria-invalid', String(Boolean(message)));
+  if (message) input.setAttribute('aria-describedby', `err-input-${field}`);
+  return !message;
+}
+
+/**
+ * Gắn kiểm tra khi rời ô (blur) và xóa lỗi khi người dùng gõ lại
+ */
+function setupContactFieldValidation() {
+  ['email', 'phone'].forEach(field => {
+    const input = document.getElementById(`input-${field}`);
+    if (!input) return;
+    input.addEventListener('blur', () => showContactFieldError(field));
+    input.addEventListener('input', () => {
+      const errEl = document.getElementById(`err-input-${field}`);
+      if (errEl && errEl.textContent) {
+        errEl.textContent = '';
+        input.classList.remove('pcb-input--error');
+        input.setAttribute('aria-invalid', 'false');
+      }
+    });
+  });
+}
+
+/**
  * Render sổ địa chỉ nhận hàng: địa chỉ mặc định đứng đầu, có nút sửa / xóa / đặt mặc định
  */
 function renderAddressList() {
@@ -1212,7 +1272,25 @@ async function renderPublicProfile(username) {
   const uidEl = document.getElementById('public-uid');
   if (uidEl) uidEl.textContent = `UID: ${maskUid(uid)}`;
   const selfNote = document.getElementById('public-self-note');
-  if (selfNote) selfNote.hidden = !(viewer && viewer.isLoggedIn !== false && viewer.username === username);
+  const isSelf = Boolean(viewer && viewer.isLoggedIn !== false && viewer.username === username);
+  if (selfNote) selfNote.hidden = !isSelf;
+
+  // Nút nhắn tin: ẩn khi xem hồ sơ của chính mình; chưa đăng nhập thì mời đăng nhập
+  const chatBtn = document.getElementById('public-chat-btn');
+  if (chatBtn) {
+    chatBtn.hidden = isSelf;
+    chatBtn.addEventListener('click', async () => {
+      if (openChatWithUser(username)) return;
+      const goLogin = await showConfirm({
+        title: 'Đăng nhập để nhắn tin',
+        message: `Bạn cần đăng nhập để trò chuyện với ${account.fullname || username}.`,
+        confirmText: 'Đăng nhập',
+        cancelText: 'Để sau',
+        tone: 'info'
+      });
+      if (goLogin) window.location.href = `login.html?redirect=${encodeURIComponent(`profile.html?user=${username}`)}`;
+    });
+  }
 
   // Tiểu sử
   const bioEl = document.getElementById('public-bio');
@@ -1743,32 +1821,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const user = getCurrentUser();
 
-      // Kiểm tra email / số điện thoại: đúng định dạng và không trùng với tài khoản khác
+      // Kiểm tra email / số điện thoại: đúng định dạng và không trùng với tài khoản khác (lỗi hiện dưới ô)
       const emailInput = document.getElementById('input-email');
       const phoneInput = document.getElementById('input-phone');
-      const newEmail = (emailInput?.value || '').trim() || user.email;
-      const newPhone = normalizePhone((phoneInput?.value || '').trim()) || user.phone;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(newEmail)) {
-        await showAlert({ title: 'Email không hợp lệ', message: 'Vui lòng nhập đúng định dạng email (ví dụ: ten@example.com).', tone: 'warning' });
-        emailInput?.focus();
+      const emailOk = showContactFieldError('email');
+      const phoneOk = showContactFieldError('phone');
+      if (!emailOk || !phoneOk) {
+        (emailOk ? phoneInput : emailInput)?.focus();
         return;
       }
-      if (!/^0(3|5|7|8|9)\d{8}$/.test(newPhone)) {
-        await showAlert({ title: 'Số điện thoại không hợp lệ', message: 'Vui lòng nhập số di động Việt Nam gồm 10 chữ số (ví dụ: 0901234567).', tone: 'warning' });
-        phoneInput?.focus();
-        return;
-      }
-      const conflict = findAccountConflict({ email: newEmail, phone: newPhone, exclude: user });
-      if (conflict) {
-        const label = conflict.field === 'email' ? 'Email' : 'Số điện thoại';
-        await showAlert({
-          title: `${label} đã được sử dụng`,
-          message: `${label} này đã được đăng ký cho một tài khoản khác trên PCBid. Vui lòng dùng ${conflict.field === 'email' ? 'email' : 'số điện thoại'} khác.`,
-          tone: 'warning'
-        });
-        (conflict.field === 'email' ? emailInput : phoneInput)?.focus();
-        return;
-      }
+      const newEmail = emailInput.value.trim();
+      const newPhone = normalizePhone(phoneInput.value.trim());
 
       // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
       const birthInput = document.getElementById('input-birthdate');
@@ -1814,6 +1877,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Đã lưu thay đổi thông tin cá nhân thành công!');
     });
   }
+
+  // 12a. Kiểm tra email / số điện thoại ngay khi rời khỏi ô: hiện dòng lỗi màu đỏ bên dưới
+  setupContactFieldValidation();
 
   // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
   const avatarInput = document.getElementById('input-avatar-file');
@@ -1944,6 +2010,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Kiểm tra mật khẩu hiện tại theo bản tài khoản đã lưu (kể cả tài khoản demo)
+      const user = getCurrentUser();
+      const stored = findAccount({ id: user.id, username: user.username }) || user;
+      if (accountHasPassword(stored) && !verifyPassword(stored, cur)) {
+        showAlert({ title: 'Sai mật khẩu hiện tại', message: 'Mật khẩu hiện tại không đúng. Vui lòng thử lại.', tone: 'warning' });
+        document.getElementById('input-current-pass')?.focus();
+        return;
+      }
+      if (cur === nw) {
+        showAlert({ title: 'Mật khẩu chưa thay đổi', message: 'Mật khẩu mới phải khác mật khẩu hiện tại.', tone: 'warning' });
+        return;
+      }
+
+      // Lưu mật khẩu mới dạng đã băm, bỏ mật khẩu mẫu dạng chữ thường (nếu là tài khoản demo)
+      const updated = { ...stored, ...user, passwordHash: hashPassword(nw) };
+      delete updated.password;
+      saveCurrentUser(updated);
       formPass.reset();
       showToast('Đổi mật khẩu tài khoản thành công!');
     });
