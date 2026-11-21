@@ -825,7 +825,38 @@ export const PHRASES = [
   ['Không áp dụng', 'Not applicable', '該当なし'],
   ['Trắng', 'White', 'ホワイト'],
   ['Đen;Trắng', 'Black;White', 'ブラック;ホワイト'],
-  ['Đen;Bạc', 'Black;Silver', 'ブラック;シルバー']
+  ['Đen;Bạc', 'Black;Silver', 'ブラック;シルバー'],
+
+  /* ---------- Ngày sinh ---------- */
+  ['Chưa cập nhật', 'Not set', '未設定'],
+
+  /* ---------- Thẻ đơn hàng: câu cố định ---------- */
+  ['Bạn đã thắng phiên này! Thanh toán thêm', 'You won this auction! Pay the remaining', '落札しました！残りの'],
+  ['trong', 'within', 'を'],
+  [').', ').', '）。'],
+  ['Người bán đã giao hàng. Kiểm tra linh kiện rồi xác nhận đã nhận để hoàn tất giao dịch.', 'The seller has shipped. Check the part, then confirm receipt to complete the transaction.', '出品者が発送しました。パーツを確認して受け取りを確定すると取引が完了します。'],
+  ['Giao dịch hoàn tất. Chúc bạn sử dụng linh kiện vui vẻ!', 'Transaction completed. Enjoy your new part!', '取引が完了しました。パーツをお楽しみください！'],
+  ['Số tiền còn lại sẽ được trừ từ ví ảo PCBid của bạn. Tiền cọc đã giữ được tính vào giá chốt.', 'The remaining amount will be deducted from your PCBid wallet. The held deposit counts toward the final price.', '残額は PCBid ウォレットから引き落とされます。保留中の保証金は落札価格に充当されます。'],
+  ['Chỉ xác nhận khi bạn đã gửi linh kiện cho người mua.', 'Only confirm once you have sent the part to the buyer.', 'パーツを購入者に発送してから確定してください。'],
+  ['Sau khi xác nhận, tiền sẽ được chuyển cho người bán và giao dịch hoàn tất.', 'After confirming, the money goes to the seller and the transaction is completed.', '確定すると代金が出品者に送られ、取引が完了します。'],
+
+  /* ---------- Kết quả thanh toán / giao hàng / nhận hàng ---------- */
+  ['Bạn không phải người thắng của phiên này.', 'You are not the winner of this auction.', 'あなたはこのオークションの落札者ではありません。'],
+  ['Đơn hàng không còn ở bước chờ thanh toán.', 'This order is no longer awaiting payment.', 'この注文はすでに支払い待ちではありません。'],
+  ['Đã quá hạn thanh toán.', 'The payment deadline has passed.', '支払い期限を過ぎています。'],
+  ['Vui lòng chọn địa chỉ nhận hàng trước khi thanh toán.', 'Please choose a shipping address before paying.', '支払いの前に配送先住所を選択してください。'],
+  ['Thanh toán thành công! Người bán sẽ sớm giao hàng.', 'Payment successful! The seller will ship soon.', '支払いが完了しました！出品者がまもなく発送します。'],
+  ['Bạn không phải người bán của đơn hàng này.', 'You are not the seller of this order.', 'あなたはこの注文の出品者ではありません。'],
+  ['Đơn hàng chưa được thanh toán.', 'This order has not been paid yet.', 'この注文はまだ支払われていません。'],
+  ['Đã xác nhận giao hàng. Chờ người mua xác nhận đã nhận.', 'Shipment confirmed. Waiting for the buyer to confirm receipt.', '発送を確定しました。購入者の受け取り確認を待っています。'],
+  ['Bạn không phải người mua của đơn hàng này.', 'You are not the buyer of this order.', 'あなたはこの注文の購入者ではありません。'],
+  ['Người bán chưa giao hàng.', 'The seller has not shipped yet.', '出品者はまだ発送していません。'],
+  ['Giao dịch hoàn tất. Cảm ơn bạn đã mua hàng trên PCBid!', 'Transaction completed. Thank you for shopping on PCBid!', '取引が完了しました。PCBid をご利用いただきありがとうございます！'],
+
+  /* ---------- Chat & trang chi tiết ---------- */
+  ['Hãy hỏi người bán về tình trạng linh kiện, bảo hành hoặc giao hàng.', 'Ask the seller about the condition, warranty or shipping.', 'パーツの状態・保証・配送について出品者に質問しましょう。'],
+  ['Hãy hỏi người mua về tình trạng linh kiện, bảo hành hoặc giao hàng.', 'Ask the buyer about the condition, warranty or shipping.', 'パーツの状態・保証・配送について購入者に質問しましょう。'],
+  ['Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào', 'The auction has ended · No bids were placed', 'オークションは終了しました · 入札はありませんでした']
 ];
 
 /**
@@ -867,5 +898,36 @@ export const PATTERNS = [
   [/^Bước giá: (.+)$/, 'Increment: $1', '入札単位：$1'],
   [/^Mã chứng chỉ: (.+)$/, 'Certificate no.: $1', '証明書番号：$1'],
   [/^Hôm nay, (\d{1,2}:\d{2})$/, 'Today, $1', '今日 $1'],
-  [/^([\d.]+ đ) · (\d+) lượt$/, '$1 · $2 bids', '$1 · $2件']
+  [/^([\d.]+ đ) · (\d+) lượt$/, '$1 · $2 bids', '$1 · $2件'],
+
+  /* ---------- Nội dung thông báo động (tên sản phẩm giữ nguyên) ---------- */
+  [/^(.+) — giá chốt ([\d.]+ ?đ)\. Thanh toán thêm ([\d.]+ ?đ) trước khi hết hạn để không bị mất cọc\.$/, '$1 — final price $2. Pay the remaining $3 before the deadline to keep your deposit.', '$1 — 落札価格 $2。保証金を失わないよう、期限までに残り $3 をお支払いください。'],
+  [/^(.+) — giá chốt ([\d.]+ ?đ), đang chờ người mua thanh toán\.$/, '$1 — final price $2, waiting for the buyer to pay.', '$1 — 落札価格 $2。購入者の支払い待ちです。'],
+  [/^(.+) — giá chốt ([\d.]+ ?đ)\.$/, '$1 — final price $2.', '$1 — 落札価格 $2。'],
+  [/^(.+) — bạn không thắng phiên này, tiền cọc đã được hoàn về ví\.$/, '$1 — you did not win this auction; your deposit has been returned to your wallet.', '$1 — 落札できませんでした。保証金はウォレットに返金されました。'],
+  [/^(.+) — giá cao nhất hiện tại ([\d.]+ ?đ), bạn đã đặt ([\d.]+ ?đ)\.$/, '$1 — current highest bid $2, your bid $3.', '$1 — 現在の最高額 $2、あなたの入札額 $3。'],
+  [/^(.+) — còn chưa đến (\d+) phút, giá của bạn ([\d.]+ ?đ)\.$/, '$1 — less than $2 min left, your bid $3.', '$1 — 残り$2分未満、あなたの入札額 $3。'],
+  [/^(.+) — giá của bạn ([\d.]+ ?đ), đang tạm giữ cọc ([\d.]+ ?đ)\.$/, '$1 — your bid $2, deposit held $3.', '$1 — あなたの入札額 $2、保留中の保証金 $3。'],
+  [/^(.+) — đã thanh toán ([\d.]+ ?đ) từ ví\.$/, '$1 — paid $2 from your wallet.', '$1 — ウォレットから $2 を支払いました。'],
+  [/^(.+) — hãy bấm "Đã nhận được hàng" khi bạn nhận đủ linh kiện\.$/, '$1 — tap "I received the item" once everything has arrived.', '$1 — すべて届いたら「商品を受け取りました」を押してください。'],
+  [/^(.+) — cảm ơn bạn đã mua hàng trên PCBid\.$/, '$1 — thank you for shopping on PCBid.', '$1 — PCBid をご利用いただきありがとうございます。'],
+  [/^(.+) — tiền cọc ([\d.]+ ?đ) đã chuyển cho người bán\.$/, '$1 — your $2 deposit has gone to the seller.', '$1 — 保証金 $2 は出品者に渡りました。'],
+  [/^(.+) — bấm "Xác nhận đã giao hàng" sau khi gửi linh kiện\.$/, '$1 — tap "Confirm shipment" after sending the part.', '$1 — パーツを発送したら「発送を確定」を押してください。'],
+  [/^(.+) — tiền ([\d.]+ ?đ) sẽ vào ví khi người mua xác nhận\.$/, '$1 — $2 will reach your wallet once the buyer confirms.', '$1 — 購入者が確認すると $2 がウォレットに入ります。'],
+  [/^(.+) — ([\d.]+ ?đ) đã được cộng vào ví của bạn\.$/, '$1 — $2 has been added to your wallet.', '$1 — $2 がウォレットに追加されました。'],
+  [/^(.+) — bạn nhận tiền cọc bồi thường ([\d.]+ ?đ)\. Có thể đăng bán lại phiên này\.$/, '$1 — you receive $2 as deposit compensation. You can relist this auction.', '$1 — 補償として保証金 $2 を受け取りました。再出品できます。'],
+
+  /* ---------- Thẻ đơn hàng: câu có số tiền / tên ---------- */
+  [/^để giữ quyền mua\. Quá hạn sẽ mất cọc ([\d.]+ ?đ)\.$/, 'to keep the item. If overdue, you lose the $1 deposit.', '以内にお支払いください。期限を過ぎると保証金 $1 を失います。'],
+  [/^Đã thanh toán đủ ([\d.]+ ?đ)\. Đang chờ người bán (.+) giao hàng\.$/, 'Paid in full: $1. Waiting for seller $2 to ship.', '$1 を全額支払いました。出品者 $2 の発送を待っています。'],
+  [/^Quá hạn thanh toán: bạn đã mất cọc ([\d.]+ ?đ), cọc được chuyển cho người bán\.$/, 'Payment overdue: you lost the $1 deposit, which went to the seller.', '支払い期限切れ：保証金 $1 を失い、出品者に渡りました。'],
+  [/^(.+) đã thắng với giá ([\d.]+ ?đ)\. Chờ người mua thanh toán \(còn$/, '$1 won at $2. Waiting for payment (', '$1 が $2 で落札しました。支払い待ち（残り'],
+  [/^Người mua đã thanh toán ([\d.]+ ?đ)\. Hãy gửi linh kiện rồi xác nhận đã giao hàng\.$/, 'The buyer paid $1. Send the part, then confirm shipment.', '購入者が $1 を支払いました。パーツを発送して発送を確定してください。'],
+  [/^Đã giao hàng\. Tiền ([\d.]+ ?đ) sẽ vào ví khi người mua xác nhận đã nhận\.$/, 'Shipped. $1 will reach your wallet once the buyer confirms receipt.', '発送済み。購入者が受け取りを確認すると $1 がウォレットに入ります。'],
+  [/^Giao dịch hoàn tất: ([\d.]+ ?đ) đã được cộng vào ví của bạn\.$/, 'Transaction completed: $1 has been added to your wallet.', '取引完了：$1 がウォレットに追加されました。'],
+  [/^Người mua không thanh toán đúng hạn\. Bạn nhận tiền cọc bồi thường ([\d.]+ ?đ) và có thể đăng bán lại\.$/, 'The buyer did not pay in time. You receive $1 as deposit compensation and can relist.', '購入者が期限内に支払いませんでした。補償として保証金 $1 を受け取り、再出品できます。'],
+  [/^Số tiền còn lại sẽ được trừ từ ví ảo PCBid của bạn\. Tiền cọc đã giữ được tính vào giá chốt\. Giao đến: (.+)$/, 'The remaining amount will be deducted from your PCBid wallet. The held deposit counts toward the final price. Ship to: $1', '残額は PCBid ウォレットから引き落とされます。保留中の保証金は落札価格に充当されます。お届け先：$1'],
+
+  /* ---------- Trang chi tiết: kết quả phiên ---------- */
+  [/^Phiên đấu giá đã kết thúc · Người thắng: (.+) với giá ([\d.]+ ?đ)$/, 'The auction has ended · Winner: $1 at $2', 'オークションは終了しました · 落札者：$1（$2）']
 ];
