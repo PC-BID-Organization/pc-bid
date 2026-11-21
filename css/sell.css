@@ -1140,3 +1140,62 @@ button.pcb-thumb-item {
     transition: none;
   }
 }
+
+/* ==========================================================================
+   TIÊU ĐỀ PHIÊN & THÔNG SỐ CHỈNH SỬA ĐƯỢC
+   ========================================================================== */
+.pcb-form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pcb-form-link-btn {
+  padding: 2px 4px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcb-primary, #ea580c);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 4px;
+}
+
+.pcb-form-link-btn:hover,
+.pcb-form-link-btn:focus-visible {
+  text-decoration: underline;
+}
+
+.pcb-form-link-btn[hidden] {
+  display: none;
+}
+
+/* Danh sách thông số của mẫu chiếm trọn chiều ngang khung thông số */
+.pcb-model-specs {
+  grid-column: 1 / -1;
+}
+
+.pcb-model-specs__key {
+  font-weight: 600;
+}
+
+.pcb-spec-grid__empty {
+  grid-column: 1 / -1;
+  padding: 8px 0;
+  font-size: 12px;
+  font-style: italic;
+  color: #94a3b8;
+}
+
+/* Nhãn "Đã chỉnh sửa" khi người bán sửa thông số của mẫu */
+.pcb-spec-box__badge--edited {
+  color: #9a3412;
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.pcb-card__seal[hidden] {
+  display: none;
+}

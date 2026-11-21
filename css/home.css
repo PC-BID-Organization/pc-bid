@@ -2412,3 +2412,10 @@
     width: 100%;
   }
 }
+
+/* Icon ngọn lửa trên băng chuyền trực tiếp */
+.pcb-ticker__flame {
+  display: inline-flex;
+  color: var(--pcb-primary, #ea580c);
+  vertical-align: -2px;
+}

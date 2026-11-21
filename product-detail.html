@@ -59,7 +59,7 @@
 
       <!-- ===== VÙNG LỖI 404 (ERROR STATE) ===== -->
       <div class="pcb-pd__error" id="pcb-pd-error" hidden>
-        <div class="pcb-pd__error-icon" aria-hidden="true">&#x26A0;&#xFE0F;</div>
+        <div class="pcb-pd__error-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--triangle-alert pcb-icon--s40" aria-hidden="true"></span></div>
         <h2 class="pcb-pd__error-title">Không tìm thấy phiên đấu giá</h2>
         <p class="pcb-pd__error-desc">ID sản phẩm không hợp lệ hoặc phiên đấu giá đã bị gỡ xuống.</p>
         <a href="products.html" class="pcb-pd__error-btn">&#x2190; Quay về danh sách</a>
@@ -79,7 +79,7 @@
               id="pcb-pd-main-img"
               loading="eager">
             <!-- Gợi ý và mức phóng to khi rê chuột vào ảnh (chỉ hiện trên máy tính có chuột) -->
-            <span class="pcb-pd__zoom-hint" aria-hidden="true">🔍 Rê chuột để phóng to · Lăn chuột để zoom</span>
+            <span class="pcb-pd__zoom-hint" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--zoom-in pcb-icon--s14" aria-hidden="true"></span> Rê chuột để phóng to · Lăn chuột để zoom</span>
             <span class="pcb-pd__zoom-level" id="pcb-pd-zoom-level" aria-hidden="true">2.0×</span>
           </div>
 
@@ -131,7 +131,7 @@
                 <span class="pcb-pd__countdown-unit-label">giây</span>
               </div>
             </div>
-            <p class="pcb-pd__countdown-ended" id="pcb-pd-ended-msg" hidden>&#x1F514; Phiên đấu giá đã kết thúc</p>
+            <p class="pcb-pd__countdown-ended" id="pcb-pd-ended-msg" hidden><span class="lucide pcb-icon pcb-icon--bell pcb-icon--s16" aria-hidden="true"></span> Phiên đấu giá đã kết thúc</p>
           </div>
 
           <!-- ===== SO SÁNH GIÁ: GIÁ THỊ TRƯỜNG vs GIÁ ĐẤU HIỆN TẠI ===== -->
@@ -157,6 +157,9 @@
 
           <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
           <!-- Bảng quản lý dành cho người bán khi xem phiên của chính mình (thay cho khung đặt giá) -->
+          <!-- Đơn hàng sau đấu giá: hiện cho người thắng và người bán khi phiên đã kết thúc -->
+          <section class="pcb-pd__order-panel" id="pcb-pd-order-panel" aria-label="Đơn hàng sau đấu giá" hidden></section>
+
           <section class="pcb-pd__owner" id="pcb-pd-owner-panel" aria-labelledby="pcb-pd-owner-title" hidden>
             <div class="pcb-pd__owner-head">
               <h2 class="pcb-pd__owner-title" id="pcb-pd-owner-title">Phiên đấu giá của bạn</h2>
@@ -185,6 +188,8 @@
               <!-- Thao tác đóng phiên đặt bên trái, tách khỏi các nút điều hướng -->
               <button type="button" class="pcb-pd__owner-btn pcb-pd__owner-btn--danger" id="pcb-pd-owner-close" hidden>Đóng phiên ngay</button>
               <a class="pcb-pd__owner-btn" id="pcb-pd-owner-relist" href="sell.html" hidden>Đăng bán lại</a>
+              <!-- Người bán tự sửa tiêu đề, mô tả và thông số kỹ thuật khi phiên còn diễn ra -->
+              <button type="button" class="pcb-pd__owner-btn" id="pcb-pd-owner-edit" hidden>Chỉnh sửa thông tin</button>
               <button type="button" class="pcb-pd__owner-btn" id="pcb-pd-owner-history">Xem lịch sử đặt giá</button>
               <a class="pcb-pd__owner-btn pcb-pd__owner-btn--primary" href="profile.html#selling">Xem linh kiện khác bạn đang đăng bán</a>
             </div>
@@ -225,12 +230,15 @@
 
             <!-- Nút xác nhận đặt giá lớn -->
             <button type="button" class="pcb-pd__submit-btn" id="pcb-pd-submit-btn" aria-label="Xác nhận đặt giá">
-              &#x1F528; XÁC NHẬN ĐẶT GIÁ
+              <span class="lucide pcb-icon pcb-icon--gavel pcb-icon--s18" aria-hidden="true"></span> XÁC NHẬN ĐẶT GIÁ
             </button>
+
+            <!-- Công cụ demo: kết thúc phiên ngay để xem quy trình sau khi trúng đấu giá -->
+            <button type="button" class="pcb-pd__demo-end-btn" id="pcb-pd-demo-end" hidden><span class="lucide pcb-icon pcb-icon--timer pcb-icon--s15" aria-hidden="true"></span> Kết thúc phiên ngay (demo)</button>
 
             <!-- Nút thêm vào danh sách theo dõi -->
             <button type="button" class="pcb-pd__watchlist-btn" id="pcb-pd-watchlist-btn" aria-pressed="false">
-              <span id="pcb-pd-watchlist-icon" aria-hidden="true">&#x1F90D;</span>
+              <span id="pcb-pd-watchlist-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--heart pcb-icon--s16" aria-hidden="true"></span></span>
               <span id="pcb-pd-watchlist-label">Thêm vào Watchlist</span>
             </button>
           </div>
@@ -247,8 +255,13 @@
               <p class="pcb-pd__seller-uid" id="pcb-pd-seller-uid"></p>
             </div>
             <div class="pcb-pd__seller-badge" aria-label="Xác thực danh tính">
-              &#x2714; Đã xác thực
+              <span class="lucide pcb-icon pcb-icon--circle-check pcb-icon--s13" aria-hidden="true"></span> Đã xác thực
             </div>
+            <!-- Nhắn tin hỏi người bán về linh kiện (mở hộp chat nổi) -->
+            <button type="button" class="pcb-pd__contact-btn" id="pcb-pd-contact-seller">
+              <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
+              Liên hệ người bán
+            </button>
           </div>
 
         </div>
@@ -364,7 +377,7 @@
     hidden>
     <div class="pcb-pd-modal__overlay" id="pcb-pd-modal-overlay" aria-hidden="true"></div>
     <div class="pcb-pd-modal__card">
-      <div class="pcb-pd-modal__icon" aria-hidden="true">&#x1F389;</div>
+      <div class="pcb-pd-modal__icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--trophy pcb-icon--s40" aria-hidden="true"></span></div>
       <h2 class="pcb-pd-modal__title" id="pcb-pd-modal-title">Đặt giá thành công!</h2>
       <p class="pcb-pd-modal__desc">Bạn đã đặt giá thành công cho sản phẩm:</p>
       <p class="pcb-pd-modal__product-name" id="pcb-pd-modal-product"></p>
@@ -373,7 +386,7 @@
         <span class="pcb-pd-modal__amount" id="pcb-pd-modal-amount">---</span>
       </div>
       <p class="pcb-pd-modal__note">
-        &#x26A1; Hệ thống sẽ thông báo khi có người đặt giá cao hơn bạn.
+        <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Hệ thống sẽ thông báo khi có người đặt giá cao hơn bạn.
       </p>
       <button type="button" class="pcb-pd-modal__close-btn" id="pcb-pd-modal-close">
         Đóng &amp; Tiếp tục xem
@@ -383,7 +396,7 @@
 
   <!-- ===== TOAST THÔNG BÁO NHANH ===== -->
   <div class="pcb-pd-toast" id="pcb-pd-toast" role="alert" aria-live="assertive" aria-atomic="true" hidden>
-    <span class="pcb-pd-toast__icon" id="pcb-pd-toast-icon" aria-hidden="true">&#x2139;&#xFE0F;</span>
+    <span class="pcb-pd-toast__icon" id="pcb-pd-toast-icon" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--info pcb-icon--s18" aria-hidden="true"></span></span>
     <span class="pcb-pd-toast__msg" id="pcb-pd-toast-msg"></span>
   </div>
 

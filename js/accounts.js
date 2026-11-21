@@ -204,19 +204,122 @@ export function maskUid(uid) {
 }
 
 /**
- * Tìm tài khoản theo ID, tên đăng nhập hoặc email trong tài khoản demo và tài khoản đã đăng ký
- * @param {{id?: string, username?: string, email?: string}} query - Điều kiện tìm
- * @returns {Object|null}
+ * Toàn bộ tài khoản thật: tài khoản đã đăng ký / đã lưu thay đổi, cộng các tài khoản demo
+ * chưa từng được lưu lại. Tài khoản demo đã sửa (email, số điện thoại...) dùng bản đã lưu,
+ * không còn khớp với thông tin gốc nữa.
+ * @returns {Array<Object>}
  */
-export function findAccount({ id, username, email } = {}) {
+export function getAllAccounts() {
   let registered = [];
   try {
     registered = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
   } catch {
     registered = [];
   }
-  // Ưu tiên bản đã lưu (có ảnh đại diện, tiểu sử, quyền riêng tư người dùng tự cập nhật)
-  const all = [...(Array.isArray(registered) ? registered : []), ...DEMO_ACCOUNTS, ...MOCK_BIDDERS];
+  const list = Array.isArray(registered) ? registered : [];
+  const saved = new Set(list.flatMap(u => [u.id, u.username].filter(Boolean)));
+  return [...list, ...DEMO_ACCOUNTS.filter(d => !saved.has(d.id) && !saved.has(d.username))];
+}
+
+/**
+ * Băm mật khẩu trước khi lưu vào localStorage (mô phỏng phía trình duyệt).
+ * Dùng hàm băm FNV-1a hai vòng để không lưu mật khẩu dạng chữ thường;
+ * đây KHÔNG phải cơ chế bảo mật thật như bcrypt trên máy chủ.
+ * @param {string} password
+ * @returns {string} Ví dụ: fnv-1a2b3c4d5e6f7a8b
+ */
+export function hashPassword(password) {
+  const input = `pcbid:${String(password ?? '')}`;
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  for (const ch of input) {
+    const code = ch.codePointAt(0);
+    h1 = Math.imul(h1 ^ code, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 ^ code, 0x5bd1e995) >>> 0;
+  }
+  return `fnv-${h1.toString(16).padStart(8, '0')}${h2.toString(16).padStart(8, '0')}`;
+}
+
+/**
+ * Tài khoản đã có mật khẩu chưa (tài khoản đăng ký từ phiên bản cũ có thể chưa lưu mật khẩu)
+ * @param {Object} account
+ * @returns {boolean}
+ */
+export function accountHasPassword(account) {
+  return Boolean(account && (account.passwordHash || account.password));
+}
+
+/**
+ * Kiểm tra mật khẩu nhập vào có khớp với tài khoản không
+ * @param {Object} account
+ * @param {string} password
+ * @returns {boolean}
+ */
+export function verifyPassword(account, password) {
+  if (!account || !password) return false;
+  if (account.passwordHash) return account.passwordHash === hashPassword(password);
+  // Tài khoản demo dựng sẵn lưu mật khẩu mẫu dạng chữ thường
+  return Boolean(account.password) && account.password === password;
+}
+
+/**
+ * Tạo tên đăng nhập chưa ai dùng từ phần đầu email (ví dụ bidder1 → bidder1_2)
+ * @param {string} email
+ * @returns {string}
+ */
+export function makeUniqueUsername(email) {
+  const base = String(email || 'user').split('@')[0].toLowerCase().replace(/[^a-z0-9._-]/g, '') || 'user';
+  const taken = new Set([...getAllAccounts(), ...MOCK_BIDDERS].map(u => u.username));
+  if (!taken.has(base)) return base;
+  let i = 2;
+  while (taken.has(`${base}_${i}`)) i += 1;
+  return `${base}_${i}`;
+}
+
+/**
+ * Chuẩn hóa số điện thoại để so sánh: bỏ khoảng trắng / dấu, đổi +84 / 84 thành 0
+ * @param {string} phone
+ * @returns {string}
+ */
+export function normalizePhone(phone) {
+  const digits = String(phone || '').replace(/[^\d+]/g, '');
+  if (digits.startsWith('+84')) return `0${digits.slice(3)}`;
+  if (/^84\d{9}$/.test(digits)) return `0${digits.slice(2)}`;
+  return digits;
+}
+
+/**
+ * Kiểm tra email / số điện thoại đã được tài khoản khác sử dụng chưa
+ * @param {Object} query
+ * @param {string} [query.email]
+ * @param {string} [query.phone]
+ * @param {Object} [query.exclude] - Tài khoản đang sửa (bỏ qua chính nó)
+ * @returns {{field:'email'|'phone', account:Object}|null}
+ */
+export function findAccountConflict({ email, phone, exclude } = {}) {
+  const isSelf = u => exclude && ((exclude.id && u.id === exclude.id) || (exclude.username && u.username === exclude.username));
+  const others = getAllAccounts().filter(u => !isSelf(u));
+  const mail = String(email || '').trim().toLowerCase();
+  if (mail) {
+    const byEmail = others.find(u => String(u.email || '').trim().toLowerCase() === mail);
+    if (byEmail) return { field: 'email', account: byEmail };
+  }
+  const tel = normalizePhone(phone);
+  if (tel) {
+    const byPhone = others.find(u => normalizePhone(u.phone) === tel);
+    if (byPhone) return { field: 'phone', account: byPhone };
+  }
+  return null;
+}
+
+/**
+ * Tìm tài khoản theo ID, tên đăng nhập hoặc email trong tài khoản demo và tài khoản đã đăng ký
+ * @param {{id?: string, username?: string, email?: string}} query - Điều kiện tìm
+ * @returns {Object|null}
+ */
+export function findAccount({ id, username, email } = {}) {
+  // Ưu tiên bản đã lưu (có ảnh đại diện, tiểu sử, email / số điện thoại người dùng tự cập nhật)
+  const all = [...getAllAccounts(), ...MOCK_BIDDERS];
   if (id) {
     const byId = all.find(u => u.id === id);
     if (byId) return byId;
@@ -264,7 +367,11 @@ export function saveAccount(user) {
     const index = list.findIndex(u => u.id === user.id || (u.username && u.username === user.username));
     // Danh sách công khai không lưu trạng thái đăng nhập
     const { isLoggedIn, loggedInAt, ...stored } = user;
-    if (index >= 0) list[index] = { ...list[index], ...stored };
+    if (index >= 0) {
+      list[index] = { ...list[index], ...stored };
+      // Đã có mật khẩu băm (đổi mật khẩu): bỏ mật khẩu mẫu dạng chữ thường của tài khoản demo
+      if (stored.passwordHash) delete list[index].password;
+    }
     else list.push(stored);
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(list));
   } catch {

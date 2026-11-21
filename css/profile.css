@@ -521,8 +521,9 @@
 .pcb-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
+  gap: 6px;
+  /* Thu gọn khoảng đệm để đủ chỗ cho 4 tab trên màn hình máy tính */
+  padding: 12px 12px;
   background-color: transparent;
   border: none;
   font-size: 14px;
@@ -2140,67 +2141,19 @@
 }
 
 .pcb-privacy__label {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text-main, #0b1c30);
 }
 
-.pcb-switch {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+/* Công tắc luôn nằm cùng hàng với nhãn, không bị đẩy xuống dòng */
+.pcb-privacy__item .pcb-switch {
+  flex-shrink: 0;
 }
 
-.pcb-switch__input {
-  position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-}
-
-.pcb-switch__track {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  border-radius: 999px;
-  background-color: #cbd5e1;
-  transition: background-color 0.15s ease;
-}
-
-.pcb-switch__track::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.15s ease;
-}
-
-.pcb-switch__input:checked + .pcb-switch__track {
-  background-color: #16a34a;
-}
-
-.pcb-switch__input:checked + .pcb-switch__track::after {
-  transform: translateX(18px);
-}
-
-.pcb-switch__input:focus-visible + .pcb-switch__track {
-  outline: 3px solid var(--color-primary-light, #ffedd5);
-  outline-offset: 2px;
-}
-
-.pcb-switch__text {
-  min-width: 64px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #475569;
-}
+/* Nút gạt .pcb-switch đã chuyển sang css/style.css để dùng chung (quyền riêng tư, địa chỉ mặc định) */
 
 /* ==========================================================================
    HỒ SƠ CÔNG KHAI (profile.html?user=...)
@@ -2383,8 +2336,10 @@
     text-align: center;
   }
 
-  .pcb-privacy__item {
-    flex-wrap: wrap;
+  /* Điện thoại: thu gọn chữ "Công khai / Riêng tư" để nhãn và công tắc vừa một hàng */
+  .pcb-privacy__item .pcb-switch__text {
+    min-width: 0;
+    font-size: 0.75rem;
   }
 }
 
@@ -2515,4 +2470,306 @@
 .pcb-public__more:hover,
 .pcb-public__more:focus-visible {
   background-color: #ffedd5;
+}
+
+/* Danh sách đơn hàng sau đấu giá (tab Đơn hàng) */
+.pcb-orders-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+/* Bộ đếm đơn hàng đang chờ bạn xử lý */
+.pcb-tab__counter--alert {
+  color: #ffffff;
+  background-color: #dc2626;
+}
+
+@media (max-width: 480px) {
+  .pcb-orders-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   KHU VỰC QUẢN LÝ ĐẤU GIÁ (tách riêng khỏi cài đặt tài khoản)
+   ========================================================================== */
+
+/* Liên kết quay về cài đặt: chỉ hiện ở chế độ Quản lý đấu giá */
+.pcb-trade-settings-link {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-main, #0b1c30);
+  text-decoration: none;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-light, rgba(226, 191, 178, 0.4));
+  border-radius: 12px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.pcb-trade-settings-link:hover,
+.pcb-trade-settings-link:focus-visible {
+  color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #ea580c);
+}
+
+.pcb-profile--trade .pcb-trade-settings-link {
+  display: flex;
+}
+
+/* Ở chế độ Quản lý đấu giá: ẩn menu cài đặt và ghi chú bảo mật */
+.pcb-profile--trade .pcb-profile-nav,
+.pcb-profile--trade .pcb-trust-note {
+  display: none;
+}
+
+/* Công tắc hai luồng Mua hàng / Bán hàng */
+.pcb-trade-switch {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background-color: #f1f5f9;
+  border-radius: 12px;
+}
+
+.pcb-trade-switch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-muted, #565e74);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 9px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pcb-trade-switch__btn:hover,
+.pcb-trade-switch__btn:focus-visible {
+  color: var(--color-primary, #ea580c);
+}
+
+.pcb-trade-switch__btn--active {
+  color: var(--color-primary, #ea580c);
+  background-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(11, 28, 48, 0.1);
+}
+
+.pcb-trade-switch__badge {
+  min-width: 18px;
+  padding: 1px 6px;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  color: #ffffff;
+  background-color: #dc2626;
+  border-radius: 999px;
+}
+
+.pcb-trade-switch__badge[hidden],
+.pcb-tab[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .pcb-trade-switch {
+    display: flex;
+  }
+
+  .pcb-trade-switch__btn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 10px;
+  }
+}
+
+/* ==========================================================================
+   MỤC ĐỊA CHỈ NHẬN HÀNG TRONG CÀI ĐẶT TÀI KHOẢN
+   ========================================================================== */
+.pcb-address-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-address-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 4px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.pcb-address-card:first-child {
+  border-top: 1px solid #eef2f7;
+}
+
+.pcb-address-card__actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.pcb-address-card__links {
+  display: flex;
+  gap: 8px;
+}
+
+.pcb-address-empty {
+  padding: 40px 16px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--color-text-muted, #565e74);
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.pcb-address-empty p {
+  margin: 4px 0;
+}
+
+@media (max-width: 560px) {
+  .pcb-address-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pcb-address-card__actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+/* Icon Lucide trong danh sách thông báo, bộ lọc nhanh và thông báo riêng tư */
+.pcb-notify--danger .pcb-notify__icon { color: #dc2626; }
+.pcb-notify--warning .pcb-notify__icon { color: #d97706; }
+.pcb-notify--success .pcb-notify__icon { color: #16a34a; }
+.pcb-notify--muted .pcb-notify__icon { color: #64748b; }
+
+.pcb-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pcb-public__private .lucide {
+  margin-right: 4px;
+  color: #64748b;
+}
+
+/* Thống kê phiên đang bán / đang tham gia trên hồ sơ công khai */
+.pcb-public__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pcb-public__stat-sep {
+  margin: 0 8px;
+  color: #cbd5e1;
+}
+
+/* Dòng lỗi màu đỏ dưới ô email / số điện thoại (kiểm tra khi rời khỏi ô) */
+.pcb-form__error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.pcb-form__error:empty {
+  display: none;
+}
+
+.pcb-input.pcb-input--error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* Nút nhắn tin trên hồ sơ công khai */
+.pcb-public__chat-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background-color: var(--color-primary, #ea580c);
+  border: none;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-public__chat-btn:hover,
+.pcb-public__chat-btn:focus-visible {
+  background-color: var(--color-primary-hover, #d94e07);
+}
+
+.pcb-public__chat-btn[hidden] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .pcb-public__chat-btn {
+    margin-left: 0;
+  }
+}
+
+/* Dấu bên phải ô email / số điện thoại: tick xanh khi hợp lệ, X đỏ khi sai hoặc đã bị dùng */
+.pcb-verified-check {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pcb-verified-check--error {
+  color: #dc2626;
+}
+
+/* Ngày sinh đã đổi 1 lần: nhãn khóa thay cho nút Thay đổi */
+.pcb-birthdate__lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  cursor: help;
+}
+
+.pcb-birthdate__lock[hidden] {
+  display: none;
+}
+
+/* Gợi ý dưới hai ô họ đệm / tên */
+.pcb-form__name-hint {
+  margin: -8px 0 0;
+}
+
+.pcb-birthdate__change[hidden] {
+  display: none;
 }
