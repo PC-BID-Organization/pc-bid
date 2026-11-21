@@ -363,6 +363,8 @@ function initHeaderUserStatus() {
   avatarBtn.onclick = (e) => {
     e.stopPropagation();
     const isHidden = dropdown.hidden;
+    // Mở menu: tính lại số dư khả dụng để phản ánh lượt đặt giá / bị vượt giá mới nhất
+    if (isHidden) refreshHeaderWallet();
     dropdown.hidden = !isHidden;
     avatarBtn.setAttribute('aria-expanded', String(isHidden));
   };
@@ -381,6 +383,27 @@ function initHeaderUserStatus() {
       dropdown.hidden = true;
       avatarBtn.setAttribute('aria-expanded', 'false');
     }
+  });
+}
+
+/**
+ * Cập nhật số dư khả dụng trong menu tài khoản từ dữ liệu mới nhất trong localStorage
+ * (tiền cọc thay đổi mỗi khi đặt giá, bị vượt giá hoặc phiên kết thúc)
+ */
+function refreshHeaderWallet() {
+  const walletEl = document.querySelector('#header-user-dropdown .header__dropdown-wallet-val');
+  if (!walletEl) return;
+  const user = readLoggedInUser();
+  if (user) walletEl.textContent = formatHeaderVnd(getAvailableBalance(user));
+}
+
+// Đặt giá trên cùng trang (pcbid:bid-placed) hoặc ở tab khác (storage): làm mới số dư ngay
+if (!window.__pcbidWalletRefreshBound) {
+  window.__pcbidWalletRefreshBound = true;
+  window.addEventListener('pcbid:bid-placed', refreshHeaderWallet);
+  window.addEventListener('pcbid:wallet-updated', refreshHeaderWallet);
+  window.addEventListener('storage', (e) => {
+    if (!e.key || ['pcbid_bids', 'pcbid_products', 'pcbid_currentUser', 'pcbid_user'].includes(e.key)) refreshHeaderWallet();
   });
 }
 

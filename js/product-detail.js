@@ -1063,6 +1063,8 @@ function thucHienDatGia(nguoiDung, soTien) {
   sanPhamHienTai.currentBid = soTien;
   sanPhamHienTai.bidCount = (sanPhamHienTai.bidCount || 0) + 1;
   capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
+  // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
+  window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: luotMoi.productId } }));
 
   // Cập nhật giao diện giá và số lượt
   capNhatGia(sanPhamHienTai);

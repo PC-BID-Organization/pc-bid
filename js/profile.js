@@ -1499,6 +1499,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {
         console.warn('[PCBid] Không thể cập nhật pcbid_products từ profile:', e);
       }
+      // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
+      window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: activeQuickBidItem.id } }));
 
       syncUserInfoUI();
       renderCurrentAuctionTab();
