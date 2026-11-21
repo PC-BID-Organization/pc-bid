@@ -1644,24 +1644,12 @@ a.pcb-chat__peer-name:focus-visible {
   display: none;
 }
 
-.pcb-addr-form__check {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--color-text-main);
-  cursor: pointer;
-}
-
-.pcb-addr-form__check input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
-}
-
-.pcb-addr-form__check--locked {
-  color: var(--color-text-muted);
-  cursor: default;
+/* Nút gạt đặt làm mặc định: nhãn bên trái, nút gạt bên phải */
+.pcb-addr-form__switch {
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: #f8fafc;
+  border-radius: 10px;
 }
 
 .pcb-addr-form__note {
@@ -1785,3 +1773,117 @@ a.pcb-chat__peer-name:focus-visible {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   NÚT GẠT BẬT / TẮT DÙNG CHUNG (quyền riêng tư, địa chỉ mặc định)
+   ========================================================================== */
+.pcb-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.pcb-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.pcb-switch__track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background-color: #cbd5e1;
+  transition: background-color 0.15s ease;
+}
+
+.pcb-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
+}
+
+.pcb-switch__input:checked + .pcb-switch__track {
+  background-color: #16a34a;
+}
+
+.pcb-switch__input:checked + .pcb-switch__track::after {
+  transform: translateX(18px);
+}
+
+.pcb-switch__input:focus-visible + .pcb-switch__track {
+  outline: 3px solid var(--color-primary-light, #ffedd5);
+  outline-offset: 2px;
+}
+
+.pcb-switch__text {
+  min-width: 64px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Nút gạt có nhãn đứng trước (ví dụ "Đặt làm địa chỉ mặc định") */
+.pcb-switch__label {
+  font-size: 14px;
+  color: var(--color-text-main);
+}
+
+.pcb-switch__input:disabled + .pcb-switch__track {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   ICON LUCIDE (js/icons.js): căn giữa theo dòng chữ
+   ========================================================================== */
+.lucide {
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+}
+
+/* Menu ba chấm trong chat: icon đứng trước chữ */
+.pcb-chat__menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pcb-chat__pin {
+  display: inline-flex;
+  margin-right: 4px;
+  color: var(--color-primary);
+  vertical-align: -1px;
+}
+
+.pcb-chat__attach-btn--image { --attach-color: #2563eb; }
+.pcb-chat__attach-btn--video { --attach-color: #9333ea; }
+.pcb-chat__attach-btn--product { --attach-color: #ea580c; }
+.pcb-chat__attach-btn--order { --attach-color: #16a34a; }
+
+.pcb-chat__attach-btn .lucide {
+  color: var(--attach-color, currentColor);
+}
+
+/* Biểu tượng vai trò trên thẻ đơn hàng */
+.pcb-order__role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pcb-order__role .lucide {
+  color: var(--color-primary);
+}
+

@@ -2146,62 +2146,7 @@
   color: var(--color-text-main, #0b1c30);
 }
 
-.pcb-switch {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.pcb-switch__input {
-  position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-}
-
-.pcb-switch__track {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  border-radius: 999px;
-  background-color: #cbd5e1;
-  transition: background-color 0.15s ease;
-}
-
-.pcb-switch__track::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.15s ease;
-}
-
-.pcb-switch__input:checked + .pcb-switch__track {
-  background-color: #16a34a;
-}
-
-.pcb-switch__input:checked + .pcb-switch__track::after {
-  transform: translateX(18px);
-}
-
-.pcb-switch__input:focus-visible + .pcb-switch__track {
-  outline: 3px solid var(--color-primary-light, #ffedd5);
-  outline-offset: 2px;
-}
-
-.pcb-switch__text {
-  min-width: 64px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #475569;
-}
+/* Nút gạt .pcb-switch đã chuyển sang css/style.css để dùng chung (quyền riêng tư, địa chỉ mặc định) */
 
 /* ==========================================================================
    HỒ SƠ CÔNG KHAI (profile.html?user=...)
@@ -2699,4 +2644,33 @@
     justify-content: space-between;
     width: 100%;
   }
+}
+
+/* Icon Lucide trong danh sách thông báo, bộ lọc nhanh và thông báo riêng tư */
+.pcb-notify--danger .pcb-notify__icon { color: #dc2626; }
+.pcb-notify--warning .pcb-notify__icon { color: #d97706; }
+.pcb-notify--success .pcb-notify__icon { color: #16a34a; }
+.pcb-notify--muted .pcb-notify__icon { color: #64748b; }
+
+.pcb-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pcb-public__private .lucide {
+  margin-right: 4px;
+  color: #64748b;
+}
+
+/* Thống kê phiên đang bán / đang tham gia trên hồ sơ công khai */
+.pcb-public__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pcb-public__stat-sep {
+  margin: 0 8px;
+  color: #cbd5e1;
 }

@@ -1045,3 +1045,35 @@
     width: auto;
   }
 }
+
+/* Icon Lucide theo loại thông báo trong bảng nhanh */
+.header__notify-icon {
+  display: inline-flex;
+  margin-top: 1px;
+}
+
+.header__notify-icon--danger { color: #dc2626; }
+.header__notify-icon--warning { color: #d97706; }
+.header__notify-icon--success { color: #16a34a; }
+.header__notify-icon--muted { color: #64748b; }
+
+/* Thống kê phiên đang bán / đang tham gia trong menu tài khoản */
+.header__dropdown-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.header__dropdown-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header__dropdown-stat .lucide {
+  color: #ea580c;
+}

@@ -718,3 +718,7 @@
 .pcb-card--just-posted .pcb-card__watch {
   top: 38px;
 }
+
+.pcb-card__just-posted .lucide {
+  margin-right: 2px;
+}

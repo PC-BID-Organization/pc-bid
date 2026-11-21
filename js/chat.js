@@ -23,6 +23,8 @@ import { loadAllAuctions } from './bid-history.js';
 import { isAuctionClosed } from './auction-time.js';
 import { ORDER_STATUS_LABELS } from './settlement.js';
 import { showAlert, showConfirm } from './dialog.js';
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
 
 const CHATS_KEY = 'pcbid_chats';
 // Thời gian phía bên kia "đang soạn tin" trước khi tự trả lời
@@ -805,7 +807,7 @@ function renderList() {
           ${avatarHtml(peer)}
           <span class="pcb-chat__item-body">
             <span class="pcb-chat__item-top">
-              <span class="pcb-chat__item-name">${pinned ? '<span class="pcb-chat__pin" aria-label="Đã ghim">📌</span>' : ''}${escapeHtml(peer.name)}</span>
+              <span class="pcb-chat__item-name">${pinned ? `<span class="pcb-chat__pin" title="Đã ghim">${icon('pin', { size: 12 })}<span class="pcb-chat__sr">Đã ghim</span></span>` : ''}${escapeHtml(peer.name)}</span>
               <span class="pcb-chat__item-time">${last ? formatTime(last.timestamp) : ''}</span>
             </span>
             <span class="pcb-chat__item-role">${peer.label}</span>
@@ -818,11 +820,11 @@ function renderList() {
         </button>
         ${menuOpen ? `
           <div class="pcb-chat__menu" role="menu">
-            <button type="button" role="menuitem" data-chat-menu="${pinned ? 'unpin' : 'pin'}" data-chat-target="${chat.id}">📌 ${pinned ? 'Bỏ ghim' : 'Ghim cuộc trò chuyện'}</button>
+            <button type="button" role="menuitem" data-chat-menu="${pinned ? 'unpin' : 'pin'}" data-chat-target="${chat.id}">${icon(pinned ? 'pin-off' : 'pin')} ${pinned ? 'Bỏ ghim' : 'Ghim cuộc trò chuyện'}</button>
             ${unread
-              ? `<button type="button" role="menuitem" data-chat-menu="read" data-chat-target="${chat.id}">✓ Đánh dấu đã đọc</button>`
-              : `<button type="button" role="menuitem" data-chat-menu="unread" data-chat-target="${chat.id}">● Đánh dấu chưa đọc</button>`}
-            <button type="button" role="menuitem" class="pcb-chat__menu-danger" data-chat-menu="delete" data-chat-target="${chat.id}">🗑 Xóa đoạn chat</button>
+              ? `<button type="button" role="menuitem" data-chat-menu="read" data-chat-target="${chat.id}">${icon('check-check')} Đánh dấu đã đọc</button>`
+              : `<button type="button" role="menuitem" data-chat-menu="unread" data-chat-target="${chat.id}">${icon('mail')} Đánh dấu chưa đọc</button>`}
+            <button type="button" role="menuitem" class="pcb-chat__menu-danger" data-chat-menu="delete" data-chat-target="${chat.id}">${icon('trash-2')} Xóa đoạn chat</button>
           </div>` : ''}
       </li>
     `;
@@ -958,13 +960,13 @@ async function renderPopover() {
   }
   if (state.popover === 'attach') {
     const items = [
-      ['image', '🖼️', 'Hình ảnh'],
-      ['video', '🎬', 'Video'],
-      ['product', '📦', 'Sản phẩm'],
-      ['order', '🧾', 'Đơn hàng']
+      ['image', 'image', 'Hình ảnh'],
+      ['video', 'video', 'Video'],
+      ['product', 'package', 'Sản phẩm'],
+      ['order', 'receipt', 'Đơn hàng']
     ];
-    pop.innerHTML = `<div class="pcb-chat__attach-grid">${items.map(([kind, icon, label]) => `
-      <button type="button" class="pcb-chat__attach-btn" data-chat-attach="${kind}"><span aria-hidden="true">${icon}</span>${label}</button>`).join('')}</div>`;
+    pop.innerHTML = `<div class="pcb-chat__attach-grid">${items.map(([kind, iconName, label]) => `
+      <button type="button" class="pcb-chat__attach-btn pcb-chat__attach-btn--${kind}" data-chat-attach="${kind}">${icon(iconName, { size: 18 })}${label}</button>`).join('')}</div>`;
     return;
   }
   const back = '<button type="button" class="pcb-chat__pop-back" data-chat-toggle="attach">‹ Quay lại</button>';
