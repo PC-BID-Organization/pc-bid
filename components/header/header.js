@@ -4,7 +4,9 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
-import { getAvailableBalance, getUnreadNotificationCount, getUserNotifications, markNotificationsRead } from '../../js/wallet.js';
+import { getAvailableBalance, getUnreadNotificationCount, getUserNotifications, markNotificationsRead, getParticipatingAuctions } from '../../js/wallet.js';
+// Thời điểm kết thúc / trạng thái phiên để chỉ đếm phiên còn diễn ra
+import { getAuctionEndTimestamp, isAuctionClosed } from '../../js/auction-time.js';
 // Đơn hàng sau đấu giá để đếm số việc cần xử lý trên icon Quản lý đấu giá
 import { getOrdersForUser, orderNeedsAction } from '../../js/settlement.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
@@ -13,6 +15,8 @@ import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from '../../js/dialog.js';
+// Bộ icon Lucide dùng chung
+import { icon, NOTIFY_ICON_NAMES } from '../../js/icons.js';
 // Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 
@@ -30,8 +34,7 @@ export function initHeader() {
    BẢNG THÔNG BÁO NHANH (bấm chuông) & SỐ ĐẾM ICON QUẢN LÝ ĐẤU GIÁ
    ========================================================================== */
 
-// Biểu tượng theo loại thông báo
-const NOTIFY_ICONS = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
+
 // Số thông báo tối đa hiển thị trong bảng nhanh
 const NOTIFY_PANEL_LIMIT = 6;
 
@@ -73,7 +76,7 @@ function renderNotifyPanel() {
         ${list.map(n => `
           <li>
             <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
-              <span class="header__notify-icon" aria-hidden="true">${NOTIFY_ICONS[n.type] || '🔔'}</span>
+              <span class="header__notify-icon header__notify-icon--${n.type}">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 18 })}</span>
               <span class="header__notify-body">
                 <span class="header__notify-item-title">${escapeHeaderHtml(n.title)}</span>
                 <span class="header__notify-item-msg">${escapeHeaderHtml(n.message)}</span>
@@ -355,9 +358,12 @@ function initHeaderUserStatus() {
     const displayName = user.fullname || user.username || 'Thành viên';
     // Avatar mặc định: chữ cái đầu của TÊN, đồng bộ với trang Hồ sơ và trang chi tiết
     const initials = getAvatarInitial(user);
-    // Mọi tài khoản đều là thành viên đấu giá (ai cũng có thể đăng bán)
-    const roleText = '👤 Đấu giá viên';
-    const roleClass = 'header__dropdown-role-badge--bidder';
+    // Không phân biệt người bán / người mua: chỉ hiện số phiên đang bán và đang tham gia
+    const now = Date.now();
+    const participatingCount = getParticipatingAuctions(user).filter(item => getAuctionEndTimestamp(item) > now).length;
+    const renderStats = sellingCount => `
+      <span class="header__dropdown-stat">${icon('tag', { size: 12 })} ${sellingCount} phiên đang bán</span>
+      <span class="header__dropdown-stat">${icon('gavel', { size: 12 })} ${participatingCount} phiên đang tham gia</span>`;
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
     avatarBtn.classList.add('header__user-avatar--initial');
@@ -371,7 +377,7 @@ function initHeaderUserStatus() {
           <div class="header__dropdown-avatar">${user.avatarImage ? renderAvatarContent(user, 'header__avatar-photo') : escapeHeaderHtml(initials)}</div>
           <div class="header__dropdown-meta">
             <div class="header__dropdown-name">${escapeHeaderHtml(displayName)}</div>
-            <span class="header__dropdown-role-badge ${roleClass}" id="header-dropdown-role">${roleText}</span>
+            <div class="header__dropdown-stats" id="header-dropdown-stats">${renderStats(0)}</div>
             <div class="header__dropdown-email">${escapeHeaderHtml(user.email || '')}</div>
           </div>
         </div>
@@ -432,11 +438,12 @@ function initHeaderUserStatus() {
       </div>
     `;
 
-    // Giống hồ sơ công khai: nếu có đăng bán thì ghi thêm số phiên (nạp catalog bất đồng bộ)
+    // Số phiên đang bán cần nạp catalog nên cập nhật bất đồng bộ (chỉ tính phiên chưa kết thúc)
     loadAllAuctions().then(auctions => {
-      const sellingCount = getSellingAuctions(user.username, auctions).length;
-      const roleEl = document.getElementById('header-dropdown-role');
-      if (roleEl && sellingCount) roleEl.textContent = `${roleText} · ${sellingCount} phiên đăng bán`;
+      const sellingCount = getSellingAuctions(user.username, auctions)
+        .filter(p => !isAuctionClosed(p) && p.endTimestamp > Date.now()).length;
+      const statsEl = document.getElementById('header-dropdown-stats');
+      if (statsEl) statsEl.innerHTML = renderStats(sellingCount);
     }).catch(() => {});
 
     const logoutBtn = document.getElementById('header-dropdown-logout-btn');
@@ -484,12 +491,12 @@ function initHeaderUserStatus() {
 
       <div>
         <div style="font-size: 11px; font-weight: 700; color: #065f46; margin-bottom: 6px;">
-          ⚡ Đăng nhập nhanh tài khoản Demo:
+          ${icon('zap', { size: 13 })} Đăng nhập nhanh tài khoản Demo:
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px;">
           ${SAMPLE_ACCOUNTS.map(acc => `
           <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
-            <span style="font-weight: 600;">👤 ${escapeHeaderHtml(acc.fullname)}</span>
+            <span style="font-weight: 600;">${icon('user', { size: 13 })} ${escapeHeaderHtml(acc.fullname)}</span>
             <span style="font-size: 11px; color: #64748b;">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
           </button>`).join('')}
         </div>

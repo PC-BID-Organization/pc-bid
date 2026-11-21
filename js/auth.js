@@ -6,7 +6,7 @@
  */
 
 // Tài khoản demo và tiện ích tên / avatar dùng chung
-import { DEMO_ACCOUNTS, getGivenName } from './accounts.js';
+import { DEMO_ACCOUNTS, getGivenName, getAllAccounts, findAccount, findAccountConflict, normalizePhone } from './accounts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Khởi tạo chức năng ẩn/hiện mật khẩu (dùng chung cho Đăng ký & Đăng nhập)
@@ -111,10 +111,19 @@ function initLoginForm() {
 
   // Lắng nghe sự kiện click nút chọn nhanh tài khoản demo
   const demoButtons = document.querySelectorAll('.pcb-demo-btn');
+  // Hiển thị đúng họ tên và email hiện tại của từng tài khoản demo (có thể đã đổi trong cài đặt)
+  demoButtons.forEach(btn => {
+    const acc = findAccount({ username: btn.getAttribute('data-demo-user') });
+    const emailEl = btn.querySelector('.pcb-auth-demo__email');
+    if (acc && emailEl) emailEl.textContent = acc.email;
+    const nameEl = btn.querySelector('.pcb-auth-demo__name');
+    if (acc && nameEl) nameEl.textContent = acc.fullname;
+  });
   demoButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const demoKey = btn.getAttribute('data-demo-user');
-      const targetAcc = SAMPLE_ACCOUNTS.find(a => a.username === demoKey) || SAMPLE_ACCOUNTS[0];
+      // Dùng bản đã lưu: email / mật khẩu người dùng đã đổi trong cài đặt tài khoản
+      const targetAcc = findAccount({ username: demoKey }) || SAMPLE_ACCOUNTS.find(a => a.username === demoKey) || SAMPLE_ACCOUNTS[0];
 
       if (inputUsername) inputUsername.value = targetAcc.email;
       if (inputPassword) inputPassword.value = targetAcc.password;
@@ -158,9 +167,9 @@ function initLoginForm() {
     if (!isValid) return;
 
     // Tra cứu tài khoản từ danh sách đăng ký hoặc danh sách tài khoản mẫu có sẵn
-    const registeredUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    // Ưu tiên bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử... sau khi đăng xuất / đăng nhập lại)
-    const allKnownUsers = [...registeredUsers, ...SAMPLE_ACCOUNTS];
+    // Ưu tiên bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử, email mới... sau khi đăng xuất / đăng nhập lại);
+    // tài khoản demo đã đổi email thì email cũ không còn đăng nhập được
+    const allKnownUsers = getAllAccounts();
     const lowerInput = usernameVal.toLowerCase();
 
     // Tìm kiếm theo username, email, hoặc alias linh hoạt
@@ -302,6 +311,10 @@ function initRegisterForm() {
     } else if (!emailRegex.test(emailVal)) {
       showFieldError(inputEmail, 'err-email', 'Định dạng email không hợp lệ (VD: user@example.com).');
       isValid = false;
+    } else if (findAccountConflict({ email: emailVal })) {
+      // Email đã thuộc về tài khoản khác (kể cả tài khoản demo đã đổi email)
+      showFieldError(inputEmail, 'err-email', 'Email này đã được đăng ký cho một tài khoản khác.');
+      isValid = false;
     } else {
       clearFieldError(inputEmail, 'err-email');
     }
@@ -314,6 +327,9 @@ function initRegisterForm() {
       isValid = false;
     } else if (!phoneRegex.test(phoneVal)) {
       showFieldError(inputPhone, 'err-phone', 'Số điện thoại phải gồm 10 đến 11 chữ số.');
+      isValid = false;
+    } else if (findAccountConflict({ phone: normalizePhone(phoneVal) })) {
+      showFieldError(inputPhone, 'err-phone', 'Số điện thoại này đã được đăng ký cho một tài khoản khác.');
       isValid = false;
     } else {
       clearFieldError(inputPhone, 'err-phone');

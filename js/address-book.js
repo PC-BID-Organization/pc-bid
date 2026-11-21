@@ -179,9 +179,11 @@ export function openAddressForm(address = null) {
           <textarea name="address" rows="3" maxlength="250" autocomplete="street-address" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố" required>${escapeHtml(values.address)}</textarea>
           <small class="pcb-addr-form__error" data-error="address"></small>
         </label>
-        <label class="pcb-addr-form__check${lockDefault ? ' pcb-addr-form__check--locked' : ''}">
-          <input type="checkbox" name="isDefault" ${values.isDefault ? 'checked' : ''} ${lockDefault ? 'disabled' : ''}>
-          <span>Đặt làm địa chỉ mặc định</span>
+        <!-- Nút gạt giống phần cài đặt quyền riêng tư -->
+        <label class="pcb-switch pcb-addr-form__switch">
+          <span class="pcb-switch__label">Đặt làm địa chỉ mặc định</span>
+          <input type="checkbox" name="isDefault" class="pcb-switch__input" role="switch" ${values.isDefault ? 'checked' : ''} ${lockDefault ? 'disabled' : ''}>
+          <span class="pcb-switch__track" aria-hidden="true"></span>
         </label>
         ${lockDefault ? `<p class="pcb-addr-form__note">${isFirst ? 'Địa chỉ đầu tiên sẽ được đặt làm mặc định.' : 'Đây đang là địa chỉ mặc định. Hãy đặt địa chỉ khác làm mặc định nếu muốn thay đổi.'}</p>` : ''}
         <div class="pcb-addr-modal__actions">

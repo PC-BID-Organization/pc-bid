@@ -248,11 +248,11 @@
             <!-- Công tắc hai luồng làm việc riêng biệt: Mua hàng / Bán hàng -->
             <div class="pcb-trade-switch" role="group" aria-label="Chọn luồng giao dịch">
               <button type="button" class="pcb-trade-switch__btn pcb-trade-switch__btn--active" data-trade-mode="buy" aria-pressed="true">
-                <span aria-hidden="true">🛒</span> Mua hàng
+                <svg class="lucide lucide-shopping-cart" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Mua hàng
                 <span class="pcb-trade-switch__badge" id="trade-badge-buy" hidden>0</span>
               </button>
               <button type="button" class="pcb-trade-switch__btn" data-trade-mode="sell" aria-pressed="false">
-                <span aria-hidden="true">🏷️</span> Bán hàng
+                <svg class="lucide lucide-tag" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg> Bán hàng
                 <span class="pcb-trade-switch__badge" id="trade-badge-sell" hidden>0</span>
               </button>
             </div>
@@ -563,32 +563,6 @@
                   <span class="pcb-form__hint">Dùng để shipper liên hệ giao hàng linh kiện công nghệ.</span>
                 </div>
 
-                <!-- Trường Địa chỉ nhận hàng -->
-                <div class="pcb-form__group pcb-form__group--full">
-                  <div class="pcb-form__label-row">
-                    <label for="input-address" class="pcb-form__label">
-                      ĐỊA CHỈ NHẬN HÀNG <span class="pcb-form__required">*</span>
-                    </label>
-                    <span class="pcb-form__default-badge">Đặt làm địa chỉ mặc định</span>
-                  </div>
-                  <div class="pcb-input-icon-wrap">
-                    <svg class="pcb-input-icon pcb-input-icon--textarea" width="16" height="16" viewBox="0 0 24 24"
-                      fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    <textarea id="input-address" name="address" class="pcb-textarea" rows="3" required
-                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố">Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</textarea>
-                  </div>
-                  <div class="pcb-form__notice">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="8" x2="12" y2="12" />
-                      <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    <span>Lưu ý: Địa chỉ cần chính xác để đơn vị vận chuyển giao an toàn các linh kiện dễ vỡ (VGA, CPU, Màn hình).</span>
-                  </div>
-                </div>
               </div>
 
               <!-- Cài đặt thông báo đấu giá -->

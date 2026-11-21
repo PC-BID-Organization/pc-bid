@@ -8,6 +8,8 @@
 import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, lockAuctionEndTime } from './auction-time.js';
 // Đơn hàng sau đấu giá và giao diện thẻ đơn hàng dùng chung
 import { getOrdersForUser, orderNeedsAction } from './settlement.js';
+// Bộ icon Lucide dùng chung
+import { icon, NOTIFY_ICON_NAMES } from './icons.js';
 // Sổ địa chỉ nhận hàng
 import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -19,7 +21,7 @@ import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBid
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
-  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount } from './accounts.js';
+  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
@@ -651,7 +653,6 @@ function syncUserInfoUI() {
   const fnInput = document.getElementById('input-fullname');
   const emInput = document.getElementById('input-email');
   const phInput = document.getElementById('input-phone');
-  const adInput = document.getElementById('input-address');
   const smsInput = document.getElementById('pref-sms');
   const mailInput = document.getElementById('pref-email');
   const lastUpdateEl = document.getElementById('last-update-time');
@@ -659,7 +660,6 @@ function syncUserInfoUI() {
   if (fnInput) fnInput.value = user.fullname || '';
   if (emInput) emInput.value = user.email || '';
   if (phInput) phInput.value = user.phone || '';
-  if (adInput) adInput.value = user.address || '';
   if (smsInput) smsInput.checked = user.pref_sms !== false;
   if (mailInput) mailInput.checked = user.pref_email !== false;
   if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
@@ -777,22 +777,22 @@ function renderFilterChips() {
   if (currentActiveTab === 'participating') {
     chips = [
       { id: 'all', label: 'Tất cả' },
-      { id: 'lead', label: '🟢 Đang dẫn đầu' },
-      { id: 'outbid', label: '🔴 Đã bị vượt giá' }
+      { id: 'lead', icon: 'trophy', label: 'Đang dẫn đầu' },
+      { id: 'outbid', icon: 'triangle-alert', label: 'Đã bị vượt giá' }
     ];
   } else if (currentActiveTab === 'selling') {
     chips = [
       { id: 'all', label: 'Tất cả' },
-      { id: 'active', label: '🔵 Đang diễn ra' },
-      { id: 'sold', label: '🟢 Đã bán thành công' },
-      { id: 'ended', label: '⚪ Đã kết thúc' }
+      { id: 'active', icon: 'clock', label: 'Đang diễn ra' },
+      { id: 'sold', icon: 'circle-check', label: 'Đã bán thành công' },
+      { id: 'ended', icon: 'circle-x', label: 'Đã kết thúc' }
     ];
   } else if (currentActiveTab === 'buy-orders' || currentActiveTab === 'sell-orders') {
     chips = [
       { id: 'all', label: 'Tất cả' },
-      { id: 'action', label: '🔔 Cần bạn xử lý' },
-      { id: 'processing', label: '🚚 Đang xử lý' },
-      { id: 'done', label: '✅ Đã kết thúc' }
+      { id: 'action', icon: 'bell', label: 'Cần bạn xử lý' },
+      { id: 'processing', icon: 'truck', label: 'Đang xử lý' },
+      { id: 'done', icon: 'circle-check', label: 'Đã kết thúc' }
     ];
   } else if (currentActiveTab === 'watchlist') {
     chips = [
@@ -806,7 +806,7 @@ function renderFilterChips() {
 
   container.innerHTML = chips.map(c => `
     <button type="button" class="pcb-chip-btn ${currentFilterChip === c.id ? 'pcb-chip-btn--active' : ''}" data-filter="${c.id}">
-      ${c.label}
+      ${c.icon ? icon(c.icon, { size: 14 }) : ''}${c.label}
     </button>
   `).join('');
 
@@ -1023,7 +1023,6 @@ function renderNotifications() {
   if (!listEl) return;
 
   const notifications = getUserNotifications(getCurrentUser());
-  const icons = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
   const readAllBtn = document.getElementById('btn-notify-read-all');
   if (readAllBtn) readAllBtn.disabled = !notifications.some(n => !n.read);
 
@@ -1038,7 +1037,7 @@ function renderNotifications() {
   if (emptyEl) emptyEl.style.display = 'none';
   listEl.innerHTML = notifications.map(n => `
     <li class="pcb-notify pcb-notify--${n.type} ${n.read ? 'pcb-notify--read' : 'pcb-notify--unread'}" data-notify-id="${escapeHtml(n.id)}">
-      <span class="pcb-notify__icon" aria-hidden="true">${icons[n.type] || '🔔'}</span>
+      <span class="pcb-notify__icon">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 20 })}</span>
       <div class="pcb-notify__body">
         <h3 class="pcb-notify__title">
           ${n.read ? '' : '<span class="pcb-notify__dot" aria-hidden="true"></span><span class="pcb-notify__sr">Chưa đọc: </span>'}${escapeHtml(n.title)}
@@ -1159,7 +1158,7 @@ function fillPublicBlock(id, isPublic, cards, emptyText) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!isPublic) {
-    el.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+    el.innerHTML = `<p class="pcb-public__private">${icon('lock', { size: 14 })} Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>`;
   } else if (!cards.length) {
     el.innerHTML = `<p class="pcb-public__empty">${emptyText}</p>`;
   } else {
@@ -1218,7 +1217,7 @@ async function renderPublicProfile(username) {
   // Tiểu sử
   const bioEl = document.getElementById('public-bio');
   if (bioEl) {
-    if (!privacy.bio) bioEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+    if (!privacy.bio) bioEl.innerHTML = `<p class="pcb-public__private">${icon('lock', { size: 14 })} Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>`;
     else bioEl.innerHTML = `<p class="pcb-public__bio">${account.bio ? escapeHtml(account.bio) : 'Người dùng chưa viết tiểu sử.'}</p>`;
   }
 
@@ -1226,7 +1225,7 @@ async function renderPublicProfile(username) {
   const contactEl = document.getElementById('public-contact');
   if (contactEl) {
     if (!privacy.contact) {
-      contactEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng chưa công khai thông tin liên hệ.</p>';
+      contactEl.innerHTML = `<p class="pcb-public__private">${icon('lock', { size: 14 })} Người dùng chưa công khai thông tin liên hệ.</p>`;
     } else if (!account.email && !account.phone) {
       contactEl.innerHTML = '<p class="pcb-public__empty">Chưa có thông tin liên hệ.</p>';
     } else {
@@ -1241,9 +1240,6 @@ async function renderPublicProfile(username) {
   const products = await loadAllAuctions();
   const now = Date.now();
   const selling = products.filter(p => p.seller === username);
-  const roleEl = document.getElementById('public-role');
-  // Mọi tài khoản đều là đấu giá viên; nếu có đăng bán thì ghi thêm số phiên
-  if (roleEl) roleEl.textContent = selling.length ? `👤 Đấu giá viên · ${selling.length} phiên đăng bán` : '👤 Đấu giá viên';
   fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
     const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
     const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
@@ -1260,6 +1256,19 @@ async function renderPublicProfile(username) {
     ? getParticipatingAuctions(account).filter(item => !historyIds.has(Number(item.id)) && getAuctionEndTimestamp(item) > now)
     : [];
   const participating = [...fromHistory, ...ownList];
+
+  // Không phân biệt người bán / người mua: chỉ hiện số phiên đang bán và đang tham gia
+  const roleEl = document.getElementById('public-role');
+  if (roleEl) {
+    const activeSelling = selling.filter(p => !isAuctionClosed(p) && getAuctionEndTimestamp(p) > now).length;
+    // Tôn trọng quyền riêng tư: mục nào đặt riêng tư thì không hiện số lượng
+    const stats = [
+      privacy.selling ? `<span class="pcb-public__stat">${icon('tag', { size: 14 })} ${activeSelling} phiên đang bán</span>` : '',
+      privacy.participating ? `<span class="pcb-public__stat">${icon('gavel', { size: 14 })} ${participating.length} phiên đang tham gia</span>` : ''
+    ].filter(Boolean);
+    roleEl.innerHTML = stats.join('<span class="pcb-public__stat-sep" aria-hidden="true">·</span>');
+    roleEl.hidden = stats.length === 0;
+  }
   fillPublicBlock('public-participating', privacy.participating, participating.map(item =>
     renderPublicCard(item, item.status === 'lead'
       ? '<span class="pcb-public-card__badge pcb-public-card__badge--active">Đang dẫn đầu</span>'
@@ -1734,6 +1743,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const user = getCurrentUser();
 
+      // Kiểm tra email / số điện thoại: đúng định dạng và không trùng với tài khoản khác
+      const emailInput = document.getElementById('input-email');
+      const phoneInput = document.getElementById('input-phone');
+      const newEmail = (emailInput?.value || '').trim() || user.email;
+      const newPhone = normalizePhone((phoneInput?.value || '').trim()) || user.phone;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(newEmail)) {
+        await showAlert({ title: 'Email không hợp lệ', message: 'Vui lòng nhập đúng định dạng email (ví dụ: ten@example.com).', tone: 'warning' });
+        emailInput?.focus();
+        return;
+      }
+      if (!/^0(3|5|7|8|9)\d{8}$/.test(newPhone)) {
+        await showAlert({ title: 'Số điện thoại không hợp lệ', message: 'Vui lòng nhập số di động Việt Nam gồm 10 chữ số (ví dụ: 0901234567).', tone: 'warning' });
+        phoneInput?.focus();
+        return;
+      }
+      const conflict = findAccountConflict({ email: newEmail, phone: newPhone, exclude: user });
+      if (conflict) {
+        const label = conflict.field === 'email' ? 'Email' : 'Số điện thoại';
+        await showAlert({
+          title: `${label} đã được sử dụng`,
+          message: `${label} này đã được đăng ký cho một tài khoản khác trên PCBid. Vui lòng dùng ${conflict.field === 'email' ? 'email' : 'số điện thoại'} khác.`,
+          tone: 'warning'
+        });
+        (conflict.field === 'email' ? emailInput : phoneInput)?.focus();
+        return;
+      }
+
       // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
       const birthInput = document.getElementById('input-birthdate');
       if (birthInput && !birthInput.hidden && birthInput.value && birthInput.value !== user.birthDate) {
@@ -1764,9 +1800,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Cập nhật lại tên gọi để avatar chữ cái luôn khớp với họ tên mới
       user.givenName = getGivenName(user.fullname);
       user.lastName = user.fullname.slice(0, user.fullname.length - user.givenName.length).trim();
-      user.email = document.getElementById('input-email')?.value.trim() || user.email;
-      user.phone = document.getElementById('input-phone')?.value.trim() || user.phone;
-      user.address = document.getElementById('input-address')?.value.trim() || user.address;
+      user.email = newEmail;
+      user.phone = newPhone;
       user.pref_sms = document.getElementById('pref-sms')?.checked ?? true;
       user.pref_email = document.getElementById('pref-email')?.checked ?? true;
 

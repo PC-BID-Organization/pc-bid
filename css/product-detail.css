@@ -273,7 +273,9 @@
 /* Chỉ hiện gợi ý trên thiết bị có chuột */
 @media (hover: hover) and (pointer: fine) {
   .pcb-pd__zoom-hint {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .pcb-pd__gallery-main--zooming .pcb-pd__zoom-hint {
@@ -1693,4 +1695,37 @@ a.pcb-pd__seller-avatar {
 
 .pcb-pd__contact-btn[hidden] {
   display: none;
+}
+
+/* Icon Lucide trong thông báo kết thúc phiên, lỗi đặt giá và nút theo dõi */
+.pcb-pd__countdown-ended .lucide,
+.pcb-pd__input-error .lucide {
+  margin-right: 4px;
+}
+
+#pcb-pd-watchlist-icon {
+  display: inline-flex;
+  color: #e11d48;
+}
+
+/* Icon Lucide trong nút đặt giá, nhãn xác thực, huy hiệu dẫn đầu và hộp thoại */
+.pcb-pd__submit-btn,
+.pcb-pd__seller-badge,
+.pcb-pd__history-bidder-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pcb-pd__submit-btn {
+  display: flex;
+}
+
+.pcb-pd-modal__icon .lucide {
+  color: #16a34a;
+}
+
+.pcb-pd__error-icon .lucide {
+  color: #d97706;
 }

@@ -11,6 +11,8 @@ import { ORDER_STATUS_LABELS, payOrder, markOrderShipped, confirmOrderReceived, 
 // Sổ địa chỉ nhận hàng: chọn / thêm địa chỉ cho đơn mua
 import { getAddresses, getDefaultAddress, openAddressForm, openAddressPicker, renderAddressInfo } from './address-book.js';
 import { showAlert, showConfirm } from './dialog.js';
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
 // Mở hộp chat với người bán / người mua của đơn hàng
 import { openChat, CHAT_ICON_SVG } from './chat.js';
 import { readOrders } from './wallet.js';
@@ -123,11 +125,11 @@ function renderShipping(order, role) {
   const editable = role === 'buyer' && order.status === 'awaiting_payment';
   const address = order.shippingAddress || (editable ? getDefaultAddress() : null);
   if (!address && !editable) return '';
-  const icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>';
+  const pinIcon = icon('map-pin');
   return `
     <div class="pcb-order__ship${address ? '' : ' pcb-order__ship--missing'}">
       <div class="pcb-order__ship-head">
-        <span class="pcb-order__ship-title">${icon} ${role === 'buyer' ? 'Địa chỉ nhận hàng' : 'Giao đến'}</span>
+        <span class="pcb-order__ship-title">${pinIcon} ${role === 'buyer' ? 'Địa chỉ nhận hàng' : 'Giao đến'}</span>
         ${editable ? `<button type="button" class="pcb-addr-link" data-order-address="${order.id}">${address ? 'Thay đổi' : 'Thêm địa chỉ'}</button>` : ''}
       </div>
       ${address
@@ -163,7 +165,7 @@ export function renderOrderCard(order, role, { showProduct = false } = {}) {
   return `
     <article class="pcb-order pcb-order--${order.status}" data-order-id="${order.id}">
       <header class="pcb-order__head">
-        <span class="pcb-order__role">${role === 'buyer' ? '🛒 Bạn là người mua' : '🏷️ Bạn là người bán'}</span>
+        <span class="pcb-order__role">${role === 'buyer' ? `${icon('shopping-cart')} Bạn là người mua` : `${icon('tag')} Bạn là người bán`}</span>
         <span class="pcb-order__badge pcb-order__badge--${order.status}">${ORDER_STATUS_LABELS[order.status] || ''}</span>
       </header>
       ${showProduct ? `

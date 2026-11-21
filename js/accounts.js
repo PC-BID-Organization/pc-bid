@@ -204,19 +204,67 @@ export function maskUid(uid) {
 }
 
 /**
- * Tìm tài khoản theo ID, tên đăng nhập hoặc email trong tài khoản demo và tài khoản đã đăng ký
- * @param {{id?: string, username?: string, email?: string}} query - Điều kiện tìm
- * @returns {Object|null}
+ * Toàn bộ tài khoản thật: tài khoản đã đăng ký / đã lưu thay đổi, cộng các tài khoản demo
+ * chưa từng được lưu lại. Tài khoản demo đã sửa (email, số điện thoại...) dùng bản đã lưu,
+ * không còn khớp với thông tin gốc nữa.
+ * @returns {Array<Object>}
  */
-export function findAccount({ id, username, email } = {}) {
+export function getAllAccounts() {
   let registered = [];
   try {
     registered = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
   } catch {
     registered = [];
   }
-  // Ưu tiên bản đã lưu (có ảnh đại diện, tiểu sử, quyền riêng tư người dùng tự cập nhật)
-  const all = [...(Array.isArray(registered) ? registered : []), ...DEMO_ACCOUNTS, ...MOCK_BIDDERS];
+  const list = Array.isArray(registered) ? registered : [];
+  const saved = new Set(list.flatMap(u => [u.id, u.username].filter(Boolean)));
+  return [...list, ...DEMO_ACCOUNTS.filter(d => !saved.has(d.id) && !saved.has(d.username))];
+}
+
+/**
+ * Chuẩn hóa số điện thoại để so sánh: bỏ khoảng trắng / dấu, đổi +84 / 84 thành 0
+ * @param {string} phone
+ * @returns {string}
+ */
+export function normalizePhone(phone) {
+  const digits = String(phone || '').replace(/[^\d+]/g, '');
+  if (digits.startsWith('+84')) return `0${digits.slice(3)}`;
+  if (/^84\d{9}$/.test(digits)) return `0${digits.slice(2)}`;
+  return digits;
+}
+
+/**
+ * Kiểm tra email / số điện thoại đã được tài khoản khác sử dụng chưa
+ * @param {Object} query
+ * @param {string} [query.email]
+ * @param {string} [query.phone]
+ * @param {Object} [query.exclude] - Tài khoản đang sửa (bỏ qua chính nó)
+ * @returns {{field:'email'|'phone', account:Object}|null}
+ */
+export function findAccountConflict({ email, phone, exclude } = {}) {
+  const isSelf = u => exclude && ((exclude.id && u.id === exclude.id) || (exclude.username && u.username === exclude.username));
+  const others = getAllAccounts().filter(u => !isSelf(u));
+  const mail = String(email || '').trim().toLowerCase();
+  if (mail) {
+    const byEmail = others.find(u => String(u.email || '').trim().toLowerCase() === mail);
+    if (byEmail) return { field: 'email', account: byEmail };
+  }
+  const tel = normalizePhone(phone);
+  if (tel) {
+    const byPhone = others.find(u => normalizePhone(u.phone) === tel);
+    if (byPhone) return { field: 'phone', account: byPhone };
+  }
+  return null;
+}
+
+/**
+ * Tìm tài khoản theo ID, tên đăng nhập hoặc email trong tài khoản demo và tài khoản đã đăng ký
+ * @param {{id?: string, username?: string, email?: string}} query - Điều kiện tìm
+ * @returns {Object|null}
+ */
+export function findAccount({ id, username, email } = {}) {
+  // Ưu tiên bản đã lưu (có ảnh đại diện, tiểu sử, email / số điện thoại người dùng tự cập nhật)
+  const all = [...getAllAccounts(), ...MOCK_BIDDERS];
   if (id) {
     const byId = all.find(u => u.id === id);
     if (byId) return byId;

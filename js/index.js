@@ -8,6 +8,8 @@
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct, lockAuctionEndTime } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
 // Danh sách phiên và lượt đặt giá thật dùng cho băng chuyền trực tiếp
 import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
@@ -424,7 +426,7 @@ function renderProductCard(product, options = {}) {
   } else if (options.isNew) {
     countdownMarkup = `
       <div class="pcb-card__countdown" style="background:#059669;">
-        <span style="font-size:10px;">✨ MỚI LÊN SÀN</span>
+        <span style="font-size:10px;">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
       </div>
     `;
   }
@@ -726,7 +728,7 @@ function renderLiveTicker(newBidId = null) {
       : `<strong>${escapeHtml(bidder.name)}</strong>`;
     return `
       <div class="pcb-ticker__item${bid.id === newBidId ? ' pcb-ticker__item--new' : ''}">
-        <span class="pcb-ticker__text">🔥 ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
+        <span class="pcb-ticker__text"><span class="pcb-ticker__flame">${icon('flame', { size: 14 })}</span> ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
           <a class="pcb-ticker__product" href="product-detail.html?id=${product.id}">${escapeHtml(product.name)}</a></span>
         <span class="pcb-ticker__time" data-time="${escapeHtml(bid.timestamp)}">• ${formatTimeAgo(bid.timestamp)}</span>
       </div>

@@ -17,6 +17,8 @@ import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, get
 // Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
 import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
 // Hộp chat với người bán
 import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
@@ -924,11 +926,11 @@ function hienThiPhienKetThuc() {
     const sp = sanPhamHienTai;
     if (sp && sp.winner) {
       const nguoiThang = describeBidder({ bidderName: sp.winner });
-      thongBaoKetThuc.textContent = `🔔 Phiên đấu giá đã kết thúc · Người thắng: ${nguoiThang.name} (${nguoiThang.maskedUid || sp.winner}) với giá ${dinhDangVnd(sp.currentBid)}`;
+      thongBaoKetThuc.innerHTML = `${icon('bell')} Phiên đấu giá đã kết thúc · Người thắng: ${maHoaHtml(nguoiThang.name)} (${maHoaHtml(nguoiThang.maskedUid || sp.winner)}) với giá ${dinhDangVnd(sp.currentBid)}`;
     } else if (sp && Number(sp.bidCount || 0) === 0) {
-      thongBaoKetThuc.textContent = '🔔 Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào';
+      thongBaoKetThuc.innerHTML = `${icon('bell')} Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào`;
     } else {
-      thongBaoKetThuc.textContent = '🔔 Phiên đấu giá đã kết thúc';
+      thongBaoKetThuc.innerHTML = `${icon('bell')} Phiên đấu giá đã kết thúc`;
     }
   }
   if (nutDatGia) {
@@ -1034,7 +1036,7 @@ function renderLichSu(idSanPham) {
       <tr class="${laDanDau ? 'pcb-pd__history-row--top' : ''}">
         <td>
           <span class="pcb-pd__history-bidder">
-            ${laDanDau ? '<span class="pcb-pd__history-bidder-badge">&#x1F947; Dẫn đầu</span>' : ''}
+            ${laDanDau ? `<span class="pcb-pd__history-bidder-badge">${icon('trophy', { size: 12 })} Dẫn đầu</span>` : ''}
             ${tenHienThi}
           </span>
         </td>
@@ -1141,7 +1143,7 @@ function xuLyDatGia() {
  * @param {string} thongBao - Nội dung thông báo lỗi
  */
 function hienThiLoi(oLoi, oNhapGia, thongBao) {
-  if (oLoi) { oLoi.textContent = '⚠ ' + thongBao; oLoi.hidden = false; }
+  if (oLoi) { oLoi.innerHTML = `${icon('triangle-alert', { size: 14 })} ${maHoaHtml(thongBao)}`; oLoi.hidden = false; }
   if (oNhapGia) oNhapGia.classList.add('pcb-pd__input--error');
 }
 
@@ -1303,9 +1305,9 @@ function hienThiToast(thongBao, kieuThongBao = 'info', thoiGianMs = 3000) {
   const oNoi = document.getElementById('pcb-pd-toast-msg');
   if (!toast) return;
 
-  const banDoIcon = { info: 'ℹ️', success: '✅', error: '❌' };
+  const banDoIcon = { info: 'info', success: 'circle-check', error: 'circle-x' };
   toast.className = `pcb-pd-toast pcb-pd-toast--${kieuThongBao}`;
-  if (oIcon) oIcon.textContent = banDoIcon[kieuThongBao] || 'ℹ️';
+  if (oIcon) oIcon.innerHTML = icon(banDoIcon[kieuThongBao] || 'info', { size: 18 });
   if (oNoi) oNoi.textContent = thongBao;
   toast.hidden = false;
 
@@ -1322,7 +1324,7 @@ function hienThiToast(thongBao, kieuThongBao = 'info', thoiGianMs = 3000) {
  */
 function capNhatNutWatchlist(idSanPham) {
   const nut = document.getElementById('pcb-pd-watchlist-btn');
-  const icon = document.getElementById('pcb-pd-watchlist-icon');
+  const iconTim = document.getElementById('pcb-pd-watchlist-icon');
   const nhan = document.getElementById('pcb-pd-watchlist-label');
 
   const watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, readLoggedInUser());
@@ -1332,7 +1334,7 @@ function capNhatNutWatchlist(idSanPham) {
     nut.setAttribute('aria-pressed', daCoTrong ? 'true' : 'false');
     nut.classList.toggle('pcb-pd__watchlist-btn--active', daCoTrong);
   }
-  if (icon) icon.textContent = daCoTrong ? '❤️' : '🤍';
+  if (iconTim) iconTim.innerHTML = icon('heart', { size: 16, filled: daCoTrong });
   if (nhan) nhan.textContent = daCoTrong ? 'Đã theo dõi' : 'Thêm vào Watchlist';
 }
 
