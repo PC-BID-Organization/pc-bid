@@ -973,6 +973,8 @@ function executeQuickBid() {
       });
     }
     localStorage.setItem('pcbid_products', JSON.stringify(localProducts));
+    // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
+    window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: currentModalProduct.id } }));
 
     const participating = JSON.parse(localStorage.getItem('pcbid_my_auctions_participating') || '[]');
     const pIdx = participating.findIndex(p => Number(p.id) === Number(currentModalProduct.id));
