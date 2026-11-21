@@ -428,6 +428,14 @@ const UPLOAD_MAX_EDGE = 1000;
 const categoryDataCache = {};
 // Phiên đang được đăng bán lại (null khi tạo phiên mới)
 let relistTarget = null;
+// Danh sách mẫu của danh mục đang chọn (nạp từ data/*.json)
+let currentModels = [];
+// Thông số của mẫu đã chọn, người bán được sửa / xóa tự do: { key, value }
+let modelSpecs = [];
+// Người bán đã tự sửa tiêu đề chưa (chưa sửa thì tiêu đề tự theo tên mẫu)
+let titleEdited = false;
+// Ảnh bìa do hệ thống tự chọn theo mẫu (được thay khi đổi mẫu, khác với ảnh người bán tự chọn)
+let autoPickedImage = null;
 
 // Ánh xạ danh mục sản phẩm sang tệp dữ liệu JSON và khóa danh mục của Catalogue
 const CATEGORY_DATA_FILES = {
@@ -449,6 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initFormSubmitHandler();
   initPhotoPicker();
   initCustomSpecs();
+  initEditableDetails();
   initProgressTracker();
   initRelistMode();
 });
@@ -763,12 +772,18 @@ function initCatalogueEvents() {
   if (!catSelect || !modelSelect) return;
 
   // Lắng nghe thay đổi danh mục (Category Change)
-  catSelect.addEventListener('change', (e) => {
+  catSelect.addEventListener('change', async (e) => {
     const selectedCat = e.target.value;
     currentCategory = selectedCat;
 
-    const models = CATALOGUE_DATA[selectedCat] || [];
-    
+    // Trong lúc nạp dữ liệu danh mục: khóa ô chọn mẫu và báo đang tải
+    modelSelect.disabled = true;
+    modelSelect.innerHTML = '<option value="" disabled selected>Đang tải danh sách mẫu...</option>';
+    const models = await getCategoryModels(selectedCat);
+    // Người dùng đã đổi sang danh mục khác trong lúc chờ: bỏ kết quả cũ
+    if (currentCategory !== selectedCat) return;
+    currentModels = models;
+
     // Đổ danh sách mẫu sản phẩm tương ứng vào dropdown Model
     modelSelect.innerHTML = '<option value="" disabled selected>-- Chọn mẫu sản phẩm chuẩn --</option>';
     models.forEach(model => {
@@ -789,9 +804,7 @@ function initCatalogueEvents() {
 
   // Lắng nghe thay đổi mẫu sản phẩm (Model Change)
   modelSelect.addEventListener('change', (e) => {
-    const modelId = e.target.value;
-    const models = CATALOGUE_DATA[currentCategory] || [];
-    const found = models.find(m => m.id === modelId);
+    const found = currentModels.find(m => m.id === e.target.value);
     if (found) {
       selectModel(found);
     }
@@ -799,12 +812,57 @@ function initCatalogueEvents() {
 }
 
 /**
+ * Nạp (có bộ nhớ đệm) tệp JSON sản phẩm của một danh mục
+ * @param {string} cat - Danh mục trên form (GPU, CPU, SSD...)
+ * @returns {Promise<Array>}
+ */
+async function loadCategoryProducts(cat) {
+  const file = CATEGORY_DATA_FILES[cat];
+  if (!file) return [];
+  if (!categoryDataCache[file]) {
+    try {
+      const res = await fetch(`data/${file}.json`);
+      categoryDataCache[file] = res.ok ? await res.json() : [];
+    } catch {
+      categoryDataCache[file] = [];
+    }
+  }
+  return categoryDataCache[file];
+}
+
+/**
+ * Toàn bộ mẫu sản phẩm chuẩn của một danh mục: mọi linh kiện trong data/*.json
+ * (thông số, ảnh, giá tham khảo), cộng các mẫu viết sẵn trong CATALOGUE_DATA chưa có trong dữ liệu
+ * @param {string} cat - Danh mục trên form
+ * @returns {Promise<Array>} Danh sách mẫu, sắp xếp theo tên
+ */
+async function getCategoryModels(cat) {
+  const products = await loadCategoryProducts(cat);
+  const fromData = products.map(p => ({
+    id: `data_${p.id}`,
+    name: p.name,
+    marketPriceNew: Number(p.marketPriceNew) || 0,
+    defaultStartingPrice: Number(p.startingPrice) || 0,
+    defaultBidStep: Number(p.bidStep) || 50000,
+    images: Array.isArray(p.images) ? p.images : [],
+    specifications: p.specifications || {}
+  }));
+  const seen = new Set(fromData.map(m => m.name.trim().toLowerCase()));
+  const extras = (CATALOGUE_DATA[cat] || []).filter(m => !seen.has(m.name.trim().toLowerCase()));
+  return [...fromData, ...extras].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+}
+
+/**
  * Xử lý khi chọn một mẫu sản phẩm từ Catalogue
  */
 function selectModel(model) {
   currentSelectedModel = model;
-  // Đổi mẫu: bỏ các ảnh kho của mẫu cũ, giữ nguyên ảnh người bán đã tải lên
-  selectedImages = selectedImages.filter(src => src.startsWith('data:'));
+  // Đổi mẫu: chỉ bỏ ảnh bìa do hệ thống tự chọn cho mẫu cũ; ảnh người bán đã tự chọn / tải lên được giữ nguyên
+  // (trước đây mọi ảnh kho bị xóa nên chọn nhiều ảnh rồi đổi mẫu chỉ còn lại 1 ảnh bìa)
+  if (autoPickedImage && selectedImages.length === 1 && selectedImages[0] === autoPickedImage) {
+    selectedImages = [];
+  }
+  autoPickedImage = null;
 
   // 1. Tự động điền giá khởi điểm đề xuất và giá thị trường
   const startPriceInput = document.getElementById('sell-start-price');
@@ -815,15 +873,22 @@ function selectModel(model) {
   if (marketPriceInput) marketPriceInput.value = model.marketPriceNew;
   if (bidStepSelect) bidStepSelect.value = String(model.defaultBidStep);
 
-  // 2. Hiển thị khối xem trước thông số kỹ thuật (Specifications Preview)
+  // 2. Nạp thông số của mẫu vào các ô người bán có thể chỉnh sửa
   renderSpecifications(model.specifications);
+
+  // Tiêu đề đề xuất theo tên mẫu; giữ nguyên nếu người bán đã tự sửa
+  const titleInput = document.getElementById('sell-title');
+  if (titleInput && !titleEdited) titleInput.value = model.name;
 
   // 3. Ảnh đề xuất liên quan tới mẫu đã chọn; chọn sẵn ảnh đầu tiên nếu chưa có ảnh nào
   getSuggestedImages(model).then(suggestions => {
     if (currentSelectedModel !== model) return;
     // Chọn sẵn ảnh liên quan nhất làm ảnh bìa nếu chưa có ảnh nào
     const first = suggestions.related[0] || suggestions.others[0];
-    if (selectedImages.length === 0 && first) selectedImages = [first];
+    if (selectedImages.length === 0 && first) {
+      selectedImages = [first];
+      autoPickedImage = first;
+    }
     renderThumbnailGrid(suggestions);
     renderSelectedPhotos();
   });
@@ -836,20 +901,111 @@ function selectModel(model) {
  * Hiển thị khối thông số kỹ thuật dạng grid
  */
 function renderSpecifications(specs) {
+  // Thông số của mẫu được nạp vào danh sách người bán có thể sửa / xóa tự do
+  modelSpecs = Object.entries(specs || {}).map(([key, value]) => ({ key, value: String(value) }));
+  renderModelSpecs();
+  setSpecBadge(false);
+}
+
+/**
+ * Vẽ các dòng thông số của mẫu dưới dạng ô nhập (tên + giá trị + nút xóa)
+ * @param {number} [focusIndex] - Dòng cần đặt con trỏ sau khi vẽ
+ */
+function renderModelSpecs(focusIndex) {
   const container = document.getElementById('spec-grid-container');
   if (!container) return;
-
-  if (!specs || Object.keys(specs).length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; font-style: italic;">Không có thông số kỹ thuật có sẵn.</div>';
+  if (modelSpecs.length === 0) {
+    container.innerHTML = '<div class="pcb-spec-grid__empty">Mẫu này chưa có thông số. Bạn có thể tự thêm ở mục "Thông số bổ sung" bên dưới.</div>';
     return;
   }
+  container.innerHTML = `<ul class="pcb-custom-specs__list pcb-model-specs">${modelSpecs.map((spec, idx) => `
+    <li class="pcb-custom-specs__row">
+      <input type="text" class="pcb-custom-specs__input pcb-model-specs__key" data-mspec-key="${idx}" value="${escapeHtml(spec.key)}"
+        maxlength="40" aria-label="Tên thông số ${idx + 1}">
+      <input type="text" class="pcb-custom-specs__input" data-mspec-value="${idx}" value="${escapeHtml(spec.value)}"
+        maxlength="120" aria-label="Giá trị thông số ${idx + 1}">
+      <button type="button" class="pcb-custom-specs__remove" data-mspec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}">×</button>
+    </li>`).join('')}</ul>`;
+  if (focusIndex !== undefined) container.querySelector(`[data-mspec-value="${focusIndex}"]`)?.focus();
+}
 
-  container.innerHTML = Object.entries(specs).map(([k, v]) => `
-    <div class="pcb-spec-item">
-      <span class="pcb-spec-item__key">${escapeHtml(k)}</span>
-      <span class="pcb-spec-item__val">${escapeHtml(v)}</span>
-    </div>
-  `).join('');
+/**
+ * Nhãn nguồn thông số: "Dữ liệu chuẩn PCBid" hoặc "Đã chỉnh sửa" khi người bán sửa
+ * @param {boolean} edited
+ */
+function setSpecBadge(edited) {
+  const badge = document.getElementById('spec-source-badge');
+  if (!badge) return;
+  badge.textContent = edited ? 'Đã chỉnh sửa' : 'Gợi ý từ dữ liệu PCBid';
+  badge.classList.toggle('pcb-spec-box__badge--edited', edited);
+}
+
+/**
+ * Gộp thông số của mẫu (đã chỉnh sửa) và thông số bổ sung thành object để lưu
+ * @returns {Object}
+ */
+function getAllSpecsObject() {
+  const result = {};
+  modelSpecs.forEach(({ key, value }) => {
+    const k = key.trim();
+    const v = value.trim();
+    if (k && v) result[k] = v;
+  });
+  return { ...result, ...getCustomSpecsObject() };
+}
+
+/**
+ * Sự kiện sửa / xóa thông số của mẫu và ô tiêu đề phiên
+ */
+function initEditableDetails() {
+  const container = document.getElementById('spec-grid-container');
+  if (container) {
+    container.addEventListener('input', e => {
+      const keyIdx = e.target.dataset.mspecKey;
+      const valIdx = e.target.dataset.mspecValue;
+      if (keyIdx !== undefined) modelSpecs[Number(keyIdx)].key = e.target.value;
+      if (valIdx !== undefined) modelSpecs[Number(valIdx)].value = e.target.value;
+      setSpecBadge(true);
+      updateLivePreview();
+    });
+    container.addEventListener('click', e => {
+      const removeBtn = e.target.closest('[data-mspec-remove]');
+      if (!removeBtn) return;
+      modelSpecs.splice(Number(removeBtn.dataset.mspecRemove), 1);
+      renderModelSpecs();
+      setSpecBadge(true);
+      updateLivePreview();
+    });
+  }
+
+  const titleInput = document.getElementById('sell-title');
+  const resetBtn = document.getElementById('btn-reset-title');
+  if (titleInput) {
+    titleInput.addEventListener('input', () => {
+      titleEdited = Boolean(titleInput.value.trim()) && titleInput.value.trim() !== currentSelectedModel?.name;
+      if (resetBtn) resetBtn.hidden = !titleEdited;
+      updateLivePreview();
+    });
+  }
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (!titleInput || !currentSelectedModel) return;
+      titleInput.value = currentSelectedModel.name;
+      titleEdited = false;
+      resetBtn.hidden = true;
+      updateLivePreview();
+      titleInput.focus();
+    });
+  }
+}
+
+/**
+ * Tiêu đề phiên hiện tại: người bán tự nhập, hoặc tên mẫu đã chọn
+ * @returns {string}
+ */
+function getListingTitle() {
+  const value = document.getElementById('sell-title')?.value.trim() || '';
+  return value || currentSelectedModel?.name || '';
 }
 
 /**
@@ -874,16 +1030,7 @@ function getModelKeywords(name) {
  * @returns {Promise<{related: Array<string>, others: Array<string>}>}
  */
 async function getSuggestedImages(model) {
-  const file = CATEGORY_DATA_FILES[currentCategory];
-  if (file && !categoryDataCache[file]) {
-    try {
-      const res = await fetch(`data/${file}.json`);
-      categoryDataCache[file] = res.ok ? await res.json() : [];
-    } catch {
-      categoryDataCache[file] = [];
-    }
-  }
-  const products = categoryDataCache[file] || [];
+  const products = await loadCategoryProducts(currentCategory);
   const keywords = getModelKeywords(model.name);
   const codes = keywords.filter(k => /\d/.test(k));
   const brands = keywords.filter(k => !/\d/.test(k));
@@ -1125,7 +1272,7 @@ function updateLivePreview() {
   if (previewCat) previewCat.textContent = currentCategory || 'PC';
 
   const previewTitle = document.getElementById('preview-title');
-  if (previewTitle) previewTitle.textContent = currentSelectedModel.name;
+  if (previewTitle) previewTitle.textContent = getListingTitle();
 
   // Huy hiệu tình trạng
   const conditionSelect = document.getElementById('sell-condition');
@@ -1139,13 +1286,15 @@ function updateLivePreview() {
   const sealSelect = document.getElementById('sell-seal');
   const previewSeal = document.getElementById('preview-seal');
   if (sealSelect && previewSeal) {
-    previewSeal.textContent = sealSelect.value;
+    // Không chọn chứng nhận thì ẩn huy hiệu
+    previewSeal.textContent = sealSelect.value ? `✓ ${sealSelect.value}` : '';
+    previewSeal.hidden = !sealSelect.value;
   }
 
-  // 2 Thông số kỹ thuật tiêu biểu
+  // 2 Thông số kỹ thuật tiêu biểu (theo thông số người bán đã chỉnh)
   const previewSpecs = document.getElementById('preview-specs');
-  if (previewSpecs && currentSelectedModel.specifications) {
-    const entries = Object.entries(currentSelectedModel.specifications).slice(0, 2);
+  if (previewSpecs) {
+    const entries = Object.entries(getAllSpecsObject()).slice(0, 2);
     previewSpecs.innerHTML = entries.map(([k, v]) => `<span class="pcb-card__spec">${escapeHtml(v)}</span>`).join('');
   }
 
@@ -1212,6 +1361,15 @@ function initFormSubmitHandler() {
       return;
     }
 
+    // Tiêu đề phiên: bắt buộc, 5 - 120 ký tự (mặc định là tên mẫu, người bán có thể sửa)
+    const titleInput = document.getElementById('sell-title');
+    const listingTitle = getListingTitle();
+    if (listingTitle.length < 5 || listingTitle.length > 120) {
+      await showAlert({ title: 'Tiêu đề chưa hợp lệ', message: 'Tiêu đề phiên đấu giá cần từ 5 đến 120 ký tự.', tone: 'warning' });
+      titleInput?.focus();
+      return;
+    }
+
     const startPriceInput = document.getElementById('sell-start-price');
     const startPrice = startPriceInput ? parseInt(startPriceInput.value, 10) : 0;
     if (!startPrice || startPrice < 10000) {
@@ -1254,7 +1412,8 @@ function initFormSubmitHandler() {
     const newAuctionProduct = {
       // Đăng bán lại: giữ nguyên ID phiên cũ; tạo mới: ID độc nhất theo timestamp
       id: relistTarget ? relistTarget.id : Date.now(),
-      name: currentSelectedModel.name,
+      // Tiêu đề do người bán xác nhận (đề xuất sẵn theo tên mẫu)
+      name: listingTitle,
       category: currentCategory,
       condition: condition,
       startingPrice: startPrice,
@@ -1266,9 +1425,12 @@ function initFormSubmitHandler() {
       seller: sellerName,
       images: selectedImages.length ? [...selectedImages] : [currentSelectedModel.images[0]],
       description: description,
-      // Thông số chuẩn của mẫu + thông số người bán tự bổ sung
-      specifications: { ...(currentSelectedModel.specifications || {}), ...getCustomSpecsObject() }
+      // Thông số của mẫu sau khi người bán chỉnh sửa + thông số tự bổ sung
+      specifications: getAllSpecsObject()
     };
+    // Chứng nhận kiểm thử: chỉ lưu khi người bán chủ động chọn
+    const certification = document.getElementById('sell-seal')?.value || '';
+    if (certification) newAuctionProduct.certification = certification;
 
     if (relistTarget) {
       // Đánh dấu phiên mở lại để các trang dùng thời hạn mới thay cho trạng thái "đã kết thúc" cũ
