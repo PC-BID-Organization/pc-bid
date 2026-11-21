@@ -162,6 +162,18 @@
               </li>
 
               <li class="pcb-profile-nav__item">
+                <button type="button" class="pcb-profile-nav__btn" data-section="section-addresses">
+                  <span class="pcb-profile-nav__btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </span>
+                  <span class="pcb-profile-nav__btn-text">Địa chỉ nhận hàng</span>
+                </button>
+              </li>
+
+              <li class="pcb-profile-nav__item">
                 <button type="button" class="pcb-profile-nav__btn" data-section="section-security">
                   <span class="pcb-profile-nav__btn-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -625,6 +637,30 @@
                 </div>
               </div>
             </form>
+          </div>
+
+          <!-- #################### SECTION: ĐỊA CHỈ NHẬN HÀNG #################### -->
+          <div class="pcb-section" id="section-addresses" style="display: none;">
+            <div class="pcb-section__header">
+              <div class="pcb-section__title-group">
+                <div class="pcb-section__indicator"></div>
+                <div>
+                  <h2 class="pcb-section__title">Địa chỉ nhận hàng</h2>
+                  <p class="pcb-section__subtitle">
+                    Lưu nhiều địa chỉ với tên và số điện thoại người nhận khác nhau để chọn nhanh khi thanh toán đơn mua.
+                  </p>
+                </div>
+              </div>
+              <button type="button" class="pcb-btn-primary pcb-section__action-btn" id="btn-add-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Thêm địa chỉ mới</span>
+              </button>
+            </div>
+            <!-- Danh sách địa chỉ, địa chỉ mặc định đứng đầu (render động) -->
+            <ul class="pcb-address-list" id="address-list" aria-label="Danh sách địa chỉ nhận hàng"></ul>
           </div>
 
           <!-- #################### SECTION 3: BẢO MẬT & ĐỔI MẬT KHẨU #################### -->

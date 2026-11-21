@@ -7,7 +7,9 @@
    "Đơn hàng" trong profile.html.
    ========================================================================== */
 
-import { ORDER_STATUS_LABELS, payOrder, markOrderShipped, confirmOrderReceived } from './settlement.js';
+import { ORDER_STATUS_LABELS, payOrder, markOrderShipped, confirmOrderReceived, setOrderAddress } from './settlement.js';
+// Sổ địa chỉ nhận hàng: chọn / thêm địa chỉ cho đơn mua
+import { getAddresses, getDefaultAddress, openAddressForm, openAddressPicker, renderAddressInfo } from './address-book.js';
 import { showAlert, showConfirm } from './dialog.js';
 // Mở hộp chat với người bán / người mua của đơn hàng
 import { openChat, CHAT_ICON_SVG } from './chat.js';
@@ -110,6 +112,45 @@ function getStateContent(order, role) {
 }
 
 /**
+ * Khối địa chỉ nhận hàng của đơn
+ * - Người mua, đơn chờ thanh toán: hiện địa chỉ đã chọn (mặc định nếu chưa chọn) kèm nút Thay đổi
+ * - Các trường hợp khác: hiện địa chỉ giao hàng đã chốt khi thanh toán (người bán cũng thấy)
+ * @param {Object} order
+ * @param {'buyer'|'seller'} role
+ * @returns {string}
+ */
+function renderShipping(order, role) {
+  const editable = role === 'buyer' && order.status === 'awaiting_payment';
+  const address = order.shippingAddress || (editable ? getDefaultAddress() : null);
+  if (!address && !editable) return '';
+  const icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>';
+  return `
+    <div class="pcb-order__ship${address ? '' : ' pcb-order__ship--missing'}">
+      <div class="pcb-order__ship-head">
+        <span class="pcb-order__ship-title">${icon} ${role === 'buyer' ? 'Địa chỉ nhận hàng' : 'Giao đến'}</span>
+        ${editable ? `<button type="button" class="pcb-addr-link" data-order-address="${order.id}">${address ? 'Thay đổi' : 'Thêm địa chỉ'}</button>` : ''}
+      </div>
+      ${address
+        ? `<div class="pcb-address">${renderAddressInfo({ ...address, isDefault: false })}</div>`
+        : '<p class="pcb-order__ship-empty">Bạn chưa có địa chỉ nhận hàng. Hãy thêm địa chỉ để thanh toán.</p>'}
+    </div>
+  `;
+}
+
+/**
+ * Đảm bảo đơn đã có địa chỉ nhận hàng trước khi thanh toán:
+ * dùng địa chỉ đã chọn, nếu chưa có thì địa chỉ mặc định, nếu sổ địa chỉ trống thì mở form thêm mới
+ * @param {Object} order
+ * @returns {Promise<Object|null>} Địa chỉ dùng cho đơn hoặc null nếu người dùng hủy
+ */
+async function ensureOrderAddress(order) {
+  if (order.shippingAddress) return order.shippingAddress;
+  const address = getDefaultAddress() || await openAddressForm();
+  if (address) setOrderAddress(order.id, address);
+  return address;
+}
+
+/**
  * HTML thẻ đơn hàng
  * @param {Object} order - Đơn hàng
  * @param {'buyer'|'seller'} role - Vai trò người xem
@@ -136,6 +177,7 @@ export function renderOrderCard(order, role, { showProduct = false } = {}) {
         <div><dt>Tiền cọc (10%)</dt><dd>${formatVnd(order.deposit)}</dd></div>
         <div><dt>${role === 'buyer' ? 'Người bán' : 'Người mua'}</dt><dd>${escapeHtml(role === 'buyer' ? order.sellerName : order.buyerName)}</dd></div>
       </dl>
+      ${renderShipping(order, role)}
       <p class="pcb-order__text">${content.text}</p>
       <div class="pcb-order__actions">
         ${content.action}
@@ -179,6 +221,17 @@ export function bindOrderActions(container, onChange) {
       }
       return;
     }
+    // Chọn / đổi địa chỉ nhận hàng cho đơn chờ thanh toán
+    const addressBtn = e.target.closest('[data-order-address]');
+    if (addressBtn) {
+      const order = readOrders().find(o => o.id === addressBtn.dataset.orderAddress);
+      if (!order) return;
+      const hasAddresses = getAddresses().length > 0;
+      const chosen = hasAddresses ? await openAddressPicker(order.shippingAddress?.id || getDefaultAddress()?.id) : await openAddressForm();
+      if (chosen) setOrderAddress(order.id, chosen);
+      if (onChange) onChange({ ok: Boolean(chosen) });
+      return;
+    }
     const btn = e.target.closest('[data-order-action]');
     if (!btn) return;
     const { orderAction, orderId } = btn.dataset;
@@ -187,8 +240,16 @@ export function bindOrderActions(container, onChange) {
       ship: ['Xác nhận đã giao hàng?', 'Chỉ xác nhận khi bạn đã gửi linh kiện cho người mua.', 'Đã giao hàng'],
       receive: ['Xác nhận đã nhận hàng?', 'Sau khi xác nhận, tiền sẽ được chuyển cho người bán và giao dịch hoàn tất.', 'Đã nhận hàng']
     };
-    const [title, message, confirmText] = confirmTexts[orderAction] || [];
+    const [title, baseMessage, confirmText] = confirmTexts[orderAction] || [];
     if (!title) return;
+    let message = baseMessage;
+    if (orderAction === 'pay') {
+      // Thanh toán cần địa chỉ nhận hàng: lấy địa chỉ đã chọn / mặc định, hoặc mời thêm mới
+      const order = readOrders().find(o => o.id === orderId);
+      const address = order && await ensureOrderAddress(order);
+      if (!address) return;
+      message = `${baseMessage}\n\nGiao đến: ${address.fullname} · ${address.phone}\n${address.address}`;
+    }
     const ok = await showConfirm({ title, message, confirmText, cancelText: 'Để sau', tone: 'info' });
     if (!ok) return;
     const handlers = { pay: payOrder, ship: markOrderShipped, receive: confirmOrderReceived };
