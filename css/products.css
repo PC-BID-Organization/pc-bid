@@ -693,3 +693,28 @@
     max-width: 100%;
   }
 }
+
+/* ==========================================================================
+   PHIÊN NGƯỜI BÁN VỪA ĐĂNG (products.html?highlight=...)
+   ========================================================================== */
+.pcb-card--just-posted {
+  position: relative;
+  border-color: var(--pcb-primary, #ea580c) !important;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18), 0 8px 24px rgba(234, 88, 12, 0.12);
+}
+
+.pcb-card__just-posted {
+  display: block;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--pcb-primary, #ea580c), #f97316);
+}
+
+/* Dải nhãn đẩy ảnh xuống: dời nút theo dõi xuống tương ứng để không đè lên nhãn */
+.pcb-card--just-posted .pcb-card__watch {
+  top: 38px;
+}

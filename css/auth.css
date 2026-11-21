@@ -635,7 +635,7 @@
    -------------------------------------------------------------------------- */
 .pcb-auth-demo__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -658,4 +658,56 @@
   .pcb-auth-demo__grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* --------------------------------------------------------------------------
+   HÀNG NHẬP HỌ VÀ TÊN ĐỆM + TÊN TRÊN TRANG ĐĂNG KÝ
+   -------------------------------------------------------------------------- */
+.pcb-auth-form__name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+/* Ô nhập không có biểu tượng bên trái */
+.pcb-auth-form__input--plain {
+  padding-left: 14px;
+}
+
+/* Điện thoại nhỏ: hai ô xếp dọc */
+@media (max-width: 420px) {
+  .pcb-auth-form__name-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* Hàng Giới tính + Ngày sinh: hai cột bằng nhau */
+.pcb-auth-form__name-row--even {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+select.pcb-auth-form__input {
+  appearance: auto;
+  cursor: pointer;
+}
+
+@media (max-width: 420px) {
+  .pcb-auth-form__name-row--even {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Nút tài khoản demo đang được chọn: giữ viền và nền xanh */
+.pcb-demo-btn.pcb-demo-btn--selected {
+  border-color: #10b981 !important;
+  background-color: #ecfdf5 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+/* Dấu sao bắt buộc cạnh ô đồng ý quy chế */
+.pcb-auth-checkbox__required {
+  margin-left: 2px;
+  font-weight: 700;
+  color: #dc2626;
 }

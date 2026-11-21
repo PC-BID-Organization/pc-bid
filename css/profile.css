@@ -97,6 +97,15 @@
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
 }
 
+/* Chữ cái đầu của tên hiển thị trong avatar tròn */
+.pcb-user-card__avatar-initial {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
 .pcb-user-card__avatar-img {
   width: 52px;
   height: 52px;
@@ -454,6 +463,14 @@
   white-space: nowrap;
 }
 
+/* Biến thể nút chính cỡ nhỏ trên thẻ phiên: chữ căn giữa nút */
+.pcb-btn-primary--compact {
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-align: center;
+}
+
 .pcb-btn-primary:hover {
   background-color: var(--color-primary-hover, #d94e07);
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
@@ -491,8 +508,14 @@
   gap: 8px;
   border-bottom: 2px solid #f1f5f9;
   margin-bottom: 20px;
+  /* Cuộn ngang khi hẹp nhưng ẩn thanh cuộn, không để lộ thanh kéo dọc */
   overflow-x: auto;
-  scrollbar-width: thin;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.pcb-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .pcb-tab {
@@ -1769,4 +1792,727 @@
     justify-content: center;
     white-space: nowrap;
   }
+}
+
+/* ==========================================================================
+   ẢNH ĐẠI DIỆN: NÚT ĐỔI ẢNH, ẢNH ĐÃ TẢI LÊN, NÚT XÓA ẢNH
+   ========================================================================== */
+.pcb-user-card__avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pcb-user-card__avatar-edit {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background-color: #0b1c30;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(11, 28, 48, 0.25);
+  transition: background-color 0.15s ease;
+}
+
+.pcb-user-card__avatar-edit:hover,
+.pcb-user-card__avatar-edit:focus-visible {
+  background-color: var(--color-primary, #ea580c);
+}
+
+.pcb-user-card__avatar-remove {
+  display: block;
+  margin: -4px auto 10px;
+  padding: 2px 6px;
+  font-size: 12px;
+  color: #64748b;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pcb-user-card__public-link {
+  display: inline-block;
+  margin: -6px 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary, #ea580c);
+  text-decoration: none;
+}
+
+.pcb-user-card__public-link:hover,
+.pcb-user-card__public-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* Ẩn chữ nhưng vẫn đọc được bởi trình đọc màn hình */
+.pcb-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   HỘP THOẠI CẮT ẢNH ĐẠI DIỆN
+   ========================================================================== */
+.pcb-cropper {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(11, 28, 48, 0.6);
+}
+
+.pcb-cropper__card {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(11, 28, 48, 0.25);
+  text-align: center;
+}
+
+.pcb-cropper__title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-cropper__desc {
+  margin: 0 0 14px;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.pcb-cropper__stage {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #f1f5f9;
+  cursor: grab;
+  touch-action: none;
+}
+
+.pcb-cropper__stage:active {
+  cursor: grabbing;
+}
+
+.pcb-cropper__stage:focus-visible {
+  outline: 3px solid var(--color-primary, #ea580c);
+  outline-offset: 2px;
+}
+
+.pcb-cropper__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Khung tròn: làm tối phần nằm ngoài vùng ảnh đại diện */
+.pcb-cropper__mask {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 999px rgba(11, 28, 48, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+.pcb-cropper__zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.pcb-cropper__range {
+  flex: 1;
+  accent-color: var(--color-primary, #ea580c);
+}
+
+.pcb-cropper__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pcb-cropper__btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pcb-cropper__btn--ghost {
+  color: #475569;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.pcb-cropper__btn--primary {
+  color: #ffffff;
+  background-color: var(--color-primary, #ea580c);
+  border: none;
+}
+
+/* ==========================================================================
+   NGÀY SINH: CHỈ HIỆN NĂM, CON MẮT HIỆN ĐẦY ĐỦ, TOOLTIP "?"
+   ========================================================================== */
+.pcb-birthdate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8fafc;
+}
+
+.pcb-birthdate__value {
+  flex: 1;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-birthdate__eye,
+.pcb-birthdate__change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-birthdate__eye {
+  width: 32px;
+  height: 32px;
+  color: #64748b;
+}
+
+.pcb-birthdate__eye[aria-pressed="true"] {
+  color: var(--color-primary, #ea580c);
+}
+
+.pcb-birthdate__change {
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary, #ea580c);
+}
+
+.pcb-birthdate__eye:hover,
+.pcb-birthdate__change:hover,
+.pcb-birthdate__eye:focus-visible,
+.pcb-birthdate__change:focus-visible {
+  background-color: #fff7ed;
+}
+
+#input-birthdate {
+  margin-top: 8px;
+}
+
+/* Dấu "?" có chú thích khi rê chuột hoặc focus bàn phím */
+.pcb-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  background-color: #94a3b8;
+  border-radius: 50%;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.pcb-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 10;
+  width: max-content;
+  max-width: 240px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+  color: #ffffff;
+  background-color: #0b1c30;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(11, 28, 48, 0.2);
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.pcb-tooltip:hover::after,
+.pcb-tooltip:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pcb-select {
+  appearance: auto;
+  cursor: pointer;
+  padding-left: 14px;
+}
+
+.pcb-textarea--plain {
+  padding-left: 14px;
+}
+
+/* ==========================================================================
+   QUYỀN RIÊNG TƯ HỒ SƠ CÔNG KHAI: CÔNG TẮC BẬT / TẮT
+   ========================================================================== */
+.pcb-privacy {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+  max-width: 580px;
+}
+
+.pcb-privacy__title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-privacy__desc {
+  margin: 0 0 14px;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.pcb-privacy__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-privacy__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pcb-privacy__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.pcb-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.pcb-switch__track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background-color: #cbd5e1;
+  transition: background-color 0.15s ease;
+}
+
+.pcb-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
+}
+
+.pcb-switch__input:checked + .pcb-switch__track {
+  background-color: #16a34a;
+}
+
+.pcb-switch__input:checked + .pcb-switch__track::after {
+  transform: translateX(18px);
+}
+
+.pcb-switch__input:focus-visible + .pcb-switch__track {
+  outline: 3px solid var(--color-primary-light, #ffedd5);
+  outline-offset: 2px;
+}
+
+.pcb-switch__text {
+  min-width: 64px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* ==========================================================================
+   HỒ SƠ CÔNG KHAI (profile.html?user=...)
+   ========================================================================== */
+.pcb-profile--public .pcb-profile__sidebar {
+  display: none;
+}
+
+.pcb-profile--public .pcb-profile__layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pcb-public__head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pcb-public__avatar {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 3px solid #ffedd5;
+  background: linear-gradient(135deg, var(--color-primary, #ea580c), #f97316);
+  font-size: 34px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pcb-public__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pcb-public__name {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-public__uid {
+  margin: 0 0 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+}
+
+.pcb-public__role {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9a3412;
+  background-color: #fff7ed;
+  border-radius: 999px;
+}
+
+.pcb-public__self-note {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  color: #075985;
+  background-color: #f0f9ff;
+  border-radius: 10px;
+}
+
+.pcb-public__block {
+  margin-top: 24px;
+}
+
+.pcb-public__block-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0b1c30);
+}
+
+.pcb-public__bio,
+.pcb-public__empty,
+.pcb-public__private {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted, #565e74);
+}
+
+.pcb-public__private {
+  padding: 12px 14px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+}
+
+.pcb-public__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.pcb-public-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  min-width: 0;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pcb-public-card:hover,
+.pcb-public-card:focus-visible {
+  border-color: #fdba74;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.1);
+}
+
+.pcb-public-card__img {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.pcb-public-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pcb-public-card__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text-main, #0b1c30);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pcb-public-card__meta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary, #ea580c);
+}
+
+.pcb-public-card__badge {
+  align-self: flex-start;
+  padding: 1px 8px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.pcb-public-card__badge--active { color: #166534; background-color: #dcfce7; }
+.pcb-public-card__badge--sold { color: #1e40af; background-color: #dbeafe; }
+.pcb-public-card__badge--ended { color: #475569; background-color: #f1f5f9; }
+.pcb-public-card__badge--outbid { color: #b91c1c; background-color: #fee2e2; }
+
+@media (max-width: 576px) {
+  .pcb-public__head {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pcb-privacy__item {
+    flex-wrap: wrap;
+  }
+}
+
+/* Chỉ hiện nút xóa ảnh khi người dùng đã tải ảnh lên */
+.pcb-user-card__avatar-remove[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   HỒ SƠ CÔNG KHAI: NÚT QUAY LẠI, KHUNG TIỂU SỬ NỔI BẬT, KHỐI LIÊN HỆ
+   ========================================================================== */
+.pcb-public__self-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pcb-public__self-note[hidden] {
+  display: none;
+}
+
+.pcb-public__back-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-primary, #ea580c);
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pcb-public__back-btn:hover,
+.pcb-public__back-btn:focus-visible {
+  background-color: var(--color-primary-hover, #d94e07);
+}
+
+/* Tiểu sử và liên hệ đặt cạnh nhau trên màn hình rộng */
+.pcb-public__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pcb-public__intro .pcb-public__block {
+  margin-top: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.pcb-public__block--bio {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fed7aa;
+  border-left: 4px solid var(--color-primary, #ea580c);
+}
+
+.pcb-public__block--bio .pcb-public__bio {
+  font-size: 0.95rem;
+  color: #431407;
+}
+
+.pcb-public__block--contact {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.pcb-public__contact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pcb-public__contact li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pcb-public__contact span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.pcb-public__contact a {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0b1c30);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.pcb-public__contact a:hover,
+.pcb-public__contact a:focus-visible {
+  color: var(--color-primary, #ea580c);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .pcb-public__intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Nút "Xem thêm" cho danh sách dài trong hồ sơ công khai */
+.pcb-public__more {
+  display: block;
+  margin: 14px auto 0;
+  padding: 9px 20px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pcb-primary, #ea580c);
+  cursor: pointer;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-public__more:hover,
+.pcb-public__more:focus-visible {
+  background-color: #ffedd5;
 }
