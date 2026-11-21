@@ -1327,11 +1327,27 @@
     padding: 20px 16px;
   }
 
-  /* Cuộn ngang thanh tab khi không đủ chỗ */
+  /* Thanh tab trên điện thoại: chia đều chiều ngang; chỉ cuộn ngang khi thật sự thiếu chỗ.
+     Khóa cuộn dọc (overflow-y: hidden) để thao tác vuốt dọc trên thanh tab vẫn cuộn được cả trang */
   .pcb-pd__tabs {
-    padding: 0 16px;
+    padding: 0 8px;
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
+  }
+
+  /* 3 tab chia đều chiều ngang, nhãn dài tự xuống dòng để luôn vừa khung (không cần kéo ngang) */
+  .pcb-pd__tab {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding: 12px 4px;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    text-align: center;
+    white-space: normal;
   }
 
   .pcb-pd__tabs::-webkit-scrollbar {
@@ -1384,10 +1400,7 @@
    ĐIỆN THOẠI (≤ 576px): bảng thông số và thanh tab không bị cắt chữ
    -------------------------------------------------------------------------- */
 @media (max-width: 576px) {
-  .pcb-pd__tab {
-    padding: 14px 12px;
-    white-space: nowrap;
-  }
+  /* Thanh tab: dùng quy tắc chia đều + tự xuống dòng ở khối ≤ 768px phía trên */
 
   .pcb-pd__specs-table {
     table-layout: fixed;
@@ -1728,4 +1741,83 @@ a.pcb-pd__seller-avatar {
 
 .pcb-pd__error-icon .lucide {
   color: #d97706;
+}
+
+/* Hộp thoại người bán chỉnh sửa thông tin phiên (dùng khung hộp thoại chung .pcb-addr-modal) */
+.pcb-pd-edit {
+  width: min(620px, 100%);
+}
+
+.pcb-pd-edit__specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-pd-edit__spec {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) 32px;
+  gap: 6px;
+}
+
+.pcb-pd-edit__spec input {
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.pcb-pd-edit__spec input:first-child {
+  font-weight: 600;
+}
+
+.pcb-pd-edit__spec input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.pcb-pd-edit__spec button {
+  font-size: 18px;
+  color: #94a3b8;
+  cursor: pointer;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.pcb-pd-edit__spec button:hover,
+.pcb-pd-edit__spec button:focus-visible {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.pcb-pd-edit__empty {
+  font-size: 13px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.pcb-pd-edit__add {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  background: #fff7ed;
+  border: 1px dashed var(--color-primary);
+  border-radius: 8px;
+}
+
+.pcb-pd__owner-btn[hidden] {
+  display: none;
 }

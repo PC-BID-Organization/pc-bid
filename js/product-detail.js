@@ -734,6 +734,15 @@ function capNhatCheDoNguoiBan() {
       nutDong.addEventListener('click', dongPhienNgay);
     }
   }
+  // Phiên còn đang diễn ra: người bán có thể sửa tiêu đề, mô tả, thông số
+  const nutSua = document.getElementById('pcb-pd-owner-edit');
+  if (nutSua) {
+    nutSua.hidden = daKetThuc;
+    if (!nutSua.dataset.bound) {
+      nutSua.dataset.bound = '1';
+      nutSua.addEventListener('click', moChinhSuaPhien);
+    }
+  }
   // Nút xem lịch sử: mở tab Lịch sử đặt giá và cuộn tới bảng
   const nutLichSu = document.getElementById('pcb-pd-owner-history');
   if (nutLichSu && !nutLichSu.dataset.bound) {
@@ -750,6 +759,139 @@ function capNhatCheDoNguoiBan() {
   // Người bán không cần nút theo dõi phiên của chính mình
   const nutTheoDoi = document.getElementById('pcb-pd-watchlist-btn');
   if (nutTheoDoi) nutTheoDoi.hidden = true;
+}
+
+/**
+ * Hộp thoại người bán chỉnh sửa tiêu đề, mô tả và thông số kỹ thuật của phiên đang diễn ra.
+ * Lưu vào pcbid_products (bản chuẩn cho mọi trang) và danh sách đăng bán của người bán.
+ */
+function moChinhSuaPhien() {
+  if (!sanPhamHienTai || !laNguoiBanHienTai()) return;
+  const sp = sanPhamHienTai;
+  // Danh sách thông số đang sửa: { key, value }
+  let thongSo = Object.entries(sp.specifications || {}).map(([key, value]) => ({ key, value: String(value) }));
+  const viTriFocus = document.activeElement;
+
+  const lop = document.createElement('div');
+  lop.className = 'pcb-addr-modal';
+  lop.innerHTML = `
+    <div class="pcb-addr-modal__card pcb-pd-edit" role="dialog" aria-modal="true" aria-labelledby="pcb-pd-edit-title">
+      <h3 class="pcb-addr-modal__title" id="pcb-pd-edit-title">Chỉnh sửa thông tin phiên</h3>
+      <form class="pcb-addr-form" novalidate>
+        <label class="pcb-addr-form__field">
+          <span>Tiêu đề phiên đấu giá</span>
+          <input type="text" name="listingTitle" maxlength="120" value="${maHoaHtml(sp.name)}" required>
+          <small class="pcb-addr-form__error" data-edit-error="title"></small>
+        </label>
+        <label class="pcb-addr-form__field">
+          <span>Mô tả tình trạng & phụ kiện</span>
+          <textarea name="description" rows="4" maxlength="1500" required>${maHoaHtml(sp.description || '')}</textarea>
+          <small class="pcb-addr-form__error" data-edit-error="description"></small>
+        </label>
+        <div class="pcb-addr-form__field">
+          <span>Thông số kỹ thuật</span>
+          <ul class="pcb-pd-edit__specs" data-edit-specs></ul>
+          <button type="button" class="pcb-pd-edit__add" data-edit-add>+ Thêm thông số</button>
+        </div>
+        <div class="pcb-addr-modal__actions">
+          <button type="button" class="pcb-addr-btn pcb-addr-btn--ghost" data-edit-cancel>Hủy</button>
+          <button type="submit" class="pcb-addr-btn pcb-addr-btn--primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>`;
+  document.body.appendChild(lop);
+
+  const form = lop.querySelector('form');
+  const dsThongSo = lop.querySelector('[data-edit-specs]');
+  const veThongSo = (focusIdx) => {
+    dsThongSo.innerHTML = thongSo.map((t, i) => `
+      <li class="pcb-pd-edit__spec">
+        <input type="text" data-key="${i}" value="${maHoaHtml(t.key)}" maxlength="40" placeholder="Tên thông số" aria-label="Tên thông số ${i + 1}">
+        <input type="text" data-value="${i}" value="${maHoaHtml(t.value)}" maxlength="120" placeholder="Giá trị" aria-label="Giá trị thông số ${i + 1}">
+        <button type="button" data-remove="${i}" aria-label="Xóa thông số ${i + 1}">×</button>
+      </li>`).join('') || '<li class="pcb-pd-edit__empty">Chưa có thông số nào.</li>';
+    if (focusIdx !== undefined) dsThongSo.querySelector(`[data-key="${focusIdx}"]`)?.focus();
+  };
+  veThongSo();
+
+  const dong = () => {
+    document.removeEventListener('keydown', khiBamPhim, true);
+    lop.remove();
+    viTriFocus?.focus?.();
+  };
+  const khiBamPhim = e => {
+    if (e.key === 'Escape' && !document.querySelector('.pcb-dialog')) {
+      e.stopPropagation();
+      dong();
+    }
+  };
+  document.addEventListener('keydown', khiBamPhim, true);
+
+  dsThongSo.addEventListener('input', e => {
+    if (e.target.dataset.key !== undefined) thongSo[Number(e.target.dataset.key)].key = e.target.value;
+    if (e.target.dataset.value !== undefined) thongSo[Number(e.target.dataset.value)].value = e.target.value;
+  });
+  lop.addEventListener('click', e => {
+    if (e.target === lop || e.target.closest('[data-edit-cancel]')) return dong();
+    const nutXoa = e.target.closest('[data-remove]');
+    if (nutXoa) {
+      thongSo.splice(Number(nutXoa.dataset.remove), 1);
+      veThongSo();
+    }
+    if (e.target.closest('[data-edit-add]') && thongSo.length < 20) {
+      thongSo.push({ key: '', value: '' });
+      veThongSo(thongSo.length - 1);
+    }
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    // Dùng form.elements: form.title là thuộc tính title của chính thẻ form
+    const oTieuDe = form.elements.listingTitle;
+    const oMoTa = form.elements.description;
+    const tieuDe = oTieuDe.value.trim();
+    const moTa = oMoTa.value.trim();
+    const loi = {
+      title: tieuDe.length < 5 ? 'Tiêu đề cần từ 5 đến 120 ký tự.' : '',
+      description: moTa.length < 10 ? 'Mô tả cần ít nhất 10 ký tự.' : ''
+    };
+    form.querySelectorAll('[data-edit-error]').forEach(el => { el.textContent = loi[el.dataset.editError] || ''; });
+    if (loi.title || loi.description) {
+      (loi.title ? oTieuDe : oMoTa).focus();
+      return;
+    }
+    const thongSoMoi = {};
+    thongSo.forEach(({ key, value }) => {
+      if (key.trim() && value.trim()) thongSoMoi[key.trim()] = value.trim();
+    });
+
+    // Cập nhật bản chuẩn trong pcbid_products
+    try {
+      const ds = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+      const viTri = ds.findIndex(p => Number(p.id) === Number(sp.id));
+      const capNhat = { name: tieuDe, description: moTa, specifications: thongSoMoi, editedAt: new Date().toISOString() };
+      if (viTri >= 0) ds[viTri] = { ...ds[viTri], ...capNhat };
+      else {
+        const banMoi = { ...sp, ...capNhat };
+        delete banMoi.endTimestamp;
+        ds.push(banMoi);
+      }
+      localStorage.setItem('pcbid_products', JSON.stringify(ds));
+      // Đồng bộ tên trong danh sách đăng bán của người bán
+      const nguoiBan = readLoggedInUser();
+      writeUserList(USER_LIST_KEYS.SELLING, nguoiBan, readUserList(USER_LIST_KEYS.SELLING, nguoiBan)
+        .map(item => (Number(item.id) === Number(sp.id) ? { ...item, name: tieuDe } : item)));
+    } catch {
+      hienThiToast('Không lưu được thay đổi (bộ nhớ trình duyệt đầy).', 'error');
+      return;
+    }
+
+    Object.assign(sanPhamHienTai, { name: tieuDe, description: moTa, specifications: thongSoMoi });
+    dong();
+    hienThiSanPham(sanPhamHienTai);
+    hienThiToast('Đã cập nhật thông tin phiên đấu giá.', 'success');
+  });
+  form.elements.listingTitle.focus();
 }
 
 /**

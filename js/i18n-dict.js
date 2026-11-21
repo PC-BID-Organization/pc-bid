@@ -827,6 +827,33 @@ export const PHRASES = [
   ['Đen;Trắng', 'Black;White', 'ブラック;ホワイト'],
   ['Đen;Bạc', 'Black;Silver', 'ブラック;シルバー'],
 
+  /* ---------- Đăng bán: tiêu đề, thông số chỉnh sửa được, chứng nhận ---------- */
+  ['Tiêu đề phiên đấu giá', 'Auction title', 'オークションのタイトル'],
+  ['Dùng tên mẫu đề xuất', 'Use suggested model name', '提案されたモデル名を使う'],
+  ['Chọn mẫu sản phẩm để hệ thống đề xuất tiêu đề', 'Choose a model to get a suggested title', 'モデルを選ぶとタイトルが提案されます'],
+  ['Tự đề xuất theo mẫu đã chọn, bạn có thể sửa lại cho đúng món hàng (5 - 120 ký tự).', 'Suggested from the selected model; edit it to match your item (5 - 120 characters).', '選択したモデルから提案されます。実際の商品に合わせて編集できます（5〜120文字）。'],
+  ['Thông số kỹ thuật (điền sẵn theo mẫu, bạn có thể sửa, xóa hoặc bổ sung)', 'Specifications (pre-filled from the model; edit, remove or add)', '仕様（モデルから自動入力・編集／削除／追加が可能）'],
+  ['Gợi ý từ dữ liệu PCBid', 'Suggested from PCBid data', 'PCBid データからの提案'],
+  ['Đã chỉnh sửa', 'Edited', '編集済み'],
+  ['Đang tải danh sách mẫu...', 'Loading models...', 'モデルを読み込み中...'],
+  ['-- Chọn mẫu sản phẩm chuẩn --', '-- Choose a standard model --', '-- 標準モデルを選択 --'],
+  ['-- Không có chứng nhận --', '-- No certificate --', '-- 証明なし --'],
+  ['Mẫu này chưa có thông số. Bạn có thể tự thêm ở mục "Thông số bổ sung" bên dưới.', 'This model has no specs yet. Add your own under "Your extra specs" below.', 'このモデルには仕様がありません。下の「追加の仕様」で追加できます。'],
+  ['Tiêu đề chưa hợp lệ', 'Invalid title', 'タイトルが無効です'],
+  ['Tiêu đề phiên đấu giá cần từ 5 đến 120 ký tự.', 'The auction title must be 5 to 120 characters.', 'オークションのタイトルは5〜120文字にしてください。'],
+
+  /* ---------- Người bán chỉnh sửa phiên sau khi đăng ---------- */
+  ['Chỉnh sửa thông tin', 'Edit details', '情報を編集'],
+  ['Chỉnh sửa thông tin phiên', 'Edit auction details', 'オークション情報の編集'],
+  ['Mô tả tình trạng & phụ kiện', 'Condition & accessories', '状態と付属品'],
+  ['Lưu thay đổi', 'Save changes', '変更を保存'],
+  ['Chưa có thông số nào.', 'No specs yet.', '仕様はまだありません。'],
+  ['Tên thông số', 'Spec name', '仕様名'],
+  ['Giá trị', 'Value', '値'],
+  ['Tiêu đề cần từ 5 đến 120 ký tự.', 'The title must be 5 to 120 characters.', 'タイトルは5〜120文字にしてください。'],
+  ['Mô tả cần ít nhất 10 ký tự.', 'The description needs at least 10 characters.', '説明は10文字以上必要です。'],
+  ['Đã cập nhật thông tin phiên đấu giá.', 'Auction details updated.', 'オークション情報を更新しました。'],
+
   /* ---------- Ngày sinh ---------- */
   ['Chưa cập nhật', 'Not set', '未設定'],
 

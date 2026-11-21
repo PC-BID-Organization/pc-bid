@@ -1368,12 +1368,19 @@ a.pcb-chat__peer-name:focus-visible {
 
 /* Máy tính bảng / điện thoại: một cột, chuyển qua lại giữa danh sách và tin nhắn */
 @media (max-width: 720px) {
+  /* minmax(0, 1fr): cột không bị ô tìm kiếm kéo giãn rộng hơn khung (che mất nút lọc) */
   .pcb-chat {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pcb-chat__sidebar {
+    min-width: 0;
     border-right: none;
+  }
+
+  .pcb-chat__search input {
+    width: 0;
+    flex: 1;
   }
 
   .pcb-chat__main {
