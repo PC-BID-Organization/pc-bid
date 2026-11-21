@@ -78,10 +78,20 @@
           <span class="header__badge" id="header-watchlist-badge">0</span>
         </a>
 
-        <!-- Nút thông báo đấu giá -->
-        <a href="profile.html#notifications" class="header__icon-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá">
-          <img src="images/icons/icon-bell.svg" alt="Thông báo" class="header__btn-icon-img" width="14" height="17">
-          <span class="header__badge" id="header-notification-badge">0</span>
+        <!-- Nút thông báo đấu giá: bấm để mở bảng thông báo nhanh (JS), không có JS thì vào trang thông báo -->
+        <div class="header__notify-wrapper">
+          <a href="profile.html#notifications" class="header__icon-btn" id="header-notify-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá" aria-haspopup="true" aria-expanded="false" aria-controls="header-notify-panel">
+            <img src="images/icons/icon-bell.svg" alt="" class="header__btn-icon-img" width="14" height="17">
+            <span class="header__badge" id="header-notification-badge">0</span>
+          </a>
+          <!-- Bảng thông báo nhanh, render động bởi header.js -->
+          <div class="header__notify-panel" id="header-notify-panel" hidden></div>
+        </div>
+
+        <!-- Nút Quản lý đấu giá (mua hàng & bán hàng), tách riêng khỏi phần cài đặt tài khoản -->
+        <a href="profile.html#participating" class="header__icon-btn" id="header-trade-btn" title="Quản lý đấu giá" aria-label="Quản lý đấu giá">
+          <img src="images/icons/icon-cart.svg" alt="" class="header__btn-icon-img" width="17" height="16">
+          <span class="header__badge" id="header-trade-badge" hidden>0</span>
         </a>
 
         <!-- Khối người dùng & Menu dropdown đăng nhập / đăng xuất -->

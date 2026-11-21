@@ -8,6 +8,8 @@ import { initHeader } from '../components/header/header.js';
 import { startBotBidding } from './bot-bidder.js';
 // Xử lý sau khi phiên kết thúc: người thắng, thanh toán, giao hàng (chạy trên mọi trang)
 import { startSettlement } from './settlement.js';
+// Hộp chat nổi giữa người mua và người bán
+import { initChatWidget } from './chat.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Nạp đồng thời cả Header và Footer từ tệp HTML thành phần riêng biệt
@@ -24,6 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Theo dõi phiên vừa kết thúc và các đơn hàng đến hạn
   startSettlement();
+
+  // Hộp chat nổi (chỉ hiện khi đã đăng nhập)
+  initChatWidget();
 });
 
 /**

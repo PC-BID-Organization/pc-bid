@@ -124,23 +124,18 @@
             </div>
           </div>
 
-          <!-- Menu chuyển đổi danh mục quản lý -->
-          <nav class="pcb-profile-nav" aria-label="Menu chức năng cá nhân">
-            <ul class="pcb-profile-nav__list">
-              <li class="pcb-profile-nav__item">
-                <button type="button" class="pcb-profile-nav__btn pcb-profile-nav__btn--active"
-                  data-section="section-auctions">
-                  <span class="pcb-profile-nav__btn-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2l6 6m-2 2l-6-6M3 21l6-6m2 2l-6 6" />
-                      <path d="M10 6l8 8-4 4-8-8 4-4z" />
-                    </svg>
-                  </span>
-                  <span class="pcb-profile-nav__btn-text">Quản lý đấu giá</span>
-                  <span class="pcb-profile-nav__badge" id="nav-auctions-count">4 phiên</span>
-                </button>
-              </li>
+          <!-- Chế độ Quản lý đấu giá: thay menu cài đặt bằng liên kết quay về cài đặt tài khoản -->
+          <a class="pcb-trade-settings-link" href="profile.html#account">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>Cài đặt tài khoản</span>
+          </a>
 
+          <!-- Menu cài đặt tài khoản (tách riêng khỏi phần Quản lý đấu giá) -->
+          <nav class="pcb-profile-nav" aria-label="Menu cài đặt tài khoản">
+            <ul class="pcb-profile-nav__list">
               <li class="pcb-profile-nav__item">
                 <button type="button" class="pcb-profile-nav__btn" data-section="section-notifications">
                   <span class="pcb-profile-nav__btn-icon">
@@ -222,9 +217,9 @@
               <div class="pcb-section__title-group">
                 <div class="pcb-section__indicator"></div>
                 <div>
-                  <h1 class="pcb-section__title">Quản lý phiên đấu giá của tôi</h1>
-                  <p class="pcb-section__subtitle">
-                    Theo dõi sát sao các phiên bạn đang tham gia trả giá, linh kiện tự đăng bán và danh sách sản phẩm quan tâm.
+                  <h1 class="pcb-section__title" id="trade-title">Quản lý đấu giá · Mua hàng</h1>
+                  <p class="pcb-section__subtitle" id="trade-subtitle">
+                    Theo dõi các phiên bạn đang trả giá, thanh toán đơn đã thắng và danh sách linh kiện quan tâm.
                   </p>
                 </div>
               </div>
@@ -238,10 +233,22 @@
               </a>
             </div>
 
+            <!-- Công tắc hai luồng làm việc riêng biệt: Mua hàng / Bán hàng -->
+            <div class="pcb-trade-switch" role="group" aria-label="Chọn luồng giao dịch">
+              <button type="button" class="pcb-trade-switch__btn pcb-trade-switch__btn--active" data-trade-mode="buy" aria-pressed="true">
+                <span aria-hidden="true">🛒</span> Mua hàng
+                <span class="pcb-trade-switch__badge" id="trade-badge-buy" hidden>0</span>
+              </button>
+              <button type="button" class="pcb-trade-switch__btn" data-trade-mode="sell" aria-pressed="false">
+                <span aria-hidden="true">🏷️</span> Bán hàng
+                <span class="pcb-trade-switch__badge" id="trade-badge-sell" hidden>0</span>
+              </button>
+            </div>
+
             <!-- Thanh điều hướng Tab chính cho Đấu giá (Sub-tabs) -->
             <div class="pcb-tabs" role="tablist" aria-label="Danh mục phiên đấu giá">
               <button type="button" class="pcb-tab pcb-tab--active" id="tab-btn-participating" role="tab"
-                aria-selected="true" aria-controls="tab-content-participating" data-tab="participating">
+                aria-selected="true" aria-controls="tab-content-participating" data-tab="participating" data-group="buy">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
@@ -250,18 +257,19 @@
                 <span class="pcb-tab__counter" id="count-participating">0</span>
               </button>
 
-              <button type="button" class="pcb-tab" id="tab-btn-selling" role="tab" aria-selected="false"
-                aria-controls="tab-content-selling" data-tab="selling">
+              <button type="button" class="pcb-tab" id="tab-btn-buy-orders" role="tab" aria-selected="false"
+                aria-controls="tab-content-buy-orders" data-tab="buy-orders" data-group="buy">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
-                <span>Linh kiện đã đăng bán</span>
-                <span class="pcb-tab__counter" id="count-selling">0</span>
+                <span>Đơn mua</span>
+                <span class="pcb-tab__counter" id="count-buy-orders">0</span>
               </button>
 
               <button type="button" class="pcb-tab" id="tab-btn-watchlist" role="tab" aria-selected="false"
-                aria-controls="tab-content-watchlist" data-tab="watchlist">
+                aria-controls="tab-content-watchlist" data-tab="watchlist" data-group="buy">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                 </svg>
@@ -269,15 +277,25 @@
                 <span class="pcb-tab__counter" id="count-watchlist">0</span>
               </button>
 
-              <button type="button" class="pcb-tab" id="tab-btn-orders" role="tab" aria-selected="false"
-                aria-controls="tab-content-orders" data-tab="orders">
+              <button type="button" class="pcb-tab" id="tab-btn-selling" role="tab" aria-selected="false" hidden
+                aria-controls="tab-content-selling" data-tab="selling" data-group="sell">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+                <span>Phiên đang bán</span>
+                <span class="pcb-tab__counter" id="count-selling">0</span>
+              </button>
+
+              <button type="button" class="pcb-tab" id="tab-btn-sell-orders" role="tab" aria-selected="false"
+                aria-controls="tab-content-sell-orders" data-tab="sell-orders" data-group="sell" hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                   <line x1="3" y1="6" x2="21" y2="6" />
                   <path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
-                <span>Đơn hàng</span>
-                <span class="pcb-tab__counter" id="count-orders">0</span>
+                <span>Đơn bán</span>
+                <span class="pcb-tab__counter" id="count-sell-orders">0</span>
               </button>
             </div>
 
@@ -351,12 +369,12 @@
               </div>
             </div>
 
-            <!-- ================= TAB 4: ĐƠN HÀNG SAU ĐẤU GIÁ ================= -->
-            <div class="pcb-tab-pane" id="tab-content-orders" role="tabpanel" aria-labelledby="tab-btn-orders">
-              <div class="pcb-orders-list" id="grid-orders">
-                <!-- Render các đơn hàng sau khi thắng đấu giá hoặc bán được linh kiện -->
+            <!-- ================= ĐƠN MUA (luồng Mua hàng) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-buy-orders" role="tabpanel" aria-labelledby="tab-btn-buy-orders">
+              <div class="pcb-orders-list" id="grid-buy-orders">
+                <!-- Render động các đơn hàng bạn đã thắng đấu giá -->
               </div>
-              <div class="pcb-empty-state" id="empty-orders" style="display: none;">
+              <div class="pcb-empty-state" id="empty-buy-orders" style="display: none;">
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -364,9 +382,28 @@
                     <path d="M16 10a4 4 0 0 1-8 0" />
                   </svg>
                 </div>
-                <h3 class="pcb-empty-state__title">Chưa có đơn hàng nào</h3>
-                <p class="pcb-empty-state__desc">Khi bạn thắng một phiên đấu giá hoặc linh kiện bạn đăng bán có người thắng, đơn hàng sẽ hiện ở đây để thanh toán và theo dõi giao hàng.</p>
+                <h3 class="pcb-empty-state__title">Chưa có đơn mua nào</h3>
+                <p class="pcb-empty-state__desc">Khi bạn thắng một phiên đấu giá, đơn mua sẽ hiện ở đây để thanh toán, theo dõi giao hàng và xác nhận đã nhận.</p>
                 <a href="products.html" class="pcb-btn-primary">Dạo sàn đấu giá</a>
+              </div>
+            </div>
+
+            <!-- ================= ĐƠN BÁN (luồng Bán hàng) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-sell-orders" role="tabpanel" aria-labelledby="tab-btn-sell-orders">
+              <div class="pcb-orders-list" id="grid-sell-orders">
+                <!-- Render động các đơn hàng linh kiện bạn đã bán -->
+              </div>
+              <div class="pcb-empty-state" id="empty-sell-orders" style="display: none;">
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Chưa có đơn bán nào</h3>
+                <p class="pcb-empty-state__desc">Khi linh kiện bạn đăng bán có người thắng, đơn bán sẽ hiện ở đây để theo dõi thanh toán và xác nhận giao hàng.</p>
+                <a href="sell.html" class="pcb-btn-primary">Đăng phiên bán mới</a>
               </div>
             </div>
 
