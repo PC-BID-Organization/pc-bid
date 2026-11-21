@@ -8,6 +8,8 @@
 import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, lockAuctionEndTime } from './auction-time.js';
 // Đơn hàng sau đấu giá và giao diện thẻ đơn hàng dùng chung
 import { getOrdersForUser, orderNeedsAction } from './settlement.js';
+// Sổ địa chỉ nhận hàng
+import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
@@ -942,6 +944,7 @@ function switchSection(sectionId) {
     if (sectionId === 'section-auctions') breadcrumbCurrent.textContent = TAB_GROUP[currentActiveTab] === 'sell' ? 'Quản lý đấu giá · Bán hàng' : 'Quản lý đấu giá · Mua hàng';
     else if (sectionId === 'section-account') breadcrumbCurrent.textContent = 'Thông tin tài khoản';
     else if (sectionId === 'section-security') breadcrumbCurrent.textContent = 'Bảo mật & Đổi mật khẩu';
+    else if (sectionId === 'section-addresses') breadcrumbCurrent.textContent = 'Địa chỉ nhận hàng';
     else if (sectionId === 'section-notifications') breadcrumbCurrent.textContent = 'Thông báo đấu giá';
   }
 
@@ -949,6 +952,8 @@ function switchSection(sectionId) {
     renderCurrentAuctionTab();
   } else if (sectionId === 'section-notifications') {
     renderNotifications();
+  } else if (sectionId === 'section-addresses') {
+    renderAddressList();
   }
 
   // Đồng bộ hash trên thanh địa chỉ với mục đang xem
@@ -956,6 +961,7 @@ function switchSection(sectionId) {
     'section-auctions': `#${currentActiveTab}`,
     'section-account': '#account',
     'section-security': '#security',
+    'section-addresses': '#addresses',
     'section-notifications': '#notifications'
   }[sectionId];
   if (sectionHash) updateHash(sectionHash);
@@ -999,6 +1005,8 @@ function applyHashRoute() {
     switchSection('section-account');
   } else if (hash === '#security') {
     switchSection('section-security');
+  } else if (hash === '#addresses') {
+    switchSection('section-addresses');
   } else {
     // Mặc định (không có hash): trang cài đặt tài khoản; Quản lý đấu giá mở qua icon xe hàng trên Header
     switchSection('section-account');
@@ -1043,6 +1051,62 @@ function renderNotifications() {
       </div>
     </li>
   `).join('');
+}
+
+/**
+ * Render sổ địa chỉ nhận hàng: địa chỉ mặc định đứng đầu, có nút sửa / xóa / đặt mặc định
+ */
+function renderAddressList() {
+  const listEl = document.getElementById('address-list');
+  if (!listEl) return;
+  const addresses = getAddresses(getCurrentUser());
+  if (!addresses.length) {
+    listEl.innerHTML = `
+      <li class="pcb-address-empty">
+        <p>Bạn chưa có địa chỉ nhận hàng nào.</p>
+        <p>Thêm địa chỉ để thanh toán nhanh khi thắng đấu giá.</p>
+      </li>`;
+    return;
+  }
+  listEl.innerHTML = addresses.map(a => `
+    <li class="pcb-address-card">
+      <div class="pcb-address">${renderAddressInfo(a)}</div>
+      <div class="pcb-address-card__actions">
+        <div class="pcb-address-card__links">
+          <button type="button" class="pcb-addr-link" data-address-edit="${a.id}">Sửa</button>
+          ${a.isDefault ? '' : `<button type="button" class="pcb-addr-link pcb-addr-link--danger" data-address-delete="${a.id}">Xóa</button>`}
+        </div>
+        <button type="button" class="pcb-addr-btn pcb-addr-btn--outline" data-address-default="${a.id}" ${a.isDefault ? 'disabled' : ''}>Thiết lập mặc định</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+/**
+ * Gắn sự kiện cho mục Địa chỉ nhận hàng
+ */
+function setupAddressSection() {
+  document.getElementById('btn-add-address')?.addEventListener('click', async () => {
+    if (await openAddressForm()) {
+      renderAddressList();
+      showToast('Đã thêm địa chỉ nhận hàng mới.');
+    }
+  });
+  document.getElementById('address-list')?.addEventListener('click', async e => {
+    const editBtn = e.target.closest('[data-address-edit]');
+    const deleteBtn = e.target.closest('[data-address-delete]');
+    const defaultBtn = e.target.closest('[data-address-default]');
+    if (editBtn) {
+      const address = getAddresses(getCurrentUser()).find(a => a.id === editBtn.dataset.addressEdit);
+      if (await openAddressForm(address)) showToast('Đã cập nhật địa chỉ.');
+    } else if (deleteBtn) {
+      if (await deleteAddress(deleteBtn.dataset.addressDelete)) showToast('Đã xóa địa chỉ.');
+    } else if (defaultBtn && !defaultBtn.disabled) {
+      setDefaultAddress(defaultBtn.dataset.addressDefault);
+      showToast('Đã đặt làm địa chỉ mặc định.');
+    }
+    renderAddressList();
+  });
 }
 
 /**
@@ -1469,6 +1533,9 @@ document.addEventListener('DOMContentLoaded', () => {
       switchAuctionTab(tabName);
     });
   });
+
+  // Mục Địa chỉ nhận hàng
+  setupAddressSection();
 
   // Công tắc Mua hàng / Bán hàng: mở tab đầu tiên của luồng tương ứng
   document.querySelectorAll('.pcb-trade-switch__btn').forEach(btn => {

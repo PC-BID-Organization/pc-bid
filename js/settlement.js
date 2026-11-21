@@ -284,8 +284,8 @@ function processOrders() {
     const updatedAt = new Date(order.updatedAt || order.createdAt).getTime();
     if (order.status === 'awaiting_payment') {
       if (!order.buyerReal && now - new Date(order.createdAt).getTime() >= AUTO_PAY_MS) {
-        // Người mua là người dùng mẫu: tự thanh toán
-        changed = Boolean(updateOrder(order.id, o => ({ ...o, status: 'paid', paidAt: new Date().toISOString() }))) || changed;
+        // Người mua là người dùng mẫu: tự thanh toán, kèm địa chỉ nhận hàng mô phỏng
+        changed = Boolean(updateOrder(order.id, o => ({ ...o, status: 'paid', paidAt: new Date().toISOString(), shippingAddress: o.shippingAddress || mockShippingAddress(o) }))) || changed;
       } else if (now > order.paymentDeadline) {
         forfeitOrder(order);
         changed = true;
@@ -339,6 +339,37 @@ export async function runSettlement() {
 }
 
 /**
+ * Địa chỉ nhận hàng mô phỏng cho người mua là người dùng mẫu
+ * @param {Object} order
+ * @returns {Object}
+ */
+function mockShippingAddress(order) {
+  const districts = ['Quận 1', 'Quận 3', 'Quận 7', 'TP. Thủ Đức', 'Quận Bình Thạnh', 'Quận Gò Vấp'];
+  const seed = String(order.buyerUsername || '').length + Number(order.productId || 0);
+  return {
+    fullname: order.buyerName,
+    phone: `09${String(10000000 + (seed * 7919) % 89999999).padStart(8, '0')}`,
+    address: `${10 + (seed % 190)} đường số ${1 + (seed % 30)}, ${districts[seed % districts.length]}, TP. Hồ Chí Minh`
+  };
+}
+
+/**
+ * Người mua chọn địa chỉ nhận hàng cho đơn đang chờ thanh toán
+ * @param {string} orderId
+ * @param {Object} address - { fullname, phone, address }
+ * @returns {boolean}
+ */
+export function setOrderAddress(orderId, address) {
+  const user = readLoggedInUser();
+  const order = readOrders().find(o => o.id === orderId);
+  if (!user || !order || !address || !isSameUser(user, order.buyerId, order.buyerUsername) || order.status !== 'awaiting_payment') return false;
+  const snapshot = { id: address.id || null, fullname: address.fullname, phone: address.phone, address: address.address };
+  updateOrder(orderId, o => ({ ...o, shippingAddress: snapshot }));
+  notifyChanges(false);
+  return true;
+}
+
+/**
  * Người thắng thanh toán phần còn lại từ ví ảo
  * @param {string} orderId
  * @returns {{ok:boolean, message:string}}
@@ -349,6 +380,7 @@ export function payOrder(orderId) {
   if (!user || !order || !isSameUser(user, order.buyerId, order.buyerUsername)) return { ok: false, message: 'Bạn không phải người thắng của phiên này.' };
   if (order.status !== 'awaiting_payment') return { ok: false, message: 'Đơn hàng không còn ở bước chờ thanh toán.' };
   if (Date.now() > order.paymentDeadline) return { ok: false, message: 'Đã quá hạn thanh toán.' };
+  if (!order.shippingAddress) return { ok: false, message: 'Vui lòng chọn địa chỉ nhận hàng trước khi thanh toán.' };
 
   const need = order.finalPrice - order.deposit;
   const available = getAvailableBalance(user);
