@@ -157,6 +157,16 @@ export function getOrdersForUser(user) {
 }
 
 /**
+ * Đơn hàng đang chờ chính người dùng thao tác (thanh toán / giao hàng / xác nhận nhận hàng)
+ * @param {Object} order - Đơn hàng kèm vai trò
+ * @returns {boolean}
+ */
+export function orderNeedsAction(order) {
+  return (order.role === 'buyer' && (order.status === 'awaiting_payment' || order.status === 'shipped'))
+    || (order.role === 'seller' && order.status === 'paid');
+}
+
+/**
  * Cập nhật một đơn hàng theo ID
  * @param {string} orderId
  * @param {Function} updater - Nhận đơn hiện tại, trả về đơn mới (hoặc null nếu không đổi)

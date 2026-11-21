@@ -17,6 +17,8 @@ import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, get
 // Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
 import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
+// Hộp chat với người bán
+import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 
@@ -625,6 +627,40 @@ function hienThiNguoiBan(tenNguoiBan) {
   // UID che bớt của người bán (người bán ngoài hệ thống dùng UID sinh từ tên đăng nhập)
   const oUid = document.getElementById('pcb-pd-seller-uid');
   if (oUid) oUid.textContent = `UID: ${maskUid(getUserUid(taiKhoan?.id || `seller_${tenNguoiBan}`))}`;
+
+  // Nút liên hệ người bán: ẩn khi chính người bán xem phiên của mình
+  const nutLienHe = document.getElementById('pcb-pd-contact-seller');
+  if (nutLienHe) {
+    nutLienHe.hidden = laNguoiBanHienTai();
+    if (!nutLienHe.dataset.bound) {
+      nutLienHe.dataset.bound = '1';
+      nutLienHe.addEventListener('click', lienHeNguoiBan);
+    }
+  }
+}
+
+/**
+ * Mở hộp chat với người bán của phiên hiện tại (yêu cầu đăng nhập)
+ */
+async function lienHeNguoiBan() {
+  if (!sanPhamHienTai) return;
+  if (!readLoggedInUser()) {
+    const dangNhap = await showConfirm({
+      title: 'Đăng nhập để nhắn tin',
+      message: 'Bạn cần đăng nhập để trò chuyện với người bán.',
+      confirmText: 'Đăng nhập',
+      cancelText: 'Để sau',
+      tone: 'info'
+    });
+    if (dangNhap) window.location.href = `login.html?redirect=${encodeURIComponent(`product-detail.html?id=${sanPhamHienTai.id}`)}`;
+    return;
+  }
+  openChat({
+    productId: sanPhamHienTai.id,
+    productName: sanPhamHienTai.name,
+    productImage: (sanPhamHienTai.images || [])[0],
+    sellerUsername: sanPhamHienTai.seller
+  });
 }
 
 /**

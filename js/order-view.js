@@ -9,6 +9,9 @@
 
 import { ORDER_STATUS_LABELS, payOrder, markOrderShipped, confirmOrderReceived } from './settlement.js';
 import { showAlert, showConfirm } from './dialog.js';
+// Mở hộp chat với người bán / người mua của đơn hàng
+import { openChat } from './chat.js';
+import { readOrders } from './wallet.js';
 
 /**
  * Định dạng tiền Việt Nam
@@ -134,7 +137,12 @@ export function renderOrderCard(order, role, { showProduct = false } = {}) {
         <div><dt>${role === 'buyer' ? 'Người bán' : 'Người mua'}</dt><dd>${escapeHtml(role === 'buyer' ? order.sellerName : order.buyerName)}</dd></div>
       </dl>
       <p class="pcb-order__text">${content.text}</p>
-      ${content.action ? `<div class="pcb-order__actions">${content.action}</div>` : ''}
+      <div class="pcb-order__actions">
+        ${content.action}
+        <button type="button" class="pcb-order__btn pcb-order__btn--ghost" data-order-chat="${order.id}">
+          💬 Nhắn tin ${role === 'buyer' ? 'người bán' : 'người mua'}
+        </button>
+      </div>
     </article>
   `;
 }
@@ -158,6 +166,21 @@ export function bindOrderActions(container, onChange) {
   if (!container || container.dataset.orderBound) return;
   container.dataset.orderBound = '1';
   container.addEventListener('click', async e => {
+    // Nhắn tin với bên còn lại của đơn hàng
+    const chatBtn = e.target.closest('[data-order-chat]');
+    if (chatBtn) {
+      const order = readOrders().find(o => o.id === chatBtn.dataset.orderChat);
+      if (order) {
+        openChat({
+          productId: order.productId,
+          productName: order.productName,
+          productImage: order.image,
+          sellerUsername: order.sellerUsername,
+          buyer: { id: order.buyerId, username: order.buyerUsername, fullname: order.buyerName }
+        });
+      }
+      return;
+    }
     const btn = e.target.closest('[data-order-action]');
     if (!btn) return;
     const { orderAction, orderId } = btn.dataset;

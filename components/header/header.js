@@ -4,7 +4,9 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
-import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet.js';
+import { getAvailableBalance, getUnreadNotificationCount, getUserNotifications, markNotificationsRead } from '../../js/wallet.js';
+// Đơn hàng sau đấu giá để đếm số việc cần xử lý trên icon Quản lý đấu giá
+import { getOrdersForUser, orderNeedsAction } from '../../js/settlement.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
@@ -20,6 +22,144 @@ export function initHeader() {
   initMobileNavToggle();
   initCategorySelectSync();
   initHeaderUserStatus();
+  initNotifyPanel();
+  refreshTradeBadge();
+}
+
+/* ==========================================================================
+   BẢNG THÔNG BÁO NHANH (bấm chuông) & SỐ ĐẾM ICON QUẢN LÝ ĐẤU GIÁ
+   ========================================================================== */
+
+// Biểu tượng theo loại thông báo
+const NOTIFY_ICONS = { danger: '⚠️', warning: '⏰', success: '🏆', muted: '🔔' };
+// Số thông báo tối đa hiển thị trong bảng nhanh
+const NOTIFY_PANEL_LIMIT = 6;
+
+/**
+ * Đóng bảng thông báo nhanh
+ */
+function closeNotifyPanel() {
+  const panel = document.getElementById('header-notify-panel');
+  const btn = document.getElementById('header-notify-btn');
+  if (panel) panel.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+/**
+ * Render nội dung bảng thông báo nhanh theo dữ liệu mới nhất
+ */
+function renderNotifyPanel() {
+  const panel = document.getElementById('header-notify-panel');
+  if (!panel) return;
+  const user = readLoggedInUser();
+  if (!user) {
+    panel.innerHTML = `
+      <div class="header__notify-head"><strong class="header__notify-title">Thông báo</strong></div>
+      <p class="header__notify-empty">Đăng nhập để nhận thông báo khi bị vượt giá, thắng phiên và theo dõi đơn hàng.</p>
+      <a href="login.html" class="header__notify-footer">Đăng nhập ngay</a>
+    `;
+    return;
+  }
+  const all = getUserNotifications(user);
+  const unread = all.filter(n => !n.read);
+  const list = all.slice(0, NOTIFY_PANEL_LIMIT);
+  panel.innerHTML = `
+    <div class="header__notify-head">
+      <strong class="header__notify-title">Thông báo${unread.length ? ` <span class="header__notify-count">${unread.length} mới</span>` : ''}</strong>
+      <button type="button" class="header__notify-readall" data-notify-readall ${unread.length ? '' : 'disabled'}>Đánh dấu đã đọc</button>
+    </div>
+    ${list.length ? `
+      <ul class="header__notify-list">
+        ${list.map(n => `
+          <li>
+            <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
+              <span class="header__notify-icon" aria-hidden="true">${NOTIFY_ICONS[n.type] || '🔔'}</span>
+              <span class="header__notify-body">
+                <span class="header__notify-item-title">${escapeHeaderHtml(n.title)}</span>
+                <span class="header__notify-item-msg">${escapeHeaderHtml(n.message)}</span>
+              </span>
+              ${n.read ? '' : '<span class="header__notify-dot" aria-label="Chưa đọc"></span>'}
+            </a>
+          </li>
+        `).join('')}
+      </ul>` : '<p class="header__notify-empty">Chưa có thông báo nào. Đặt giá một phiên để bắt đầu nhận thông báo.</p>'}
+    <a href="profile.html#notifications" class="header__notify-footer">Xem tất cả thông báo${all.length > NOTIFY_PANEL_LIMIT ? ` (${all.length})` : ''}</a>
+  `;
+}
+
+/**
+ * Bấm chuông: mở / đóng bảng thông báo nhanh thay vì chuyển thẳng sang trang thông báo
+ */
+function initNotifyPanel() {
+  const btn = document.getElementById('header-notify-btn');
+  const panel = document.getElementById('header-notify-panel');
+  if (!btn || !panel || btn.dataset.bound) return;
+  btn.dataset.bound = '1';
+
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const willOpen = panel.hidden;
+    // Đóng menu tài khoản nếu đang mở để hai bảng không chồng lên nhau
+    const userDropdown = document.getElementById('header-user-dropdown');
+    if (userDropdown && !userDropdown.hidden) {
+      userDropdown.hidden = true;
+      document.getElementById('header-user-avatar-btn')?.setAttribute('aria-expanded', 'false');
+    }
+    if (willOpen) renderNotifyPanel();
+    panel.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', String(willOpen));
+  });
+
+  panel.addEventListener('click', e => {
+    const user = readLoggedInUser();
+    if (e.target.closest('[data-notify-readall]')) {
+      e.stopPropagation();
+      if (user) markNotificationsRead(user, getUserNotifications(user).map(n => n.id));
+      renderNotifyPanel();
+      return;
+    }
+    // Bấm một thông báo: đánh dấu đã đọc rồi mở phiên tương ứng
+    const item = e.target.closest('[data-notify-id]');
+    if (item && user) markNotificationsRead(user, [item.dataset.notifyId]);
+  });
+
+  document.addEventListener('click', e => {
+    if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) closeNotifyPanel();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      closeNotifyPanel();
+      btn.focus();
+    }
+  });
+
+  // Đang mở mà có thông báo mới (bot vượt giá, đơn hàng đổi trạng thái): vẽ lại
+  const refreshIfOpen = () => { if (!panel.hidden) renderNotifyPanel(); };
+  window.addEventListener('pcbid:notifications-updated', refreshIfOpen);
+  window.addEventListener('pcbid:bid-placed', refreshIfOpen);
+  window.addEventListener('storage', refreshIfOpen);
+}
+
+/**
+ * Số đếm trên icon Quản lý đấu giá: số đơn hàng đang chờ bạn xử lý
+ * (thanh toán, xác nhận đã nhận hàng, hoặc giao hàng với vai trò người bán)
+ */
+function refreshTradeBadge() {
+  const badge = document.getElementById('header-trade-badge');
+  if (!badge) return;
+  const user = readLoggedInUser();
+  const count = user ? getOrdersForUser(user).filter(orderNeedsAction).length : 0;
+  badge.textContent = count;
+  badge.hidden = count === 0;
+}
+
+if (!window.__pcbidTradeBadgeBound) {
+  window.__pcbidTradeBadgeBound = true;
+  window.addEventListener('pcbid:orders-updated', refreshTradeBadge);
+  window.addEventListener('storage', e => {
+    if (!e.key || e.key === 'pcbid_orders') refreshTradeBadge();
+  });
 }
 
 /**
@@ -269,9 +409,15 @@ function initHeaderUserStatus() {
           </a>
         </li>
         <li>
-          <a href="profile.html#orders" class="header__dropdown-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span>Đơn hàng của tôi</span>
+          <a href="profile.html#buy-orders" class="header__dropdown-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>Đơn mua của tôi</span>
+          </a>
+        </li>
+        <li>
+          <a href="profile.html#sell-orders" class="header__dropdown-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span>Đơn bán của tôi</span>
           </a>
         </li>
       </ul>
@@ -370,7 +516,10 @@ function initHeaderUserStatus() {
     e.stopPropagation();
     const isHidden = dropdown.hidden;
     // Mở menu: tính lại số dư khả dụng để phản ánh lượt đặt giá / bị vượt giá mới nhất
-    if (isHidden) refreshHeaderWallet();
+    if (isHidden) {
+      refreshHeaderWallet();
+      closeNotifyPanel();
+    }
     dropdown.hidden = !isHidden;
     avatarBtn.setAttribute('aria-expanded', String(isHidden));
   };
