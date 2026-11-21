@@ -17,6 +17,8 @@ import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } fro
 import { showConfirm } from '../../js/dialog.js';
 // Bộ icon Lucide dùng chung
 import { icon, NOTIFY_ICON_NAMES } from '../../js/icons.js';
+// Chuyển đổi ngôn ngữ giao diện
+import { LANGUAGES, getLanguage, setLanguage } from '../../js/i18n.js';
 // Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 
@@ -28,6 +30,70 @@ export function initHeader() {
   initHeaderUserStatus();
   initNotifyPanel();
   refreshTradeBadge();
+  initLanguageSwitcher();
+}
+
+/**
+ * Tô đậm ngôn ngữ đang chọn ở mọi vị trí (thanh trên cùng và menu tài khoản)
+ */
+function syncLanguageButtons() {
+  const lang = getLanguage();
+  const current = LANGUAGES.find(l => l.code === lang);
+  const codeEl = document.getElementById('header-lang-code');
+  if (codeEl && current) codeEl.textContent = current.short;
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    const active = el.dataset.lang === lang;
+    el.classList.toggle('is-active', active);
+    if (el.getAttribute('role') === 'menuitemradio') el.setAttribute('aria-checked', String(active));
+    else el.setAttribute('aria-pressed', String(active));
+  });
+}
+
+/**
+ * Nút chọn ngôn ngữ trên thanh trên cùng và hàng chọn ngôn ngữ trong menu tài khoản (màn hình nhỏ)
+ */
+function initLanguageSwitcher() {
+  const btn = document.getElementById('header-lang-btn');
+  const menu = document.getElementById('header-lang-menu');
+
+  const closeMenu = () => {
+    if (!menu || !btn) return;
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  };
+
+  if (btn && menu && !btn.dataset.bound) {
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) menu.querySelector('.is-active')?.focus();
+    });
+    document.addEventListener('click', e => {
+      if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        closeMenu();
+        btn.focus();
+      }
+    });
+  }
+
+  // Ủy quyền sự kiện: menu tài khoản được vẽ lại nhiều lần nên gắn một lần trên document
+  if (!window.__pcbidLangBound) {
+    window.__pcbidLangBound = true;
+    document.addEventListener('click', e => {
+      const option = e.target.closest('[data-lang]');
+      if (!option) return;
+      setLanguage(option.dataset.lang);
+      closeMenu();
+    });
+    window.addEventListener('pcbid:language-changed', syncLanguageButtons);
+  }
+  syncLanguageButtons();
 }
 
 /* ==========================================================================
@@ -429,6 +495,14 @@ function initHeaderUserStatus() {
       </ul>
 
       <div class="header__dropdown-divider"></div>
+      <div class="header__dropdown-lang">
+        <span class="header__dropdown-lang-label">Ngôn ngữ</span>
+        <div class="header__dropdown-lang-options" translate="no">
+          <button type="button" class="header__dropdown-lang-btn" data-lang="vi">VI</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="en">EN</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="ja">JA</button>
+        </div>
+      </div>
 
       <div class="header__dropdown-footer">
         <button type="button" class="header__dropdown-logout-btn" id="header-dropdown-logout-btn">
@@ -487,6 +561,15 @@ function initHeaderUserStatus() {
         </a>
       </div>
 
+      <div class="header__dropdown-lang">
+        <span class="header__dropdown-lang-label">Ngôn ngữ</span>
+        <div class="header__dropdown-lang-options" translate="no">
+          <button type="button" class="header__dropdown-lang-btn" data-lang="vi">VI</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="en">EN</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="ja">JA</button>
+        </div>
+      </div>
+
       <div class="header__dropdown-divider"></div>
 
       <div>
@@ -517,6 +600,9 @@ function initHeaderUserStatus() {
       });
     });
   }
+
+  // Menu vừa vẽ lại: đánh dấu ngôn ngữ đang chọn
+  syncLanguageButtons();
 
   // Đóng/Mở Dropdown khi bấm vào Avatar
   avatarBtn.onclick = (e) => {
