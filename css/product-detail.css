@@ -830,6 +830,9 @@
 /* Vùng thông tin tên người bán */
 .pcb-pd__seller-info {
   flex: 1;
+  /* Cho phép co lại để tên người bán dài không đẩy nhãn xác thực tràn khung */
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1614,4 +1617,47 @@ a.pcb-pd__seller-avatar {
 
 #pcb-pd-panel-history {
   scroll-margin-top: 90px;
+}
+
+/* Khung đơn hàng sau đấu giá ở cột phải */
+.pcb-pd__order-panel {
+  margin-bottom: 16px;
+}
+
+.pcb-pd__order-panel[hidden] {
+  display: none;
+}
+
+/* Nút công cụ demo: kết thúc phiên ngay */
+.pcb-pd__demo-end-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  background-color: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pcb-pd__demo-end-btn:hover,
+.pcb-pd__demo-end-btn:focus-visible {
+  color: var(--color-primary);
+  background-color: #fff7ed;
+  border-color: var(--color-primary);
+}
+
+.pcb-pd__demo-end-btn[hidden] {
+  display: none;
+}
+
+/* Màn hình rất hẹp: nhãn xác thực xuống dòng dưới thông tin người bán */
+@media (max-width: 360px) {
+  .pcb-pd__seller-card {
+    flex-wrap: wrap;
+  }
 }

@@ -5,15 +5,18 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct, lockAuctionEndTime } from './auction-time.js';
 // Kiểm tra tiền cọc 10% trước khi đặt giá
-import { checkBidDeposit } from './wallet.js';
+import { checkBidDeposit, isSameUser } from './wallet.js';
 // Watchlist lưu riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 // Bộ sinh lịch sử đặt giá mẫu dùng chung
 import { buildMockBids } from './bid-history.js';
 // Họ tên, UID và avatar chữ cái của người dùng
 import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
+// Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
+import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
+import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 
@@ -380,6 +383,73 @@ function hienThiSanPham(sanPham) {
 
   // Kiểm tra phiên đã kết thúc chưa để vô hiệu nút đặt giá
   kiemTraPhienKetThuc(sanPham.endTime);
+
+  // Đơn hàng sau đấu giá và nút demo kết thúc phiên
+  renderKhungDonHang();
+  capNhatNutDemo();
+}
+
+/**
+ * Hiển thị đơn hàng sau đấu giá của phiên hiện tại cho người thắng hoặc người bán
+ */
+function renderKhungDonHang() {
+  const khung = document.getElementById('pcb-pd-order-panel');
+  if (!khung || !sanPhamHienTai) return;
+  const nguoiDung = readLoggedInUser();
+  const donHang = getOrderForProduct(sanPhamHienTai.id, getAuctionEndTimestamp(sanPhamHienTai));
+  const vaiTro = donHang && nguoiDung
+    ? (isSameUser(nguoiDung, donHang.buyerId, donHang.buyerUsername) ? 'buyer'
+      : isSameUser(nguoiDung, donHang.sellerId, donHang.sellerUsername) ? 'seller' : null)
+    : null;
+
+  khung.hidden = !vaiTro;
+  // Người thắng xem đơn hàng: ẩn khung đặt giá đã khóa cho gọn
+  const hopDatGia = document.getElementById('pcb-pd-bidbox');
+  if (hopDatGia && vaiTro === 'buyer') hopDatGia.hidden = true;
+  if (!vaiTro) {
+    khung.innerHTML = '';
+    return;
+  }
+  khung.innerHTML = renderOrderCard(donHang, vaiTro);
+  bindOrderActions(khung, () => {
+    renderKhungDonHang();
+  });
+}
+
+/**
+ * Nút demo "Kết thúc phiên ngay": hiện cho người đã đặt giá vào phiên đang diễn ra
+ */
+function capNhatNutDemo() {
+  const nut = document.getElementById('pcb-pd-demo-end');
+  if (!nut || !sanPhamHienTai) return;
+  const nguoiDung = readLoggedInUser();
+  const dangDienRa = !isAuctionClosed(sanPhamHienTai) && getAuctionEndTimestamp(sanPhamHienTai) > Date.now();
+  let daDatGia = false;
+  if (nguoiDung && dangDienRa && !laNguoiBanHienTai()) {
+    try {
+      daDatGia = JSON.parse(localStorage.getItem('pcbid_bids') || '[]').some(b =>
+        Number(b.productId) === Number(sanPhamHienTai.id) && isSameUser(nguoiDung, b.bidderId, b.bidderName));
+    } catch {
+      daDatGia = false;
+    }
+  }
+  nut.hidden = !daDatGia;
+  if (nut.dataset.bound) return;
+  nut.dataset.bound = '1';
+  nut.addEventListener('click', async () => {
+    const dongY = await showConfirm({
+      title: 'Kết thúc phiên ngay? (demo)',
+      message: 'Công cụ thử nghiệm: phiên sẽ kết thúc ngay và người đang dẫn đầu thắng.\nNgười thắng có 1 phút để thanh toán phần còn lại, quá hạn sẽ mất cọc.',
+      confirmText: 'Kết thúc phiên',
+      cancelText: 'Hủy',
+      tone: 'warning'
+    });
+    if (!dongY) return;
+    await endAuctionNowForDemo(sanPhamHienTai);
+    const sp = await timSanPhamTheoId(sanPhamHienTai.id);
+    if (sp) hienThiSanPham(sp);
+    document.getElementById('pcb-pd-order-panel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 }
 
 /**
@@ -610,7 +680,7 @@ function capNhatCheDoNguoiBan() {
   // Phiên kết thúc mà không ai đặt giá: cho phép đăng bán lại đúng phiên này
   const nutDangLai = document.getElementById('pcb-pd-owner-relist');
   if (nutDangLai) {
-    nutDangLai.hidden = !(daKetThuc && soLuot === 0 && sp.status !== 'sold');
+    nutDangLai.hidden = !(daKetThuc && sp.status !== 'sold' && (soLuot === 0 || sp.forfeited || sp.status === 'ended'));
     nutDangLai.href = `sell.html?relist=${sp.id}`;
   }
   // Phiên còn đang diễn ra: người bán có thể đóng phiên ngay
@@ -1063,6 +1133,9 @@ function thucHienDatGia(nguoiDung, soTien) {
   sanPhamHienTai.currentBid = soTien;
   sanPhamHienTai.bidCount = (sanPhamHienTai.bidCount || 0) + 1;
   capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
+  // Có người dùng thật tham gia: chốt thời điểm kết thúc để phiên kết thúc thật và có người thắng
+  lockAuctionEndTime(sanPhamHienTai);
+  sanPhamHienTai.endLocked = true;
   // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
   window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: luotMoi.productId } }));
 
@@ -1112,6 +1185,7 @@ function thucHienDatGia(nguoiDung, soTien) {
 
   // Làm mới bảng lịch sử
   renderLichSu(sanPhamHienTai.id);
+  capNhatNutDemo();
 
   // Hiển thị modal thành công
   hienThiModalThanhCong(sanPhamHienTai.name, soTien);
@@ -1425,6 +1499,19 @@ window.addEventListener('pageshow', (event) => {
     });
   }
 });
+
+// Đơn hàng thay đổi (thanh toán, giao hàng, quá hạn...): vẽ lại khung đơn hàng
+window.addEventListener('pcbid:orders-updated', () => {
+  if (sanPhamHienTai) renderKhungDonHang();
+});
+window.addEventListener('storage', (e) => {
+  if (e.key === 'pcbid_orders' && sanPhamHienTai) renderKhungDonHang();
+});
+// Đồng hồ hạn thanh toán chạy mỗi giây
+setInterval(() => {
+  const khung = document.getElementById('pcb-pd-order-panel');
+  if (khung && !khung.hidden) tickOrderCountdowns(khung);
+}, 1000);
 
 window.addEventListener('storage', (e) => {
   if ((e.key === 'pcbid_products' || e.key === 'pcbid_bids') && sanPhamHienTai) {

@@ -5,7 +5,10 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed } from './auction-time.js';
+import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed, lockAuctionEndTime } from './auction-time.js';
+// Đơn hàng sau đấu giá và giao diện thẻ đơn hàng dùng chung
+import { getOrdersForUser } from './settlement.js';
+import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
 // Module ví ảo & tiền cọc dùng chung
@@ -724,6 +727,14 @@ function updateCounters() {
   if (countPartEl) countPartEl.textContent = participating.length;
   if (countSellEl) countSellEl.textContent = selling.length;
   if (countWatchEl) countWatchEl.textContent = watchlist.length;
+  // Bộ đếm đơn hàng: số đơn đang chờ bạn xử lý (nếu có), ngược lại là tổng số đơn
+  const countOrdersEl = document.getElementById('count-orders');
+  if (countOrdersEl) {
+    const orders = getOrdersForUser(getCurrentUser());
+    const pending = orders.filter(orderNeedsAction).length;
+    countOrdersEl.textContent = pending || orders.length;
+    countOrdersEl.classList.toggle('pcb-tab__counter--alert', pending > 0);
+  }
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
 
   // Số thông báo chưa đọc
@@ -755,6 +766,13 @@ function renderFilterChips() {
       { id: 'active', label: '🔵 Đang diễn ra' },
       { id: 'sold', label: '🟢 Đã bán thành công' },
       { id: 'ended', label: '⚪ Đã kết thúc' }
+    ];
+  } else if (currentActiveTab === 'orders') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'action', label: '🔔 Cần bạn xử lý' },
+      { id: 'buyer', label: '🛒 Tôi mua' },
+      { id: 'seller', label: '🏷️ Tôi bán' }
     ];
   } else if (currentActiveTab === 'watchlist') {
     chips = [
@@ -851,9 +869,38 @@ function renderCurrentAuctionTab() {
         empty.style.display = 'block';
       }
     }
+  } else if (currentActiveTab === 'orders') {
+    const filtered = getOrdersForUser(getCurrentUser()).filter(order => {
+      const matchKw = !kw || String(order.productName || '').toLowerCase().includes(kw);
+      const matchChip = currentFilterChip === 'all'
+        || (currentFilterChip === 'action' && orderNeedsAction(order))
+        || order.role === currentFilterChip;
+      return matchKw && matchChip;
+    });
+    const grid = document.getElementById('grid-orders');
+    const empty = document.getElementById('empty-orders');
+    if (grid && empty) {
+      grid.innerHTML = filtered.map(order => renderOrderCard(order, order.role, { showProduct: true })).join('');
+      grid.style.display = filtered.length ? 'grid' : 'none';
+      empty.style.display = filtered.length ? 'none' : 'block';
+      bindOrderActions(grid, () => {
+        renderCurrentAuctionTab();
+        syncUserInfoUI();
+      });
+    }
   }
 
   updateCounters();
+}
+
+/**
+ * Đơn hàng đang chờ chính người dùng thao tác (thanh toán / giao hàng / xác nhận nhận hàng)
+ * @param {Object} order - Đơn hàng kèm vai trò
+ * @returns {boolean}
+ */
+function orderNeedsAction(order) {
+  return (order.role === 'buyer' && (order.status === 'awaiting_payment' || order.status === 'shipped'))
+    || (order.role === 'seller' && order.status === 'paid');
 }
 
 /**
@@ -921,6 +968,9 @@ function applyHashRoute() {
   } else if (hash === '#selling') {
     switchSection('section-auctions');
     switchAuctionTab('selling');
+  } else if (hash === '#orders') {
+    switchSection('section-auctions');
+    switchAuctionTab('orders');
   } else if (hash === '#notifications') {
     switchSection('section-notifications');
   } else if (hash === '#account') {
@@ -1169,8 +1219,15 @@ function switchAuctionTab(tabName) {
   renderFilterChips();
   renderCurrentAuctionTab();
 
+  // Màn hình hẹp: cuộn thanh tab để tab đang chọn luôn nằm trong tầm nhìn
+  const activeTab = document.querySelector(`.pcb-tab[data-tab="${tabName}"]`);
+  const tabBar = activeTab?.parentElement;
+  if (activeTab && tabBar && tabBar.scrollWidth > tabBar.clientWidth) {
+    tabBar.scrollTo({ left: activeTab.offsetLeft - (tabBar.clientWidth - activeTab.offsetWidth) / 2, behavior: 'smooth' });
+  }
+
   // Đồng bộ hash với tab đang xem
-  updateHash({ watchlist: '#watchlist', selling: '#selling', participating: '#participating' }[tabName] || '#participating');
+  updateHash({ watchlist: '#watchlist', selling: '#selling', participating: '#participating', orders: '#orders' }[tabName] || '#participating');
 }
 
 /* ==========================================================================
@@ -1499,6 +1556,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {
         console.warn('[PCBid] Không thể cập nhật pcbid_products từ profile:', e);
       }
+      // Có người dùng thật tham gia: chốt thời điểm kết thúc của phiên
+      lockAuctionEndTime(activeQuickBidItem);
       // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
       window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: activeQuickBidItem.id } }));
 
@@ -1769,8 +1828,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Đơn hàng / ví thay đổi (thanh toán, giao hàng, quá hạn, bot vượt giá): làm mới tab và số dư
+  const refreshOrdersAndWallet = () => {
+    if (new URLSearchParams(window.location.search).get('user')) return;
+    renderCurrentAuctionTab();
+    syncUserInfoUI();
+    if (currentActiveSection === 'section-notifications') renderNotifications();
+  };
+  window.addEventListener('pcbid:orders-updated', refreshOrdersAndWallet);
+  window.addEventListener('pcbid:bid-placed', refreshOrdersAndWallet);
+  // Đồng hồ hạn thanh toán trong tab Đơn hàng
+  setInterval(() => {
+    const grid = document.getElementById('grid-orders');
+    if (grid && currentActiveTab === 'orders') tickOrderCountdowns(grid);
+  }, 1000);
+
   window.addEventListener('storage', (e) => {
-    if (e.key === 'pcbid_my_auctions_participating' || e.key === 'pcbid_products' || e.key === 'pcbid_bids') {
+    if (e.key === 'pcbid_my_auctions_participating' || e.key === 'pcbid_products' || e.key === 'pcbid_bids' || e.key === 'pcbid_orders' || e.key === 'pcbid_wallet_ledger') {
       renderCurrentAuctionTab();
       syncUserInfoUI();
       updateCounters();

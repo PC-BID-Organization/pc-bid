@@ -521,8 +521,9 @@
 .pcb-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
+  gap: 6px;
+  /* Thu gọn khoảng đệm để đủ chỗ cho 4 tab trên màn hình máy tính */
+  padding: 12px 12px;
   background-color: transparent;
   border: none;
   font-size: 14px;
@@ -2515,4 +2516,23 @@
 .pcb-public__more:hover,
 .pcb-public__more:focus-visible {
   background-color: #ffedd5;
+}
+
+/* Danh sách đơn hàng sau đấu giá (tab Đơn hàng) */
+.pcb-orders-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+/* Bộ đếm đơn hàng đang chờ bạn xử lý */
+.pcb-tab__counter--alert {
+  color: #ffffff;
+  background-color: #dc2626;
+}
+
+@media (max-width: 480px) {
+  .pcb-orders-list {
+    grid-template-columns: 1fr;
+  }
 }

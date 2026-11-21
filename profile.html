@@ -256,7 +256,7 @@
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                 </svg>
-                <span>Linh kiện tôi đã đăng bán</span>
+                <span>Linh kiện đã đăng bán</span>
                 <span class="pcb-tab__counter" id="count-selling">0</span>
               </button>
 
@@ -267,6 +267,17 @@
                 </svg>
                 <span>Danh sách theo dõi</span>
                 <span class="pcb-tab__counter" id="count-watchlist">0</span>
+              </button>
+
+              <button type="button" class="pcb-tab" id="tab-btn-orders" role="tab" aria-selected="false"
+                aria-controls="tab-content-orders" data-tab="orders">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+                <span>Đơn hàng</span>
+                <span class="pcb-tab__counter" id="count-orders">0</span>
               </button>
             </div>
 
@@ -337,6 +348,25 @@
                 <h3 class="pcb-empty-state__title">Danh sách theo dõi trống</h3>
                 <p class="pcb-empty-state__desc">Bấm vào biểu tượng bookmark trên các thẻ linh kiện ngoài trang chủ để tiện theo dõi diễn biến giá.</p>
                 <a href="products.html" class="pcb-btn-primary">Dạo sàn săn linh kiện</a>
+              </div>
+            </div>
+
+            <!-- ================= TAB 4: ĐƠN HÀNG SAU ĐẤU GIÁ ================= -->
+            <div class="pcb-tab-pane" id="tab-content-orders" role="tabpanel" aria-labelledby="tab-btn-orders">
+              <div class="pcb-orders-list" id="grid-orders">
+                <!-- Render các đơn hàng sau khi thắng đấu giá hoặc bán được linh kiện -->
+              </div>
+              <div class="pcb-empty-state" id="empty-orders" style="display: none;">
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Chưa có đơn hàng nào</h3>
+                <p class="pcb-empty-state__desc">Khi bạn thắng một phiên đấu giá hoặc linh kiện bạn đăng bán có người thắng, đơn hàng sẽ hiện ở đây để thanh toán và theo dõi giao hàng.</p>
+                <a href="products.html" class="pcb-btn-primary">Dạo sàn đấu giá</a>
               </div>
             </div>
 
