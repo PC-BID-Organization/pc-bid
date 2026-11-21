@@ -248,11 +248,11 @@
             <!-- Công tắc hai luồng làm việc riêng biệt: Mua hàng / Bán hàng -->
             <div class="pcb-trade-switch" role="group" aria-label="Chọn luồng giao dịch">
               <button type="button" class="pcb-trade-switch__btn pcb-trade-switch__btn--active" data-trade-mode="buy" aria-pressed="true">
-                <svg class="lucide lucide-shopping-cart" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Mua hàng
+                <span class="lucide pcb-icon pcb-icon--shopping-cart pcb-icon--s15" aria-hidden="true"></span> Mua hàng
                 <span class="pcb-trade-switch__badge" id="trade-badge-buy" hidden>0</span>
               </button>
               <button type="button" class="pcb-trade-switch__btn" data-trade-mode="sell" aria-pressed="false">
-                <svg class="lucide lucide-tag" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg> Bán hàng
+                <span class="lucide pcb-icon pcb-icon--tag pcb-icon--s15" aria-hidden="true"></span> Bán hàng
                 <span class="pcb-trade-switch__badge" id="trade-badge-sell" hidden>0</span>
               </button>
             </div>
@@ -543,6 +543,8 @@
                     <span class="pcb-verified-check" title="Email đã xác thực">✓</span>
                   </div>
                   <span class="pcb-form__hint">Nhận thông báo khi bị vượt giá hoặc thắng phiên đấu.</span>
+                  <!-- Lỗi kiểm tra khi rời khỏi ô (định dạng / đã được tài khoản khác sử dụng) -->
+                  <span class="pcb-form__error" id="err-input-email" role="alert"></span>
                 </div>
 
                 <!-- Trường Số điện thoại -->
@@ -561,6 +563,7 @@
                     <span class="pcb-verified-check" title="Số điện thoại đã xác thực">✓</span>
                   </div>
                   <span class="pcb-form__hint">Dùng để shipper liên hệ giao hàng linh kiện công nghệ.</span>
+                  <span class="pcb-form__error" id="err-input-phone" role="alert"></span>
                 </div>
 
               </div>
@@ -722,6 +725,11 @@
                 <p class="pcb-public__uid" id="public-uid"></p>
                 <span class="pcb-public__role" id="public-role"></span>
               </div>
+              <!-- Nhắn tin trực tiếp với tài khoản này (mở hộp chat nổi) -->
+              <button type="button" class="pcb-public__chat-btn" id="public-chat-btn" hidden>
+                <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
+                Nhắn tin
+              </button>
             </div>
             <div class="pcb-public__self-note" id="public-self-note" hidden>
               <span>Đây là cách người khác nhìn thấy hồ sơ của bạn.</span>

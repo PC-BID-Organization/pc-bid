@@ -2674,3 +2674,55 @@
   margin: 0 8px;
   color: #cbd5e1;
 }
+
+/* Dòng lỗi màu đỏ dưới ô email / số điện thoại (kiểm tra khi rời khỏi ô) */
+.pcb-form__error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.pcb-form__error:empty {
+  display: none;
+}
+
+.pcb-input.pcb-input--error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* Nút nhắn tin trên hồ sơ công khai */
+.pcb-public__chat-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background-color: var(--color-primary, #ea580c);
+  border: none;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-public__chat-btn:hover,
+.pcb-public__chat-btn:focus-visible {
+  background-color: var(--color-primary-hover, #d94e07);
+}
+
+.pcb-public__chat-btn[hidden] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .pcb-public__chat-btn {
+    margin-left: 0;
+  }
+}
