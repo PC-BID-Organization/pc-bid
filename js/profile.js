@@ -653,14 +653,19 @@ function syncUserInfoUI() {
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
 
   // Form Account
-  const fnInput = document.getElementById('input-fullname');
+  const lastNameInput = document.getElementById('input-lastname');
+  const givenNameInput = document.getElementById('input-givenname');
   const emInput = document.getElementById('input-email');
   const phInput = document.getElementById('input-phone');
   const smsInput = document.getElementById('pref-sms');
   const mailInput = document.getElementById('pref-email');
   const lastUpdateEl = document.getElementById('last-update-time');
 
-  if (fnInput) fnInput.value = user.fullname || '';
+  // Họ đệm và tên tách riêng; tài khoản cũ chỉ có họ tên đầy đủ thì tự tách theo từ cuối
+  const givenName = user.givenName || getGivenName(user.fullname || '');
+  const lastName = user.lastName ?? String(user.fullname || '').slice(0, Math.max(0, String(user.fullname || '').length - givenName.length)).trim();
+  if (lastNameInput) lastNameInput.value = lastName;
+  if (givenNameInput) givenNameInput.value = givenName;
   if (emInput) emInput.value = user.email || '';
   if (phInput) phInput.value = user.phone || '';
   if (smsInput) smsInput.checked = user.pref_sms !== false;
@@ -708,6 +713,9 @@ function renderBirthDate(user) {
   }
   const locked = Boolean(user.birthDateLocked);
   if (changeBtn) changeBtn.hidden = locked;
+  // Đã đổi 1 lần: hiện icon khóa
+  const lockEl = document.getElementById('birthdate-lock');
+  if (lockEl) lockEl.hidden = !locked;
   if (tooltip) {
     tooltip.dataset.tooltip = locked
       ? 'Thông tin không thể thay đổi được'
@@ -1087,6 +1095,7 @@ function showContactFieldError(field) {
   if (!input) return true;
   const message = validateContactField(field, input.value.trim());
   if (errEl) errEl.textContent = message;
+  setContactCheck(field, !message);
   input.classList.toggle('pcb-input--error', Boolean(message));
   input.setAttribute('aria-invalid', String(Boolean(message)));
   if (message) input.setAttribute('aria-describedby', `err-input-${field}`);
@@ -1094,9 +1103,36 @@ function showContactFieldError(field) {
 }
 
 /**
+ * Đổi dấu bên phải ô: tick xanh khi hợp lệ, X đỏ khi không hợp lệ / đã bị dùng
+ * @param {'email'|'phone'} field
+ * @param {boolean} valid
+ */
+function setContactCheck(field, valid) {
+  const check = document.getElementById(`check-input-${field}`);
+  if (!check) return;
+  check.classList.toggle('pcb-verified-check--error', !valid);
+  check.title = valid
+    ? (field === 'email' ? 'Email hợp lệ' : 'Số điện thoại hợp lệ')
+    : (field === 'email' ? 'Email không hợp lệ' : 'Số điện thoại không hợp lệ');
+  const iconEl = check.querySelector('.pcb-icon');
+  if (iconEl) {
+    iconEl.classList.toggle('pcb-icon--check', valid);
+    iconEl.classList.toggle('pcb-icon--x', !valid);
+  }
+}
+
+/**
  * Gắn kiểm tra khi rời ô (blur) và xóa lỗi khi người dùng gõ lại
  */
 function setupContactFieldValidation() {
+  // Gõ lại họ đệm / tên thì xóa dòng lỗi tương ứng
+  ['lastname', 'givenname'].forEach(key => {
+    document.getElementById(`input-${key}`)?.addEventListener('input', e => {
+      const errEl = document.getElementById(`err-input-${key}`);
+      if (errEl) errEl.textContent = '';
+      e.target.classList.remove('pcb-input--error');
+    });
+  });
   ['email', 'phone'].forEach(field => {
     const input = document.getElementById(`input-${field}`);
     if (!input) return;
@@ -1107,6 +1143,7 @@ function setupContactFieldValidation() {
         errEl.textContent = '';
         input.classList.remove('pcb-input--error');
         input.setAttribute('aria-invalid', 'false');
+        setContactCheck(field, true);
       }
     });
   });
@@ -1826,6 +1863,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const phoneInput = document.getElementById('input-phone');
       const emailOk = showContactFieldError('email');
       const phoneOk = showContactFieldError('phone');
+      // Họ đệm và tên: bắt buộc, chỉ gồm chữ cái và khoảng trắng
+      const lastNameInput = document.getElementById('input-lastname');
+      const givenNameInput = document.getElementById('input-givenname');
+      const lastNameVal = (lastNameInput?.value || '').trim().replace(/\s+/g, ' ');
+      const givenNameVal = (givenNameInput?.value || '').trim().replace(/\s+/g, ' ');
+      const namePattern = /^[\p{L}\s'-]+$/u;
+      const nameErrors = {
+        lastname: !lastNameVal ? 'Vui lòng nhập họ và tên đệm.' : (!namePattern.test(lastNameVal) ? 'Họ và tên đệm chỉ gồm chữ cái.' : ''),
+        givenname: !givenNameVal ? 'Vui lòng nhập tên.' : (!namePattern.test(givenNameVal) || /\s/.test(givenNameVal) ? 'Tên chỉ gồm một từ, không chứa số hay ký tự đặc biệt.' : '')
+      };
+      Object.entries(nameErrors).forEach(([key, msg]) => {
+        const errEl = document.getElementById(`err-input-${key}`);
+        if (errEl) errEl.textContent = msg;
+        document.getElementById(`input-${key}`)?.classList.toggle('pcb-input--error', Boolean(msg));
+      });
+      if (nameErrors.lastname || nameErrors.givenname) {
+        (nameErrors.lastname ? lastNameInput : givenNameInput)?.focus();
+        return;
+      }
       if (!emailOk || !phoneOk) {
         (emailOk ? phoneInput : emailInput)?.focus();
         return;
@@ -1859,10 +1915,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       user.gender = document.getElementById('input-gender')?.value || '';
       user.bio = (document.getElementById('input-bio')?.value || '').trim().slice(0, 300);
-      user.fullname = document.getElementById('input-fullname')?.value.trim() || user.fullname;
-      // Cập nhật lại tên gọi để avatar chữ cái luôn khớp với họ tên mới
-      user.givenName = getGivenName(user.fullname);
-      user.lastName = user.fullname.slice(0, user.fullname.length - user.givenName.length).trim();
+      // Lưu riêng họ đệm và tên; avatar chữ cái lấy theo Tên
+      user.lastName = lastNameVal;
+      user.givenName = givenNameVal;
+      user.fullname = `${lastNameVal} ${givenNameVal}`;
       user.email = newEmail;
       user.phone = newPhone;
       user.pref_sms = document.getElementById('pref-sms')?.checked ?? true;

@@ -468,12 +468,12 @@
             </div>
 
             <!-- Biểu mẫu cập nhật thông tin cá nhân -->
-            <form id="form-account-info" class="pcb-form">
+            <form id="form-account-info" class="pcb-form" novalidate>
               <div class="pcb-form__grid">
-                <!-- Trường Họ và tên -->
-                <div class="pcb-form__group pcb-form__group--full">
-                  <label for="input-fullname" class="pcb-form__label">
-                    HỌ VÀ TÊN <span class="pcb-form__required">*</span>
+                <!-- Họ và tên đệm / Tên tách riêng giống trang Đăng ký -->
+                <div class="pcb-form__group">
+                  <label for="input-lastname" class="pcb-form__label">
+                    HỌ VÀ TÊN ĐỆM <span class="pcb-form__required">*</span>
                   </label>
                   <div class="pcb-input-icon-wrap">
                     <svg class="pcb-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -481,11 +481,29 @@
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    <input type="text" id="input-fullname" name="fullname" class="pcb-input" value="Nguyễn Hùng Phong"
-                      required placeholder="Nhập họ và tên đầy đủ">
+                    <input type="text" id="input-lastname" name="lastName" class="pcb-input" maxlength="40"
+                      required placeholder="VD: Nguyễn Hùng" autocomplete="family-name">
                   </div>
-                  <span class="pcb-form__hint">Họ tên hiển thị kèm UID che bớt trong lịch sử đặt giá (VD: Nguyễn Hùng Phong · #PCB-1Q***2T).</span>
+                  <span class="pcb-form__error" id="err-input-lastname" role="alert"></span>
                 </div>
+
+                <div class="pcb-form__group">
+                  <label for="input-givenname" class="pcb-form__label">
+                    TÊN <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap">
+                    <svg class="pcb-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <input type="text" id="input-givenname" name="givenName" class="pcb-input" maxlength="20"
+                      required placeholder="VD: Phong" autocomplete="given-name">
+                  </div>
+                  <span class="pcb-form__error" id="err-input-givenname" role="alert"></span>
+                </div>
+
+                <p class="pcb-form__hint pcb-form__group--full pcb-form__name-hint">Họ tên hiển thị kèm UID che bớt trong lịch sử đặt giá (VD: Nguyễn Hùng Phong · #PCB-1Q***2T). Avatar mặc định lấy chữ cái đầu của Tên.</p>
 
                 <!-- Trường Giới tính -->
                 <div class="pcb-form__group">
@@ -494,7 +512,6 @@
                     <option value="">-- Chưa cập nhật --</option>
                     <option value="male">Nam</option>
                     <option value="female">Nữ</option>
-                    <option value="other">Khác</option>
                   </select>
                 </div>
 
@@ -514,6 +531,11 @@
                       </svg>
                     </button>
                     <button type="button" class="pcb-birthdate__change" id="btn-change-birthdate">Thay đổi</button>
+                    <!-- Đã đổi ngày sinh 1 lần: hiện icon khóa thay cho nút Thay đổi -->
+                    <span class="pcb-birthdate__lock" id="birthdate-lock" title="Ngày sinh đã được thay đổi 1 lần, không thể thay đổi nữa" hidden>
+                      <span class="lucide pcb-icon pcb-icon--lock pcb-icon--s14" aria-hidden="true"></span>
+                      <span>Đã khóa</span>
+                    </span>
                   </div>
                   <input type="date" id="input-birthdate" class="pcb-input" hidden aria-label="Ngày sinh mới">
                   <span class="pcb-form__hint" id="birthdate-hint" hidden>Lưu ý: sau khi lưu, ngày sinh sẽ không thể thay đổi thêm lần nào nữa.</span>
@@ -540,7 +562,7 @@
                     </svg>
                     <input type="email" id="input-email" name="email" class="pcb-input" value="nguyenvana@example.com"
                       required placeholder="email@domain.com">
-                    <span class="pcb-verified-check" title="Email đã xác thực">✓</span>
+                    <span class="pcb-verified-check" id="check-input-email" title="Email hợp lệ"><span class="lucide pcb-icon pcb-icon--check pcb-icon--s16" aria-hidden="true"></span></span>
                   </div>
                   <span class="pcb-form__hint">Nhận thông báo khi bị vượt giá hoặc thắng phiên đấu.</span>
                   <!-- Lỗi kiểm tra khi rời khỏi ô (định dạng / đã được tài khoản khác sử dụng) -->
@@ -560,7 +582,7 @@
                     </svg>
                     <input type="tel" id="input-phone" name="phone" class="pcb-input" value="0912345678" required
                       placeholder="09xxxxxxxx">
-                    <span class="pcb-verified-check" title="Số điện thoại đã xác thực">✓</span>
+                    <span class="pcb-verified-check" id="check-input-phone" title="Số điện thoại hợp lệ"><span class="lucide pcb-icon pcb-icon--check pcb-icon--s16" aria-hidden="true"></span></span>
                   </div>
                   <span class="pcb-form__hint">Dùng để shipper liên hệ giao hàng linh kiện công nghệ.</span>
                   <span class="pcb-form__error" id="err-input-phone" role="alert"></span>

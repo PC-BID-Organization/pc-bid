@@ -2140,3 +2140,13 @@ a.pcb-chat__peer-name:focus-visible {
   -webkit-mask-image: url('../images/icons/lucide/zoom-in.svg');
   mask-image: url('../images/icons/lucide/zoom-in.svg');
 }
+
+.pcb-icon--check {
+  -webkit-mask-image: url('../images/icons/lucide/check.svg');
+  mask-image: url('../images/icons/lucide/check.svg');
+}
+
+.pcb-icon--x {
+  -webkit-mask-image: url('../images/icons/lucide/x.svg');
+  mask-image: url('../images/icons/lucide/x.svg');
+}
