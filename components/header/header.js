@@ -7,6 +7,12 @@
 import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
+// Tài khoản demo và avatar chữ cái dùng chung
+import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
+// Hộp thoại xác nhận dùng chung
+import { showConfirm } from '../../js/dialog.js';
+// Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
+import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -135,41 +141,8 @@ function initMobileNavToggle() {
 /**
  * Quản lý trạng thái đăng nhập và số lượng Watchlist hiển thị trên Header
  */
-const SAMPLE_ACCOUNTS = [
-  {
-    id: "user_bidder1_demo",
-    username: "bidder1",
-    password: "123456",
-    fullname: "Nguyễn Văn A (Đấu Giá 1)",
-    email: "bidder1@pcbid.vn",
-    role: "bidder",
-    verified: true,
-    walletBalance: 50000000,
-    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
-  },
-  {
-    id: "user_bidder2_demo",
-    username: "bidder2",
-    password: "123456",
-    fullname: "Lê Thị C (Đấu Giá 2)",
-    email: "bidder2@pcbid.vn",
-    role: "bidder",
-    verified: true,
-    walletBalance: 60000000,
-    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh"
-  },
-  {
-    id: "user_seller_demo",
-    username: "seller",
-    password: "123456",
-    fullname: "Trần Văn B (Người Bán)",
-    email: "seller@pcbid.vn",
-    role: "seller",
-    verified: true,
-    walletBalance: 80000000,
-    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh"
-  }
-];
+// 4 tài khoản demo lấy từ module dùng chung js/accounts.js
+const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
 function initHeaderUserStatus() {
   // Cập nhật số lượng Watchlist từ LocalStorage
@@ -188,6 +161,11 @@ function initHeaderUserStatus() {
 
   // Số thông báo chưa đọc của tài khoản đang đăng nhập
   refreshNotificationBadge();
+  // Trang Hồ sơ đổi ảnh đại diện / họ tên: vẽ lại khu vực tài khoản trên Header
+  if (!window.__pcbidAccountUpdateBound) {
+    window.__pcbidAccountUpdateBound = true;
+    window.addEventListener('pcbid:account-updated', () => initHeaderUserStatus());
+  }
   if (!window.__pcbidNotifyBadgeBound) {
     window.__pcbidNotifyBadgeBound = true;
     // Cập nhật khi đánh dấu đã đọc trên cùng trang, hoặc khi tab khác đặt giá / đọc thông báo
@@ -235,23 +213,25 @@ function initHeaderUserStatus() {
 
   if (user && user.isLoggedIn !== false) {
     const displayName = user.fullname || user.username || 'Thành viên';
-    const words = displayName.trim().split(/\s+/);
-    const initials = words.length >= 2 
-      ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
-      : (displayName.substring(0, 2).toUpperCase() || 'U');
-    const isSeller = user.role === 'seller';
-    const roleText = isSeller ? '🏪 Người bán hàng' : '👤 Đấu giá viên';
-    const roleClass = isSeller ? 'header__dropdown-role-badge--seller' : 'header__dropdown-role-badge--bidder';
+    // Avatar mặc định: chữ cái đầu của TÊN, đồng bộ với trang Hồ sơ và trang chi tiết
+    const initials = getAvatarInitial(user);
+    // Mọi tài khoản đều là thành viên đấu giá (ai cũng có thể đăng bán)
+    const roleText = '👤 Đấu giá viên';
+    const roleClass = 'header__dropdown-role-badge--bidder';
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
+    avatarBtn.classList.add('header__user-avatar--initial');
+    avatarBtn.innerHTML = user.avatarImage
+      ? renderAvatarContent(user, 'header__avatar-photo')
+      : `<span class="header__avatar-initial" aria-hidden="true">${escapeHeaderHtml(initials)}</span>`;
 
     dropdown.innerHTML = `
       <div class="header__dropdown-header">
         <div class="header__dropdown-user-info">
-          <div class="header__dropdown-avatar">${escapeHeaderHtml(initials)}</div>
+          <div class="header__dropdown-avatar">${user.avatarImage ? renderAvatarContent(user, 'header__avatar-photo') : escapeHeaderHtml(initials)}</div>
           <div class="header__dropdown-meta">
             <div class="header__dropdown-name">${escapeHeaderHtml(displayName)}</div>
-            <span class="header__dropdown-role-badge ${roleClass}">${roleText}</span>
+            <span class="header__dropdown-role-badge ${roleClass}" id="header-dropdown-role">${roleText}</span>
             <div class="header__dropdown-email">${escapeHeaderHtml(user.email || '')}</div>
           </div>
         </div>
@@ -300,11 +280,24 @@ function initHeaderUserStatus() {
       </div>
     `;
 
+    // Giống hồ sơ công khai: nếu có đăng bán thì ghi thêm số phiên (nạp catalog bất đồng bộ)
+    loadAllAuctions().then(auctions => {
+      const sellingCount = getSellingAuctions(user.username, auctions).length;
+      const roleEl = document.getElementById('header-dropdown-role');
+      if (roleEl && sellingCount) roleEl.textContent = `${roleText} · ${sellingCount} phiên đăng bán`;
+    }).catch(() => {});
+
     const logoutBtn = document.getElementById('header-dropdown-logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
+      logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (confirm('Bạn có chắc chắn muốn đăng xuất tài khoản PCBid?')) {
+        const ok = await showConfirm({
+          title: 'Đăng xuất tài khoản?',
+          message: 'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?',
+          confirmText: 'Đăng xuất',
+          tone: 'danger'
+        });
+        if (ok) {
           localStorage.removeItem('pcbid_currentUser');
           localStorage.removeItem('pcbid_user');
           localStorage.setItem('pcbid_logged_out', 'true');
@@ -315,6 +308,8 @@ function initHeaderUserStatus() {
   } else {
     // Trạng thái khách (chưa đăng nhập)
     avatarBtn.title = 'Tài khoản (Chưa đăng nhập)';
+    avatarBtn.classList.remove('header__user-avatar--initial');
+    avatarBtn.innerHTML = '<img src="images/icons/icon-user.svg" alt="Ảnh đại diện" class="header__avatar-icon" width="14" height="14">';
 
     dropdown.innerHTML = `
       <div class="header__dropdown-header">
@@ -340,18 +335,11 @@ function initHeaderUserStatus() {
           ⚡ Đăng nhập nhanh tài khoản Demo:
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px;">
-          <button type="button" class="header__dropdown-quick-acc" data-quick-user="bidder1">
-            <span style="font-weight: 600;">👤 Đấu Giá 1</span>
-            <span style="font-size: 11px; color: #64748b;">(50tr ví)</span>
-          </button>
-          <button type="button" class="header__dropdown-quick-acc" data-quick-user="bidder2">
-            <span style="font-weight: 600;">👤 Đấu Giá 2</span>
-            <span style="font-size: 11px; color: #64748b;">(60tr ví)</span>
-          </button>
-          <button type="button" class="header__dropdown-quick-acc" data-quick-user="seller">
-            <span style="font-weight: 600;">🏪 Người Bán</span>
-            <span style="font-size: 11px; color: #64748b;">(80tr ví)</span>
-          </button>
+          ${SAMPLE_ACCOUNTS.map(acc => `
+          <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
+            <span style="font-weight: 600;">👤 ${escapeHeaderHtml(acc.fullname)}</span>
+            <span style="font-size: 11px; color: #64748b;">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
+          </button>`).join('')}
         </div>
       </div>
     `;
@@ -359,7 +347,8 @@ function initHeaderUserStatus() {
     dropdown.querySelectorAll('.header__dropdown-quick-acc').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-quick-user');
-        const acc = SAMPLE_ACCOUNTS.find(a => a.username === key);
+        // Lấy bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử) nếu có
+        const acc = findAccount({ username: key }) || SAMPLE_ACCOUNTS.find(a => a.username === key);
         if (acc) {
           localStorage.removeItem('pcbid_logged_out');
           localStorage.setItem('pcbid_currentUser', JSON.stringify({ ...acc, isLoggedIn: true }));

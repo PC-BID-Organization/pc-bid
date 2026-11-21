@@ -78,6 +78,9 @@
               class="pcb-pd__gallery-main-img"
               id="pcb-pd-main-img"
               loading="eager">
+            <!-- Gợi ý và mức phóng to khi rê chuột vào ảnh (chỉ hiện trên máy tính có chuột) -->
+            <span class="pcb-pd__zoom-hint" aria-hidden="true">🔍 Rê chuột để phóng to · Lăn chuột để zoom</span>
+            <span class="pcb-pd__zoom-level" id="pcb-pd-zoom-level" aria-hidden="true">2.0×</span>
           </div>
 
           <!-- Hàng thumbnail ảnh nhỏ (cuộn xem thêm) -->
@@ -153,6 +156,40 @@
           </p>
 
           <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
+          <!-- Bảng quản lý dành cho người bán khi xem phiên của chính mình (thay cho khung đặt giá) -->
+          <section class="pcb-pd__owner" id="pcb-pd-owner-panel" aria-labelledby="pcb-pd-owner-title" hidden>
+            <div class="pcb-pd__owner-head">
+              <h2 class="pcb-pd__owner-title" id="pcb-pd-owner-title">Phiên đấu giá của bạn</h2>
+              <span class="pcb-pd__owner-status" id="pcb-pd-owner-status">Đang diễn ra</span>
+            </div>
+            <dl class="pcb-pd__owner-stats">
+              <div class="pcb-pd__owner-stat">
+                <dt>Giá hiện tại</dt>
+                <dd id="pcb-pd-owner-price">---</dd>
+              </div>
+              <div class="pcb-pd__owner-stat">
+                <dt>Lượt đặt giá</dt>
+                <dd id="pcb-pd-owner-count">0</dd>
+              </div>
+              <div class="pcb-pd__owner-stat">
+                <dt>Giá khởi điểm</dt>
+                <dd id="pcb-pd-owner-start">---</dd>
+              </div>
+              <div class="pcb-pd__owner-stat pcb-pd__owner-stat--wide">
+                <dt>Người đang dẫn đầu</dt>
+                <dd id="pcb-pd-owner-leader">Chưa có lượt đặt giá</dd>
+              </div>
+            </dl>
+            <p class="pcb-pd__owner-note">Bạn là người bán của phiên này nên không thể tự đặt giá. Theo dõi diễn biến ở bảng Lịch sử đặt giá bên dưới.</p>
+            <div class="pcb-pd__owner-actions">
+              <!-- Thao tác đóng phiên đặt bên trái, tách khỏi các nút điều hướng -->
+              <button type="button" class="pcb-pd__owner-btn pcb-pd__owner-btn--danger" id="pcb-pd-owner-close" hidden>Đóng phiên ngay</button>
+              <a class="pcb-pd__owner-btn" id="pcb-pd-owner-relist" href="sell.html" hidden>Đăng bán lại</a>
+              <button type="button" class="pcb-pd__owner-btn" id="pcb-pd-owner-history">Xem lịch sử đặt giá</button>
+              <a class="pcb-pd__owner-btn pcb-pd__owner-btn--primary" href="profile.html#selling">Xem linh kiện khác bạn đang đăng bán</a>
+            </div>
+          </section>
+
           <div class="pcb-pd__bidbox" id="pcb-pd-bidbox">
             <div class="pcb-pd__bidbox-header">
               <h2 class="pcb-pd__bidbox-title">Đặt giá của bạn</h2>
@@ -200,12 +237,14 @@
 
           <!-- ===== THÔNG TIN NGƯỜI BÁN ===== -->
           <div class="pcb-pd__seller-card">
-            <div class="pcb-pd__seller-avatar" aria-hidden="true">
+            <!-- Bấm avatar hoặc tên để xem hồ sơ công khai của người bán -->
+            <a class="pcb-pd__seller-avatar" id="pcb-pd-seller-avatar-link" href="profile.html" aria-hidden="true" tabindex="-1">
               <span class="pcb-pd__seller-avatar-char" id="pcb-pd-seller-avatar-char">?</span>
-            </div>
+            </a>
             <div class="pcb-pd__seller-info">
               <p class="pcb-pd__seller-label">Người bán</p>
-              <p class="pcb-pd__seller-name" id="pcb-pd-seller-name">---</p>
+              <a class="pcb-pd__seller-name" id="pcb-pd-seller-name" href="profile.html">---</a>
+              <p class="pcb-pd__seller-uid" id="pcb-pd-seller-uid"></p>
             </div>
             <div class="pcb-pd__seller-badge" aria-label="Xác thực danh tính">
               &#x2714; Đã xác thực

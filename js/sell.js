@@ -8,6 +8,8 @@
 
 // Lưu phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
+// Hộp thoại thông báo dùng chung
+import { showAlert, showConfirm } from './dialog.js';
 
 
 /* ==========================================================================
@@ -417,13 +419,339 @@ const CATALOGUE_DATA = {
 let currentCategory = "";
 let currentSelectedModel = null;
 let currentSelectedImage = "";
+// Danh sách ảnh đã chọn theo thứ tự (phần tử đầu là ảnh bìa); gồm ảnh kho PCBid và ảnh người bán tải lên
+let selectedImages = [];
+// Số ảnh tối đa cho một phiên và kích thước cạnh dài tối đa của ảnh tải lên
+const MAX_PHOTOS = 6;
+const UPLOAD_MAX_EDGE = 1000;
+// Bộ nhớ đệm dữ liệu JSON theo danh mục (dùng để đề xuất ảnh liên quan)
+const categoryDataCache = {};
+// Phiên đang được đăng bán lại (null khi tạo phiên mới)
+let relistTarget = null;
+
+// Ánh xạ danh mục sản phẩm sang tệp dữ liệu JSON và khóa danh mục của Catalogue
+const CATEGORY_DATA_FILES = {
+  GPU: 'gpu', CPU: 'cpu', Mainboard: 'mainboard', RAM: 'ram',
+  SSD: 'storage', Storage: 'storage', PSU: 'psu', Cooling: 'cooling', Case: 'case'
+};
+const CATEGORY_CATALOGUE_KEYS = { Storage: 'SSD' };
 
 // Khởi chạy khi tài liệu DOM hoàn tất nạp
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Bắt buộc đăng nhập mới được đăng bán
+  if (!readLoggedInUser()) {
+    await requireLoginToSell();
+    return;
+  }
+
   initCatalogueEvents();
   initFormInputsSync();
   initFormSubmitHandler();
+  initPhotoPicker();
+  initCustomSpecs();
+  initProgressTracker();
+  initRelistMode();
 });
+
+/* ==========================================================================
+   BẮT BUỘC ĐĂNG NHẬP KHI ĐĂNG BÁN
+   ========================================================================== */
+async function requireLoginToSell() {
+  // Khóa toàn bộ form để không nhập được khi chưa đăng nhập
+  const form = document.getElementById('sell-auction-form');
+  if (form) {
+    form.setAttribute('inert', '');
+    form.classList.add('pcb-sell-form--locked');
+  }
+  const goLogin = await showConfirm({
+    title: 'Cần đăng nhập để đăng bán',
+    message: 'Bạn cần đăng nhập tài khoản PCBid trước khi tạo phiên đấu giá.\nSau khi đăng nhập, bạn sẽ được đưa trở lại trang này.',
+    confirmText: 'Đăng nhập',
+    cancelText: 'Về trang chủ',
+    tone: 'info'
+  });
+  const backTo = `${window.location.pathname.split('/').pop() || 'sell.html'}${window.location.search}`;
+  window.location.href = goLogin ? `login.html?redirect=${encodeURIComponent(backTo)}` : 'index.html';
+}
+
+/* ==========================================================================
+   THÔNG SỐ KỸ THUẬT DO NGƯỜI BÁN TỰ BỔ SUNG
+   ========================================================================== */
+// Mỗi phần tử: { key, value }
+let customSpecs = [];
+const MAX_CUSTOM_SPECS = 8;
+
+/**
+ * Gộp thông số bổ sung hợp lệ (có cả tên và giá trị) thành object
+ * @returns {Object}
+ */
+function getCustomSpecsObject() {
+  const result = {};
+  customSpecs.forEach(({ key, value }) => {
+    const k = key.trim();
+    const v = value.trim();
+    if (k && v) result[k] = v;
+  });
+  return result;
+}
+
+/**
+ * Vẽ danh sách dòng thông số bổ sung (ô tên + ô giá trị + nút xóa)
+ * @param {number} [focusIndex] - Dòng cần đặt con trỏ sau khi vẽ
+ */
+function renderCustomSpecs(focusIndex) {
+  const list = document.getElementById('sell-custom-specs');
+  const addBtn = document.getElementById('btn-add-spec');
+  if (!list) return;
+  list.innerHTML = customSpecs.map((spec, idx) => `
+    <li class="pcb-custom-specs__row">
+      <input type="text" class="pcb-custom-specs__input" data-spec-key="${idx}" value="${escapeHtml(spec.key)}"
+        placeholder="Tên thông số (VD: Bảo hành còn lại)" maxlength="40" aria-label="Tên thông số bổ sung ${idx + 1}">
+      <input type="text" class="pcb-custom-specs__input" data-spec-value="${idx}" value="${escapeHtml(spec.value)}"
+        placeholder="Giá trị (VD: 8 tháng)" maxlength="80" aria-label="Giá trị thông số bổ sung ${idx + 1}">
+      <button type="button" class="pcb-custom-specs__remove" data-spec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}">×</button>
+    </li>`).join('');
+  if (addBtn) addBtn.hidden = customSpecs.length >= MAX_CUSTOM_SPECS;
+  if (focusIndex !== undefined) list.querySelector(`[data-spec-key="${focusIndex}"]`)?.focus();
+}
+
+function initCustomSpecs() {
+  const list = document.getElementById('sell-custom-specs');
+  const addBtn = document.getElementById('btn-add-spec');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      if (customSpecs.length >= MAX_CUSTOM_SPECS) return;
+      customSpecs.push({ key: '', value: '' });
+      renderCustomSpecs(customSpecs.length - 1);
+    });
+  }
+  if (list) {
+    list.addEventListener('input', e => {
+      const keyIdx = e.target.dataset.specKey;
+      const valIdx = e.target.dataset.specValue;
+      if (keyIdx !== undefined) customSpecs[Number(keyIdx)].key = e.target.value;
+      if (valIdx !== undefined) customSpecs[Number(valIdx)].value = e.target.value;
+    });
+    list.addEventListener('click', e => {
+      const removeBtn = e.target.closest('[data-spec-remove]');
+      if (!removeBtn) return;
+      customSpecs.splice(Number(removeBtn.dataset.specRemove), 1);
+      renderCustomSpecs();
+    });
+  }
+  renderCustomSpecs();
+}
+
+/* ==========================================================================
+   THANH TIẾN TRÌNH ĐỘNG: BƯỚC ĐANG Ở + BƯỚC CẦN HOÀN THÀNH TIẾP THEO
+   ========================================================================== */
+const PROGRESS_STEP_NAMES = {
+  1: 'Chọn linh kiện',
+  2: 'Tình trạng & phụ kiện',
+  3: 'Giá & thời hạn'
+};
+// Bước người dùng đang thao tác (theo ô đang nhập hoặc khối đang xem)
+let progressCurrentStep = 1;
+// Các bước người dùng đã ghé qua: giá trị điền sẵn theo mẫu chỉ được tính khi người dùng đã xem lại bước đó
+const visitedSteps = new Set([1]);
+
+/**
+ * Kiểm tra từng bước đã đủ thông tin chưa
+ * @returns {{1: boolean, 2: boolean, 3: boolean}}
+ */
+function getStepCompletion() {
+  const value = id => document.getElementById(id)?.value || '';
+  const valid = {
+    1: Boolean(currentCategory && currentSelectedModel && selectedImages.length > 0),
+    2: Boolean(value('sell-condition') && value('sell-description').trim().length >= 10),
+    3: Number(value('sell-start-price')) >= 10000 && Boolean(value('sell-bid-step')) && Boolean(value('sell-duration'))
+  };
+  // Hoàn thành theo thứ tự: một bước chỉ được tính xong khi đủ thông tin, đã ghé qua
+  // và mọi bước trước nó cũng đã xong (tránh bước 3 "xong" khi bước 2 còn dở)
+  const done1 = valid[1] && visitedSteps.has(1);
+  const done2 = done1 && valid[2] && visitedSteps.has(2);
+  const done3 = done2 && valid[3] && visitedSteps.has(3);
+  return { 1: done1, 2: done2, 3: done3 };
+}
+
+/**
+ * Cập nhật giao diện thanh tiến trình theo bước hiện tại và mức độ hoàn thành
+ */
+function updateProgress() {
+  const nav = document.getElementById('sell-progress');
+  if (!nav) return;
+  const done = getStepCompletion();
+  // Bước cần hoàn thành tiếp theo: bước chưa xong đầu tiên, khác bước đang ở
+  const nextStep = [1, 2, 3].find(step => !done[step] && step !== progressCurrentStep) || null;
+
+  nav.querySelectorAll('.pcb-sell-progress__step').forEach(btn => {
+    const step = Number(btn.dataset.step);
+    const isCurrent = step === progressCurrentStep;
+    const isNext = step === nextStep;
+    btn.classList.toggle('pcb-sell-progress__step--done', done[step]);
+    btn.classList.toggle('pcb-sell-progress__step--current', isCurrent);
+    btn.classList.toggle('pcb-sell-progress__step--next', isNext);
+    if (isCurrent) btn.setAttribute('aria-current', 'step');
+    else btn.removeAttribute('aria-current');
+    const stateText = btn.querySelector('[data-state-text]');
+    if (stateText) {
+      stateText.textContent = isCurrent ? (done[step] ? 'Đang ở · Đã đủ' : 'Đang ở bước này')
+        : done[step] ? 'Đã hoàn thành'
+        : isNext ? 'Cần làm tiếp theo'
+        : 'Chưa hoàn thành';
+    }
+  });
+
+  // Đường nối: tô xanh từ bước 1 tới bước xa nhất đã xong; nếu bước kế tiếp đang được làm thì tô tới bước đó
+  const completedInRow = done[3] ? 3 : done[2] ? 2 : done[1] ? 1 : 0;
+  const reach = progressCurrentStep === completedInRow + 1 ? progressCurrentStep : Math.max(completedInRow, 1);
+  nav.style.setProperty('--progress-ratio', String((reach - 1) / 2));
+
+  const summary = document.getElementById('sell-progress-summary');
+  if (summary) {
+    const allDone = done[1] && done[2] && done[3];
+    summary.textContent = allDone
+      ? '✓ Đã đủ thông tin. Bấm "Xác nhận" ở cuối form để đưa phiên lên sàn.'
+      : `Đang ở: Bước ${progressCurrentStep} – ${PROGRESS_STEP_NAMES[progressCurrentStep]}`
+        + (nextStep ? ` · Tiếp theo: Bước ${nextStep} – ${PROGRESS_STEP_NAMES[nextStep]}` : '');
+  }
+}
+
+/**
+ * Theo dõi người dùng đang ở bước nào (ô đang nhập / khối đang hiển thị) và cập nhật thanh tiến trình
+ */
+function initProgressTracker() {
+  const form = document.getElementById('sell-auction-form');
+  const panels = [...document.querySelectorAll('.pcb-sell-panel[data-step]')];
+  if (!form || !panels.length) return;
+
+  const setCurrent = step => {
+    if (step) visitedSteps.add(step);
+    if (step && step !== progressCurrentStep) {
+      progressCurrentStep = step;
+      updateProgress();
+    }
+  };
+
+  // Nhập liệu trong khối nào thì đó là bước hiện tại
+  form.addEventListener('focusin', e => setCurrent(Number(e.target.closest('.pcb-sell-panel[data-step]')?.dataset.step)));
+  form.addEventListener('input', updateProgress);
+  form.addEventListener('change', updateProgress);
+
+  // Cuộn trang: khối chiếm phần lớn vùng nhìn là bước hiện tại (khi không đang nhập ô nào)
+  if ('IntersectionObserver' in window) {
+    const ratios = new Map();
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => ratios.set(Number(entry.target.dataset.step), entry.intersectionRatio));
+      if (form.contains(document.activeElement) && document.activeElement !== form) return;
+      const visible = [...ratios.entries()].sort((a, b) => b[1] - a[1])[0];
+      if (visible && visible[1] > 0) setCurrent(visible[0]);
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '-120px 0px -35% 0px' });
+    panels.forEach(panel => observer.observe(panel));
+  }
+
+  // Bấm vào một bước để cuộn tới khối tương ứng
+  document.querySelectorAll('.pcb-sell-progress__step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const step = Number(btn.dataset.step);
+      const panel = document.getElementById(`sell-step-${step}`);
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setCurrent(step);
+      panel.querySelector('select, input, textarea')?.focus({ preventScroll: true });
+    });
+  });
+
+  updateProgress();
+}
+
+/* ==========================================================================
+   CHẾ ĐỘ ĐĂNG BÁN LẠI (sell.html?relist=<id>)
+   Dùng lại đúng phiên cũ (cùng ID, cùng thông tin linh kiện) thay vì tạo bài đăng mới
+   ========================================================================== */
+async function initRelistMode() {
+  const relistId = Number(new URLSearchParams(window.location.search).get('relist'));
+  if (!relistId) return;
+
+  const user = readLoggedInUser();
+  const savedItem = readUserList(USER_LIST_KEYS.SELLING, user).find(item => Number(item.id) === relistId);
+  if (!savedItem) {
+    await showAlert({ title: 'Không tìm thấy phiên', message: 'Không tìm thấy phiên này trong danh sách đăng bán của bạn. Hệ thống sẽ mở form tạo phiên mới.', tone: 'warning' });
+    return;
+  }
+
+  // Lấy đầy đủ thông tin phiên: ưu tiên bản trong localStorage, sau đó tới tệp JSON của danh mục
+  let product = null;
+  try {
+    product = JSON.parse(localStorage.getItem('pcbid_products') || '[]').find(p => Number(p.id) === relistId) || null;
+  } catch {
+    product = null;
+  }
+  const dataFile = CATEGORY_DATA_FILES[savedItem.category];
+  if (dataFile) {
+    try {
+      const res = await fetch(`data/${dataFile}.json`);
+      if (res.ok) {
+        const fromJson = (await res.json()).find(p => Number(p.id) === relistId);
+        if (fromJson) product = { ...fromJson, ...(product?.relisted ? product : {}) };
+      }
+    } catch {
+      // Không fetch được thì dùng dữ liệu đã lưu trong danh sách đăng bán
+    }
+  }
+  product = { ...savedItem, ...(product || {}) };
+
+  relistTarget = { id: relistId, product };
+
+  // Đổ thông tin linh kiện cũ vào form: khóa danh mục và mẫu để giữ đúng phiên
+  const catalogueKey = CATEGORY_CATALOGUE_KEYS[product.category] || product.category;
+  const catSelect = document.getElementById('sell-category');
+  const modelSelect = document.getElementById('sell-model');
+  const relistModel = {
+    id: `relist-${relistId}`,
+    name: product.name,
+    images: product.images && product.images.length ? product.images : (savedItem.images || []),
+    specifications: product.specifications || {},
+    defaultStartingPrice: Number(product.startingPrice) || 0,
+    defaultBidStep: Number(product.bidStep) || 50000,
+    marketPriceNew: Number(product.marketPriceNew) || 0
+  };
+
+  currentCategory = catalogueKey;
+  if (catSelect) {
+    catSelect.value = catalogueKey;
+    catSelect.disabled = true;
+  }
+  if (modelSelect) {
+    modelSelect.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.value = relistModel.id;
+    opt.textContent = relistModel.name;
+    modelSelect.appendChild(opt);
+    modelSelect.value = relistModel.id;
+    modelSelect.disabled = true;
+  }
+  selectModel(relistModel);
+  // Đăng bán lại: giữ nguyên bộ ảnh của phiên cũ
+  selectedImages = [...relistModel.images].slice(0, MAX_PHOTOS);
+  renderSelectedPhotos();
+
+  const descInput = document.getElementById('sell-description');
+  if (descInput && product.description) descInput.value = product.description;
+  const conditionSelect = document.getElementById('sell-condition');
+  if (conditionSelect && [...conditionSelect.options].some(o => o.value === product.condition)) {
+    conditionSelect.value = product.condition;
+  }
+  updateLivePreview();
+
+  // Đổi tiêu đề và nút để người bán biết đang đăng lại phiên cũ
+  const heading = document.getElementById('sell-hero-heading');
+  if (heading) heading.textContent = 'Đăng Bán Lại Phiên Đấu Giá';
+  const desc = document.querySelector('.pcb-sell-hero__desc');
+  if (desc) desc.textContent = `Mở lại phiên #${relistId} – ${product.name}. Thông tin linh kiện được giữ nguyên, bạn chỉ cần điều chỉnh giá khởi điểm, bước giá và thời hạn.`;
+  const submitBtn = document.getElementById('btn-submit-sell');
+  if (submitBtn) submitBtn.lastChild.textContent = ' Xác nhận đăng bán lại';
+}
 
 /* ==========================================================================
    3. KHỞI TẠO SỰ KIỆN CHỌN CATALOGUE & MẪU LINH KIỆN
@@ -475,6 +803,8 @@ function initCatalogueEvents() {
  */
 function selectModel(model) {
   currentSelectedModel = model;
+  // Đổi mẫu: bỏ các ảnh kho của mẫu cũ, giữ nguyên ảnh người bán đã tải lên
+  selectedImages = selectedImages.filter(src => src.startsWith('data:'));
 
   // 1. Tự động điền giá khởi điểm đề xuất và giá thị trường
   const startPriceInput = document.getElementById('sell-start-price');
@@ -488,8 +818,15 @@ function selectModel(model) {
   // 2. Hiển thị khối xem trước thông số kỹ thuật (Specifications Preview)
   renderSpecifications(model.specifications);
 
-  // 3. Dựng lưới thumbnail ảnh có sẵn trong repo để người bán click chọn
-  renderThumbnailGrid(model.images);
+  // 3. Ảnh đề xuất liên quan tới mẫu đã chọn; chọn sẵn ảnh đầu tiên nếu chưa có ảnh nào
+  getSuggestedImages(model).then(suggestions => {
+    if (currentSelectedModel !== model) return;
+    // Chọn sẵn ảnh liên quan nhất làm ảnh bìa nếu chưa có ảnh nào
+    const first = suggestions.related[0] || suggestions.others[0];
+    if (selectedImages.length === 0 && first) selectedImages = [first];
+    renderThumbnailGrid(suggestions);
+    renderSelectedPhotos();
+  });
 
   // 4. Cập nhật thẻ xem trước trực tiếp (Live Card Preview)
   updateLivePreview();
@@ -516,36 +853,237 @@ function renderSpecifications(specs) {
 }
 
 /**
- * Dựng lưới thumbnail ảnh để click chọn ảnh đại diện
+ * Lấy các "từ khóa nhận diện" trong tên mẫu: cụm có chữ số (3070, 5800X3D, B760M...) và tên hãng
+ * @param {string} name - Tên sản phẩm
+ * @returns {Array<string>}
  */
-function renderThumbnailGrid(images) {
-  const grid = document.getElementById('sell-thumb-grid');
+function getModelKeywords(name) {
+  const words = String(name || '').toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean);
+  const brands = ['ASUS', 'MSI', 'GIGABYTE', 'ASROCK', 'CORSAIR', 'KINGSTON', 'SAMSUNG', 'NZXT', 'NOCTUA', 'DEEPCOOL',
+    'SEASONIC', 'INTEL', 'AMD', 'NVIDIA', 'COOLER', 'LIAN', 'HYTE', 'CRUCIAL', 'WD', 'XFX', 'SAPPHIRE', 'ZOTAC', 'EVGA', 'GSKILL'];
+  // Bỏ các cụm chỉ dung lượng / công suất / xung nhịp (8GB, 650W, 3600MHZ...) vì trùng giữa nhiều sản phẩm khác nhau
+  const isSpecUnit = w => /^\d+(GB|TB|MB|MHZ|GHZ|W|MM|HZ|X)$/.test(w) || /^DDR\d$/.test(w) || /^PCIE\d?$/.test(w);
+  return words.filter(w => /\d/.test(w) && w.length >= 3 && !isSpecUnit(w)).concat(words.filter(w => brands.includes(w)));
+}
+
+/**
+ * Đề xuất ảnh cho mẫu đã chọn, chia 2 nhóm:
+ * - related: sản phẩm trùng mã nhận diện (3070, 5800X3D, B760M...) → rất liên quan
+ * - others: cùng hãng, ảnh mẫu của catalogue và vài sản phẩm cùng danh mục → có thể liên quan
+ * @param {Object} model - Mẫu sản phẩm đã chọn
+ * @returns {Promise<{related: Array<string>, others: Array<string>}>}
+ */
+async function getSuggestedImages(model) {
+  const file = CATEGORY_DATA_FILES[currentCategory];
+  if (file && !categoryDataCache[file]) {
+    try {
+      const res = await fetch(`data/${file}.json`);
+      categoryDataCache[file] = res.ok ? await res.json() : [];
+    } catch {
+      categoryDataCache[file] = [];
+    }
+  }
+  const products = categoryDataCache[file] || [];
+  const keywords = getModelKeywords(model.name);
+  const codes = keywords.filter(k => /\d/.test(k));
+  const brands = keywords.filter(k => !/\d/.test(k));
+
+  const relatedScored = [];
+  const sameBrand = [];
+  const sameCategory = [];
+  // Từ thường gặp trong tên mẫu (dòng sản phẩm: TOMAHAWK, STRIX, VENGEANCE...) dùng để xếp hạng trong nhóm liên quan
+  const modelWords = new Set(String(model.name).toUpperCase().split(/[^A-Z0-9]+/).filter(w => w.length >= 4));
+  products.forEach(product => {
+    const words = getModelKeywords(product.name);
+    const images = product.images || [];
+    const codeHits = codes.filter(code => words.includes(code)).length;
+    if (codeHits > 0) {
+      const nameWords = String(product.name).toUpperCase().split(/[^A-Z0-9]+/);
+      const wordHits = nameWords.filter(w => modelWords.has(w)).length;
+      relatedScored.push({ images, score: codeHits * 10 + wordHits });
+    } else if (brands.some(brand => words.includes(brand))) sameBrand.push(...images);
+    else sameCategory.push(...images);
+  });
+
+  // Khớp đúng mẫu nhất lên đầu
+  const related = relatedScored.sort((a, b) => b.score - a.score).flatMap(entry => entry.images);
+  const relatedUnique = [...new Set(related)].slice(0, 6);
+  const others = [...new Set([...sameBrand, ...(model.images || []), ...sameCategory])]
+    .filter(src => !relatedUnique.includes(src))
+    .slice(0, 8);
+  return { related: relatedUnique, others };
+}
+
+/**
+ * Vẽ một lưới ảnh đề xuất; bấm để thêm / bỏ khỏi danh sách ảnh đã chọn
+ * @param {string} gridId - ID lưới
+ * @param {Array<string>} images - Đường dẫn ảnh
+ * @param {string} emptyText - Thông báo khi không có ảnh
+ */
+function renderSuggestionGrid(gridId, images, emptyText) {
+  const grid = document.getElementById(gridId);
   if (!grid) return;
 
   if (!images || images.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px;">Chưa có ảnh trong kho mẫu.</div>';
+    grid.innerHTML = `<div class="pcb-thumb-grid__empty">${emptyText}</div>`;
     return;
   }
 
-  // Mặc định chọn ảnh đầu tiên
-  currentSelectedImage = images[0];
-
   grid.innerHTML = images.map((imgSrc, idx) => `
-    <div class="pcb-thumb-item ${idx === 0 ? 'pcb-thumb-item--active' : ''}" data-src="${imgSrc}">
-      <img class="pcb-thumb-img" src="${imgSrc}" alt="Ảnh mẫu ${idx + 1}" loading="lazy">
-    </div>
+    <button type="button" class="pcb-thumb-item ${selectedImages.includes(imgSrc) ? 'pcb-thumb-item--active' : ''}" data-src="${escapeHtml(imgSrc)}"
+      aria-pressed="${selectedImages.includes(imgSrc)}" aria-label="Ảnh đề xuất ${idx + 1}">
+      <img class="pcb-thumb-img" src="${escapeHtml(imgSrc)}" alt="" loading="lazy">
+    </button>
   `).join('');
 
-  // Gắn sự kiện click chọn ảnh
-  const items = grid.querySelectorAll('.pcb-thumb-item');
-  items.forEach(item => {
-    item.addEventListener('click', () => {
-      items.forEach(i => i.classList.remove('pcb-thumb-item--active'));
-      item.classList.add('pcb-thumb-item--active');
-      currentSelectedImage = item.getAttribute('data-src');
-      updateLivePreview();
-    });
+  grid.querySelectorAll('.pcb-thumb-item').forEach(item => {
+    // Ảnh bị thiếu tệp thì ẩn đi thay vì hiện ô trống
+    item.querySelector('img').addEventListener('error', () => item.remove());
+    item.addEventListener('click', () => toggleSelectedImage(item.getAttribute('data-src')));
   });
+}
+
+/**
+ * Hiển thị 2 nhóm ảnh đề xuất: "Có liên quan nhất" và "Ảnh khác"
+ * @param {{related: Array<string>, others: Array<string>}} suggestions - Kết quả đề xuất
+ */
+function renderThumbnailGrid(suggestions) {
+  renderSuggestionGrid('sell-thumb-related', suggestions.related, 'Chưa có ảnh sản phẩm trùng mã trong kho. Hãy tải ảnh thật của bạn hoặc chọn ở mục Ảnh khác.');
+  renderSuggestionGrid('sell-thumb-grid', suggestions.others, 'Chưa có ảnh đề xuất khác.');
+}
+
+/**
+ * Thêm / bỏ một ảnh khỏi danh sách ảnh đã chọn
+ * @param {string} src - Đường dẫn hoặc data URL của ảnh
+ */
+async function toggleSelectedImage(src) {
+  if (selectedImages.includes(src)) {
+    selectedImages = selectedImages.filter(img => img !== src);
+  } else if (selectedImages.length >= MAX_PHOTOS) {
+    await showAlert({ title: 'Đã đủ số ảnh', message: `Mỗi phiên tối đa ${MAX_PHOTOS} ảnh. Hãy bỏ bớt ảnh trước khi thêm.`, tone: 'warning' });
+    return;
+  } else {
+    selectedImages.push(src);
+  }
+  renderSelectedPhotos();
+}
+
+/**
+ * Hiển thị dải ảnh đã chọn: ảnh bìa, nút đặt làm bìa và nút bỏ ảnh
+ */
+function renderSelectedPhotos() {
+  currentSelectedImage = selectedImages[0] || '';
+  const list = document.getElementById('sell-selected-photos');
+  const counter = document.getElementById('sell-photo-count');
+  if (counter) counter.textContent = `${selectedImages.length}/${MAX_PHOTOS} ảnh`;
+
+  if (list) {
+    list.innerHTML = selectedImages.length === 0
+      ? '<li class="pcb-photo-picker__empty">Chưa chọn ảnh nào. Tải ảnh của bạn hoặc bấm vào ảnh đề xuất bên dưới.</li>'
+      : selectedImages.map((src, idx) => `
+        <li class="pcb-photo-chip ${idx === 0 ? 'pcb-photo-chip--cover' : ''}">
+          <img src="${escapeHtml(src)}" alt="Ảnh đã chọn ${idx + 1}">
+          ${idx === 0 ? '<span class="pcb-photo-chip__badge">Ảnh bìa</span>'
+            : `<button type="button" class="pcb-photo-chip__cover" data-cover="${idx}" title="Đặt làm ảnh bìa">Đặt làm bìa</button>`}
+          <button type="button" class="pcb-photo-chip__remove" data-remove="${idx}" aria-label="Bỏ ảnh ${idx + 1}">×</button>
+        </li>`).join('');
+  }
+
+  // Ảnh thay đổi ảnh hưởng tới mức hoàn thành của bước 1
+  updateProgress();
+
+  // Đồng bộ trạng thái chọn trên lưới ảnh đề xuất
+  document.querySelectorAll('#sell-thumb-related .pcb-thumb-item, #sell-thumb-grid .pcb-thumb-item').forEach(item => {
+    const active = selectedImages.includes(item.getAttribute('data-src'));
+    item.classList.toggle('pcb-thumb-item--active', active);
+    item.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  updateLivePreview();
+}
+
+/**
+ * Thu gọn ảnh người bán tải lên (cạnh dài tối đa 1000px, JPEG) để lưu vừa localStorage
+ * @param {File} file - Tệp ảnh
+ * @returns {Promise<string>} data URL
+ */
+function compressUploadedImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, UPLOAD_MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => reject(new Error('Không đọc được ảnh'));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error('Không đọc được tệp'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Khởi tạo khu vực ảnh: tải ảnh từ máy, đặt ảnh bìa, bỏ ảnh
+ */
+function initPhotoPicker() {
+  const input = document.getElementById('sell-photo-input');
+  const list = document.getElementById('sell-selected-photos');
+
+  if (input) {
+    input.addEventListener('change', async () => {
+      const files = [...(input.files || [])];
+      input.value = '';
+      const skipped = [];
+      for (const file of files) {
+        if (selectedImages.length >= MAX_PHOTOS) {
+          skipped.push(`${file.name}: đã đủ ${MAX_PHOTOS} ảnh`);
+          continue;
+        }
+        if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+          skipped.push(`${file.name}: định dạng không hỗ trợ`);
+          continue;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          skipped.push(`${file.name}: lớn hơn 5MB`);
+          continue;
+        }
+        try {
+          selectedImages.push(await compressUploadedImage(file));
+        } catch {
+          skipped.push(`${file.name}: không đọc được ảnh`);
+        }
+      }
+      renderSelectedPhotos();
+      if (skipped.length) {
+        await showAlert({ title: 'Một số ảnh chưa được thêm', message: skipped.join('\n'), tone: 'warning' });
+      }
+    });
+  }
+
+  if (list) {
+    list.addEventListener('click', e => {
+      const coverBtn = e.target.closest('[data-cover]');
+      const removeBtn = e.target.closest('[data-remove]');
+      if (coverBtn) {
+        const idx = Number(coverBtn.dataset.cover);
+        const [img] = selectedImages.splice(idx, 1);
+        selectedImages.unshift(img);
+        renderSelectedPhotos();
+      } else if (removeBtn) {
+        selectedImages.splice(Number(removeBtn.dataset.remove), 1);
+        renderSelectedPhotos();
+      }
+    });
+  }
+  renderSelectedPhotos();
 }
 
 /* ==========================================================================
@@ -652,18 +1190,24 @@ function initFormSubmitHandler() {
   const form = document.getElementById('sell-auction-form');
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Phiên đăng nhập có thể đã hết (đăng xuất ở tab khác): yêu cầu đăng nhập lại
+    if (!readLoggedInUser()) {
+      await requireLoginToSell();
+      return;
+    }
 
     // 1. Kiểm tra validation cơ bản
     if (!currentCategory) {
-      alert('Vui lòng chọn Danh mục linh kiện!');
+      await showAlert({ title: 'Thiếu danh mục', message: 'Vui lòng chọn Danh mục linh kiện.', tone: 'warning' });
       document.getElementById('sell-category')?.focus();
       return;
     }
 
     if (!currentSelectedModel) {
-      alert('Vui lòng chọn Mẫu sản phẩm chuẩn của sàn!');
+      await showAlert({ title: 'Thiếu mẫu sản phẩm', message: 'Vui lòng chọn Mẫu sản phẩm chuẩn của sàn.', tone: 'warning' });
       document.getElementById('sell-model')?.focus();
       return;
     }
@@ -671,7 +1215,7 @@ function initFormSubmitHandler() {
     const startPriceInput = document.getElementById('sell-start-price');
     const startPrice = startPriceInput ? parseInt(startPriceInput.value, 10) : 0;
     if (!startPrice || startPrice < 10000) {
-      alert('Vui lòng nhập Giá khởi điểm hợp lệ (tối thiểu 10.000₫)!');
+      await showAlert({ title: 'Giá khởi điểm không hợp lệ', message: 'Vui lòng nhập Giá khởi điểm hợp lệ (tối thiểu 10.000₫).', tone: 'warning' });
       startPriceInput?.focus();
       return;
     }
@@ -679,8 +1223,14 @@ function initFormSubmitHandler() {
     const descriptionInput = document.getElementById('sell-description');
     const description = descriptionInput ? descriptionInput.value.trim() : '';
     if (!description) {
-      alert('Vui lòng nhập Mô tả tình trạng thực tế & phụ kiện của món hàng!');
+      await showAlert({ title: 'Thiếu mô tả', message: 'Vui lòng nhập Mô tả tình trạng thực tế & phụ kiện của món hàng.', tone: 'warning' });
       descriptionInput?.focus();
+      return;
+    }
+
+    if (selectedImages.length === 0) {
+      await showAlert({ title: 'Thiếu ảnh sản phẩm', message: 'Vui lòng tải ít nhất 1 ảnh hoặc chọn ảnh đề xuất cho món hàng.', tone: 'warning' });
+      document.getElementById('sell-photo-input')?.focus();
       return;
     }
 
@@ -702,7 +1252,8 @@ function initFormSubmitHandler() {
     }
 
     const newAuctionProduct = {
-      id: Date.now(), // Tạo ID độc nhất theo timestamp
+      // Đăng bán lại: giữ nguyên ID phiên cũ; tạo mới: ID độc nhất theo timestamp
+      id: relistTarget ? relistTarget.id : Date.now(),
       name: currentSelectedModel.name,
       category: currentCategory,
       condition: condition,
@@ -713,21 +1264,39 @@ function initFormSubmitHandler() {
       marketPriceNew: marketPrice,
       endTime: new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString(),
       seller: sellerName,
-      images: [currentSelectedImage || currentSelectedModel.images[0]],
+      images: selectedImages.length ? [...selectedImages] : [currentSelectedModel.images[0]],
       description: description,
-      specifications: currentSelectedModel.specifications || {}
+      // Thông số chuẩn của mẫu + thông số người bán tự bổ sung
+      specifications: { ...(currentSelectedModel.specifications || {}), ...getCustomSpecsObject() }
     };
+
+    if (relistTarget) {
+      // Đánh dấu phiên mở lại để các trang dùng thời hạn mới thay cho trạng thái "đã kết thúc" cũ
+      newAuctionProduct.relisted = true;
+      newAuctionProduct.relistedAt = new Date().toISOString();
+      newAuctionProduct.status = 'active';
+      newAuctionProduct.condition = condition;
+      newAuctionProduct.category = relistTarget.product.category || newAuctionProduct.category;
+    }
 
     // 3. Lưu vào LocalStorage theo chuẩn quy định AGENTS.md (pcbid_products)
     try {
-      const existing = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+      // Khi đăng bán lại: thay bản cũ cùng ID và xóa lượt đặt giá của phiên trước
+      const existing = JSON.parse(localStorage.getItem('pcbid_products') || '[]')
+        .filter(p => Number(p.id) !== Number(newAuctionProduct.id));
       existing.unshift(newAuctionProduct);
+      if (relistTarget) {
+        const bids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]')
+          .filter(b => Number(b.productId) !== Number(newAuctionProduct.id));
+        localStorage.setItem('pcbid_bids', JSON.stringify(bids));
+      }
       localStorage.setItem('pcbid_products', JSON.stringify(existing));
 
       // Đồng bộ đồng thời vào tab "Linh kiện tôi đã đăng bán" (pcbid_my_auctions_selling) của profile.html
       // Danh sách đăng bán lưu riêng theo tài khoản người bán
       const sellerUser = readLoggedInUser();
-      const mySelling = readUserList(USER_LIST_KEYS.SELLING, sellerUser);
+      const mySelling = readUserList(USER_LIST_KEYS.SELLING, sellerUser)
+        .filter(item => Number(item.id) !== Number(newAuctionProduct.id));
       const specsList = newAuctionProduct.specifications
         ? Object.entries(newAuctionProduct.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
         : [];
@@ -739,6 +1308,8 @@ function initFormSubmitHandler() {
         currentBid: newAuctionProduct.startingPrice,
         bidCount: 0,
         status: 'active',
+        relisted: Boolean(relistTarget),
+        endTime: newAuctionProduct.endTime,
         endTimestamp: new Date(newAuctionProduct.endTime).getTime(),
         images: newAuctionProduct.images,
         specs: specsList
@@ -746,6 +1317,12 @@ function initFormSubmitHandler() {
       writeUserList(USER_LIST_KEYS.SELLING, sellerUser, mySelling);
     } catch (e) {
       console.error('[Lỗi lưu LocalStorage PCBid]:', e);
+      await showAlert({
+        title: 'Không lưu được phiên',
+        message: 'Bộ nhớ trình duyệt đã đầy (thường do quá nhiều ảnh tải lên). Hãy bớt ảnh hoặc dùng ảnh đề xuất rồi thử lại.',
+        tone: 'danger'
+      });
+      return;
     }
 
     // 4. Hiển thị modal thông báo thành công
@@ -753,12 +1330,36 @@ function initFormSubmitHandler() {
     if (successModal) {
       successModal.classList.add('pcb-modal-overlay--open');
 
-      // Tự động chuyển hướng về trang products.html sau 1.8 giây
-      setTimeout(() => {
-        window.location.href = 'products.html';
-      }, 1800);
+      // Sang trang Sàn đấu giá, sắp xếp "Phiên mới lên sàn" và làm nổi bật phiên vừa đăng
+      const nextUrl = `products.html?sort=newest&highlight=${encodeURIComponent(newAuctionProduct.id)}`;
+      const goBtn = document.getElementById('sell-success-go');
+      if (goBtn) {
+        goBtn.href = nextUrl;
+        goBtn.focus();
+      }
+
+      // Đếm ngược 10 giây rồi tự chuyển trang
+      const TOTAL_SECONDS = 10;
+      let remaining = TOTAL_SECONDS;
+      const numEl = document.getElementById('sell-countdown-num');
+      const textEl = document.getElementById('sell-countdown-text');
+      const barEl = document.getElementById('sell-countdown-bar');
+      const paint = () => {
+        if (numEl) numEl.textContent = remaining;
+        if (textEl) textEl.textContent = remaining;
+        if (barEl) barEl.style.strokeDashoffset = String(119.4 * (1 - remaining / TOTAL_SECONDS));
+      };
+      paint();
+      const timer = setInterval(() => {
+        remaining -= 1;
+        paint();
+        if (remaining <= 0) {
+          clearInterval(timer);
+          window.location.href = nextUrl;
+        }
+      }, 1000);
     } else {
-      alert('Tạo phiên đấu giá thành công! Đang chuyển về sàn...');
+      await showAlert({ title: 'Thành công', message: 'Tạo phiên đấu giá thành công! Đang chuyển về sàn...', tone: 'success' });
       window.location.href = 'products.html';
     }
   });

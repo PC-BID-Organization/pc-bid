@@ -9,8 +9,10 @@
     "bidStep": 50000,
     "bidCount": 8,
     "marketPriceNew": 3490000,
-    "endTime": "2026-11-15T20:00:00+07:00",
-    "seller": "hoang_minh_store",
+    "endTime": "2026-10-28T20:00:00+07:00",
+    "seller": "seller",
+    "status": "sold",
+    "winner": "nguon_pc_chat",
     "images": [
       "images/products/psu/6001-corsair-rm850x-1.png"
     ],

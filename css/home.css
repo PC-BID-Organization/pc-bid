@@ -196,6 +196,53 @@
   font-size: 11px;
 }
 
+/* Liên kết trên băng chuyền: tên người đặt mở hồ sơ, tên linh kiện mở trang chi tiết */
+.pcb-ticker__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pcb-ticker__user {
+  font-weight: 600;
+  color: var(--pcb-text-main);
+  text-decoration: none;
+}
+
+.pcb-ticker__product {
+  font-style: italic;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pcb-ticker__user:hover,
+.pcb-ticker__user:focus-visible,
+.pcb-ticker__product:hover,
+.pcb-ticker__product:focus-visible {
+  color: var(--pcb-primary);
+  text-decoration: underline;
+}
+
+.pcb-ticker__time {
+  flex-shrink: 0;
+}
+
+/* Lượt đặt vừa xuất hiện: nháy nền cam nhẹ */
+.pcb-ticker__item--new {
+  animation: pcb-ticker-flash 1.6s ease-out;
+}
+
+@keyframes pcb-ticker-flash {
+  0% { background-color: rgba(234, 88, 12, 0.18); }
+  100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-ticker__item--new {
+    animation: none;
+  }
+}
+
 .pcb-ticker__link {
   font-size: 12px;
   font-weight: 600;

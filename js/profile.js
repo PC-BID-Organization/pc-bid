@@ -5,11 +5,21 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, getAuctionEndTimeIso } from './auction-time.js';
+import { getAuctionEndTimestamp, getAuctionEndTimeIso, isAuctionClosed } from './auction-time.js';
+// Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
+import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
+// Tài khoản demo, avatar chữ cái và UID dùng chung
+import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
+  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount } from './accounts.js';
+// Công cụ cắt ảnh đại diện
+import { openAvatarCropper } from './avatar-cropper.js';
+// Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
+import { showAlert, showConfirm } from './dialog.js';
+
 
 
 /* ==========================================================================
@@ -24,71 +34,8 @@ const STORAGE_KEYS = {
   WATCHLIST: 'pcbid_watchlist'
 };
 
-/**
- * Danh sách 3 tài khoản mẫu dựng sẵn phục vụ demo, chấm điểm và kiểm thử phân quyền
- * Acc 1 (bidder1): Đấu Giá 1 - Tham gia trả giá cạnh tranh, ví 50tr
- * Acc 2 (bidder2): Đấu Giá 2 - Tham gia trả giá đối kháng để demo vượt giá qua lại, ví 60tr
- * Acc 3 (seller):  Người Bán - Đăng bán linh kiện PC lên sàn, ví 80tr
- */
-const SAMPLE_ACCOUNTS = [
-  {
-    id: "user_bidder1_demo",
-    username: "bidder1",
-    password: "123456",
-    fullname: "Nguyễn Văn A (Đấu Giá 1)",
-    email: "bidder1@pcbid.vn",
-    phone: "0901234567",
-    role: "bidder",
-    verified: true,
-    walletBalance: 50000000,
-    address: "Ký túc xá Khu B ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder.png",
-    rating: 5.0,
-    reviewCount: 38,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 14:32",
-    isLoggedIn: true
-  },
-  {
-    id: "user_bidder2_demo",
-    username: "bidder2",
-    password: "123456",
-    fullname: "Lê Thị C (Đấu Giá 2)",
-    email: "bidder2@pcbid.vn",
-    phone: "0918765432",
-    role: "bidder",
-    verified: true,
-    walletBalance: 60000000,
-    address: "Ký túc xá Khu A ĐHQG-HCM, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-bidder2.png",
-    rating: 4.9,
-    reviewCount: 25,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 11:20",
-    isLoggedIn: true
-  },
-  {
-    id: "user_seller_demo",
-    username: "seller",
-    password: "123456",
-    fullname: "Trần Văn B (Người Bán)",
-    email: "seller@pcbid.vn",
-    phone: "0987654321",
-    role: "seller",
-    verified: true,
-    walletBalance: 80000000,
-    address: "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
-    avatar: "images/avatars/avatar-seller.png",
-    rating: 4.9,
-    reviewCount: 124,
-    pref_sms: true,
-    pref_email: true,
-    lastUpdated: "Hôm nay, 10:15",
-    isLoggedIn: true
-  }
-];
+// 4 tài khoản demo lấy từ module dùng chung js/accounts.js
+const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
 const DEFAULT_USER = SAMPLE_ACCOUNTS[0];
 
@@ -102,34 +49,34 @@ const DEFAULT_SELLING = [
     category: "Mainboard",
     status: "active", // 'active': Đang diễn ra | 'sold': Đã bán thành công | 'ended': Đã kết thúc
     startingPrice: 2700000,
-    currentBid: 3200000,
-    highestBidder: "tuan_pcbuilder",
+    currentBid: 3100000,
     bidCount: 8,
-    endTimestamp: Date.now() + 14 * 3600 * 1000, // 14 giờ
     images: ["images/products/mainboard/3006-asus-tuf-b760m-plus-wifi-1.jpg"],
     specs: ["LGA 1700", "Micro-ATX"]
   },
   {
     id: 6001,
-    name: "Nguồn máy tính Corsair RM850x 850W 80 Plus Gold Modular",
+    name: "Nguồn Máy Tính Corsair RM850x 850W - 80 Plus Gold",
     category: "PSU",
     status: "sold", // Đã bán thành công
-    startingPrice: 1500000,
-    currentBid: 2150000,
+    startingPrice: 1800000,
+    currentBid: 2200000,
     highestBidder: "nguon_pc_chat",
-    bidCount: 13,
+    bidCount: 8,
     soldDate: "28/10/2026",
-    images: ["images/products/psu/6001-corsair-rm850x-1.jpg"],
+    endTime: "2026-10-28T20:00:00+07:00",
+    images: ["images/products/psu/6001-corsair-rm850x-1.png"],
     specs: ["850W", "80 Plus Gold"]
   },
   {
     id: 7005,
-    name: "Vỏ máy tính Lian Li O11 Dynamic Mini Snow White",
+    name: "Vỏ máy tính Lian Li O11D Mini V2 White",
     category: "Case",
-    status: "ended", // Đã kết thúc
-    startingPrice: 1200000,
-    currentBid: 1750000,
-    bidCount: 11,
+    status: "ended", // Đã kết thúc nhưng không có lượt đặt giá nào (có thể đăng bán lại)
+    startingPrice: 1150000,
+    currentBid: 1150000,
+    bidCount: 0,
+    endTime: "2026-11-05T20:00:00+07:00",
     images: ["images/products/case/7005-vo-may-tinh-lian-li-o11d-mini-v2-white-1.jpg"],
     specs: ["2 mặt kính", "Snow White"]
   }
@@ -275,6 +222,10 @@ function getCurrentUser() {
 
 function saveCurrentUser(user) {
   localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+  // Đồng bộ vào danh sách tài khoản để hồ sơ công khai luôn thấy thông tin mới nhất
+  saveAccount(user);
+  // Báo cho Header cập nhật lại avatar và tên
+  window.dispatchEvent(new CustomEvent('pcbid:account-updated'));
 }
 
 function getParticipatingBids() {
@@ -313,7 +264,36 @@ function getSellingItems() {
     ...getLegacySellingItems(user),
     ...(user?.username === 'seller' ? DEFAULT_SELLING : [])
   ];
-  return readUserList(USER_LIST_KEYS.SELLING, user, seed);
+  const list = readUserList(USER_LIST_KEYS.SELLING, user, seed);
+
+  // Đọc giá và lượt bid mới nhất để thẻ đăng bán khớp với trang chi tiết
+  let localProducts = [];
+  let localBids = [];
+  try { localProducts = JSON.parse(localStorage.getItem('pcbid_products') || '[]'); } catch {}
+  try { localBids = JSON.parse(localStorage.getItem('pcbid_bids') || '[]'); } catch {}
+  const productMap = new Map(localProducts.map(p => [Number(p.id), p]));
+
+  return list.map(saved => {
+    // Phiên mẫu chưa đăng lại: luôn lấy thông tin chuẩn mới nhất (sửa dữ liệu cũ lưu sai ảnh / tên / trạng thái)
+    const sample = DEFAULT_SELLING.find(d => d.id === Number(saved.id));
+    const item = sample && !(saved.relisted || saved.closedEarly) ? { ...saved, ...sample } : { ...saved };
+
+    if (item.status === 'active') {
+      const product = productMap.get(Number(item.id));
+      if (product?.relisted || !sample) {
+        if (product?.currentBid !== undefined) item.currentBid = Number(product.currentBid);
+        if (product?.bidCount !== undefined) item.bidCount = Number(product.bidCount);
+      }
+      const bids = localBids.filter(b => Number(b.productId) === Number(item.id));
+      if (bids.length > 0) {
+        item.currentBid = Math.max(Number(item.currentBid) || 0, ...bids.map(b => Number(b.amount) || 0));
+        item.bidCount = Math.max(Number(item.bidCount) || 0, sample && !saved.relisted ? sample.bidCount + bids.length : bids.length);
+      }
+      // Phiên hết hạn mà không có ai đặt giá thì chuyển sang "Đã kết thúc" để có thể đăng bán lại
+      if (getAuctionEndTimestamp(item) <= Date.now()) item.status = Number(item.bidCount || 0) > 0 ? 'sold' : 'ended';
+    }
+    return item;
+  });
 }
 
 function getWatchlistItems() {
@@ -456,7 +436,7 @@ function renderSellingCard(item) {
       Đang diễn ra
     </span>`;
     actionButtonsHtml = `
-      <a href="${detailUrl}" class="pcb-btn-primary" style="padding: 8px 12px; font-size: 12px;">Xem phiên đấu</a>
+      <a href="${detailUrl}" class="pcb-btn-primary pcb-btn-primary--compact">Xem phiên đấu</a>
       <a href="${detailUrl}#edit" class="pcb-btn-detail">Quản lý phiên</a>
     `;
   } else if (item.status === 'sold') {
@@ -486,7 +466,7 @@ function renderSellingCard(item) {
     <article class="pcb-auction-card ${modifierClass}" data-id="${item.id}">
       <a href="${detailUrl}" class="pcb-auction-card__media-link" aria-label="Xem chi tiết ${escapeHtml(item.name)}">
         <span class="pcb-auction-card__category-badge">${escapeHtml(item.category)}</span>
-        <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.src='images/products/mainboard/3006-asus-tuf-b760m-plus-wifi-1.jpg'">
+        <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
       </a>
 
       <div class="pcb-auction-card__body">
@@ -523,7 +503,7 @@ function renderSellingCard(item) {
           ` : `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Người mua thắng</span>
-              <span class="pcb-stat-col__val" style="color:#059669;">${escapeHtml(item.highestBidder || 'Chưa có')}</span>
+              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
             </div>
           `}
 
@@ -641,7 +621,14 @@ function syncUserInfoUI() {
   const holdEl = document.getElementById('wallet-hold-display');
 
   if (nameEl) nameEl.textContent = user.fullname || user.username;
-  if (uidEl) uidEl.textContent = `UID: #${user.id.toUpperCase()}-IE104`;
+  if (uidEl) uidEl.textContent = `UID: ${getUserUid(user)}`;
+  // Avatar: ảnh tự tải lên hoặc chữ cái đầu của tên, đồng bộ với Header
+  const avatarEl = document.getElementById('sidebar-user-avatar');
+  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(user, 'pcb-user-card__avatar-photo');
+  const removeAvatarBtn = document.getElementById('btn-remove-avatar');
+  if (removeAvatarBtn) removeAvatarBtn.hidden = !user.avatarImage;
+  const publicLink = document.getElementById('sidebar-public-link');
+  if (publicLink) publicLink.href = `profile.html?user=${encodeURIComponent(user.username || '')}`;
   // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
   if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
@@ -662,6 +649,63 @@ function syncUserInfoUI() {
   if (smsInput) smsInput.checked = user.pref_sms !== false;
   if (mailInput) mailInput.checked = user.pref_email !== false;
   if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
+
+  // Giới tính, tiểu sử, ngày sinh
+  const genderInput = document.getElementById('input-gender');
+  const bioInput = document.getElementById('input-bio');
+  if (genderInput) genderInput.value = user.gender || '';
+  if (bioInput) bioInput.value = user.bio || '';
+  renderBirthDate(user);
+
+  // Quyền riêng tư hồ sơ công khai
+  const privacyForm = document.getElementById('form-privacy');
+  if (privacyForm) {
+    const privacy = getPrivacy(user);
+    privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
+      input.checked = Boolean(privacy[input.name]);
+      updateSwitchText(input);
+    });
+  }
+}
+
+// Trạng thái hiển thị đầy đủ ngày sinh (bấm biểu tượng con mắt)
+let birthDateRevealed = false;
+
+/**
+ * Hiển thị ngày sinh: mặc định chỉ hiện năm; khóa nút thay đổi khi đã đổi 1 lần
+ * @param {Object} user - Người dùng hiện tại
+ */
+function renderBirthDate(user) {
+  const display = document.getElementById('birthdate-display');
+  const eyeBtn = document.getElementById('btn-toggle-birthdate');
+  const changeBtn = document.getElementById('btn-change-birthdate');
+  const tooltip = document.getElementById('birthdate-tooltip');
+  if (!display) return;
+
+  display.textContent = formatBirthDate(user.birthDate, birthDateRevealed);
+  if (eyeBtn) {
+    eyeBtn.hidden = !user.birthDate;
+    eyeBtn.setAttribute('aria-pressed', birthDateRevealed ? 'true' : 'false');
+    eyeBtn.setAttribute('aria-label', birthDateRevealed ? 'Ẩn ngày và tháng sinh' : 'Hiện đầy đủ ngày sinh');
+    eyeBtn.title = eyeBtn.getAttribute('aria-label');
+  }
+  const locked = Boolean(user.birthDateLocked);
+  if (changeBtn) changeBtn.hidden = locked;
+  if (tooltip) {
+    tooltip.dataset.tooltip = locked
+      ? 'Thông tin không thể thay đổi được'
+      : 'Ngày sinh chỉ được thay đổi 1 lần, sau đó không thể thay đổi được nữa';
+    tooltip.setAttribute('aria-label', tooltip.dataset.tooltip);
+  }
+}
+
+/**
+ * Cập nhật nhãn "Công khai" / "Riêng tư" cạnh công tắc quyền riêng tư
+ * @param {HTMLInputElement} input - Công tắc
+ */
+function updateSwitchText(input) {
+  const text = input.closest('.pcb-switch')?.querySelector('.pcb-switch__text');
+  if (text) text.textContent = input.checked ? 'Công khai' : 'Riêng tư';
 }
 
 /**
@@ -941,6 +985,168 @@ function handleMarkNotificationsRead(ids) {
   updateCounters();
 }
 
+/* ==========================================================================
+   HỒ SƠ CÔNG KHAI (profile.html?user=<tên đăng nhập>)
+   Ai cũng xem được, kể cả chưa đăng nhập; tôn trọng cài đặt quyền riêng tư
+   ========================================================================== */
+
+/**
+ * Thẻ linh kiện rút gọn dùng trong hồ sơ công khai
+ * @param {Object} item - Sản phẩm / phiên
+ * @param {string} badgeHtml - Huy hiệu trạng thái
+ * @returns {string}
+ */
+function renderPublicCard(item, badgeHtml) {
+  const image = item.images && item.images[0] ? item.images[0] : 'images/placeholder-product.svg';
+  return `
+    <a class="pcb-public-card" href="product-detail.html?id=${item.id}">
+      <img class="pcb-public-card__img" src="${escapeHtml(image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+      <span class="pcb-public-card__body">
+        ${badgeHtml}
+        <strong class="pcb-public-card__name">${escapeHtml(item.name)}</strong>
+        <span class="pcb-public-card__meta">${formatVnd(item.currentBid)} · ${Number(item.bidCount || 0)} lượt</span>
+      </span>
+    </a>
+  `;
+}
+
+// Số thẻ hiển thị mỗi lần trong một khối của hồ sơ công khai
+const PUBLIC_PAGE_SIZE = 8;
+
+/**
+ * Hiển thị một khối thông tin của hồ sơ công khai (hoặc thông báo riêng tư / trống)
+ * @param {string} id - ID vùng chứa
+ * @param {boolean} isPublic - Thông tin có được công khai không
+ * @param {Array<string>} cards - Danh sách HTML thẻ
+ * @param {string} emptyText - Thông báo khi không có dữ liệu
+ */
+function fillPublicBlock(id, isPublic, cards, emptyText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!isPublic) {
+    el.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+  } else if (!cards.length) {
+    el.innerHTML = `<p class="pcb-public__empty">${emptyText}</p>`;
+  } else {
+    // Danh sách dài: hiện trước một số thẻ, phần còn lại mở bằng nút "Xem thêm"
+    const visible = cards.slice(0, PUBLIC_PAGE_SIZE);
+    const rest = cards.length - visible.length;
+    el.innerHTML = `
+      <div class="pcb-public__grid">${visible.join('')}</div>
+      ${rest > 0 ? `<button type="button" class="pcb-public__more">Xem thêm ${rest} phiên</button>` : ''}
+    `;
+    const moreBtn = el.querySelector('.pcb-public__more');
+    if (moreBtn) {
+      let shown = visible.length;
+      moreBtn.addEventListener('click', () => {
+        const next = cards.slice(shown, shown + PUBLIC_PAGE_SIZE);
+        el.querySelector('.pcb-public__grid').insertAdjacentHTML('beforeend', next.join(''));
+        shown += next.length;
+        const left = cards.length - shown;
+        if (left > 0) moreBtn.textContent = `Xem thêm ${left} phiên`;
+        else moreBtn.remove();
+      });
+    }
+  }
+}
+
+/**
+ * Hiển thị hồ sơ công khai của một người dùng
+ * @param {string} username - Tên đăng nhập cần xem
+ */
+async function renderPublicProfile(username) {
+  // Ẩn thanh bên quản lý cá nhân, chỉ hiện khu vực hồ sơ công khai
+  document.body.classList.add('pcb-profile--public');
+  document.querySelectorAll('.pcb-section').forEach(sec => {
+    sec.style.display = sec.id === 'section-public' ? 'block' : 'none';
+  });
+  const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+  if (breadcrumbCurrent) breadcrumbCurrent.textContent = 'Hồ sơ công khai';
+
+  // Thông tin tài khoản: thành viên / tài khoản đã đăng ký / người dùng mẫu; nếu không có thì chỉ biết tên đăng nhập
+  const account = findAccount({ username }) || { username, fullname: username };
+  const privacy = getPrivacy(account);
+  const uid = getUserUid(account.id || `seller_${username}`);
+  let viewer = null;
+  try { viewer = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null'); } catch {}
+
+  document.title = `${account.fullname || username} - Hồ sơ công khai | PCBid`;
+  const avatarEl = document.getElementById('public-avatar');
+  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(account, 'pcb-public__avatar-img');
+  const nameEl = document.getElementById('public-name');
+  if (nameEl) nameEl.textContent = account.fullname || username;
+  const uidEl = document.getElementById('public-uid');
+  if (uidEl) uidEl.textContent = `UID: ${maskUid(uid)}`;
+  const selfNote = document.getElementById('public-self-note');
+  if (selfNote) selfNote.hidden = !(viewer && viewer.isLoggedIn !== false && viewer.username === username);
+
+  // Tiểu sử
+  const bioEl = document.getElementById('public-bio');
+  if (bioEl) {
+    if (!privacy.bio) bioEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng đã đặt thông tin này ở chế độ riêng tư.</p>';
+    else bioEl.innerHTML = `<p class="pcb-public__bio">${account.bio ? escapeHtml(account.bio) : 'Người dùng chưa viết tiểu sử.'}</p>`;
+  }
+
+  // Liên hệ: email và số điện thoại (mặc định riêng tư)
+  const contactEl = document.getElementById('public-contact');
+  if (contactEl) {
+    if (!privacy.contact) {
+      contactEl.innerHTML = '<p class="pcb-public__private">🔒 Người dùng chưa công khai thông tin liên hệ.</p>';
+    } else if (!account.email && !account.phone) {
+      contactEl.innerHTML = '<p class="pcb-public__empty">Chưa có thông tin liên hệ.</p>';
+    } else {
+      contactEl.innerHTML = `<ul class="pcb-public__contact">
+        ${account.email ? `<li><span>Email</span><a href="mailto:${escapeHtml(account.email)}">${escapeHtml(account.email)}</a></li>` : ''}
+        ${account.phone ? `<li><span>Điện thoại</span><a href="tel:${escapeHtml(account.phone)}">${escapeHtml(account.phone)}</a></li>` : ''}
+      </ul>`;
+    }
+  }
+
+  // Linh kiện đã đăng bán: mọi phiên có người bán là tài khoản này
+  const products = await loadAllAuctions();
+  const now = Date.now();
+  const selling = products.filter(p => p.seller === username);
+  const roleEl = document.getElementById('public-role');
+  // Mọi tài khoản đều là đấu giá viên; nếu có đăng bán thì ghi thêm số phiên
+  if (roleEl) roleEl.textContent = selling.length ? `👤 Đấu giá viên · ${selling.length} phiên đăng bán` : '👤 Đấu giá viên';
+  fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
+    const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
+    const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
+    const mod = p.status === 'sold' ? 'sold' : closed ? 'ended' : 'active';
+    return renderPublicCard(p, `<span class="pcb-public-card__badge pcb-public-card__badge--${mod}">${label}</span>`);
+  }), 'Chưa đăng bán linh kiện nào.');
+
+  // Phiên đang tham gia (chỉ phiên chưa kết thúc)
+  // Lấy từ chính lịch sử đặt giá của các phiên (lượt thật + lượt mẫu), nên bấm vào phiên
+  // sẽ thấy tên người này trong bảng lịch sử; tài khoản thành viên bổ sung thêm phiên mẫu riêng
+  const fromHistory = getAuctionsFromHistory(account, products);
+  const historyIds = new Set(fromHistory.map(item => Number(item.id)));
+  const ownList = account.id
+    ? getParticipatingAuctions(account).filter(item => !historyIds.has(Number(item.id)) && getAuctionEndTimestamp(item) > now)
+    : [];
+  const participating = [...fromHistory, ...ownList];
+  fillPublicBlock('public-participating', privacy.participating, participating.map(item =>
+    renderPublicCard(item, item.status === 'lead'
+      ? '<span class="pcb-public-card__badge pcb-public-card__badge--active">Đang dẫn đầu</span>'
+      : '<span class="pcb-public-card__badge pcb-public-card__badge--outbid">Bị vượt giá</span>')
+  ), 'Hiện không tham gia phiên đấu giá nào.');
+
+  // Danh sách theo dõi: đọc trực tiếp, không tạo dữ liệu mẫu cho tài khoản người khác
+  let watchlist = [];
+  try {
+    const raw = localStorage.getItem(`${USER_LIST_KEYS.WATCHLIST}__${getUserKey(account)}`);
+    watchlist = raw ? JSON.parse(raw) : (isDemoUser(account) ? DEFAULT_WATCHLIST : []);
+  } catch {
+    watchlist = [];
+  }
+  const productMap = new Map(products.map(p => [Number(p.id), p]));
+  const watchCards = (Array.isArray(watchlist) ? watchlist : [])
+    .map(w => productMap.get(Number(typeof w === 'object' ? w.id : w)) || (typeof w === 'object' ? w : null))
+    .filter(Boolean)
+    .map(p => renderPublicCard(p, ''));
+  fillPublicBlock('public-watchlist', privacy.watchlist, watchCards, 'Chưa theo dõi linh kiện nào.');
+}
+
 /**
  * Chuyển đổi giữa các Sub-tabs trong Quản lý đấu giá (Đang tham gia, Đã đăng bán, Watchlist)
  */
@@ -1088,6 +1294,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   } catch (e) {}
 
+  // 0. Chế độ xem hồ sơ công khai của người khác: profile.html?user=<tên đăng nhập>
+  const publicUsername = new URLSearchParams(window.location.search).get('user');
+  if (publicUsername) {
+    renderPublicProfile(publicUsername);
+    return;
+  }
+
   // 1. Đồng bộ thông tin người dùng & đếm số lượng
   syncUserInfoUI();
   updateCounters();
@@ -1209,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. Xác nhận Trả giá nhanh (Cập nhật trực tiếp vào trạng thái)
   const btnSubmitBid = document.getElementById('btn-submit-quick-bid');
   if (btnSubmitBid) {
-    btnSubmitBid.addEventListener('click', () => {
+    btnSubmitBid.addEventListener('click', async () => {
       if (!activeQuickBidItem) return;
 
       const user = getCurrentUser() || DEFAULT_USER;
@@ -1221,8 +1434,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Kiểm tra số dư khả dụng đủ giữ cọc 10% cho mức giá mới (cọc cũ của phiên này được trả lại trước)
       const depositCheck = checkBidDeposit(user, activeQuickBidItem.id, newBidAmount);
       if (!depositCheck.ok) {
-        alert(`Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}). Vui lòng nạp thêm tiền vào ví!`);
         closeModal('modal-quick-bid');
+        await showAlert({
+          title: 'Không đủ tiền cọc',
+          message: `Số dư ví khả dụng (${formatVnd(depositCheck.available)}) không đủ giữ cọc 10% (${formatVnd(depositCheck.required)}).\nVui lòng nạp thêm tiền vào ví.`,
+          tone: 'warning'
+        });
         openModal('modal-deposit');
         return;
       }
@@ -1247,6 +1464,9 @@ document.addEventListener('DOMContentLoaded', () => {
         bids.unshift({
           id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
           productId: activeQuickBidItem.id,
+          // Định danh người đặt bằng ID tài khoản (không trùng), kèm họ tên để hiển thị
+          bidderId: user.id || null,
+          bidderFullname: user.fullname || user.username || '',
           bidderName: user.username || 'pcbuilder99',
           amount: newBidAmount,
           timestamp: new Date().toISOString()
@@ -1314,7 +1534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnConfirmDeposit.addEventListener('click', () => {
       const amount = Number(depositInput.value);
       if (!amount || amount <= 0) {
-        alert('Vui lòng nhập số tiền nạp hợp lệ!');
+        showAlert({ title: 'Số tiền không hợp lệ', message: 'Vui lòng nhập số tiền nạp lớn hơn 0.', tone: 'warning' });
         return;
       }
 
@@ -1331,11 +1551,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. Xử lý Form Cập nhật thông tin tài khoản
   const formAccount = document.getElementById('form-account-info');
   if (formAccount) {
-    formAccount.addEventListener('submit', (e) => {
+    formAccount.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const user = getCurrentUser();
+
+      // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
+      const birthInput = document.getElementById('input-birthdate');
+      if (birthInput && !birthInput.hidden && birthInput.value && birthInput.value !== user.birthDate) {
+        const chosen = new Date(birthInput.value);
+        const age = (Date.now() - chosen.getTime()) / (365.25 * 24 * 3600 * 1000);
+        if (Number.isNaN(chosen.getTime()) || age < 13 || age > 100) {
+          await showAlert({ title: 'Ngày sinh không hợp lệ', message: 'Độ tuổi cho phép từ 13 đến 100.', tone: 'warning' });
+          return;
+        }
+        const ok = await showConfirm({
+          title: 'Xác nhận đổi ngày sinh',
+          message: `Bạn sắp đổi ngày sinh thành ${formatBirthDate(birthInput.value, true)}.\n\nNgày sinh chỉ được thay đổi 1 lần. Sau khi lưu, bạn sẽ KHÔNG thể thay đổi được nữa.`,
+          confirmText: 'Đổi ngày sinh',
+          cancelText: 'Để sau',
+          tone: 'danger'
+        });
+        if (!ok) return;
+        user.birthDate = birthInput.value;
+        user.birthDateLocked = true;
+      }
+      if (birthInput) birthInput.hidden = true;
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthHint) birthHint.hidden = true;
+
+      user.gender = document.getElementById('input-gender')?.value || '';
+      user.bio = (document.getElementById('input-bio')?.value || '').trim().slice(0, 300);
       user.fullname = document.getElementById('input-fullname')?.value.trim() || user.fullname;
+      // Cập nhật lại tên gọi để avatar chữ cái luôn khớp với họ tên mới
+      user.givenName = getGivenName(user.fullname);
+      user.lastName = user.fullname.slice(0, user.fullname.length - user.givenName.length).trim();
       user.email = document.getElementById('input-email')?.value.trim() || user.email;
       user.phone = document.getElementById('input-phone')?.value.trim() || user.phone;
       user.address = document.getElementById('input-address')?.value.trim() || user.address;
@@ -1352,6 +1602,111 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
+  const avatarInput = document.getElementById('input-avatar-file');
+  if (avatarInput) {
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      avatarInput.value = '';
+      if (!file) return;
+      const dataUrl = await openAvatarCropper(file);
+      if (!dataUrl) return;
+      const user = getCurrentUser();
+      user.avatarImage = dataUrl;
+      saveCurrentUser(user);
+      syncUserInfoUI();
+      showToast('Đã cập nhật ảnh đại diện!');
+    });
+  }
+  const removeAvatarBtn = document.getElementById('btn-remove-avatar');
+  if (removeAvatarBtn) {
+    removeAvatarBtn.addEventListener('click', async () => {
+      const ok = await showConfirm({
+        title: 'Đặt avatar thành mặc định?',
+        message: 'Ảnh đại diện hiện tại sẽ bị xóa và avatar quay về chữ cái đầu của tên.',
+        confirmText: 'Đặt mặc định',
+        tone: 'danger'
+      });
+      if (!ok) return;
+      const user = getCurrentUser();
+      delete user.avatarImage;
+      saveCurrentUser(user);
+      syncUserInfoUI();
+      showToast('Đã đặt avatar về mặc định.');
+    });
+  }
+
+  // 12c. Ngày sinh: con mắt hiện / ẩn ngày tháng; nút Thay đổi mở ô chọn ngày
+  const eyeBtn = document.getElementById('btn-toggle-birthdate');
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', () => {
+      birthDateRevealed = !birthDateRevealed;
+      renderBirthDate(getCurrentUser());
+    });
+  }
+  const changeBirthBtn = document.getElementById('btn-change-birthdate');
+  if (changeBirthBtn) {
+    changeBirthBtn.addEventListener('click', () => {
+      const user = getCurrentUser();
+      if (user.birthDateLocked) return;
+      const birthInput = document.getElementById('input-birthdate');
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthInput) {
+        birthInput.hidden = false;
+        birthInput.value = user.birthDate || '';
+        birthInput.max = new Date().toISOString().slice(0, 10);
+        birthInput.focus();
+      }
+      if (birthHint) birthHint.hidden = false;
+    });
+  }
+
+  // 12d. Quyền riêng tư hồ sơ công khai
+  const privacyForm = document.getElementById('form-privacy');
+  // Quay lại trang (nút Back / bộ nhớ đệm bfcache): vẽ lại theo dữ liệu đã lưu,
+  // tránh công tắc giữ trạng thái chưa lưu trong khi chữ hiển thị trạng thái cũ
+  window.addEventListener('pageshow', () => {
+    if (privacyForm) syncUserInfoUI();
+  });
+  // Đánh dấu có thay đổi quyền riêng tư chưa lưu
+  let privacyDirty = false;
+  if (privacyForm) {
+    privacyForm.addEventListener('change', (e) => {
+      if (e.target.matches('.pcb-switch__input')) {
+        updateSwitchText(e.target);
+        privacyDirty = true;
+      }
+    });
+    // Bấm "Xem hồ sơ công khai" khi còn thay đổi chưa lưu: hỏi lưu trước
+    const publicLink = document.getElementById('sidebar-public-link');
+    if (publicLink) {
+      publicLink.addEventListener('click', async (e) => {
+        if (!privacyDirty) return;
+        e.preventDefault();
+        const save = await showConfirm({
+          title: 'Chưa lưu cài đặt quyền riêng tư',
+          message: 'Bạn vừa thay đổi quyền riêng tư nhưng chưa lưu. Lưu trước khi xem hồ sơ công khai?',
+          confirmText: 'Lưu và xem',
+          cancelText: 'Bỏ thay đổi'
+        });
+        if (save) privacyForm.requestSubmit();
+        else syncUserInfoUI();
+        privacyDirty = false;
+        window.location.href = publicLink.href;
+      });
+    }
+    privacyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = getCurrentUser();
+      const privacy = {};
+      privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => { privacy[input.name] = input.checked; });
+      user.privacy = privacy;
+      saveCurrentUser(user);
+      privacyDirty = false;
+      showToast('Đã lưu cài đặt quyền riêng tư hồ sơ công khai!');
+    });
+  }
+
   // 13. Xử lý Form Đổi mật khẩu
   const formPass = document.getElementById('form-change-password');
   if (formPass) {
@@ -1362,17 +1717,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const cf = document.getElementById('input-confirm-pass')?.value;
 
       if (!cur || !nw || !cf) {
-        alert('Vui lòng điền đầy đủ các trường mật khẩu!');
+        showAlert({ title: 'Thiếu thông tin', message: 'Vui lòng điền đầy đủ các trường mật khẩu.', tone: 'warning' });
         return;
       }
 
       if (nw.length < 8) {
-        alert('Mật khẩu mới phải có ít nhất 8 ký tự!');
+        showAlert({ title: 'Mật khẩu quá ngắn', message: 'Mật khẩu mới phải có ít nhất 8 ký tự.', tone: 'warning' });
         return;
       }
 
       if (nw !== cf) {
-        alert('Mật khẩu xác nhận không khớp với mật khẩu mới!');
+        showAlert({ title: 'Mật khẩu không khớp', message: 'Mật khẩu xác nhận không khớp với mật khẩu mới.', tone: 'warning' });
         return;
       }
 
@@ -1384,9 +1739,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 14. Nút Đăng xuất
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) {
-    btnLogout.addEventListener('click', (e) => {
+    btnLogout.addEventListener('click', async (e) => {
       e.preventDefault();
-      if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?')) {
+      const ok = await showConfirm({
+        title: 'Đăng xuất tài khoản?',
+        message: 'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản PCBid?',
+        confirmText: 'Đăng xuất',
+        tone: 'danger'
+      });
+      if (ok) {
         localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
         localStorage.removeItem('pcbid_user');
         localStorage.setItem('pcbid_logged_out', 'true');

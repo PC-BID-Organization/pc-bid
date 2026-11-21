@@ -6,7 +6,7 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 
 
 /* ==========================================================================
@@ -42,6 +42,8 @@ const filterState = {
   conditions: [],
   seals: [],
   sortBy: 'ending',
+  // ID phiên người bán vừa đăng (products.html?highlight=...), được đưa lên đầu và gắn nhãn
+  highlightId: null,
   searchQuery: ''
 };
 
@@ -115,6 +117,8 @@ function parseUrlParams() {
   // và tham số sort từ Trang chủ (ví dụ: products.html?sort=bids cho nút "Cạnh tranh nhất")
   const status = params.get('status');
   const sort = (params.get('sort') || '').toLowerCase();
+  const highlight = params.get('highlight');
+  if (highlight) filterState.highlightId = String(highlight);
   const sortAliases = {
     'bids': 'bids-desc',
     'bids-desc': 'bids-desc',
@@ -225,15 +229,16 @@ async function loadAllProducts() {
     });
 
     // 1. Đồng bộ các sản phẩm đã có từ JSON với giá và lượt bid mới nhất
-    const mergedList = fetchedItems.map(item => {
-      const idNum = Number(item.id);
-      const localUpdated = localMap.get(idNum);
+    const mergedList = fetchedItems.map(rawItem => {
+      const idNum = Number(rawItem.id);
+      // Gộp với bản trong localStorage (phiên đăng lại / phiên đã chốt được xử lý trong helper)
+      const item = mergeLocalProduct(rawItem, localMap.get(idNum));
       const bInfo = bidSummary.get(idNum);
 
-      let curBid = localUpdated?.currentBid !== undefined ? Number(localUpdated.currentBid) : item.currentBid;
-      let bCount = localUpdated?.bidCount !== undefined ? Number(localUpdated.bidCount) : item.bidCount;
+      let curBid = Number(item.currentBid);
+      let bCount = Number(item.bidCount || 0);
 
-      if (bInfo) {
+      if (bInfo && !isAuctionClosed(item)) {
         if (bInfo.maxBid > curBid) curBid = bInfo.maxBid;
         bCount = Math.max(bCount, bInfo.count);
       }
@@ -242,6 +247,7 @@ async function loadAllProducts() {
         ...item,
         currentBid: curBid,
         bidCount: bCount,
+        endTimestamp: getAuctionEndTimestamp(item),
         marketPriceNew: item.marketPriceNew && item.marketPriceNew > curBid ? item.marketPriceNew : Math.round(curBid * 1.5)
       };
     });
@@ -267,10 +273,11 @@ async function loadAllProducts() {
       }
     });
 
-    rawProducts = [...customUserItems, ...mergedList];
+    // Chỉ hiển thị các phiên còn mở trên sàn; phiên đã bán / đã kết thúc vẫn xem được qua link chi tiết
+    rawProducts = [...customUserItems, ...mergedList].filter(p => !isAuctionClosed(p));
   } catch (e) {
     console.warn('[PCBid] Lỗi đồng bộ giá products:', e);
-    if (fetchedItems.length > 0) rawProducts = fetchedItems;
+    if (fetchedItems.length > 0) rawProducts = fetchedItems.filter(p => !isAuctionClosed(p));
   }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar
@@ -627,7 +634,15 @@ function applyFiltersAndRender() {
   } else if (filterState.sortBy === 'price-desc') {
     list.sort((a, b) => b.currentBid - a.currentBid);
   } else if (filterState.sortBy === 'newest') {
-    list.sort((a, b) => b.id - a.id);
+    // Phiên mới nhất: phiên đăng lại tính theo thời điểm đăng lại, phiên tự đăng có ID theo thời gian
+    const postedAt = p => (p.relistedAt ? new Date(p.relistedAt).getTime() : Number(p.id) || 0);
+    list.sort((a, b) => postedAt(b) - postedAt(a));
+  }
+
+  // Phiên người bán vừa đăng luôn đứng đầu danh sách
+  if (filterState.highlightId) {
+    const idx = list.findIndex(p => String(p.id) === filterState.highlightId);
+    if (idx > 0) list.unshift(list.splice(idx, 1)[0]);
   }
 
   filteredProducts = list;
@@ -760,6 +775,8 @@ function attachCardClickEvents() {
  */
 function renderCatalogProductCard(product) {
   const detailUrl = `product-detail.html?id=${product.id}`;
+  // Phiên người bán vừa đăng: gắn nhãn và viền nổi bật
+  const isJustPosted = filterState.highlightId && String(product.id) === filterState.highlightId;
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
 
@@ -773,7 +790,8 @@ function renderCatalogProductCard(product) {
     : 'images/products/gpu/2018-rtx-4070-12gb-1.webp';
 
   return `
-    <article class="pcb-card" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
+    <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
+      ${isJustPosted ? '<span class="pcb-card__just-posted">✨ Bạn vừa đăng</span>' : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
         <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

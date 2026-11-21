@@ -214,9 +214,77 @@
   transition: transform 0.35s ease;
 }
 
-/* Hiệu ứng phóng to khi di chuột vào ảnh chính */
+/* Hiệu ứng phóng to nhẹ khi di chuột vào ảnh chính (dự phòng khi chưa bật zoom) */
 .pcb-pd__gallery-main:hover .pcb-pd__gallery-main-img {
   transform: scale(1.05);
+}
+
+/* ==========================================================================
+   ZOOM ẢNH CHÍNH: rê chuột để phóng to tại chỗ, lăn chuột để zoom in / out
+   ========================================================================== */
+.pcb-pd__gallery-main--zooming {
+  cursor: zoom-in;
+}
+
+/* Khi đang zoom: ảnh bám con trỏ nhanh, không trễ như hiệu ứng hover thường */
+.pcb-pd__gallery-main--zooming .pcb-pd__gallery-main-img {
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
+/* Gợi ý thao tác ở cạnh dưới khung ảnh, ẩn khi đang zoom */
+.pcb-pd__zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: none;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #ffffff;
+  pointer-events: none;
+  background-color: rgba(11, 28, 48, 0.72);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transition: opacity 0.2s ease;
+}
+
+/* Nhãn mức phóng to hiện thoáng qua sau mỗi lần lăn chuột */
+.pcb-pd__zoom-level {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  pointer-events: none;
+  background-color: rgba(11, 28, 48, 0.72);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pcb-pd__zoom-level--show {
+  opacity: 1;
+}
+
+/* Chỉ hiện gợi ý trên thiết bị có chuột */
+@media (hover: hover) and (pointer: fine) {
+  .pcb-pd__zoom-hint {
+    display: block;
+  }
+
+  .pcb-pd__gallery-main--zooming .pcb-pd__zoom-hint {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-pd__gallery-main--zooming .pcb-pd__gallery-main-img {
+    transition: none;
+  }
 }
 
 /* Dải thumbnail ảnh nhỏ bên dưới */
@@ -1330,4 +1398,220 @@
     width: 42%;
     white-space: normal;
   }
+}
+
+/* UID che bớt hiển thị cạnh họ tên người đặt giá: dạng nhãn nhỏ, cùng font chữ của trang */
+.pcb-pd__history-uid {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  vertical-align: 1px;
+}
+
+/* Tên người đặt giá dẫn sang hồ sơ công khai */
+.pcb-pd__history-name {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pcb-pd__history-name:hover,
+.pcb-pd__history-name:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Người bán: tên dạng liên kết, UID che bớt bên dưới */
+a.pcb-pd__seller-name {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.pcb-pd__seller-name:hover,
+a.pcb-pd__seller-name:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+a.pcb-pd__seller-avatar {
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.pcb-pd__seller-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.pcb-pd__seller-uid {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+}
+
+/* Vùng chữ / ảnh trong avatar người bán phủ kín khung tròn */
+.pcb-pd__seller-avatar-char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================================================
+   BẢNG QUẢN LÝ CỦA NGƯỜI BÁN (thay khung đặt giá khi xem phiên của chính mình)
+   ========================================================================== */
+.pcb-pd__owner {
+  margin-bottom: 16px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-light);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(11, 28, 48, 0.05);
+}
+
+.pcb-pd__owner-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pcb-pd__owner-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-pd__owner-status {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  color: #166534;
+  background-color: #dcfce7;
+  white-space: nowrap;
+}
+
+.pcb-pd__owner-status[data-state="ended"] { color: #475569; background-color: #f1f5f9; }
+.pcb-pd__owner-status[data-state="sold"] { color: #1e40af; background-color: #dbeafe; }
+
+.pcb-pd__owner-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.pcb-pd__owner-stat {
+  padding: 10px 12px;
+  background-color: var(--color-bg-body);
+  border-radius: 10px;
+}
+
+.pcb-pd__owner-stat--wide {
+  grid-column: 1 / -1;
+}
+
+.pcb-pd__owner-stat dt {
+  margin-bottom: 2px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.pcb-pd__owner-stat dd {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.pcb-pd__owner-note {
+  margin: 0 0 14px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.pcb-pd__owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pcb-pd__owner-btn {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.pcb-pd__owner-btn--primary {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pcb-pd__owner-btn:hover,
+.pcb-pd__owner-btn:focus-visible {
+  filter: brightness(0.96);
+}
+
+.pcb-pd__owner-btn[hidden] {
+  display: none;
+}
+
+@media (max-width: 400px) {
+  .pcb-pd__owner-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Nút đóng phiên sớm của người bán */
+.pcb-pd__owner-btn--danger {
+  font-family: inherit;
+  color: #b91c1c;
+  background-color: #ffffff;
+  border-color: #fca5a5;
+  cursor: pointer;
+}
+
+.pcb-pd__owner-btn--danger:hover,
+.pcb-pd__owner-btn--danger:focus-visible {
+  background-color: #fef2f2;
+}
+
+/* Bảng người bán: nút đóng phiên căn trái, các nút điều hướng dồn sang phải */
+.pcb-pd__owner-btn--danger {
+  margin-right: auto;
+}
+
+#pcb-pd-panel-history {
+  scroll-margin-top: 90px;
 }
