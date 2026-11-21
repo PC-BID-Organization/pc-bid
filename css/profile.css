@@ -2726,3 +2726,41 @@
     margin-left: 0;
   }
 }
+
+/* Dấu bên phải ô email / số điện thoại: tick xanh khi hợp lệ, X đỏ khi sai hoặc đã bị dùng */
+.pcb-verified-check {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pcb-verified-check--error {
+  color: #dc2626;
+}
+
+/* Ngày sinh đã đổi 1 lần: nhãn khóa thay cho nút Thay đổi */
+.pcb-birthdate__lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  cursor: help;
+}
+
+.pcb-birthdate__lock[hidden] {
+  display: none;
+}
+
+/* Gợi ý dưới hai ô họ đệm / tên */
+.pcb-form__name-hint {
+  margin: -8px 0 0;
+}
+
+.pcb-birthdate__change[hidden] {
+  display: none;
+}
