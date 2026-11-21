@@ -170,3 +170,249 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   THẺ ĐƠN HÀNG SAU ĐẤU GIÁ (dùng chung: trang chi tiết phiên và tab Đơn hàng)
+   ========================================================================== */
+.pcb-order {
+  padding: 18px;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-light);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(11, 28, 48, 0.05);
+}
+
+.pcb-order--completed {
+  border-top-color: #16a34a;
+}
+
+.pcb-order--forfeited {
+  border-top-color: #dc2626;
+}
+
+.pcb-order__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pcb-order__role {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-order__badge {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.pcb-order__badge--awaiting_payment {
+  color: #9a3412;
+  background-color: #ffedd5;
+}
+
+.pcb-order__badge--paid,
+.pcb-order__badge--shipped {
+  color: #1e40af;
+  background-color: #dbeafe;
+}
+
+.pcb-order__badge--completed {
+  color: #166534;
+  background-color: #dcfce7;
+}
+
+.pcb-order__badge--forfeited {
+  color: #991b1b;
+  background-color: #fee2e2;
+}
+
+/* Ảnh và tên linh kiện (chỉ hiện trong danh sách đơn hàng) */
+.pcb-order__product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--color-text-main);
+  text-decoration: none;
+}
+
+.pcb-order__img {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background-color: #f8fafc;
+  border-radius: 10px;
+}
+
+.pcb-order__name {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.pcb-order__product:hover .pcb-order__name,
+.pcb-order__product:focus-visible .pcb-order__name {
+  color: var(--color-primary);
+}
+
+/* Dòng thời gian 4 bước */
+.pcb-order__steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-order__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Đường nối giữa các bước */
+.pcb-order__step::before {
+  position: absolute;
+  top: 7px;
+  right: 50%;
+  left: -50%;
+  height: 2px;
+  content: '';
+  background-color: #e2e8f0;
+}
+
+.pcb-order__step:first-child::before {
+  display: none;
+}
+
+.pcb-order__step-dot {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+}
+
+.pcb-order__step--done {
+  color: #166534;
+}
+
+.pcb-order__step--done::before {
+  background-color: #16a34a;
+}
+
+.pcb-order__step--done .pcb-order__step-dot {
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+
+.pcb-order__step--current {
+  color: var(--color-primary);
+}
+
+.pcb-order__step--current .pcb-order__step-dot {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.18);
+}
+
+.pcb-order__step--failed {
+  color: #dc2626;
+}
+
+.pcb-order__step--failed .pcb-order__step-dot {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Số tiền */
+.pcb-order__money {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.pcb-order__money div {
+  min-width: 0;
+  padding: 8px 10px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+}
+
+.pcb-order__money dt {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.pcb-order__money dd {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pcb-order__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-main);
+}
+
+.pcb-order__countdown {
+  font-variant-numeric: tabular-nums;
+  color: #dc2626;
+}
+
+.pcb-order__actions {
+  margin-top: 12px;
+}
+
+.pcb-order__btn {
+  width: 100%;
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-order__btn:hover,
+.pcb-order__btn:focus-visible {
+  background-color: var(--color-primary-hover);
+}
+
+@media (max-width: 480px) {
+  .pcb-order__money {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pcb-order__money div:last-child {
+    grid-column: 1 / -1;
+  }
+}

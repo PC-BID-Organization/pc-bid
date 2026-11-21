@@ -6,6 +6,8 @@
 import { initHeader } from '../components/header/header.js';
 // Bot mô phỏng người dùng khác đặt giá theo thời gian thực (chạy trên mọi trang)
 import { startBotBidding } from './bot-bidder.js';
+// Xử lý sau khi phiên kết thúc: người thắng, thanh toán, giao hàng (chạy trên mọi trang)
+import { startSettlement } from './settlement.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Nạp đồng thời cả Header và Footer từ tệp HTML thành phần riêng biệt
@@ -19,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Khởi động bot đặt giá tự động (15 - 60 giây một lượt)
   startBotBidding();
+
+  // Theo dõi phiên vừa kết thúc và các đơn hàng đến hạn
+  startSettlement();
 });
 
 /**

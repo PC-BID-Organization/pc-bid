@@ -157,6 +157,9 @@
 
           <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
           <!-- Bảng quản lý dành cho người bán khi xem phiên của chính mình (thay cho khung đặt giá) -->
+          <!-- Đơn hàng sau đấu giá: hiện cho người thắng và người bán khi phiên đã kết thúc -->
+          <section class="pcb-pd__order-panel" id="pcb-pd-order-panel" aria-label="Đơn hàng sau đấu giá" hidden></section>
+
           <section class="pcb-pd__owner" id="pcb-pd-owner-panel" aria-labelledby="pcb-pd-owner-title" hidden>
             <div class="pcb-pd__owner-head">
               <h2 class="pcb-pd__owner-title" id="pcb-pd-owner-title">Phiên đấu giá của bạn</h2>
@@ -227,6 +230,9 @@
             <button type="button" class="pcb-pd__submit-btn" id="pcb-pd-submit-btn" aria-label="Xác nhận đặt giá">
               &#x1F528; XÁC NHẬN ĐẶT GIÁ
             </button>
+
+            <!-- Công cụ demo: kết thúc phiên ngay để xem quy trình sau khi trúng đấu giá -->
+            <button type="button" class="pcb-pd__demo-end-btn" id="pcb-pd-demo-end" hidden>⏱ Kết thúc phiên ngay (demo)</button>
 
             <!-- Nút thêm vào danh sách theo dõi -->
             <button type="button" class="pcb-pd__watchlist-btn" id="pcb-pd-watchlist-btn" aria-pressed="false">
