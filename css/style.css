@@ -2150,3 +2150,13 @@ a.pcb-chat__peer-name:focus-visible {
   -webkit-mask-image: url('../images/icons/lucide/x.svg');
   mask-image: url('../images/icons/lucide/x.svg');
 }
+
+.pcb-icon--globe {
+  -webkit-mask-image: url('../images/icons/lucide/globe.svg');
+  mask-image: url('../images/icons/lucide/globe.svg');
+}
+
+.pcb-icon--chevron-down {
+  -webkit-mask-image: url('../images/icons/lucide/chevron-down.svg');
+  mask-image: url('../images/icons/lucide/chevron-down.svg');
+}

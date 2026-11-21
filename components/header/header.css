@@ -597,6 +597,8 @@
 .header__nav-list {
   display: flex;
   align-items: center;
+  /* Dàn đều các mục trên một hàng; màn hình hẹp hơn thì cuộn ngang */
+  justify-content: space-between;
   gap: 14px;
   overflow-x: auto;
   white-space: nowrap;
@@ -1076,4 +1078,180 @@
 
 .header__dropdown-stat .lucide {
   color: #ea580c;
+}
+
+/* Máy tính bảng ngang / laptop nhỏ: thu gọn khoảng cách để thanh danh mục vừa một hàng */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .header__nav-list {
+    gap: 8px;
+  }
+
+  .header__nav-link {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+}
+
+/* ==========================================================================
+   CHỌN NGÔN NGỮ (thanh trên cùng + menu tài khoản trên màn hình nhỏ)
+   ========================================================================== */
+.header__lang {
+  position: relative;
+  display: inline-flex;
+}
+
+.header__lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #565e74;
+  cursor: pointer;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.header__lang-btn:hover,
+.header__lang-btn:focus-visible,
+.header__lang-btn[aria-expanded="true"] {
+  color: #ea580c;
+  background-color: #ffffff;
+  border-color: rgba(226, 191, 178, 0.6);
+}
+
+.header__lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1100;
+  min-width: 160px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid rgba(226, 191, 178, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+  animation: pcbDropdownSlideIn 0.15s ease-out;
+}
+
+.header__lang-menu[hidden] {
+  display: none;
+}
+
+.header__lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #0b1c30;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.header__lang-option:hover,
+.header__lang-option:focus-visible {
+  background-color: #f8fafc;
+}
+
+.header__lang-option.is-active {
+  font-weight: 700;
+  color: #ea580c;
+  background-color: #fff7ed;
+}
+
+.header__lang-option-code {
+  min-width: 24px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.header__lang-option.is-active .header__lang-option-code {
+  color: #ffffff;
+  background-color: #ea580c;
+}
+
+/* Hàng chọn ngôn ngữ trong menu tài khoản: chỉ hiện khi thanh trên cùng bị ẩn (≤ 992px) */
+.header__dropdown-lang {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 4px;
+}
+
+.header__dropdown-lang-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.header__dropdown-lang-options {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+}
+
+.header__dropdown-lang-btn {
+  padding: 4px 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+}
+
+.header__dropdown-lang-btn.is-active {
+  color: #ea580c;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.12);
+}
+
+@media (max-width: 992px) {
+  .header__dropdown-lang {
+    display: flex;
+  }
+}
+
+/* Thanh trên cùng: các liên kết bên phải luôn một dòng, dòng giới thiệu đồ án co lại kèm dấu "…" */
+.header__top-bar-inner {
+  gap: 16px;
+}
+
+.header__course-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.header__course-info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header__top-links {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

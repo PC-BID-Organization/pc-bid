@@ -4,6 +4,11 @@
  */
 
 import { initHeader } from '../components/header/header.js';
+// Chuyển đổi ngôn ngữ giao diện (Tiếng Việt / English / 日本語)
+import { initI18n } from './i18n.js';
+
+// Dịch ngay khi tải trang để hạn chế nháy chữ tiếng Việt
+initI18n();
 // Bot mô phỏng người dùng khác đặt giá theo thời gian thực (chạy trên mọi trang)
 import { startBotBidding } from './bot-bidder.js';
 // Xử lý sau khi phiên kết thúc: người thắng, thanh toán, giao hàng (chạy trên mọi trang)
