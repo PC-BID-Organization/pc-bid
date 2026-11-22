@@ -1055,6 +1055,27 @@ a.pcb-chat__peer-name:focus-visible {
   border-radius: 14px 14px 4px 14px;
 }
 
+/* Tin nhắn chỉ có emoji: không nền, không viền, chữ to hơn (áp dụng cho cả hai phía) */
+.pcb-chat__bubble--emoji,
+.pcb-chat__msg--mine .pcb-chat__bubble--emoji {
+  padding: 2px 0;
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: 1px;
+  background: none;
+  border: none;
+}
+
+.pcb-chat__bubble--emoji-lg,
+.pcb-chat__msg--mine .pcb-chat__bubble--emoji-lg {
+  font-size: 34px;
+}
+
+/* Emoji lẫn trong chữ trên bong bóng cam: thêm viền sáng mỏng để emoji đỏ / cam không bị chìm */
+.pcb-chat__msg--mine .pcb-chat__emoji {
+  filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 1px #ffffff);
+}
+
 .pcb-chat__msg-time {
   margin-top: 2px;
   font-size: 10px;
