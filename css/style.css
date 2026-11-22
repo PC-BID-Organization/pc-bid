@@ -755,6 +755,13 @@
   border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
+/* Avatar chữ cái trên header cam: nền trắng, chữ cam đậm để không bị chìm vào nền */
+.pcb-chat__header .pcb-chat__avatar {
+  color: #c2410c;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
 .pcb-chat__avatar--xs,
 .pcb-chat__avatar-gap {
   flex-shrink: 0;
