@@ -2419,3 +2419,27 @@
   color: var(--pcb-primary, #ea580c);
   vertical-align: -2px;
 }
+
+/* Điện thoại: nhãn "Trực tiếp sàn đấu giá" nằm hàng riêng phía trên,
+   lượt đặt giá chiếm trọn chiều ngang bên dưới để không bị che mất tên người đặt */
+@media (max-width: 640px) {
+  .pcb-ticker__left {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .pcb-ticker__badge {
+    align-self: flex-start;
+  }
+
+  .pcb-ticker__viewport {
+    flex: none;
+    width: 100%;
+  }
+
+  .pcb-ticker__item {
+    gap: 6px;
+    font-size: 12px;
+  }
+}
