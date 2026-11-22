@@ -99,6 +99,8 @@ export const PHRASES = [
   ['Kiểm định Furmark', 'Furmark tested', 'Furmark 検証済み'],
   ['Card màn hình VGA', 'VGA graphics cards', 'VGA グラフィックカード'],
   ['Mainboard bo mạch chủ', 'Motherboards', 'マザーボード'],
+  ['CPU Intel & AMD', 'Intel & AMD CPUs', 'Intel・AMD CPU'],
+  ['RAM máy tính DDR4 / DDR5', 'DDR4 / DDR5 memory', 'DDR4 / DDR5 メモリ'],
   ['Vỏ Case & Fan tản nhiệt PC', 'Cases & cooling fans', 'ケース＆冷却ファン'],
   ['Quy định & Hướng dẫn', 'Rules & guides', '規約とガイド'],
   ['Quy chế sàn đấu giá', 'Marketplace rules', 'オークション規約'],
