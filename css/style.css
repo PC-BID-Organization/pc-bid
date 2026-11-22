@@ -1730,16 +1730,15 @@ a.pcb-chat__peer-name:focus-visible {
 .pcb-order__ship {
   margin-bottom: 12px;
   padding: 10px 12px;
-  background-color: #fffbf5;
-  border: 1px solid #fde4c8;
-  border-left: 3px solid var(--color-primary);
+  background-color: #f6f7f9;
+  border: 1px solid #e5e8ec;
   border-radius: 10px;
 }
 
+/* Thiếu địa chỉ: chỉ đổi nền sang đỏ rất nhạt, không dùng vạch màu */
 .pcb-order__ship--missing {
   background-color: #fef2f2;
   border-color: #fecaca;
-  border-left-color: #dc2626;
 }
 
 .pcb-order__ship-head {

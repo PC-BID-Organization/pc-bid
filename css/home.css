@@ -747,21 +747,6 @@
   box-shadow: var(--pcb-shadow-card);
 }
 
-.hero-v2__promo-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--pcb-primary);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.hero-v2__promo-card:hover::before {
-  opacity: 1;
-}
 
 .hero-v2__promo-info {
   flex: 1;
@@ -1770,9 +1755,10 @@
   padding: 0;
 }
 
+/* Mỗi bước: đường kẻ mảnh phía trên thay cho vạch cam bên trái */
 .pcb-values__step {
-  border-left: 2px solid var(--pcb-primary);
-  padding-left: 14px;
+  border-top: 1px solid var(--pcb-border-light);
+  padding-top: 12px;
 }
 
 .pcb-values__step-num {
@@ -2135,12 +2121,14 @@
   pointer-events: none;
 }
 
+/* Toast nền trắng viền mảnh; icon trạng thái bên trái thay cho vạch màu */
 .pcb-toast {
-  background: #0f172a;
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--pcb-text-main);
+  border: 1px solid var(--pcb-border-light);
   padding: 12px 18px;
   border-radius: var(--pcb-radius-sm);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.18);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -2150,16 +2138,15 @@
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: auto;
   max-width: 360px;
-  border-left: 4px solid var(--pcb-primary);
+}
+
+.pcb-toast svg {
+  flex-shrink: 0;
 }
 
 .pcb-toast--show {
   transform: translateY(0);
   opacity: 1;
-}
-
-.pcb-toast--success {
-  border-left-color: #10b981;
 }
 
 /* ==========================================================================
@@ -2205,7 +2192,6 @@
   border-radius: var(--pcb-radius-sm);
   padding: 12px 14px;
   margin-bottom: 16px;
-  border-left: 4px solid var(--pcb-primary);
 }
 
 .pcb-lightbox-card__caption {
