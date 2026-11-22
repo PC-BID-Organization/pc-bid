@@ -276,44 +276,43 @@
 
         </div>
 
-        <!-- Cột 3: 4 Thẻ Đấu Giá Nổi Bật Thu Nhỏ (Curated Promos) -->
+        <!-- Cột 3: 4 thẻ đấu giá nổi bật thu nhỏ. JS điền sản phẩm thật và liên kết thẳng tới trang chi tiết phiên -->
         <div class="hero-v2__promos">
-          <a href="products.html?sort=ending" class="hero-v2__promo-card">
+          <a href="products.html?sort=ending" class="hero-v2__promo-card" id="hero-promo-ending">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--danger">Sắp hết giờ</span>
-              <h4 class="hero-v2__promo-title">Ryzen 5 5600 6C/12T</h4>
-              <span class="hero-v2__promo-sub">Còn 18 phút • Vào bid →</span>
+              <h4 class="hero-v2__promo-title" data-promo-title>Ryzen 5 5600 6C/12T</h4>
+              <span class="hero-v2__promo-sub" data-promo-sub>Vào bid →</span>
             </div>
-            <img src="images/products/cpu/1019-ryzen-5-5600-1.jpg" alt="" class="hero-v2__promo-img">
+            <img src="images/products/cpu/1019-ryzen-5-5600-1.jpg" alt="" class="hero-v2__promo-img" data-promo-img>
           </a>
 
-          <!-- Thẻ "Cạnh tranh nhất": JS tự cập nhật theo sản phẩm có nhiều lượt bid nhất -->
           <a href="products.html?sort=bids" class="hero-v2__promo-card" id="hero-promo-competitive">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--hot">Cạnh tranh nhất</span>
               <h4 class="hero-v2__promo-title" data-promo-title>RTX 3090 Master 24GB</h4>
-              <span class="hero-v2__promo-sub" data-promo-sub>26 lượt bid • Xem ngay →</span>
+              <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
             <img src="images/products/gpu/2015-rtx-3090-24gb-1.png" alt="" class="hero-v2__promo-img" data-promo-img>
           </a>
 
-          <a href="products.html?category=psu" class="hero-v2__promo-card">
+          <a href="products.html?category=psu" class="hero-v2__promo-card" id="hero-promo-psu">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--blue">Nguồn Gold 80+</span>
-              <h4 class="hero-v2__promo-title">NZXT C750 Gold 750W</h4>
-              <span class="hero-v2__promo-sub">Giá từ 1.200k →</span>
+              <h4 class="hero-v2__promo-title" data-promo-title>NZXT C750 Gold 750W</h4>
+              <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
-            <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="hero-v2__promo-img">
+            <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="hero-v2__promo-img" data-promo-img>
           </a>
 
-          <a href="products.html?category=cooling" class="hero-v2__promo-card">
+          <a href="products.html?category=cooling" class="hero-v2__promo-card" id="hero-promo-cooling">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--cool">Tản nhiệt đỉnh</span>
-              <h4 class="hero-v2__promo-title">Noctua NH-D15s Black</h4>
-              <span class="hero-v2__promo-sub">Test êm ái • Xem ngay →</span>
+              <h4 class="hero-v2__promo-title" data-promo-title>Noctua NH-D15S Chromax Black</h4>
+              <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
             <img src="images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg" alt=""
-              class="hero-v2__promo-img">
+              class="hero-v2__promo-img" data-promo-img>
           </a>
         </div>
 
@@ -971,39 +970,46 @@
 
       <div class="pcb-modal__body">
         <div class="pcb-cert-card">
+          <!-- Đầu phiếu: tên trung tâm, mã chứng chỉ và con dấu kết quả -->
           <div class="pcb-cert-card__head">
-            <div>
-              <h4 class="pcb-cert-card__title">TRUNG TÂM KIỂM ĐỊNH PHẦN CỨNG PCBID</h4>
-              <span style="font-size:11px; color:#64748b;">Mã chứng chỉ: #UIT-QC-2026-8892</span>
+            <div class="pcb-cert-card__org">
+              <span class="pcb-cert-card__eyebrow">Phiếu kiểm định phần cứng</span>
+              <h4 class="pcb-cert-card__title">Trung tâm kiểm định phần cứng PCBid</h4>
+              <span class="pcb-cert-card__code">Mã chứng chỉ: <strong>#UIT-QC-2026-8892</strong></span>
             </div>
-            <div class="pcb-cert-card__stamp">ĐẠT CHUẨN A+</div>
+            <div class="pcb-cert-card__stamp" role="img" aria-label="Kết quả: Đạt chuẩn A+">
+              <span class="pcb-cert-card__stamp-top">Đạt chuẩn</span>
+              <span class="pcb-cert-card__stamp-grade">A+</span>
+              <span class="pcb-cert-card__stamp-bottom">PCBid QC</span>
+            </div>
           </div>
 
-          <table class="pcb-cert-table">
-            <tr>
-              <td>Thiết bị kiểm định:</td>
-              <td>ASUS ROG Strix GeForce RTX 3070 8GB OC</td>
-            </tr>
-            <tr>
-              <td>Nhiệt độ Furmark (15P):</td>
-              <td style="color:#059669;">64.8°C (Quạt 58% - Rất mát)</td>
-            </tr>
-            <tr>
-              <td>Xung nhịp Boost thực tế:</td>
-              <td>1905 MHz (Ổn định 99.4%)</td>
-            </tr>
-            <tr>
-              <td>Tình trạng VRAM &amp; Tụ điện:</td>
-              <td>100% tụ rắn không phù, tem void SPC nguyên vẹn</td>
-            </tr>
-            <tr>
-              <td>Bảo đảm sàn PCBid:</td>
-              <td>Bao test 7 ngày 1 đổi 1 hoặc hoàn tiền ví cọc</td>
-            </tr>
-          </table>
+          <!-- Bảng kết quả đo thực tế -->
+          <dl class="pcb-cert-list">
+            <div class="pcb-cert-list__row">
+              <dt>Thiết bị kiểm định</dt>
+              <dd>ASUS ROG Strix GeForce RTX 3070 8GB OC</dd>
+            </div>
+            <div class="pcb-cert-list__row">
+              <dt>Nhiệt độ Furmark (15 phút)</dt>
+              <dd class="pcb-cert-list__good">64.8°C · quạt 58% · rất mát</dd>
+            </div>
+            <div class="pcb-cert-list__row">
+              <dt>Xung nhịp Boost thực tế</dt>
+              <dd>1905 MHz · ổn định 99.4%</dd>
+            </div>
+            <div class="pcb-cert-list__row">
+              <dt>Tình trạng VRAM &amp; tụ điện</dt>
+              <dd>100% tụ rắn không phù, tem void SPC nguyên vẹn</dd>
+            </div>
+            <div class="pcb-cert-list__row">
+              <dt>Bảo đảm của sàn PCBid</dt>
+              <dd>Bao test 7 ngày, 1 đổi 1 hoặc hoàn tiền về ví cọc</dd>
+            </div>
+          </dl>
 
-          <div
-            style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #cbd5e1; padding-top:8px; font-size:11px; color:#64748b;">
+          <!-- Chân phiếu: người kiểm định và ngày cấp -->
+          <div class="pcb-cert-card__foot">
             <span>Kiểm định viên: <strong>Nguyễn Trọng Thao (UIT Hardware Lab)</strong></span>
             <span>Ngày cấp: <strong>Hôm nay</strong></span>
           </div>
