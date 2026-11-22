@@ -96,42 +96,42 @@ const DEFAULT_SELLING = [
 const DEFAULT_WATCHLIST = [
   {
     id: 1012,
-    name: "Bộ vi xử lý Intel Core i5-13600K (14C/20T, Up to 5.1GHz)",
+    name: "Intel Core i5-13600K",
     category: "CPU",
-    currentBid: 5600000,
-    marketPriceNew: 8100000,
-    bidCount: 11,
+    currentBid: 6600000,
+    marketPriceNew: 8200000,
+    bidCount: 15,
     endTimestamp: Date.now() + 3 * 3600 * 1000 + 20 * 60 * 1000,
     images: ["images/products/cpu/1012-i5-13600k-1.jpg"],
     specs: ["LGA 1700", "5.1 GHz Max"]
   },
   {
     id: 2028,
-    name: "Card màn hình Gigabyte Radeon RX 7800 XT Gaming OC 16GB",
+    name: "Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB",
     category: "GPU",
-    currentBid: 12800000,
-    marketPriceNew: 16900000,
-    bidCount: 16,
+    currentBid: 12400000,
+    marketPriceNew: 15500000,
+    bidCount: 6,
     endTimestamp: Date.now() + 5 * 3600 * 1000 + 40 * 60 * 1000,
     images: ["images/products/gpu/2028-rx-7800-xt-1.jpg"],
     specs: ["16GB GDDR6", "256-bit"]
   },
   {
     id: 8007,
-    name: "Tản nhiệt khí Noctua NH-D15 chromax.black Dual Fan",
+    name: "Tản nhiệt Noctua NH-D15S Chromax Black",
     category: "Cooling",
-    currentBid: 2200000,
-    marketPriceNew: 3200000,
-    bidCount: 12,
+    currentBid: 1800000,
+    marketPriceNew: 2790000,
+    bidCount: 2,
     endTimestamp: Date.now() + 7 * 3600 * 1000,
     images: ["images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg"],
-    specs: ["140mm Dual", "TDP 250W"]
+    specs: ["Tản khí", "Màu đen"]
   },
   {
     id: 4013,
     name: "RAM G.SKILL Trident Z5 Neo RGB 64GB (2x32GB) 6000MHz DDR5",
     category: "RAM",
-    currentBid: 5300000,
+    currentBid: 5200000,
     marketPriceNew: 6890000,
     bidCount: 7,
     endTimestamp: Date.now() + 12 * 3600 * 1000,
@@ -306,6 +306,45 @@ function getSellingItems() {
   });
 }
 
+// Dữ liệu phiên mới nhất (danh mục + phiên tự đăng + lượt đặt giá thật), nạp bất đồng bộ khi mở trang
+let liveProductMap = new Map();
+
+/**
+ * Lấy hai thông số nổi bật của sản phẩm để hiện dạng chip trên thẻ
+ * @param {Object} specifications - Bảng thông số kỹ thuật
+ * @returns {string[]}
+ */
+function pickSpecChips(specifications) {
+  return Object.values(specifications || {})
+    .map(v => String(v).trim())
+    .filter(v => v && !/chưa có dữ liệu/i.test(v) && v.length <= 28)
+    .slice(0, 2);
+}
+
+/**
+ * Ghép thông tin mới nhất của phiên vào bản lưu trong watchlist
+ * (bản lưu chỉ là ảnh chụp lúc bấm theo dõi nên tên / giá / lượt đặt có thể đã cũ)
+ * @param {Object} item - Mục trong watchlist
+ * @returns {Object}
+ */
+function syncWithLiveProduct(item) {
+  const live = liveProductMap.get(Number(item.id));
+  if (!live) return item;
+  const chips = pickSpecChips(live.specifications);
+  return {
+    ...item,
+    name: live.name || item.name,
+    category: live.category || item.category,
+    images: live.images && live.images.length ? live.images : item.images,
+    currentBid: Number(live.currentBid) || item.currentBid,
+    bidCount: live.bidCount !== undefined ? Number(live.bidCount) : item.bidCount,
+    marketPriceNew: Number(live.marketPriceNew) || item.marketPriceNew,
+    endTime: live.endTime,
+    endTimestamp: getAuctionEndTimestamp(live),
+    specs: chips.length ? chips : item.specs
+  };
+}
+
 function getWatchlistItems() {
   const user = getCurrentUser();
   // Watchlist mẫu chỉ nạp cho tài khoản demo; tài khoản mới đăng ký bắt đầu với watchlist trống
@@ -314,21 +353,22 @@ function getWatchlistItems() {
     if (typeof item === 'number' || typeof item === 'string') {
       const idNum = Number(item);
       const sample = DEFAULT_WATCHLIST.find(x => x.id === idNum);
-      return sample || {
+      return syncWithLiveProduct(sample || {
         id: idNum,
         name: 'Linh kiện #' + idNum,
-        category: 'GPU',
-        currentBid: 2500000,
-        marketPriceNew: 4000000,
-        bidCount: 5,
+        category: 'Khác',
+        currentBid: 0,
+        marketPriceNew: 0,
+        bidCount: 0,
         endTimestamp: getAuctionEndTimestamp({ id: idNum }),
-        images: ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-        specs: ['Đã qua kiểm định Furmark']
-      };
+        images: ['images/placeholder-product.svg'],
+        specs: []
+      });
     }
-    if (!item.name) item.name = 'Linh kiện #' + (item.id || '');
-    if (!item.category) item.category = 'Khác';
-    return item;
+    const synced = syncWithLiveProduct({ ...item });
+    if (!synced.name) synced.name = 'Linh kiện #' + (synced.id || '');
+    if (!synced.category) synced.category = 'Khác';
+    return synced;
   });
 }
 
@@ -1597,6 +1637,13 @@ document.addEventListener('DOMContentLoaded', () => {
   //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
   applyHashRoute();
   window.addEventListener('hashchange', applyHashRoute);
+
+  // Nạp dữ liệu phiên mới nhất rồi vẽ lại để thẻ watchlist khớp đúng với trang chi tiết
+  loadAllAuctions().then(products => {
+    liveProductMap = new Map(products.map(p => [Number(p.id), p]));
+    updateCounters();
+    renderCurrentAuctionTab();
+  }).catch(() => {});
 
   // Đánh dấu thông báo đã đọc: từng thông báo, khi bấm Xem phiên, hoặc tất cả
   const notifyList = document.getElementById('notification-list');
