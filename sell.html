@@ -141,10 +141,13 @@
 
               <div class="pcb-form-group">
                 <label for="sell-model" class="pcb-form-label pcb-form-label--required">Mẫu sản phẩm chuẩn của sàn</label>
+                <!-- Tìm nhanh mẫu theo tên; không có trong danh sách thì chọn "Sản phẩm khác" để tự nhập -->
+                <input type="search" id="sell-model-search" class="pcb-form-input pcb-model-search" placeholder="Tìm mẫu theo tên (VD: 3070, B760, 990 Pro...)"
+                  aria-label="Tìm mẫu sản phẩm" autocomplete="off" disabled>
                 <select id="sell-model" name="model" class="pcb-form-select" disabled required>
                   <option value="" disabled selected>-- Vui lòng chọn danh mục trước --</option>
                 </select>
-                <span class="pcb-form-hint">Danh sách được lọc chính xác theo danh mục đã chọn</span>
+                <span class="pcb-form-hint" id="sell-model-hint">Danh sách được lọc theo danh mục đã chọn. Không thấy món của bạn? Chọn "Sản phẩm khác (tự nhập)".</span>
               </div>
             </div>
 
