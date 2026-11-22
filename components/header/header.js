@@ -101,58 +101,131 @@ function initLanguageSwitcher() {
    ========================================================================== */
 
 
-// Số thông báo tối đa hiển thị trong bảng nhanh
-const NOTIFY_PANEL_LIMIT = 6;
+// Số thông báo hiển thị trước khi bấm "Xem thông báo trước đó"
+const NOTIFY_PANEL_LIMIT = 5;
+
+// Trạng thái bảng thông báo nhanh: bộ lọc Tất cả / Chưa đọc, đã mở rộng danh sách, menu ba chấm
+const notifyState = { filter: 'all', expanded: false, menuOpen: false };
 
 /**
- * Đóng bảng thông báo nhanh
+ * Đóng bảng thông báo nhanh và đặt lại trạng thái thu gọn cho lần mở sau
  */
 function closeNotifyPanel() {
   const panel = document.getElementById('header-notify-panel');
   const btn = document.getElementById('header-notify-btn');
   if (panel) panel.hidden = true;
   if (btn) btn.setAttribute('aria-expanded', 'false');
+  notifyState.expanded = false;
+  notifyState.menuOpen = false;
 }
 
 /**
- * Render nội dung bảng thông báo nhanh theo dữ liệu mới nhất
+ * Đổi mốc thời gian thành dạng ngắn như "Vừa xong", "5 phút", "3 giờ", "2 ngày"
+ * @param {number} time - Mốc thời gian (ms)
+ * @returns {string}
+ */
+function formatNotifyAgo(time) {
+  if (!time) return '';
+  const minutes = Math.floor(Math.max(0, Date.now() - time) / 60000);
+  if (minutes < 1) return 'Vừa xong';
+  if (minutes < 60) return `${minutes} phút`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} giờ`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} ngày`;
+  return `${Math.floor(days / 7)} tuần`;
+}
+
+/**
+ * HTML một dòng thông báo: ảnh sản phẩm tròn kèm huy hiệu loại, nội dung và thời gian
+ * @param {Object} n - Thông báo
+ * @returns {string}
+ */
+function renderNotifyItem(n) {
+  const image = n.image || 'images/placeholder-product.svg';
+  return `
+    <li>
+      <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
+        <span class="header__notify-avatar">
+          <img src="${escapeHeaderHtml(image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+          <span class="header__notify-icon header__notify-icon--${n.type}">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 12 })}</span>
+        </span>
+        <span class="header__notify-body">
+          <span class="header__notify-item-title">${escapeHeaderHtml(n.title)}</span>
+          <span class="header__notify-item-msg">${escapeHeaderHtml(n.message)}</span>
+          <span class="header__notify-time">${formatNotifyAgo(n.eventTime)}</span>
+        </span>
+        ${n.read ? '' : '<span class="header__notify-dot"><span class="header__notify-sr">Chưa đọc</span></span>'}
+      </a>
+    </li>
+  `;
+}
+
+/**
+ * Render nội dung bảng thông báo nhanh theo dữ liệu mới nhất (bố cục giống bảng thông báo Facebook)
  */
 function renderNotifyPanel() {
   const panel = document.getElementById('header-notify-panel');
   if (!panel) return;
   const user = readLoggedInUser();
   if (!user) {
+    panel.classList.remove('header__notify-panel--expanded');
     panel.innerHTML = `
       <div class="header__notify-head"><strong class="header__notify-title">Thông báo</strong></div>
       <p class="header__notify-empty">Đăng nhập để nhận thông báo khi bị vượt giá, thắng phiên và theo dõi đơn hàng.</p>
-      <a href="login.html" class="header__notify-footer">Đăng nhập ngay</a>
+      <a href="login.html" class="header__notify-more">Đăng nhập ngay</a>
     `;
     return;
   }
+
   const all = getUserNotifications(user);
-  const unread = all.filter(n => !n.read);
-  const list = all.slice(0, NOTIFY_PANEL_LIMIT);
+  const unreadCount = all.filter(n => !n.read).length;
+  // Chưa đọc lên trước, trong cùng nhóm thì thông báo mới nhất đứng trên (sắp xếp trước khi cắt danh sách)
+  const filtered = (notifyState.filter === 'unread' ? all.filter(n => !n.read) : [...all])
+    .sort((a, b) => (a.read - b.read) || ((b.eventTime || 0) - (a.eventTime || 0)));
+  const shown = notifyState.expanded ? filtered : filtered.slice(0, NOTIFY_PANEL_LIMIT);
+  // Chia nhóm như Facebook: "Mới" (chưa đọc) và "Trước đó" (đã đọc)
+  const groups = [
+    { label: 'Mới', items: shown.filter(n => !n.read) },
+    { label: 'Trước đó', items: shown.filter(n => n.read) }
+  ].filter(g => g.items.length);
+
+  panel.classList.toggle('header__notify-panel--expanded', notifyState.expanded);
   panel.innerHTML = `
     <div class="header__notify-head">
-      <strong class="header__notify-title">Thông báo${unread.length ? ` <span class="header__notify-count">${unread.length} mới</span>` : ''}</strong>
-      <button type="button" class="header__notify-readall" data-notify-readall ${unread.length ? '' : 'disabled'}>Đánh dấu đã đọc</button>
+      <strong class="header__notify-title">Thông báo</strong>
+      <div class="header__notify-menu-wrap">
+        <button type="button" class="header__notify-menu-btn" data-notify-menu aria-label="Tùy chọn thông báo" aria-haspopup="true" aria-expanded="${notifyState.menuOpen}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" /></svg>
+        </button>
+        <div class="header__notify-menu" role="menu" ${notifyState.menuOpen ? '' : 'hidden'}>
+          <button type="button" role="menuitem" class="header__notify-menu-item" data-notify-readall ${unreadCount ? '' : 'disabled'}>
+            ${icon('check', { size: 16 })} Đánh dấu tất cả là đã đọc
+          </button>
+          <a role="menuitem" class="header__notify-menu-item" href="profile.html#notifications">
+            ${icon('bell', { size: 16 })} Mở trang thông báo
+          </a>
+        </div>
+      </div>
     </div>
-    ${list.length ? `
-      <ul class="header__notify-list">
-        ${list.map(n => `
-          <li>
-            <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
-              <span class="header__notify-icon header__notify-icon--${n.type}">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 18 })}</span>
-              <span class="header__notify-body">
-                <span class="header__notify-item-title">${escapeHeaderHtml(n.title)}</span>
-                <span class="header__notify-item-msg">${escapeHeaderHtml(n.message)}</span>
-              </span>
-              ${n.read ? '' : '<span class="header__notify-dot" aria-label="Chưa đọc"></span>'}
-            </a>
-          </li>
-        `).join('')}
-      </ul>` : '<p class="header__notify-empty">Chưa có thông báo nào. Đặt giá một phiên để bắt đầu nhận thông báo.</p>'}
-    <a href="profile.html#notifications" class="header__notify-footer">Xem tất cả thông báo${all.length > NOTIFY_PANEL_LIMIT ? ` (${all.length})` : ''}</a>
+    <div class="header__notify-tabs" role="group" aria-label="Lọc thông báo">
+      <button type="button" class="header__notify-tab${notifyState.filter === 'all' ? ' is-active' : ''}" data-notify-filter="all" aria-pressed="${notifyState.filter === 'all'}">Tất cả</button>
+      <button type="button" class="header__notify-tab${notifyState.filter === 'unread' ? ' is-active' : ''}" data-notify-filter="unread" aria-pressed="${notifyState.filter === 'unread'}">Chưa đọc</button>
+    </div>
+    <div class="header__notify-scroll">
+      ${groups.length ? groups.map((g, i) => `
+        <div class="header__notify-group-head">
+          <span class="header__notify-group">${g.label}</span>
+          ${i === 0 ? '<a href="profile.html#notifications" class="header__notify-seeall">Xem tất cả</a>' : ''}
+        </div>
+        <ul class="header__notify-list">${g.items.map(renderNotifyItem).join('')}</ul>
+      `).join('') : `<p class="header__notify-empty">${notifyState.filter === 'unread'
+        ? 'Bạn đã đọc hết thông báo.'
+        : 'Chưa có thông báo nào. Đặt giá một phiên để bắt đầu nhận thông báo.'}</p>`}
+      ${!notifyState.expanded && filtered.length > NOTIFY_PANEL_LIMIT
+        ? '<button type="button" class="header__notify-more" data-notify-more>Xem thông báo trước đó</button>'
+        : ''}
+    </div>
   `;
 }
 
@@ -182,9 +255,41 @@ function initNotifyPanel() {
 
   panel.addEventListener('click', e => {
     const user = readLoggedInUser();
+    // Các nút điều khiển vẽ lại bảng nên chặn lan sự kiện để bảng không tự đóng
     if (e.target.closest('[data-notify-readall]')) {
       e.stopPropagation();
       if (user) markNotificationsRead(user, getUserNotifications(user).map(n => n.id));
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    if (e.target.closest('[data-notify-menu]')) {
+      e.stopPropagation();
+      notifyState.menuOpen = !notifyState.menuOpen;
+      renderNotifyPanel();
+      return;
+    }
+    const filterBtn = e.target.closest('[data-notify-filter]');
+    if (filterBtn) {
+      e.stopPropagation();
+      notifyState.filter = filterBtn.dataset.notifyFilter;
+      notifyState.expanded = false;
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    // "Xem thông báo trước đó": hiện toàn bộ danh sách, bảng chuyển sang dạng cuộn
+    if (e.target.closest('[data-notify-more]')) {
+      e.stopPropagation();
+      notifyState.expanded = true;
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    // Bấm vùng khác trong bảng thì đóng menu ba chấm nếu đang mở
+    if (notifyState.menuOpen && !e.target.closest('.header__notify-menu')) {
+      e.stopPropagation();
+      notifyState.menuOpen = false;
       renderNotifyPanel();
       return;
     }

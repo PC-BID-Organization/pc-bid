@@ -589,8 +589,33 @@ function ensureWidget() {
       <input type="file" id="pcb-chat-file-video" accept="video/*" hidden>
     </div>
   `;
-  document.body.append(launcher, panel);
+  // Khung nhắc đăng nhập dành cho khách chưa đăng nhập bấm nút Tin nhắn
+  const guest = document.createElement('section');
+  guest.className = 'pcb-chat-guest';
+  guest.id = 'pcb-chat-guest';
+  guest.setAttribute('role', 'dialog');
+  guest.setAttribute('aria-labelledby', 'pcb-chat-guest-title');
+  guest.hidden = true;
+  guest.innerHTML = `
+    <button type="button" class="pcb-chat__icon-btn pcb-chat-guest__close" data-chat-close aria-label="Đóng">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+    </button>
+    <span class="pcb-chat-guest__icon">${icon('message-square', { size: 26 })}</span>
+    <h2 class="pcb-chat-guest__title" id="pcb-chat-guest-title">Đăng nhập để gửi tin nhắn</h2>
+    <p class="pcb-chat-guest__text">Trao đổi trực tiếp với người bán về tình trạng linh kiện, bảo hành và cách giao hàng.</p>
+    <a class="pcb-chat-guest__login" id="pcb-chat-guest-login" href="login.html">Đăng nhập</a>
+    <p class="pcb-chat-guest__alt">Chưa có tài khoản? <a href="register.html">Đăng ký</a></p>
+  `;
+
+  document.body.append(launcher, panel, guest);
   bindWidgetEvents(launcher, panel);
+  guest.addEventListener('click', e => {
+    if (e.target.closest('[data-chat-close]')) closeChat();
+  });
+  // Bấm ra ngoài khung nhắc đăng nhập thì đóng lại
+  document.addEventListener('click', e => {
+    if (!guest.hidden && !guest.contains(e.target) && !launcher.contains(e.target)) closeChat();
+  });
 }
 
 /**
@@ -1019,13 +1044,28 @@ function renderChat() {
   const panel = document.getElementById('pcb-chat');
   if (!launcher || !panel) return;
   const user = readLoggedInUser();
+  const guest = document.getElementById('pcb-chat-guest');
 
-  // Chưa đăng nhập: ẩn toàn bộ hộp chat
-  launcher.hidden = !user;
+  // Chưa đăng nhập: vẫn hiện nút Tin nhắn, bấm vào chỉ mở khung nhắc đăng nhập
   if (!user) {
     panel.hidden = true;
+    document.getElementById('pcb-chat-badge').hidden = true;
+    // Đang ở chính trang đăng nhập / đăng ký thì không cần nút nhắc đăng nhập
+    launcher.hidden = /(login|register)\.html$/.test(window.location.pathname);
+    launcher.setAttribute('aria-controls', 'pcb-chat-guest');
+    launcher.setAttribute('aria-expanded', String(state.open));
+    if (guest) {
+      guest.hidden = !state.open;
+      // Đăng nhập xong quay lại đúng trang đang xem
+      const back = `${window.location.pathname.split('/').pop() || 'index.html'}${window.location.search}${window.location.hash}`;
+      const loginLink = document.getElementById('pcb-chat-guest-login');
+      if (loginLink) loginLink.href = `login.html?redirect=${encodeURIComponent(back)}`;
+    }
     return;
   }
+  if (guest) guest.hidden = true;
+  launcher.hidden = false;
+  launcher.setAttribute('aria-controls', 'pcb-chat');
   const unread = getUnreadChatCount(user);
   const badge = document.getElementById('pcb-chat-badge');
   badge.textContent = unread;
