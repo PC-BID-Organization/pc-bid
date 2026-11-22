@@ -908,7 +908,29 @@ function renderMessageContent(m, role) {
         </a>
       </div>`;
   }
-  return `<p class="pcb-chat__bubble">${escapeHtml(m.text)}</p>`;
+  return renderTextBubble(m.text);
+}
+
+// Nhận diện một emoji (kể cả emoji ghép bằng ZWJ, có biến thể màu da hoặc ký tự biến thể FE0F)
+const EMOJI_PATTERN = /\p{Extended_Pictographic}(?:️|\p{Emoji_Modifier}|‍\p{Extended_Pictographic}️?)*/gu;
+
+/**
+ * Bong bóng tin nhắn chữ.
+ * - Tin chỉ toàn emoji: hiện cỡ to, không có nền bong bóng (giống Messenger) để emoji đỏ / cam không chìm vào nền cam
+ * - Tin có cả chữ và emoji: bọc từng emoji để thêm viền sáng, vẫn nhìn rõ trên bong bóng cam
+ * @param {string} text - Nội dung tin nhắn
+ * @returns {string}
+ */
+function renderTextBubble(text) {
+  const raw = String(text || '');
+  const emojis = raw.match(EMOJI_PATTERN) || [];
+  const onlyEmoji = emojis.length > 0 && raw.replace(EMOJI_PATTERN, '').replace(/[\s️‍]/g, '') === '';
+  if (onlyEmoji) {
+    const size = emojis.length <= 3 ? 'pcb-chat__bubble--emoji-lg' : '';
+    return `<p class="pcb-chat__bubble pcb-chat__bubble--emoji ${size}">${escapeHtml(raw)}</p>`;
+  }
+  const html = escapeHtml(raw).replace(EMOJI_PATTERN, e => `<span class="pcb-chat__emoji">${e}</span>`);
+  return `<p class="pcb-chat__bubble">${html}</p>`;
 }
 
 /**
