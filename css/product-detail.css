@@ -377,13 +377,25 @@
   line-height: 1.35;
 }
 
-/* Mô tả tình trạng chi tiết từ người bán */
+/* Mô tả tình trạng chi tiết từ người bán: trình bày như lời trích dẫn, chữ nghiêng có ngoặc kép */
 .pcb-pd__condition-text {
   font-size: 0.875rem;
+  font-style: italic;
   color: var(--color-text-muted);
   line-height: 1.6;
-  border-left: 3px solid var(--color-primary-light);
-  padding-left: 12px;
+}
+
+.pcb-pd__condition-text::before {
+  content: "\201C";
+}
+
+.pcb-pd__condition-text::after {
+  content: "\201D";
+}
+
+/* Không hiện cặp ngoặc kép khi chưa có nội dung mô tả */
+.pcb-pd__condition-text:empty {
+  display: none;
 }
 
 /* ==========================================================================
