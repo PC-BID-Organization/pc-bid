@@ -1635,9 +1635,9 @@
   display: none;
 }
 
-/* Thông báo chưa đọc: tiêu đề đậm, có chấm cam trước tiêu đề (không đổ bóng) */
+/* Thông báo chưa đọc: nền cam rất nhạt, có chấm cam trước tiêu đề */
 .pcb-notify--unread {
-  background-color: #ffffff;
+  background-color: #fffaf5;
 }
 
 /* Thông báo đã đọc: chữ nhạt hơn */

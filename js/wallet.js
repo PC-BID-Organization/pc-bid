@@ -317,9 +317,13 @@ export function getParticipatingAuctions(currentUser) {
         }
       : {};
 
+    // Thời điểm có lượt đặt giá gần nhất trên phiên (dùng để hiện "x giờ trước" ở thông báo)
+    const lastBidAt = allBidsOnItem.reduce((max, b) => Math.max(max, new Date(b.timestamp).getTime() || 0), 0);
+
     return {
       ...item,
       ...lifecycle,
+      lastBidAt,
       id: idNum,
       bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
       myBid: myHighestBid,
@@ -427,7 +431,8 @@ function getOrderNotifications(user, orders, formatVnd) {
     const isBuyer = isSameUser(user, o.buyerId, o.buyerUsername);
     const isSeller = isSameUser(user, o.sellerId, o.sellerUsername);
     if (!isBuyer && !isSeller) return;
-    const base = { productId: Number(o.productId), endTimestamp: new Date(o.updatedAt || o.createdAt).getTime() };
+    const changedAt = new Date(o.updatedAt || o.createdAt).getTime();
+    const base = { productId: Number(o.productId), endTimestamp: changedAt, eventTime: changedAt, image: o.image || '' };
     const name = o.productName;
     const price = formatVnd(o.finalPrice);
     const remaining = formatVnd((Number(o.finalPrice) || 0) - (Number(o.deposit) || 0));
@@ -475,7 +480,12 @@ export function getUserNotifications(user) {
   const notifications = getParticipatingAuctions(user).map(item => {
     const endTimestamp = getAuctionEndTimestamp(item);
     const remaining = endTimestamp - now;
-    const base = { productId: Number(item.id), endTimestamp };
+    // Thời điểm xảy ra sự kiện: phiên đã kết thúc lấy mốc kết thúc, còn lại lấy lượt đặt giá gần nhất.
+    // Phiên mẫu chưa có lượt đặt giá thật: lùi một khoảng cố định theo ID để thời gian ổn định giữa các lần tải
+    const fallbackTime = now - (((Number(item.id) * 37) % 70) + 2) * 3600 * 1000;
+    const eventTime = remaining <= 0 ? endTimestamp : (item.lastBidAt || fallbackTime);
+    const image = (item.images && item.images[0]) || '';
+    const base = { productId: Number(item.id), endTimestamp, eventTime, image };
 
     // Phiên đã kết thúc
     if (remaining <= 0) {
