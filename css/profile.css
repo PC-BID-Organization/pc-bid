@@ -2336,9 +2336,11 @@
     text-align: center;
   }
 
-  /* Điện thoại: thu gọn chữ "Công khai / Riêng tư" để nhãn và công tắc vừa một hàng */
+  /* Điện thoại: thu gọn chữ "Công khai / Riêng tư" nhưng giữ độ rộng cố định
+     để các nút gạt luôn thẳng hàng (chữ "Riêng tư" ngắn hơn "Công khai") */
   .pcb-privacy__item .pcb-switch__text {
-    min-width: 0;
+    width: 58px;
+    min-width: 58px;
     font-size: 0.75rem;
   }
 }

@@ -842,6 +842,14 @@ export const PHRASES = [
   ['-- Không có chứng nhận --', '-- No certificate --', '-- 証明なし --'],
   ['Mẫu này chưa có thông số. Bạn có thể tự thêm ở mục "Thông số bổ sung" bên dưới.', 'This model has no specs yet. Add your own under "Your extra specs" below.', 'このモデルには仕様がありません。下の「追加の仕様」で追加できます。'],
   ['Tiêu đề chưa hợp lệ', 'Invalid title', 'タイトルが無効です'],
+  ['Tìm mẫu theo tên (VD: 3070, B760, 990 Pro...)', 'Search models by name (e.g. 3070, B760, 990 Pro...)', 'モデル名で検索（例：3070、B760、990 Pro...）'],
+  ['Tìm mẫu sản phẩm', 'Search models', 'モデルを検索'],
+  ['Danh sách được lọc theo danh mục đã chọn. Không thấy món của bạn? Chọn "Sản phẩm khác (tự nhập)".', 'Filtered by the selected category. Can’t find your item? Choose "Other product (enter manually)".', '選択したカテゴリで絞り込まれます。見つからない場合は「その他の商品（手入力）」を選んでください。'],
+  ['+ Sản phẩm khác (tự nhập, không có trong danh sách)', '+ Other product (enter manually, not in the list)', '+ その他の商品（手入力・一覧にないもの）'],
+  ['-- Không tìm thấy mẫu phù hợp --', '-- No matching models --', '-- 該当するモデルがありません --'],
+  ['Bạn tự nhập', 'Entered by you', '手入力'],
+  ['Nhập tên sản phẩm của bạn (VD: Card màn hình Zotac RTX 3060 Twin Edge 12GB)', 'Enter your product name (e.g. Zotac RTX 3060 Twin Edge 12GB graphics card)', '商品名を入力（例：Zotac RTX 3060 Twin Edge 12GB）'],
+  ['Sản phẩm tự nhập chưa có thông số. Hãy thêm các thông số chính ở mục "Thông số bổ sung" bên dưới.', 'Manually entered products have no specs yet. Add the key specs under "Your extra specs" below.', '手入力の商品には仕様がありません。下の「追加の仕様」で主な仕様を追加してください。'],
   ['Tiêu đề phiên đấu giá cần từ 5 đến 120 ký tự.', 'The auction title must be 5 to 120 characters.', 'オークションのタイトルは5〜120文字にしてください。'],
 
   /* ---------- Người bán chỉnh sửa phiên sau khi đăng ---------- */
@@ -920,6 +928,7 @@ export const PATTERNS = [
   [/^Đang ở: Bước (\d) – (.+) · Tiếp theo: Bước (\d) – (.+)$/, 'Now: step $1 · Next: step $3', '現在：ステップ $1 · 次：ステップ $3'],
   [/^Còn (\d+) phút • Vào bid →$/, '$1 min left • Bid →', '残り$1分 • 入札 →'],
   [/^(\d+) lượt bid • Xem ngay →$/, '$1 bids • View →', '$1件の入札 • 見る →'],
+  [/^-- (\d+) mẫu phù hợp --$/, '-- $1 matching models --', '-- 該当モデル $1件 --'],
   [/^(\d+) nhân \/ (\d+) luồng$/, '$1 cores / $2 threads', '$1コア / $2スレッド'],
   [/^(\d+) nhân \((\d+)P \+ (\d+)E\) \/ (\d+) luồng$/, '$1 cores ($2P + $3E) / $4 threads', '$1コア ($2P + $3E) / $4スレッド'],
   [/^(\d) khe (DDR\d) \(Tối đa (\d+GB)\)$/, '$1 × $2 slots (max $3)', '$2 スロット×$1（最大 $3）'],

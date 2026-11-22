@@ -1199,3 +1199,8 @@ button.pcb-thumb-item {
 .pcb-card__seal[hidden] {
   display: none;
 }
+
+/* Ô tìm mẫu sản phẩm nằm ngay trên danh sách mẫu */
+.pcb-model-search {
+  margin-bottom: 8px;
+}
