@@ -35,7 +35,7 @@
 }
 
 .pcb-profile__breadcrumb-link:hover {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-profile__breadcrumb-separator {
@@ -44,7 +44,7 @@
 }
 
 .pcb-profile__breadcrumb-current {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   font-weight: 600;
 }
 
@@ -89,7 +89,7 @@
   height: 96px;
   border-radius: 50%;
   border: 3px solid #ffedd5;
-  background: linear-gradient(135deg, var(--color-primary, #ea580c), #f97316);
+  background: linear-gradient(135deg, var(--color-primary, #c9450a), #f97316);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,6 +157,21 @@
   margin-bottom: 18px;
 }
 
+/* Tài khoản chưa đủ thông tin: nhãn màu xám, kèm dòng gợi ý bên dưới */
+.pcb-user-card__tag--pending {
+  margin-bottom: 6px;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pcb-user-card__verify-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
 /* Khung ví ảo mô phỏng (Virtual Wallet) */
 .pcb-wallet {
   background-color: #fff7ed;
@@ -184,7 +199,7 @@
 
 .pcb-wallet__badge {
   background-color: rgba(209, 250, 229, 0.85);
-  color: #059669;
+  color: #047857;
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
@@ -195,7 +210,7 @@
   font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   letter-spacing: -0.02em;
   margin-bottom: 10px;
 }
@@ -224,8 +239,8 @@
 .pcb-wallet__deposit-btn {
   width: 100%;
   background-color: #ffffff;
-  border: 1px solid var(--color-primary, #ea580c);
-  color: var(--color-primary, #ea580c);
+  border: 1px solid var(--color-primary, #c9450a);
+  color: var(--color-primary, #c9450a);
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 13px;
@@ -239,7 +254,7 @@
 }
 
 .pcb-wallet__deposit-btn:hover {
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 }
@@ -348,7 +363,7 @@
   height: 36px;
   border-radius: 8px;
   background-color: #ffedd5;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -442,7 +457,7 @@
 
 /* Nút bấm tiện ích chung */
 .pcb-btn-primary {
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -532,11 +547,11 @@
 }
 
 .pcb-tab:hover {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-tab--active {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   font-weight: 700;
 }
 
@@ -547,7 +562,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   border-radius: 2px 2px 0 0;
 }
 
@@ -604,7 +619,7 @@
 }
 
 .pcb-filter-bar__input:focus {
-  border-color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
 }
 
@@ -745,7 +760,7 @@
 }
 
 .pcb-auction-card__title:hover {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-auction-card__specs {
@@ -793,7 +808,7 @@
 }
 
 .pcb-stat-col__val--primary {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   font-size: 17px;
 }
 
@@ -827,7 +842,7 @@
 
 /* Nút Trả giá tiếp nổi bật (Re-bid Button) */
 .pcb-btn-rebid {
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -1019,7 +1034,7 @@
 
 .pcb-form__default-badge {
   font-size: 11px;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   font-weight: 600;
 }
 
@@ -1055,7 +1070,7 @@
 
 .pcb-input:focus,
 .pcb-textarea:focus {
-  border-color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
 }
 
@@ -1150,8 +1165,8 @@
 }
 
 .pcb-checkbox:checked ~ .pcb-checkbox-custom {
-  background-color: var(--color-primary, #ea580c);
-  border-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
+  border-color: var(--color-primary, #c9450a);
 }
 
 .pcb-checkbox:checked ~ .pcb-checkbox-custom::after {
@@ -1204,12 +1219,16 @@
   padding: 16px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  /* Khi đóng: ẩn hẳn (visibility) sau khi mờ dần để phím Tab và trình đọc màn hình bỏ qua nội dung bên trong */
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
 
 .pcb-modal--open {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s;
 }
 
 .pcb-modal__overlay {
@@ -1314,14 +1333,14 @@
 }
 
 .pcb-preset-btn:hover {
-  border-color: var(--color-primary, #ea580c);
-  color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-preset-btn--selected {
   background-color: #fff7ed;
-  border-color: var(--color-primary, #ea580c);
-  color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
+  color: var(--color-primary, #c9450a);
 }
 
 /* Chi tiết khung Trả giá nhanh */
@@ -1394,7 +1413,7 @@
 .pcb-quick-bid__new-val {
   font-family: var(--font-family-heading, 'Space Grotesk', sans-serif);
   font-size: 18px;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   font-weight: 800;
 }
 
@@ -1418,13 +1437,13 @@
 }
 
 .pcb-mult-btn:hover {
-  border-color: var(--color-primary, #ea580c);
-  color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-mult-btn--active {
   background-color: #ffedd5;
-  border-color: var(--color-primary, #ea580c);
+  border-color: var(--color-primary, #c9450a);
   color: #c2410c;
 }
 
@@ -1794,7 +1813,7 @@
 
 .pcb-user-card__avatar-edit:hover,
 .pcb-user-card__avatar-edit:focus-visible {
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
 }
 
 .pcb-user-card__avatar-remove {
@@ -1814,7 +1833,7 @@
   margin: -6px 0 12px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   text-decoration: none;
 }
 
@@ -1888,7 +1907,7 @@
 }
 
 .pcb-cropper__stage:focus-visible {
-  outline: 3px solid var(--color-primary, #ea580c);
+  outline: 3px solid var(--color-primary, #c9450a);
   outline-offset: 2px;
 }
 
@@ -1920,7 +1939,7 @@
 
 .pcb-cropper__range {
   flex: 1;
-  accent-color: var(--color-primary, #ea580c);
+  accent-color: var(--color-primary, #c9450a);
 }
 
 .pcb-cropper__actions {
@@ -1945,7 +1964,7 @@
 
 .pcb-cropper__btn--primary {
   color: #ffffff;
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   border: none;
 }
 
@@ -1989,14 +2008,14 @@
 }
 
 .pcb-birthdate__eye[aria-pressed="true"] {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-birthdate__change {
   padding: 6px 10px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-birthdate__eye:hover,
@@ -2153,7 +2172,7 @@
   overflow: hidden;
   border-radius: 50%;
   border: 3px solid #ffedd5;
-  background: linear-gradient(135deg, var(--color-primary, #ea580c), #f97316);
+  background: linear-gradient(135deg, var(--color-primary, #c9450a), #f97316);
   font-size: 34px;
   font-weight: 700;
   color: #ffffff;
@@ -2283,7 +2302,7 @@
 .pcb-public-card__meta {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-public-card__badge {
@@ -2341,7 +2360,7 @@
   font-size: 0.8125rem;
   font-weight: 700;
   color: #ffffff;
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   border-radius: 8px;
   text-decoration: none;
   white-space: nowrap;
@@ -2412,7 +2431,7 @@
 
 .pcb-public__contact a:hover,
 .pcb-public__contact a:focus-visible {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   text-decoration: underline;
 }
 
@@ -2430,7 +2449,7 @@
   font: inherit;
   font-size: 13px;
   font-weight: 700;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   cursor: pointer;
   background-color: #fff7ed;
   border: 1px solid #fed7aa;
@@ -2485,8 +2504,8 @@
 
 .pcb-trade-settings-link:hover,
 .pcb-trade-settings-link:focus-visible {
-  color: var(--color-primary, #ea580c);
-  border-color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
+  border-color: var(--color-primary, #c9450a);
 }
 
 .pcb-profile--trade .pcb-trade-settings-link {
@@ -2527,11 +2546,11 @@
 
 .pcb-trade-switch__btn:hover,
 .pcb-trade-switch__btn:focus-visible {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
 }
 
 .pcb-trade-switch__btn--active {
-  color: var(--color-primary, #ea580c);
+  color: var(--color-primary, #c9450a);
   background-color: #ffffff;
   box-shadow: 0 1px 4px rgba(11, 28, 48, 0.1);
 }
@@ -2686,7 +2705,7 @@
   font-weight: 700;
   color: #ffffff;
   cursor: pointer;
-  background-color: var(--color-primary, #ea580c);
+  background-color: var(--color-primary, #c9450a);
   border: none;
   border-radius: 10px;
   transition: background-color 0.2s ease;
@@ -2743,4 +2762,57 @@
 
 .pcb-birthdate__change[hidden] {
   display: none;
+}
+
+/* ==========================================================================
+   CÁC CLASS THAY CHO INLINE STYLE TRONG TRANG HỒ SƠ
+   ========================================================================== */
+.pcb-form__grid--narrow {
+  max-width: 580px;
+}
+
+.pcb-form__actions--spaced {
+  margin-top: 24px;
+}
+
+/* Ô nhập số tiền nạp ví: đơn vị VND nằm bên phải trong ô */
+.pcb-input-icon-wrap--deposit {
+  position: relative;
+  margin-top: 14px;
+}
+
+.pcb-input-icon-wrap__unit {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-weight: 700;
+  color: #565e74;
+}
+
+/* Nút "Đăng bán lại" màu xám cho phiên đã kết thúc */
+.pcb-btn-rebid--muted {
+  background-color: #565e74;
+}
+
+/* Giá trị thống kê: người thắng (xanh) / chưa có người thắng (xám) */
+.pcb-stat-col__val--winner {
+  color: #047857;
+}
+
+.pcb-stat-col__val--muted {
+  color: #64748b;
+}
+
+/* Nút chính cỡ nhỏ trong thẻ watchlist */
+.pcb-btn-primary--small {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+/* Danh mục sản phẩm trong hộp thoại trả giá nhanh */
+.pcb-quick-bid-item__category {
+  font-size: 11px;
+  font-weight: 700;
+  color: #c9450a;
+  text-transform: uppercase;
 }

@@ -460,6 +460,11 @@ function initFilterEventListeners() {
     });
   }
 
+  // Nút "Xóa toàn bộ bộ lọc" trong trạng thái không có kết quả (được vẽ lại nên dùng ủy quyền sự kiện)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-reset-filters]')) resetAllFilters();
+  });
+
   // Nút toggle filter trên mobile
   const filterToggleBtn = document.getElementById('filter-toggle-btn');
   const filterSidebar = document.getElementById('pcb-filter-sidebar');
@@ -721,7 +726,7 @@ function renderCurrentPage() {
         </svg>
         <h3 class="pcb-empty-state__title">Không tìm thấy linh kiện phù hợp</h3>
         <p class="pcb-empty-state__desc">Thử nới lỏng các tiêu chí bộ lọc giá, danh mục hoặc tìm kiếm bằng từ khóa khác.</p>
-        <button type="button" class="pcb-filter__price-apply" style="width:auto; padding:8px 20px;" onclick="document.getElementById('reset-filter-btn').click()">
+        <button type="button" class="pcb-filter__price-apply pcb-filter__price-apply--inline" data-reset-filters>
           Xóa toàn bộ bộ lọc
         </button>
       </div>
@@ -871,10 +876,10 @@ function renderPagination(totalItems) {
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   if (totalPages <= 1) {
-    container.style.display = 'none';
+    container.hidden = true;
     return;
   }
-  container.style.display = 'flex';
+  container.hidden = false;
 
   let html = `
     <a href="#" class="pcb-pagination__item ${currentPage === 1 ? 'pcb-pagination__item--disabled' : ''}" data-page="prev" aria-label="Trang trước">

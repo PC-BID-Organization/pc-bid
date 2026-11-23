@@ -13,7 +13,9 @@ import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from '.
 // Bộ sinh lịch sử đặt giá mẫu dùng chung
 import { buildMockBids } from './bid-history.js';
 // Họ tên, UID và avatar chữ cái của người dùng
-import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
+import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid, getAllAccounts } from './accounts.js';
+// Trạng thái xác thực của người bán là thành viên (đủ email, số điện thoại, địa chỉ)
+import { getVerificationStatus } from './address-book.js';
 // Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
 import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -630,6 +632,14 @@ function hienThiNguoiBan(tenNguoiBan) {
   const oUid = document.getElementById('pcb-pd-seller-uid');
   if (oUid) oUid.textContent = `UID: ${maskUid(getUserUid(taiKhoan?.id || `seller_${tenNguoiBan}`))}`;
 
+  // Nhãn "Đã xác thực": người bán mẫu của sàn luôn được xác thực; thành viên tự đăng ký thì
+  // chỉ có nhãn khi đã bổ sung đủ email, số điện thoại và địa chỉ nhận hàng
+  const nhanXacThuc = document.getElementById('pcb-pd-seller-badge');
+  if (nhanXacThuc) {
+    const laThanhVien = getAllAccounts().some(a => a.username === tenNguoiBan);
+    nhanXacThuc.hidden = laThanhVien && !getVerificationStatus(taiKhoan).verified;
+  }
+
   // Nút liên hệ người bán: ẩn khi chính người bán xem phiên của mình
   const nutLienHe = document.getElementById('pcb-pd-contact-seller');
   if (nutLienHe) {
@@ -974,7 +984,7 @@ function renderThongSo(thongSo) {
 
   const mục = Object.entries(thongSo);
   if (mục.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color: var(--color-text-muted);">Chưa có thông số kỹ thuật.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="2" class="pcb-pd__specs-empty">Chưa có thông số kỹ thuật.</td></tr>';
     return;
   }
 

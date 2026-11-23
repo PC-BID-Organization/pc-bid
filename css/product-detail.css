@@ -560,7 +560,7 @@
   align-items: center;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #16A34A;
+  color: #15803D;
   background-color: #DCFCE7;
   border-radius: 4px;
   padding: 2px 6px;
@@ -870,7 +870,7 @@
 .pcb-pd__seller-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #16A34A;
+  color: #15803D;
   background-color: #DCFCE7;
   padding: 4px 10px;
   border-radius: 20px;
@@ -1831,4 +1831,10 @@ a.pcb-pd__seller-avatar {
 
 .pcb-pd__owner-btn[hidden] {
   display: none;
+}
+
+/* Bảng thông số trống */
+.pcb-pd__specs-empty {
+  text-align: center;
+  color: var(--color-text-muted);
 }

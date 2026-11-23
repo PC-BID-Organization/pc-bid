@@ -13,7 +13,7 @@ import { icon, NOTIFY_ICON_NAMES } from './icons.js';
 // Mở hội thoại với tài khoản đang xem hồ sơ
 import { openChatWithUser } from './chat.js';
 // Sổ địa chỉ nhận hàng
-import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo } from './address-book.js';
+import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo, getVerificationStatus } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
@@ -505,7 +505,7 @@ function renderSellingCard(item) {
       Đã kết thúc
     </span>`;
     actionButtonsHtml = `
-      <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid" style="background-color: #565E74;">Đăng bán lại</a>
+      <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid pcb-btn-rebid--muted">Đăng bán lại</a>
       <a href="${detailUrl}" class="pcb-btn-detail">Xem lại</a>
     `;
   }
@@ -553,7 +553,7 @@ function renderSellingCard(item) {
           ` : `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Người mua thắng</span>
-              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
+              <span class="pcb-stat-col__val ${item.highestBidder ? 'pcb-stat-col__val--winner' : 'pcb-stat-col__val--muted'}">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
             </div>
           `}
 
@@ -609,7 +609,7 @@ function renderWatchlistCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá thị trường mới</span>
-            <span class="pcb-stat-col__val" style="color: #64748B;">${formatVnd(item.marketPriceNew || item.currentBid * 1.5)}</span>
+            <span class="pcb-stat-col__val pcb-stat-col__val--muted">${formatVnd(item.marketPriceNew || item.currentBid * 1.5)}</span>
           </div>
 
           <div class="pcb-stat-col">
@@ -628,7 +628,7 @@ function renderWatchlistCard(item) {
       </div>
 
       <div class="pcb-auction-card__actions">
-        <a href="${detailUrl}" class="pcb-btn-primary" style="padding: 8px 14px; font-size: 13px;">
+        <a href="${detailUrl}" class="pcb-btn-primary pcb-btn-primary--small">
           Vào đấu giá ngay
         </a>
         <button type="button" class="pcb-btn-unwatch" data-action="unwatch" data-id="${item.id}" title="Xóa khỏi danh sách theo dõi">
@@ -665,6 +665,26 @@ let currentMultiplier = 1;
 /**
  * Cập nhật số dư và thông tin người dùng lên toàn bộ giao diện
  */
+/**
+ * Nhãn xác thực ở thẻ tài khoản: chỉ "Đã xác thực" khi có đủ email, số điện thoại và địa chỉ nhận hàng,
+ * ngược lại hiện "Chưa xác thực" kèm gợi ý các mục cần bổ sung
+ * @param {Object} user - Người dùng đang đăng nhập
+ */
+function renderVerificationStatus(user) {
+  const { verified, missing } = getVerificationStatus(user);
+  const tag = document.getElementById('sidebar-verified-tag');
+  const text = document.getElementById('sidebar-verified-text');
+  const badge = document.getElementById('sidebar-verified-badge');
+  const hint = document.getElementById('sidebar-verify-hint');
+  if (tag) tag.classList.toggle('pcb-user-card__tag--pending', !verified);
+  if (text) text.textContent = verified ? 'Tài khoản đã xác thực' : 'Chưa xác thực';
+  if (badge) badge.hidden = !verified;
+  if (hint) {
+    hint.hidden = verified;
+    hint.textContent = verified ? '' : `Bổ sung ${missing.join(', ')} để được xác thực.`;
+  }
+}
+
 function syncUserInfoUI() {
   const user = getCurrentUser();
   if (!user) {
@@ -691,6 +711,7 @@ function syncUserInfoUI() {
   // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
   if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
+  renderVerificationStatus(user);
 
   // Form Account
   const lastNameInput = document.getElementById('input-lastname');
@@ -890,12 +911,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderParticipatingCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'selling') {
@@ -911,12 +932,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderSellingCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'watchlist') {
@@ -932,12 +953,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderWatchlistCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'buy-orders' || currentActiveTab === 'sell-orders') {
@@ -957,8 +978,8 @@ function renderCurrentAuctionTab() {
     const empty = document.getElementById(`empty-${currentActiveTab}`);
     if (grid && empty) {
       grid.innerHTML = filtered.map(order => renderOrderCard(order, order.role, { showProduct: true })).join('');
-      grid.style.display = filtered.length ? 'grid' : 'none';
-      empty.style.display = filtered.length ? 'none' : 'block';
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
       bindOrderActions(grid, () => {
         renderCurrentAuctionTab();
         syncUserInfoUI();
@@ -980,7 +1001,7 @@ function switchSection(sectionId) {
 
   // Ẩn tất cả các sections
   document.querySelectorAll('.pcb-section').forEach(sec => {
-    sec.style.display = sec.id === sectionId ? 'block' : 'none';
+    sec.hidden = sec.id !== sectionId;
   });
 
   // Cập nhật trạng thái active nút sidebar
@@ -1079,13 +1100,13 @@ function renderNotifications() {
 
   if (notifications.length === 0) {
     listEl.innerHTML = '';
-    listEl.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = 'block';
+    listEl.hidden = true;
+    if (emptyEl) emptyEl.hidden = false;
     return;
   }
 
-  listEl.style.display = 'flex';
-  if (emptyEl) emptyEl.style.display = 'none';
+  listEl.hidden = false;
+  if (emptyEl) emptyEl.hidden = true;
   listEl.innerHTML = notifications.map(n => `
     <li class="pcb-notify pcb-notify--${n.type} ${n.read ? 'pcb-notify--read' : 'pcb-notify--unread'}" data-notify-id="${escapeHtml(n.id)}">
       <span class="pcb-notify__icon">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 20 })}</span>
@@ -1329,7 +1350,7 @@ async function renderPublicProfile(username) {
   // Ẩn thanh bên quản lý cá nhân, chỉ hiện khu vực hồ sơ công khai
   document.body.classList.add('pcb-profile--public');
   document.querySelectorAll('.pcb-section').forEach(sec => {
-    sec.style.display = sec.id === 'section-public' ? 'block' : 'none';
+    sec.hidden = sec.id !== 'section-public';
   });
   const breadcrumbCurrent = document.getElementById('breadcrumb-current');
   if (breadcrumbCurrent) breadcrumbCurrent.textContent = 'Hồ sơ công khai';
@@ -1545,7 +1566,7 @@ function setupQuickBid(productId) {
     infoContainer.innerHTML = `
       <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-quick-bid-item__img">
       <div>
-        <div style="font-size:11px; color:#EA580C; font-weight:700; text-transform:uppercase;">${escapeHtml(item.category)}</div>
+        <div class="pcb-quick-bid-item__category">${escapeHtml(item.category)}</div>
         <div class="pcb-quick-bid-item__title">${escapeHtml(item.name)}</div>
       </div>
     `;
@@ -1637,6 +1658,11 @@ document.addEventListener('DOMContentLoaded', () => {
   //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
   applyHashRoute();
   window.addEventListener('hashchange', applyHashRoute);
+
+  // Thêm / xóa địa chỉ hoặc cập nhật email, số điện thoại: tính lại nhãn xác thực ngay
+  const refreshVerification = () => renderVerificationStatus(getCurrentUser());
+  window.addEventListener('pcbid:addresses-updated', refreshVerification);
+  window.addEventListener('pcbid:account-updated', refreshVerification);
 
   // Nạp dữ liệu phiên mới nhất rồi vẽ lại để thẻ watchlist khớp đúng với trang chi tiết
   loadAllAuctions().then(products => {

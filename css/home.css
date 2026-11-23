@@ -9,8 +9,8 @@
    0. THIẾT LẬP BIẾN TOÀN TRANG & TOKENS MÀU SẮC
    -------------------------------------------------------------------------- */
 :root {
-  --pcb-primary: #ea580c;
-  --pcb-primary-hover: #c2410c;
+  --pcb-primary: #c9450a;
+  --pcb-primary-hover: #a93a08;
   --pcb-primary-light: #fff7ed;
   --pcb-primary-subtle: #ffedd5;
   --pcb-primary-dark: #9a3412;
@@ -22,7 +22,7 @@
   --pcb-text-main: #0f172a;
   --pcb-text-secondary: #475569;
   --pcb-text-muted: #64748b;
-  --pcb-text-faint: #94a3b8;
+  --pcb-text-faint: #64748b;
 
   --pcb-bg-canvas: #f8fafc;
   --pcb-bg-card: #ffffff;
@@ -31,13 +31,13 @@
 
   --pcb-border-light: #e2e8f0;
   --pcb-border-medium: #cbd5e1;
-  --pcb-border-focus: #ea580c;
+  --pcb-border-focus: #c9450a;
 
   --pcb-danger: #dc2626;
   --pcb-danger-soft: #fef2f2;
   --pcb-danger-border: #fecaca;
 
-  --pcb-success: #059669;
+  --pcb-success: #047857;
   --pcb-success-soft: #ecfdf5;
   --pcb-success-border: #a7f3d0;
 
@@ -478,7 +478,7 @@
 }
 
 .hero-v2__title-accent {
-  background: linear-gradient(90deg, #ffedd5 0%, #fb923c 60%, #ea580c 100%);
+  background: linear-gradient(90deg, #ffedd5 0%, #fb923c 60%, #c9450a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -513,7 +513,7 @@
 }
 
 .hero-v2__btn--primary {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #f97316 0%, #c9450a 100%);
   color: #ffffff;
   box-shadow: 0 4px 14px 0 rgba(234, 88, 12, 0.45);
 }
@@ -670,7 +670,7 @@
 .hero-v2__spotlight-action {
   width: 100%;
   padding: 9px;
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  background: linear-gradient(135deg, #c9450a 0%, #c2410c 100%);
   border: none;
   border-radius: var(--pcb-radius-sm);
   color: #ffffff;
@@ -685,7 +685,7 @@
 }
 
 .hero-v2__spotlight-action:hover {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #f97316 0%, #c9450a 100%);
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
 }
 
@@ -852,7 +852,7 @@
 
 .pcb-trust__icon--orange {
   background: #ffedd5;
-  color: #ea580c;
+  color: #c9450a;
 }
 .pcb-trust__icon--blue {
   background: #eff6ff;
@@ -935,7 +935,7 @@
 }
 .pcb-shelf__icon--clock {
   background: #ffedd5;
-  color: #ea580c;
+  color: #c9450a;
 }
 .pcb-shelf__icon--star {
   background: #fef3c7;
@@ -1255,7 +1255,7 @@
 
 .pcb-card__progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  background: linear-gradient(90deg, #f59e0b, #c9450a);
   border-radius: 2px;
 }
 
@@ -1526,7 +1526,7 @@
   font-family: var(--pcb-font-heading);
   font-size: 22px;
   font-weight: 800;
-  color: var(--pcb-border-medium);
+  color: var(--pcb-text-faint);
   position: absolute;
   top: 10px;
   right: 12px;
@@ -2026,7 +2026,7 @@
 .pcb-modal__submit {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #f97316 0%, #c9450a 100%);
   border: none;
   border-radius: var(--pcb-radius-sm);
   color: #ffffff;
@@ -2038,7 +2038,7 @@
 }
 
 .pcb-modal__submit:hover {
-  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #fb923c 0%, #c9450a 100%);
   transform: translateY(-1px);
 }
 
@@ -2081,7 +2081,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #ea580c;
+  color: #c9450a;
 }
 
 .pcb-cert-card__title {
@@ -2528,7 +2528,7 @@
 /* Icon ngọn lửa trên băng chuyền trực tiếp */
 .pcb-ticker__flame {
   display: inline-flex;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   vertical-align: -2px;
 }
 
@@ -2554,4 +2554,69 @@
     gap: 6px;
     font-size: 12px;
   }
+}
+
+/* ==========================================================================
+   CÁC CLASS THAY CHO INLINE STYLE TRÊN TRANG CHỦ
+   ========================================================================== */
+/* Số lượt bid trong khung Đang đấu trực tiếp */
+.hero-v2__spotlight-count {
+  color: #fdba74;
+}
+
+/* Dòng gợi ý bấm ảnh cạnh tiêu đề thư viện ảnh */
+.pcb-gallery__hint {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Biểu tượng ngôi sao của kệ "Mới lên sàn" */
+.pcb-shelf__icon--star {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+/* Hộp thoại đặt giá nhanh: nhãn giá, bước giá và nhãn chọn mức tăng */
+.pcb-modal__price-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.pcb-modal__price-side {
+  text-align: right;
+}
+
+.pcb-modal__step-info {
+  font-size: 11px;
+  color: #475569;
+}
+
+.pcb-modal__field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pcb-modal__submit--spaced {
+  margin-top: 16px;
+}
+
+/* Nhãn "Mới lên sàn" trên thẻ sản phẩm */
+.pcb-card__countdown--new {
+  background: #047857;
+}
+
+.pcb-card__new-label {
+  font-size: 10px;
+}
+
+/* Thông báo trống của một kệ sản phẩm */
+.pcb-shelf__empty {
+  grid-column: 1 / -1;
+  padding: 30px;
+  text-align: center;
+  color: #64748b;
 }

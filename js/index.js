@@ -425,8 +425,8 @@ function renderProductCard(product, options = {}) {
     `;
   } else if (options.isNew) {
     countdownMarkup = `
-      <div class="pcb-card__countdown" style="background:#059669;">
-        <span style="font-size:10px;">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
+      <div class="pcb-card__countdown pcb-card__countdown--new">
+        <span class="pcb-card__new-label">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
       </div>
     `;
   }
@@ -532,7 +532,7 @@ function renderHotAuctionsShelf() {
   const items = filtered.slice(0, 5);
   
   if (items.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">Chưa có phiên phù hợp trong nhóm này.</div>';
+    container.innerHTML = '<div class="pcb-shelf__empty">Chưa có phiên phù hợp trong nhóm này.</div>';
     return;
   }
   container.innerHTML = items.map(p => renderProductCard(p, { showCountdown: false })).join('');
@@ -646,7 +646,7 @@ function renderSpotlight() {
 
   if (nameEl) {
     nameEl.textContent = product.name;
-    nameEl.closest('h3')?.setAttribute('title', product.name);
+    nameEl.closest('h2')?.setAttribute('title', product.name);
   }
   if (imgEl && product.images && product.images[0]) {
     imgEl.src = encodePath(product.images[0]);
@@ -902,7 +902,7 @@ function openQuickBidModal(productId) {
   const modalBackdrop = document.getElementById('pcb-bid-modal');
   if (!modalBackdrop) return;
 
-  document.getElementById('pcb-modal-img').src = product.images && product.images[0] ? encodePath(product.images[0]) : '';
+  document.getElementById('pcb-modal-img').src = product.images && product.images[0] ? encodePath(product.images[0]) : 'images/placeholder-product.svg';
   document.getElementById('pcb-modal-name').textContent = product.name;
   document.getElementById('pcb-modal-cond').textContent = product.condition || 'Đã kiểm định Furmark';
   document.getElementById('pcb-modal-cur-bid').textContent = formatVnd(product.currentBid);
@@ -1135,8 +1135,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const endingTabs = document.querySelectorAll('[data-ending-tab]');
   endingTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      endingTabs.forEach(t => t.classList.remove('pcb-shelf__tab--active'));
+      endingTabs.forEach(t => {
+        t.classList.remove('pcb-shelf__tab--active');
+        t.setAttribute('aria-pressed', 'false');
+      });
       tab.classList.add('pcb-shelf__tab--active');
+      tab.setAttribute('aria-pressed', 'true');
       endingSortMode = tab.dataset.endingTab;
       renderEndingSoonShelf();
     });
@@ -1146,8 +1150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hotTabs = document.querySelectorAll('[data-hot-tab]');
   hotTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      hotTabs.forEach(t => t.classList.remove('pcb-shelf__tab--active'));
+      hotTabs.forEach(t => {
+        t.classList.remove('pcb-shelf__tab--active');
+        t.setAttribute('aria-pressed', 'false');
+      });
       tab.classList.add('pcb-shelf__tab--active');
+      tab.setAttribute('aria-pressed', 'true');
       hotFilterCategory = tab.dataset.hotTab;
       renderHotAuctionsShelf();
     });
@@ -1202,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Xem chứng nhận kiểm định
-    if (e.target.closest('#btn-open-cert')) {
+    if (e.target.closest('#btn-open-cert, [data-open-cert]')) {
       openCertModal();
       return;
     }

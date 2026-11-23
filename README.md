@@ -23,6 +23,7 @@ Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
 9. [Quy chuẩn lập trình](#9-quy-chuẩn-lập-trình)
 10. [Quy trình Git của nhóm](#10-quy-trình-git-của-nhóm)
 11. [Giới hạn của bản mô phỏng](#11-giới-hạn-của-bản-mô-phỏng)
+12. [Kiểm tra chất lượng](#12-kiểm-tra-chất-lượng)
 
 ---
 
@@ -121,7 +122,7 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 | 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản, địa chỉ nhận hàng, bảo mật & quyền riêng tư, hồ sơ công khai `?user=` |
 | 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
 
-> Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html`. Tệp `my-auctions.html` chỉ chuyển hướng về `profile.html#my-auctions`.
+> Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html` (ví dụ `profile.html#participating`, `profile.html?user=<tên đăng nhập>`).
 
 ---
 
@@ -259,3 +260,20 @@ Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nha
 - Mật khẩu được băm bằng hàm FNV-1a phía trình duyệt, **không phải cơ chế bảo mật thật**.
 - Video gửi trong chat giới hạn 1,5MB vì bộ nhớ `localStorage` chỉ khoảng 5MB.
 - Bộ dịch giữ nguyên tên sản phẩm, thông số dạng giá trị, tên người dùng và nội dung tin nhắn.
+- Khi triển khai thật cần backend để xác thực, băm mật khẩu bằng bcrypt / argon2, kiểm tra giá đặt và số dư phía server, dùng HTTPS và phiên đăng nhập an toàn.
+- Nhãn "Đã xác thực" là mô phỏng: tài khoản có đủ email, số điện thoại và ít nhất một địa chỉ nhận hàng thì được gắn nhãn.
+
+---
+
+## 12. Kiểm tra chất lượng
+
+| Hạng mục | Công cụ | Kết quả |
+| --- | --- | --- |
+| Chuẩn HTML | W3C Nu Html Checker (8 màn hình) | Không có lỗi |
+| Lighthouse (điện thoại) | Accessibility / Best Practices / SEO | 96 – 100 / 100 / 100 |
+| Lỗi JavaScript | Playwright, 8 màn hình × máy tính / điện thoại × đã / chưa đăng nhập | Không có lỗi |
+| Responsive | Khổ 375px, 390px, 820px, 1280px | Không tràn ngang |
+
+- Màu cam chủ đạo `#c9450a` đạt tỉ lệ tương phản 4,8:1 trên nền trắng (chuẩn WCAG AA cho chữ thường là 4,5:1).
+- Ảnh sản phẩm được thu nhỏ về tối đa 1000px; logo và ảnh minh họa được nén theo kích thước hiển thị.
+- Điểm Performance phụ thuộc máy chủ: GitHub Pages có nén và lưu đệm tệp nên nhanh hơn khi chạy bằng `python -m http.server`.

@@ -4,11 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
   <meta name="description"
     content="Đăng bán đấu giá linh kiện máy tính cũ tại PCBid. Chọn mẫu linh kiện chuẩn từ catalogue, chọn ảnh thực tế và bắt đầu phiên đấu giá minh bạch nhanh chóng.">
   <title>Đăng Bán Đấu Giá Linh Kiện PC | PCBid</title>
 
-  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <!-- Phông chữ từ Google Fonts: Be Vietnam Pro & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -122,7 +126,7 @@
               </div>
             </div>
 
-            <!-- Dropdown Category & Dropdown Model -->
+            <!-- Ô chọn danh mục và mẫu sản phẩm -->
             <div class="pcb-form-row">
               <div class="pcb-form-group">
                 <label for="sell-category" class="pcb-form-label pcb-form-label--required">Danh mục linh kiện</label>
@@ -176,7 +180,7 @@
                   <span class="pcb-spec-box__badge" id="spec-source-badge">Dữ liệu chuẩn PCBid</span>
                 </div>
                 <div class="pcb-spec-grid" id="spec-grid-container">
-                  <div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; font-style: italic; padding: 10px 0;">
+                  <div class="pcb-spec-grid__placeholder">
                     Vui lòng chọn mẫu sản phẩm ở trên để hiển thị thông số kỹ thuật.
                   </div>
                 </div>
@@ -244,7 +248,7 @@
             <div class="pcb-form-row">
               <div class="pcb-form-group">
                 <label for="sell-condition" class="pcb-form-label pcb-form-label--required">Mức độ mới / Tình trạng</label>
-                <select id="sell-condition" name="condition" class="pcb-form-select" required>
+                <select id="sell-condition" name="condition" class="pcb-form-select">
                   <option value="Like New 99% - Fullbox, Tem Void nguyên vẹn">Like New 99% - Fullbox, Tem Void nguyên vẹn</option>
                   <option value="Đã sử dụng - Còn bảo hành chính hãng">Đã sử dụng - Còn bảo hành chính hãng</option>
                   <option value="Đã sử dụng - Hết bảo hành, bao test 7 ngày">Đã sử dụng - Hết bảo hành, bao test 7 ngày</option>
@@ -295,7 +299,7 @@
 
               <div class="pcb-form-group">
                 <label for="sell-bid-step" class="pcb-form-label pcb-form-label--required">Bước giá tối thiểu (VNĐ)</label>
-                <select id="sell-bid-step" name="bidStep" class="pcb-form-select" required>
+                <select id="sell-bid-step" name="bidStep" class="pcb-form-select">
                   <option value="20000">20.000₫</option>
                   <option value="50000" selected>50.000₫ (Khuyên dùng)</option>
                   <option value="100000">100.000₫</option>
@@ -309,7 +313,7 @@
             <div class="pcb-form-row">
               <div class="pcb-form-group">
                 <label for="sell-duration" class="pcb-form-label pcb-form-label--required">Thời hạn mở phiên đấu giá</label>
-                <select id="sell-duration" name="duration" class="pcb-form-select" required>
+                <select id="sell-duration" name="duration" class="pcb-form-select">
                   <option value="1">1 ngày (24 giờ - Phiên nhanh)</option>
                   <option value="3" selected>3 ngày (72 giờ - Khuyên dùng)</option>
                   <option value="5">5 ngày (120 giờ)</option>
@@ -350,7 +354,7 @@
           <div class="pcb-preview-card">
             <div class="pcb-preview-card__head">
               <h3 class="pcb-preview-card__title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#ea580c">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#c9450a">
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M12 16v-4M12 8h.01"></path>
                 </svg>
@@ -360,7 +364,7 @@
             </div>
 
             <!-- Card hiển thị xem trước trực tiếp trên sàn -->
-            <article class="pcb-card" id="sell-live-card" style="margin: 0; box-shadow: none; border: 1.5px solid #cbd5e1;">
+            <article class="pcb-card pcb-card--preview" id="sell-live-card">
               <div class="pcb-card__media">
                 <div class="pcb-card__countdown" id="preview-countdown">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -379,7 +383,7 @@
                   <span class="pcb-card__seal pcb-card__seal--pass" id="preview-seal" hidden></span>
                 </div>
 
-                <div class="pcb-card__title" id="preview-title" style="pointer-events:none;">
+                <div class="pcb-card__title pcb-card__title--static" id="preview-title">
                   Card màn hình ASUS ROG Strix GeForce RTX 3070 8GB OC
                 </div>
 
@@ -402,7 +406,7 @@
                     </span>
                   </div>
 
-                  <button type="button" class="pcb-card__btn" style="pointer-events:none; opacity: 0.9;">
+                  <button type="button" class="pcb-card__btn pcb-card__btn--preview" tabindex="-1" aria-hidden="true">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
                     Đặt giá ngay (Bước: <span id="preview-step">50.000₫</span>)
                   </button>
@@ -446,7 +450,7 @@
         <span class="pcb-modal-countdown__num" id="sell-countdown-num">10</span>
         <span class="pcb-modal-countdown__text">Tự động chuyển tới trang Sàn đấu giá sau <strong id="sell-countdown-text">10</strong> giây</span>
       </div>
-      <a href="products.html" class="pcb-btn pcb-btn--primary" id="sell-success-go" style="width:100%;">
+      <a href="products.html" class="pcb-btn pcb-btn--primary pcb-btn--block" id="sell-success-go">
         Chuyển đến trang Đấu giá ngay
       </a>
     </div>

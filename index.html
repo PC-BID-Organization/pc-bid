@@ -4,11 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
   <meta name="description"
     content="PCBid - Sàn đấu giá trực tuyến chuyên biệt cho linh kiện máy tính cũ, card màn hình, CPU, bo mạch chủ đã qua kiểm định Furmark và MemTest86.">
   <title>PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
 
-  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <!-- Phông chữ từ Google Fonts: Be Vietnam Pro & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -252,14 +256,14 @@
                 alt="Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB" data-spotlight-img>
             </a>
 
-            <h3 class="hero-v2__spotlight-name" title="Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB">
+            <h2 class="hero-v2__spotlight-name" title="Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB">
               <a class="hero-v2__spotlight-name-link" href="product-detail.html?id=2028" data-spotlight-link data-spotlight-name>Card màn hình Gigabyte Radeon RX 7800 XT GAMING OC 16GB</a>
-            </h3>
+            </h2>
 
             <div class="hero-v2__spotlight-pricebox">
               <div class="hero-v2__spotlight-lbl">
                 <span>Giá đang dẫn đầu:</span>
-                <span style="color:#fdba74;" data-spotlight-count>6 lượt bid</span>
+                <span class="hero-v2__spotlight-count" data-spotlight-count>6 lượt bid</span>
               </div>
               <div class="hero-v2__spotlight-bid" data-spotlight-bid>12.400.000đ</div>
             </div>
@@ -281,7 +285,7 @@
           <a href="products.html?sort=ending" class="hero-v2__promo-card" id="hero-promo-ending">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--danger">Sắp hết giờ</span>
-              <h4 class="hero-v2__promo-title" data-promo-title>Ryzen 5 5600 6C/12T</h4>
+              <h3 class="hero-v2__promo-title" data-promo-title>Ryzen 5 5600 6C/12T</h3>
               <span class="hero-v2__promo-sub" data-promo-sub>Vào bid →</span>
             </div>
             <img src="images/products/cpu/1019-ryzen-5-5600-1.jpg" alt="" class="hero-v2__promo-img" data-promo-img>
@@ -290,7 +294,7 @@
           <a href="products.html?sort=bids" class="hero-v2__promo-card" id="hero-promo-competitive">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--hot">Cạnh tranh nhất</span>
-              <h4 class="hero-v2__promo-title" data-promo-title>RTX 3090 Master 24GB</h4>
+              <h3 class="hero-v2__promo-title" data-promo-title>RTX 3090 Master 24GB</h3>
               <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
             <img src="images/products/gpu/2015-rtx-3090-24gb-1.png" alt="" class="hero-v2__promo-img" data-promo-img>
@@ -299,7 +303,7 @@
           <a href="products.html?category=psu" class="hero-v2__promo-card" id="hero-promo-psu">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--blue">Nguồn Gold 80+</span>
-              <h4 class="hero-v2__promo-title" data-promo-title>NZXT C750 Gold 750W</h4>
+              <h3 class="hero-v2__promo-title" data-promo-title>NZXT C750 Gold 750W</h3>
               <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
             <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="hero-v2__promo-img" data-promo-img>
@@ -308,7 +312,7 @@
           <a href="products.html?category=cooling" class="hero-v2__promo-card" id="hero-promo-cooling">
             <div class="hero-v2__promo-info">
               <span class="hero-v2__promo-tag hero-v2__promo-tag--cool">Tản nhiệt đỉnh</span>
-              <h4 class="hero-v2__promo-title" data-promo-title>Noctua NH-D15S Chromax Black</h4>
+              <h3 class="hero-v2__promo-title" data-promo-title>Noctua NH-D15S Chromax Black</h3>
               <span class="hero-v2__promo-sub" data-promo-sub>Xem ngay →</span>
             </div>
             <img src="images/products/cooling/8007-tan-nhiet-noctua-nh-d15s-chromax-black-1.jpg" alt=""
@@ -400,11 +404,11 @@
           </div>
 
           <div class="pcb-shelf__tools">
-            <div class="pcb-shelf__tabs" role="tablist" aria-label="Sắp xếp phiên sắp kết thúc">
-              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" data-ending-tab="ending">Sắp hết
+            <div class="pcb-shelf__tabs" role="group" aria-label="Sắp xếp phiên sắp kết thúc">
+              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" aria-pressed="true" data-ending-tab="ending">Sắp hết
                 giờ</button>
-              <button type="button" class="pcb-shelf__tab" data-ending-tab="bids">Nhiều lượt bid</button>
-              <button type="button" class="pcb-shelf__tab" data-ending-tab="price">Giá cao nhất</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-ending-tab="bids">Nhiều lượt bid</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-ending-tab="price">Giá cao nhất</button>
             </div>
             <a href="products.html?status=ending" class="pcb-shelf__more">
               <span>Xem tất cả</span>
@@ -553,12 +557,12 @@
           </div>
 
           <div class="pcb-shelf__tools">
-            <div class="pcb-shelf__tabs" role="tablist" aria-label="Lọc danh mục đấu giá nổi bật">
-              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" data-hot-tab="all">Tất cả</button>
-              <button type="button" class="pcb-shelf__tab" data-hot-tab="gpu">Card VGA</button>
-              <button type="button" class="pcb-shelf__tab" data-hot-tab="cpu">CPU</button>
-              <button type="button" class="pcb-shelf__tab" data-hot-tab="ram">RAM</button>
-              <button type="button" class="pcb-shelf__tab" data-hot-tab="mainboard">Mainboard</button>
+            <div class="pcb-shelf__tabs" role="group" aria-label="Lọc danh mục đấu giá nổi bật">
+              <button type="button" class="pcb-shelf__tab pcb-shelf__tab--active" aria-pressed="true" data-hot-tab="all">Tất cả</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-hot-tab="gpu">Card VGA</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-hot-tab="cpu">CPU</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-hot-tab="ram">RAM</button>
+              <button type="button" class="pcb-shelf__tab" aria-pressed="false" data-hot-tab="mainboard">Mainboard</button>
             </div>
             <a href="products.html?status=hot" class="pcb-shelf__more">Xem thêm phiên hot →</a>
           </div>
@@ -586,7 +590,7 @@
               Loại bỏ 100% rủi ro trâu cày dập nát, cong chân socket hay ổ cứng bad sector trước khi mở phiên.
             </p>
           </div>
-          <button type="button" class="pcb-lab__btn-cert" onclick="document.getElementById('btn-open-cert').click()">
+          <button type="button" class="pcb-lab__btn-cert" data-open-cert>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
@@ -684,7 +688,7 @@
             <p class="pcb-shelf__desc">Ảnh chụp góc cận cảnh bởi kiểm định viên và người bán — không dùng ảnh render 3D
               mạng.</p>
           </div>
-          <span style="font-size:12px; color:#64748b;">(Bấm vào ảnh để xem chi tiết)</span>
+          <span class="pcb-gallery__hint">(Bấm vào ảnh để xem chi tiết)</span>
         </header>
 
         <div class="pcb-gallery">
@@ -771,7 +775,7 @@
         <header class="pcb-shelf__head">
           <div class="pcb-shelf__heading">
             <div class="pcb-shelf__title-wrap">
-              <span class="pcb-shelf__icon pcb-shelf__icon--star" style="background:#ecfdf5; color:#059669;">
+              <span class="pcb-shelf__icon pcb-shelf__icon--star">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                   <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
                   <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
@@ -792,7 +796,7 @@
           <div class="pcb-win-card">
             <img src="images/products/gpu/2018-rtx-4070-12gb-1.webp" alt="" class="pcb-win-card__img">
             <div class="pcb-win-card__info">
-              <h4 class="pcb-win-card__title">RTX 4070 12GB OC</h4>
+              <h3 class="pcb-win-card__title">RTX 4070 12GB OC</h3>
               <div class="pcb-win-card__price">11.400.000đ</div>
               <span class="pcb-win-card__saved">Tiết kiệm 3.800.000đ</span>
             </div>
@@ -801,7 +805,7 @@
           <div class="pcb-win-card">
             <img src="images/products/cpu/1012-i5-13600k-1.jpg" alt="" class="pcb-win-card__img">
             <div class="pcb-win-card__info">
-              <h4 class="pcb-win-card__title">Intel Core i5-13600K</h4>
+              <h3 class="pcb-win-card__title">Intel Core i5-13600K</h3>
               <div class="pcb-win-card__price">5.200.000đ</div>
               <span class="pcb-win-card__saved">Tiết kiệm 2.900.000đ</span>
             </div>
@@ -810,7 +814,7 @@
           <div class="pcb-win-card">
             <img src="images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg" alt="" class="pcb-win-card__img">
             <div class="pcb-win-card__info">
-              <h4 class="pcb-win-card__title">MSI MAG Z790 DDR5</h4>
+              <h3 class="pcb-win-card__title">MSI MAG Z790 DDR5</h3>
               <div class="pcb-win-card__price">4.300.000đ</div>
               <span class="pcb-win-card__saved">Tiết kiệm 2.900.000đ</span>
             </div>
@@ -819,7 +823,7 @@
           <div class="pcb-win-card">
             <img src="images/products/psu/6013-nzxt-c750-gold-1.png" alt="" class="pcb-win-card__img">
             <div class="pcb-win-card__info">
-              <h4 class="pcb-win-card__title">Corsair RM850x Gold</h4>
+              <h3 class="pcb-win-card__title">Corsair RM850x Gold</h3>
               <div class="pcb-win-card__price">1.950.000đ</div>
               <span class="pcb-win-card__saved">Tiết kiệm 1.650.000đ</span>
             </div>
@@ -878,7 +882,7 @@
         </div>
         <form class="pcb-subscribe__form" id="pcb-subscribe-form">
           <input type="email" class="pcb-subscribe__input" id="pcb-subscribe-input"
-            placeholder="Nhập địa chỉ email của bạn..." required>
+            placeholder="Nhập địa chỉ email của bạn..." aria-label="Email nhận bản tin" autocomplete="email" required>
           <button type="submit" class="pcb-subscribe__btn">Đăng ký ngay</button>
         </form>
       </section>
@@ -897,7 +901,7 @@
       <div class="pcb-modal__head">
         <h3 class="pcb-modal__title" id="bid-modal-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            color="#ea580c">
+            color="#c9450a">
             <circle cx="12" cy="12" r="10" />
             <path d="M12 8v8M8 12h8" />
           </svg>
@@ -913,7 +917,7 @@
 
       <div class="pcb-modal__body">
         <div class="pcb-modal__product">
-          <img src="" alt="" class="pcb-modal__img" id="pcb-modal-img">
+          <img src="images/placeholder-product.svg" alt="" class="pcb-modal__img" id="pcb-modal-img">
           <div>
             <h4 class="pcb-modal__prod-name" id="pcb-modal-name">Tên sản phẩm</h4>
             <span class="pcb-modal__prod-cond" id="pcb-modal-cond">Like New 99%</span>
@@ -922,15 +926,15 @@
 
         <div class="pcb-modal__price-display">
           <div>
-            <span style="font-size:11px; color:#9a3412; font-weight:600;">Giá cao nhất hiện nay</span>
+            <span class="pcb-modal__price-label">Giá cao nhất hiện nay</span>
             <div class="pcb-modal__cur-val" id="pcb-modal-cur-bid">0đ</div>
           </div>
-          <div style="text-align:right;">
-            <span style="font-size:11px; color:#475569;" id="pcb-modal-step-info">Bước giá: +100.000đ</span>
+          <div class="pcb-modal__price-side">
+            <span class="pcb-modal__step-info" id="pcb-modal-step-info">Bước giá: +100.000đ</span>
           </div>
         </div>
 
-        <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:6px; display:block;">
+        <label class="pcb-modal__field-label">
           Chọn mức tăng bước giá của bạn:
         </label>
         <div class="pcb-modal__step-btns">
@@ -1015,7 +1019,7 @@
           </div>
         </div>
 
-        <button type="button" class="pcb-modal__submit" style="margin-top:16px;" data-action="close-cert-modal">
+        <button type="button" class="pcb-modal__submit pcb-modal__submit--spaced" data-action="close-cert-modal">
           Đã hiểu, quay lại sàn đấu giá
         </button>
       </div>
@@ -1032,7 +1036,7 @@
       <div class="pcb-modal__head">
         <h3 class="pcb-modal__title" id="pcb-lightbox-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            color="#ea580c">
+            color="#c9450a">
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <circle cx="8.5" cy="8.5" r="1.5" />
             <polyline points="21 15 16 10 5 21" />
@@ -1049,7 +1053,7 @@
 
       <div class="pcb-lightbox-card__body">
         <div class="pcb-lightbox-card__media">
-          <img src="" alt="" class="pcb-lightbox-card__img" id="pcb-lightbox-img">
+          <img src="images/placeholder-product.svg" alt="" class="pcb-lightbox-card__img" id="pcb-lightbox-img">
         </div>
 
         <div class="pcb-lightbox-card__info">

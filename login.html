@@ -4,6 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
   <meta name="description"
     content="PCBid - Đăng nhập tài khoản thành viên. Tham gia sàn đấu giá linh kiện máy tính cũ uy tín, bảo đảm quyền lợi với ví ảo ký quỹ an toàn.">
   <title>Đăng Nhập Tài Khoản | PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
@@ -59,30 +63,30 @@
           <form class="pcb-auth-form" id="login-form" novalidate>
 
             <!-- KHỐI TÀI KHOẢN MẪU PHỤC VỤ BÁO CÁO & THUYẾT TRÌNH (DEMO ACCOUNTS) -->
-            <div class="pcb-auth-demo" style="margin-bottom: 20px; padding: 12px 14px; background: #f0fdf4; border: 1.5px dashed #10b981; border-radius: 10px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 12px; font-weight: 700; color: #065f46; display: flex; align-items: center; gap: 5px;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <div class="pcb-auth-demo">
+              <div class="pcb-auth-demo__head">
+                <span class="pcb-auth-demo__label">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                   Tài khoản Demo (Báo cáo &amp; Đấu giá đối kháng):
                 </span>
-                <span style="font-size: 11px; color: #047857; background: #d1fae5; padding: 2px 7px; border-radius: 4px; font-weight: 600;">MK: 123456</span>
+                <span class="pcb-auth-demo__pass">MK: 123456</span>
               </div>
               <div class="pcb-auth-demo__grid">
-                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder1" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
-                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Hùng Phong</span></div>
-                  <div class="pcb-auth-demo__email">bidder1@pcbid.vn</div>
+                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder1">
+                  <span class="pcb-auth-demo__title"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Hùng Phong</span></span>
+                  <span class="pcb-auth-demo__email">bidder1@pcbid.vn</span>
                 </button>
-                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder2" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
-                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Nhật Huy</span></div>
-                  <div class="pcb-auth-demo__email">bidder2@pcbid.vn</div>
+                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder2">
+                  <span class="pcb-auth-demo__title"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Nhật Huy</span></span>
+                  <span class="pcb-auth-demo__email">bidder2@pcbid.vn</span>
                 </button>
-                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder3" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
-                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Huỳnh Nhật Minh</span></div>
-                  <div class="pcb-auth-demo__email">bidder3@pcbid.vn</div>
+                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="bidder3">
+                  <span class="pcb-auth-demo__title"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Huỳnh Nhật Minh</span></span>
+                  <span class="pcb-auth-demo__email">bidder3@pcbid.vn</span>
                 </button>
-                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="seller" style="padding: 8px 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; color: #065f46;">
-                  <div style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Gia Huy</span></div>
-                  <div class="pcb-auth-demo__email">seller@pcbid.vn</div>
+                <button type="button" class="pcb-demo-btn" aria-pressed="false" data-demo-user="seller">
+                  <span class="pcb-auth-demo__title"><span class="pcb-auth-demo__icon"><span class="lucide pcb-icon pcb-icon--user pcb-icon--s13" aria-hidden="true"></span></span> <span class="pcb-auth-demo__name">Nguyễn Gia Huy</span></span>
+                  <span class="pcb-auth-demo__email">seller@pcbid.vn</span>
                 </button>
               </div>
             </div>
@@ -122,7 +126,7 @@
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
-                  <svg class="pcb-icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                  <svg class="pcb-icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                     <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
@@ -188,7 +192,7 @@
             </span>
             <span class="pcb-auth-card__badge-dot">•</span>
             <span class="pcb-auth-card__badge-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9450a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
               Đấu giá minh bạch

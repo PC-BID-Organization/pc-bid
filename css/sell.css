@@ -114,7 +114,7 @@
   height: 32px;
   border-radius: 8px;
   background: var(--pcb-primary-light, #fff7ed);
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -186,7 +186,7 @@
 .pcb-form-select:focus,
 .pcb-form-input:focus,
 .pcb-form-textarea:focus {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
@@ -258,7 +258,7 @@
 
 .pcb-spec-item__key {
   font-size: 11px;
-  color: var(--pcb-text-faint, #94a3b8);
+  color: var(--pcb-text-faint, #64748b);
   font-weight: 500;
 }
 
@@ -300,7 +300,7 @@
 }
 
 .pcb-thumb-item--active {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
   background-color: var(--pcb-primary-light, #fff7ed);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
 }
@@ -312,7 +312,7 @@
   right: 4px;
   width: 18px;
   height: 18px;
-  background: var(--pcb-primary, #ea580c);
+  background: var(--pcb-primary, #c9450a);
   color: #ffffff;
   border-radius: 50%;
   font-size: 10px;
@@ -368,7 +368,7 @@
 .pcb-preview-card__badge {
   font-size: 11px;
   font-weight: 700;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   background: var(--pcb-primary-light, #fff7ed);
   padding: 3px 8px;
   border-radius: 9999px;
@@ -428,13 +428,13 @@
 }
 
 .pcb-btn--primary {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #f97316 0%, #c9450a 100%);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
 }
 
 .pcb-btn--primary:hover {
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  background: linear-gradient(135deg, #c9450a 0%, #c2410c 100%);
   box-shadow: 0 6px 16px rgba(234, 88, 12, 0.45);
   transform: translateY(-1px);
 }
@@ -571,7 +571,7 @@
 .pcb-photo-picker__limit {
   font-size: 11px;
   font-weight: 600;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-photo-picker__subtitle {
@@ -611,7 +611,7 @@
 }
 
 .pcb-photo-chip--cover {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-photo-chip img {
@@ -635,7 +635,7 @@
 
 .pcb-photo-chip__badge {
   color: #ffffff;
-  background-color: var(--pcb-primary, #ea580c);
+  background-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-photo-chip__cover {
@@ -647,8 +647,8 @@
 
 .pcb-photo-chip__cover:hover,
 .pcb-photo-chip__cover:focus-visible {
-  color: var(--pcb-primary, #ea580c);
-  border-color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
+  border-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-photo-chip__remove {
@@ -683,7 +683,7 @@
   padding: 12px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   background-color: #ffffff;
   border: 1.5px dashed #fdba74;
   border-radius: 10px;
@@ -736,7 +736,7 @@ button.pcb-thumb-item {
 
 .pcb-breadcrumb__link:hover,
 .pcb-breadcrumb__link:focus-visible {
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-breadcrumb__separator {
@@ -871,20 +871,20 @@ button.pcb-thumb-item {
 
 /* Bước cần hoàn thành tiếp theo: viền cam nét đứt */
 .pcb-sell-progress__step--next .pcb-sell-progress__num {
-  color: var(--pcb-primary, #ea580c);
-  border-color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
+  border-color: var(--pcb-primary, #c9450a);
   border-style: dashed;
 }
 
 .pcb-sell-progress__step--next .pcb-sell-progress__state {
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 /* Bước đang ở: nền cam đậm, vòng sáng nhẹ */
 .pcb-sell-progress__step--current .pcb-sell-progress__num {
   color: #ffffff;
-  background-color: var(--pcb-primary, #ea580c);
-  border-color: var(--pcb-primary, #ea580c);
+  background-color: var(--pcb-primary, #c9450a);
+  border-color: var(--pcb-primary, #c9450a);
   border-style: solid;
   box-shadow: 0 0 0 5px rgba(234, 88, 12, 0.18);
 }
@@ -896,7 +896,7 @@ button.pcb-thumb-item {
 }
 
 .pcb-sell-progress__step--current .pcb-sell-progress__label {
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-sell-progress__step--current .pcb-sell-progress__state {
@@ -1009,7 +1009,7 @@ button.pcb-thumb-item {
 
 .pcb-custom-specs__input:focus {
   outline: none;
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
@@ -1035,7 +1035,7 @@ button.pcb-thumb-item {
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   background-color: #ffffff;
   border: 1px dashed #fdba74;
   border-radius: 8px;
@@ -1113,7 +1113,7 @@ button.pcb-thumb-item {
 
 /* Chu vi vòng tròn r = 19 ≈ 119.4; độ lệch tăng dần theo thời gian đã trôi qua */
 .pcb-modal-countdown__bar {
-  stroke: var(--pcb-primary, #ea580c);
+  stroke: var(--pcb-primary, #c9450a);
   stroke-linecap: round;
   stroke-dasharray: 119.4;
   stroke-dashoffset: 0;
@@ -1127,7 +1127,7 @@ button.pcb-thumb-item {
   font-size: 15px;
   font-weight: 800;
   text-align: center;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-modal-countdown__text {
@@ -1156,7 +1156,7 @@ button.pcb-thumb-item {
   font: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   cursor: pointer;
   background: none;
   border: none;
@@ -1203,4 +1203,34 @@ button.pcb-thumb-item {
 /* Ô tìm mẫu sản phẩm nằm ngay trên danh sách mẫu */
 .pcb-model-search {
   margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   CÁC CLASS THAY CHO INLINE STYLE TRÊN TRANG ĐĂNG BÁN
+   ========================================================================== */
+/* Dòng nhắc khi chưa chọn mẫu sản phẩm */
+.pcb-spec-grid__placeholder {
+  grid-column: 1 / -1;
+  padding: 10px 0;
+  font-size: 12px;
+  font-style: italic;
+  color: #64748b;
+}
+
+/* Thẻ xem trước phiên đấu giá: không đổ bóng, viền mảnh */
+.pcb-card--preview {
+  margin: 0;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: none;
+}
+
+/* Tiêu đề và nút trên thẻ xem trước chỉ để minh họa, không bấm được */
+.pcb-card__title--static,
+.pcb-card__btn--preview {
+  pointer-events: none;
+}
+
+/* Nút chiếm trọn chiều ngang */
+.pcb-btn--block {
+  width: 100%;
 }

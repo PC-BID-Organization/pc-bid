@@ -66,7 +66,7 @@
 }
 
 .header__top-link:hover {
-  color: #ea580c;
+  color: #c9450a;
 }
 
 /* --------------------------------------------------------------------------
@@ -198,7 +198,7 @@
   gap: 6px;
   height: 42px;
   padding: 0 24px;
-  background-color: #ea580c;
+  background-color: #c9450a;
   border-radius: 0 5px 5px 0;
   color: #ffffff;
   font-family: "Be Vietnam Pro", sans-serif;
@@ -235,7 +235,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background-color: #ea580c;
+  background-color: #c9450a;
   color: #ffffff;
   border-radius: 6px;
   font-family: "Be Vietnam Pro", sans-serif;
@@ -290,7 +290,7 @@
   left: 14px;
   width: 20px;
   height: 14px;
-  background-color: #ea580c;
+  background-color: #c9450a;
   border-radius: 10px;
   color: #ffffff;
   font-family: "Be Vietnam Pro", sans-serif;
@@ -316,7 +316,7 @@
   width: 38px;
   height: 38px;
   border-radius: 19px;
-  background-color: #ea580c;
+  background-color: #c9450a;
   border: 2px solid #ffffff;
   box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
   display: flex;
@@ -394,7 +394,7 @@
   width: 42px;
   height: 42px;
   border-radius: 21px;
-  background: linear-gradient(135deg, #ea580c, #f97316);
+  background: linear-gradient(135deg, #c9450a, #f97316);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -494,7 +494,7 @@
 
 .header__dropdown-item:hover {
   background: #fff7ed;
-  color: #ea580c;
+  color: #c9450a;
 }
 
 .header__dropdown-footer {
@@ -543,7 +543,7 @@
 }
 
 .header__dropdown-btn--primary {
-  background: #ea580c;
+  background: #c9450a;
   color: #ffffff;
 }
 
@@ -766,7 +766,7 @@
     display: block;
     height: 2px;
     border-radius: 2px;
-    background-color: #ea580c;
+    background-color: #c9450a;
   }
 
   /* Tên mục đang xem, hiển thị mờ bên cạnh chữ "Danh mục" */
@@ -1031,7 +1031,7 @@
   padding: 4px 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #ea580c;
+  color: #c9450a;
   text-decoration: none;
   border-radius: 6px;
 }
@@ -1144,14 +1144,14 @@
 
 .header__notify-item--unread .header__notify-time {
   font-weight: 700;
-  color: #ea580c;
+  color: #c9450a;
 }
 
 .header__notify-dot {
   flex-shrink: 0;
   width: 10px;
   height: 10px;
-  background-color: #ea580c;
+  background-color: #c9450a;
   border-radius: 50%;
 }
 
@@ -1229,7 +1229,7 @@
 }
 
 .header__dropdown-stat .lucide {
-  color: #ea580c;
+  color: #c9450a;
 }
 
 /* Máy tính bảng ngang / laptop nhỏ: thu gọn khoảng cách để thanh danh mục vừa một hàng */
@@ -1271,7 +1271,7 @@
 .header__lang-btn:hover,
 .header__lang-btn:focus-visible,
 .header__lang-btn[aria-expanded="true"] {
-  color: #ea580c;
+  color: #c9450a;
   background-color: #ffffff;
   border-color: rgba(226, 191, 178, 0.6);
 }
@@ -1320,7 +1320,7 @@
 
 .header__lang-option.is-active {
   font-weight: 700;
-  color: #ea580c;
+  color: #c9450a;
   background-color: #fff7ed;
 }
 
@@ -1337,7 +1337,7 @@
 
 .header__lang-option.is-active .header__lang-option-code {
   color: #ffffff;
-  background-color: #ea580c;
+  background-color: #c9450a;
 }
 
 /* Hàng chọn ngôn ngữ trong menu tài khoản: chỉ hiện khi thanh trên cùng bị ẩn (≤ 992px) */
@@ -1376,7 +1376,7 @@
 }
 
 .header__dropdown-lang-btn.is-active {
-  color: #ea580c;
+  color: #c9450a;
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(11, 28, 48, 0.12);
 }
@@ -1406,4 +1406,49 @@
 .header__top-links {
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+/* ==========================================================================
+   CÁC CLASS THAY CHO INLINE STYLE TRONG HEADER
+   ========================================================================== */
+.header__top-user-name {
+  font-weight: 700;
+  color: #c9450a;
+}
+
+/* Lời chào trong menu tài khoản khi chưa đăng nhập */
+.header__dropdown-welcome {
+  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.header__dropdown-welcome-sub {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+/* Danh sách đăng nhập nhanh tài khoản demo */
+.header__dropdown-quick-title {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.header__dropdown-quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.header__dropdown-quick-name {
+  font-weight: 600;
+}
+
+.header__dropdown-quick-role {
+  font-size: 11px;
+  color: #64748b;
 }

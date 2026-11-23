@@ -5,8 +5,8 @@
 
 :root {
   /* Bảng màu chủ đạo (Brand Colors) */
-  --color-primary: #EA580C;
-  --color-primary-hover: #D94E07;
+  --color-primary: #c9450a;
+  --color-primary-hover: #A93A08;
   --color-primary-dark: #A33900;
   --color-primary-light: #FFEDD5;
 
@@ -1975,7 +1975,7 @@ a.pcb-chat__peer-name:focus-visible {
 
 .pcb-chat__attach-btn--image { --attach-color: #2563eb; }
 .pcb-chat__attach-btn--video { --attach-color: #9333ea; }
-.pcb-chat__attach-btn--product { --attach-color: #ea580c; }
+.pcb-chat__attach-btn--product { --attach-color: #c9450a; }
 .pcb-chat__attach-btn--order { --attach-color: #16a34a; }
 
 .pcb-chat__attach-btn .lucide {
