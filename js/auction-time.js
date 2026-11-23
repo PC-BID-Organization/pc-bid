@@ -60,7 +60,7 @@ export function getAuctionEndTimestamp(product, now = Date.now()) {
 
   // Phiên đã chốt (đã bán / đã kết thúc) hoặc phiên được người bán đăng lại:
   // dùng đúng endTime đã lưu thay cho chu kỳ mô phỏng
-  if ((isAuctionClosed(product) || product.relisted || product.closedEarly) && Number.isFinite(savedEnd)) {
+  if ((isAuctionClosed(product) || product.relisted || product.closedEarly || product.endLocked) && Number.isFinite(savedEnd)) {
     return savedEnd;
   }
 
@@ -100,8 +100,8 @@ export function isAuctionClosed(product) {
  */
 export function mergeLocalProduct(base, local) {
   if (!local) return { ...base };
-  // Phiên đăng bán lại hoặc bị người bán đóng sớm: bản trong localStorage là bản chuẩn
-  if (local.relisted || local.closedEarly) return { ...base, ...local };
+  // Phiên đăng bán lại, bị đóng sớm hoặc đã khóa thời điểm kết thúc: bản trong localStorage là bản chuẩn
+  if (local.relisted || local.closedEarly || local.endLocked) return { ...base, ...local };
   const merged = { ...base, ...local };
   ['status', 'winner', 'endTime'].forEach(key => {
     if (key in base) merged[key] = base[key];
@@ -122,4 +122,29 @@ export function mergeLocalProduct(base, local) {
  */
 export function getAuctionEndTimeIso(product) {
   return new Date(getAuctionEndTimestamp(product)).toISOString();
+}
+
+/**
+ * Khóa thời điểm kết thúc của phiên khi người dùng thật đặt giá.
+ * Phiên catalog mẫu vốn chạy theo chu kỳ cuốn chiếu 72 giờ (không bao giờ kết thúc);
+ * sau khi có người dùng tham gia, phiên sẽ kết thúc thật vào đúng mốc đang đếm ngược
+ * để xác định người thắng và chuyển sang bước thanh toán.
+ * @param {Object} product - Phiên đấu giá vừa được đặt giá
+ */
+export function lockAuctionEndTime(product) {
+  if (!product) return;
+  try {
+    const list = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const index = list.findIndex(p => Number(p.id) === Number(product.id));
+    const current = index >= 0 ? list[index] : null;
+    if (current?.endLocked || current?.relisted || current?.closedEarly) return;
+    const endTime = new Date(getAuctionEndTimestamp(current ? { ...product, ...current } : product)).toISOString();
+    const locked = { ...(current || product), endTime, endLocked: true };
+    delete locked.endTimestamp;
+    if (index >= 0) list[index] = locked;
+    else list.push(locked);
+    localStorage.setItem('pcbid_products', JSON.stringify(list));
+  } catch {
+    // Bỏ qua khi localStorage không khả dụng
+  }
 }

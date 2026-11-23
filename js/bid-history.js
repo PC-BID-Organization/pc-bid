@@ -11,7 +11,9 @@
    ========================================================================== */
 
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
-import { MOCK_BIDDERS } from './accounts.js';
+import { MOCK_BIDDERS, DEMO_ACCOUNTS } from './accounts.js';
+// Phiên tham gia mẫu của tài khoản demo để lịch sử đặt giá có đúng lượt "Giá bạn đã đặt"
+import { DEFAULT_PARTICIPATING_BY_USER } from './wallet.js';
 
 // Danh sách tệp catalog linh kiện trong thư mục data/
 export const CATALOG_FILES = ['cpu', 'gpu', 'mainboard', 'ram', 'storage', 'psu', 'cooling', 'case'];
@@ -169,6 +171,26 @@ export function buildMockBids(product, realBids = []) {
     const maxSteps = Math.max(1, Math.floor(stepsLeft / remaining));
     price -= (1 + Math.floor(random() * maxSteps)) * bidStep;
   }
+
+  // Gắn lượt đặt giá mẫu của tài khoản demo vào đúng mức giá đã ghi ở thẻ "Phiên đang tham gia",
+  // để bảng lịch sử hiện đúng tên người đặt thay vì một người dùng ảo khác
+  Object.entries(DEFAULT_PARTICIPATING_BY_USER).forEach(([username, list]) => {
+    const item = list.find(x => Number(x.id) === productId);
+    if (!item) return;
+    const account = DEMO_ACCOUNTS.find(a => a.username === username);
+    // Người dùng đã có lượt đặt thật trên phiên này: lịch sử thật đã thể hiện, không gắn thêm
+    if (realBids.some(b => (account && b.bidderId === account.id) || b.bidderName === username)) return;
+    const myBid = Number(item.myBid);
+    let index = result.findIndex(b => b.amount === myBid);
+    if (index === -1) {
+      // Không có lượt trùng mức giá: dùng lượt ngay dưới và nâng lên đúng mức (vẫn giữ thứ tự giảm dần)
+      index = result.findIndex(b => b.amount < myBid);
+      if (index < 1) return;
+      result[index].amount = myBid;
+    }
+    result[index].bidderName = username;
+    if (account) result[index].bidderId = account.id;
+  });
   return result;
 }
 

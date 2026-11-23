@@ -5,9 +5,11 @@
  */
 
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
-import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
+import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct, lockAuctionEndTime } from './auction-time.js';
 // Module ví ảo & tiền cọc dùng chung
 import { readCurrentUser, getAvailableBalance, checkBidDeposit } from './wallet.js';
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
 // Danh sách phiên và lượt đặt giá thật dùng cho băng chuyền trực tiếp
 import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
@@ -142,9 +144,9 @@ const FALLBACK_PRODUCTS = [
     category: "Case",
     condition: "Đã sử dụng - Còn mới 92%, ngoại hình tốt, quạt đi kèm (nếu có) cần kiểm tra khi nhận",
     startingPrice: 1150000,
-    currentBid: 1500000,
+    currentBid: 1150000,
     bidStep: 50000,
-    bidCount: 7,
+    bidCount: 0,
     marketPriceNew: 2790000,
     endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     seller: "thanh_pcgear",
@@ -424,7 +426,7 @@ function renderProductCard(product, options = {}) {
   } else if (options.isNew) {
     countdownMarkup = `
       <div class="pcb-card__countdown" style="background:#059669;">
-        <span style="font-size:10px;">✨ MỚI LÊN SÀN</span>
+        <span style="font-size:10px;">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
       </div>
     `;
   }
@@ -541,23 +543,79 @@ function renderHotAuctionsShelf() {
  * (tránh hiển thị số liệu ghi cứng không khớp với dữ liệu thực tế)
  */
 function renderCompetitivePromo() {
-  const card = document.getElementById('hero-promo-competitive');
-  if (!card || allProducts.length === 0) return;
+  renderHeroPromos();
+}
 
-  const top = allProducts.reduce((best, p) => ((p.bidCount || 0) > (best.bidCount || 0) ? p : best), allProducts[0]);
-  if (!top) return;
+/**
+ * Rút gọn tên sản phẩm: bỏ tiền tố loại linh kiện để vừa khung thẻ nhỏ
+ * @param {string} name - Tên đầy đủ
+ * @returns {string}
+ */
+function shortProductName(name) {
+  return String(name || '')
+    .replace(/^(Card màn hình|Bộ vi xử lý|CPU|Bo mạch chủ|Mainboard|Bộ nguồn|Nguồn máy tính|Nguồn|RAM|Ổ cứng|SSD|Tản nhiệt khí|Tản nhiệt nước|Tản nhiệt|Vỏ máy tính|Vỏ case|Case)\s+/i, '');
+}
 
-  // Rút gọn tên sản phẩm: bỏ tiền tố loại linh kiện để vừa khung thẻ
-  const shortName = String(top.name || '')
-    .replace(/^(Card màn hình|Bộ vi xử lý|CPU|Bo mạch chủ|Mainboard|Bộ nguồn|Nguồn|RAM|Ổ cứng|Tản nhiệt|Vỏ case|Case)\s+/i, '');
-
+/**
+ * Điền một thẻ khuyến mãi ở Hero bằng sản phẩm thật và trỏ liên kết tới đúng trang chi tiết phiên
+ * @param {string} cardId - ID thẻ trên HTML
+ * @param {Object|undefined} product - Sản phẩm cần hiển thị
+ * @param {string} subText - Dòng phụ bên dưới tên
+ */
+function fillHeroPromo(cardId, product, subText) {
+  const card = document.getElementById(cardId);
+  if (!card || !product) return;
   const titleEl = card.querySelector('[data-promo-title]');
   const subEl = card.querySelector('[data-promo-sub]');
   const imgEl = card.querySelector('[data-promo-img]');
+  card.href = `product-detail.html?id=${product.id}`;
+  card.dataset.productId = product.id;
+  card.setAttribute('aria-label', product.name);
+  card.title = product.name;
+  if (titleEl) titleEl.textContent = shortProductName(product.name);
+  if (subEl) subEl.textContent = subText;
+  if (imgEl && product.images && product.images[0]) {
+    imgEl.src = encodePath(product.images[0]);
+    imgEl.alt = product.name;
+  }
+}
 
-  if (titleEl) titleEl.textContent = shortName;
-  if (subEl) subEl.textContent = `${top.bidCount || 0} lượt bid • Xem ngay →`;
-  if (imgEl && top.images && top.images[0]) imgEl.src = encodePath(top.images[0]);
+/**
+ * Dòng phụ đếm ngược cho thẻ "Sắp hết giờ"
+ * @param {number} endTimestamp - Thời điểm kết thúc phiên
+ * @returns {string}
+ */
+function formatEndingSub(endTimestamp) {
+  const minutes = Math.max(0, Math.ceil((endTimestamp - Date.now()) / 60000));
+  if (minutes >= 60) {
+    const h = Math.floor(minutes / 60);
+    return `Còn ${h} giờ ${minutes % 60} phút • Vào bid →`;
+  }
+  return `Còn ${minutes} phút • Vào bid →`;
+}
+
+/**
+ * Cập nhật 4 thẻ nhỏ ở Hero theo dữ liệu thật: phiên sắp kết thúc nhất, phiên nhiều lượt bid nhất,
+ * nguồn 80 Plus Gold giá tốt nhất và tản nhiệt được quan tâm nhất (chỉ lấy phiên còn đang diễn ra)
+ */
+function renderHeroPromos() {
+  if (allProducts.length === 0) return;
+  const now = Date.now();
+  const active = allProducts.filter(p => !isAuctionClosed(p) && Number(p.endTimestamp) > now);
+  if (active.length === 0) return;
+  const byBids = (a, b) => (Number(b.bidCount) || 0) - (Number(a.bidCount) || 0);
+
+  const ending = [...active].sort((a, b) => a.endTimestamp - b.endTimestamp)[0];
+  const competitive = [...active].filter(p => p.id !== ending.id).sort(byBids)[0];
+  const isGoldPsu = p => String(p.category).toUpperCase() === 'PSU'
+    && /gold/i.test(`${p.name} ${Object.values(p.specifications || {}).join(' ')}`);
+  const psu = active.filter(isGoldPsu).sort((a, b) => (Number(a.currentBid) || 0) - (Number(b.currentBid) || 0))[0];
+  const cooling = active.filter(p => String(p.category).toUpperCase() === 'COOLING').sort(byBids)[0];
+
+  fillHeroPromo('hero-promo-ending', ending, formatEndingSub(ending.endTimestamp));
+  fillHeroPromo('hero-promo-competitive', competitive, `${competitive?.bidCount || 0} lượt bid • Xem ngay →`);
+  fillHeroPromo('hero-promo-psu', psu, `Giá hiện tại ${formatVnd(psu?.currentBid)} →`);
+  fillHeroPromo('hero-promo-cooling', cooling, `${cooling?.bidCount || 0} lượt bid • Xem ngay →`);
 }
 
 /**
@@ -651,6 +709,19 @@ function updateAllCountdowns() {
     }
   });
 
+  // Thẻ "Sắp hết giờ": cập nhật số phút còn lại; phiên đã kết thúc thì chọn lại phiên khác
+  const endingCard = document.getElementById('hero-promo-ending');
+  if (endingCard?.dataset.productId) {
+    const endingItem = allProducts.find(p => Number(p.id) === Number(endingCard.dataset.productId));
+    if (!endingItem || endingItem.endTimestamp <= now) {
+      renderHeroPromos();
+    } else {
+      const subEl = endingCard.querySelector('[data-promo-sub]');
+      const text = formatEndingSub(endingItem.endTimestamp);
+      if (subEl && subEl.textContent !== text) subEl.textContent = text;
+    }
+  }
+
   // Cập nhật đồng hồ spotlight trên hero theo sản phẩm tâm điểm
   const heroTimer = document.getElementById('hero-spotlight-timer');
   if (heroTimer) {
@@ -726,7 +797,7 @@ function renderLiveTicker(newBidId = null) {
       : `<strong>${escapeHtml(bidder.name)}</strong>`;
     return `
       <div class="pcb-ticker__item${bid.id === newBidId ? ' pcb-ticker__item--new' : ''}">
-        <span class="pcb-ticker__text">🔥 ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
+        <span class="pcb-ticker__text"><span class="pcb-ticker__flame">${icon('flame', { size: 14 })}</span> ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
           <a class="pcb-ticker__product" href="product-detail.html?id=${product.id}">${escapeHtml(product.name)}</a></span>
         <span class="pcb-ticker__time" data-time="${escapeHtml(bid.timestamp)}">• ${formatTimeAgo(bid.timestamp)}</span>
       </div>
@@ -973,6 +1044,10 @@ function executeQuickBid() {
       });
     }
     localStorage.setItem('pcbid_products', JSON.stringify(localProducts));
+    // Có người dùng thật tham gia: chốt thời điểm kết thúc của phiên
+    lockAuctionEndTime(currentModalProduct);
+    // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
+    window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: currentModalProduct.id } }));
 
     const participating = JSON.parse(localStorage.getItem('pcbid_my_auctions_participating') || '[]');
     const pIdx = participating.findIndex(p => Number(p.id) === Number(currentModalProduct.id));

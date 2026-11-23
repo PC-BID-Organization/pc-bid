@@ -4,190 +4,258 @@
 
 # PCBid - Website Đấu Giá Linh Kiện PC Cũ
 
-Đồ án môn học: **IE104 - Internet & Công nghệ Web**  
-Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**  
+Đồ án môn học: **IE104 - Internet & Công nghệ Web**
+Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**
 Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
 
 ---
 
-## 1. Giới thiệu dự án
+## Mục lục
 
-**PCBid** là nền tảng web mô phỏng sàn đấu giá trực tuyến dành riêng cho linh kiện máy tính cũ (Used PC Parts Auction). 
-
-Khác với các trang web thương mại điện tử mua bán thông thường, cơ chế cốt lõi của PCBid tập trung hoàn toàn vào **đấu giá theo thời gian thực (Auction & Bidding Simulation)**: người bán đặt giá khởi điểm & thời hạn đấu giá, người mua theo dõi đồng hồ đếm ngược và tham gia trả giá cạnh tranh.
-
----
-
-## 2. Công nghệ sử dụng & Ràng buộc kỹ thuật (Hard Constraints)
-
-Dự án được xây dựng phục vụ yêu cầu học phần IE104 với tiêu chí **100% mã nguồn thuần (Vanilla)**:
-
-* **Frontend:** HTML5 (Ngữ nghĩa semantic), CSS3 (Flexbox, CSS Grid, Responsive, BEM convention), Vanilla JavaScript (ES6+).
-* **Kiến trúc Component:** Module hóa Header và Footer độc lập (`components/header/`, `components/footer/`), nạp động qua JavaScript để tái sử dụng xuyên suốt toàn bộ các trang.
-* **Tuyệt đối KHÔNG sử dụng:**
-  * Framework/Thư viện CSS: Bootstrap, Tailwind CSS, Bulma,...
-  * Framework/Thư viện JS: React, Vue, Angular, jQuery,...
-  * Backend & Server: Node.js, Express, Python/Django, PHP, Spring Boot,...
-  * Cơ sở dữ liệu thật: MySQL, MongoDB, Firebase, Supabase,...
-* **Mô phỏng dữ liệu & Trạng thái (SSOT):**
-  * Dữ liệu khởi tạo (mock data): Các file `.json` hoặc hằng số dữ liệu trong Javascript (`data/products.json`, `js/data.js`).
-  * Lưu trữ trạng thái phiên người dùng: `localStorage` (`pcbid_products`, `pcbid_bids`, `pcbid_my_auctions_participating`, `pcbid_my_auctions_selling`, `pcbid_registered_users`, `pcbid_logged_in_user`).
-  * Đồng bộ thời gian thực cross-page và cross-tab qua sự kiện `storage` và `pageshow` (hỗ trợ bfcache).
-* **Triển khai (Deployment):** Static Hosting (GitHub Pages).
+1. [Giới thiệu](#1-giới-thiệu)
+2. [Tính năng nổi bật](#2-tính-năng-nổi-bật)
+3. [Công nghệ & ràng buộc kỹ thuật](#3-công-nghệ--ràng-buộc-kỹ-thuật)
+4. [8 màn hình chính thức](#4-8-màn-hình-chính-thức)
+5. [Cấu trúc thư mục](#5-cấu-trúc-thư-mục)
+6. [Mô phỏng dữ liệu bằng localStorage](#6-mô-phỏng-dữ-liệu-bằng-localstorage)
+7. [Hướng dẫn chạy dự án](#7-hướng-dẫn-chạy-dự-án)
+8. [Tài khoản demo & kịch bản trình diễn](#8-tài-khoản-demo--kịch-bản-trình-diễn)
+9. [Quy chuẩn lập trình](#9-quy-chuẩn-lập-trình)
+10. [Quy trình Git của nhóm](#10-quy-trình-git-của-nhóm)
+11. [Giới hạn của bản mô phỏng](#11-giới-hạn-của-bản-mô-phỏng)
 
 ---
 
-## 3. Danh sách 8 màn hình chính thức
+## 1. Giới thiệu
 
-Dự án đã chốt chính xác **8 màn hình** đáp ứng đầy đủ yêu cầu nghiệp vụ:
+**PCBid** là website mô phỏng sàn đấu giá trực tuyến dành riêng cho **linh kiện máy tính đã qua sử dụng** (GPU, CPU, Mainboard, RAM, SSD/HDD, PSU, tản nhiệt, vỏ case).
 
-1. **Trang chủ (`index.html`)**:
-   - Hero banner giới thiệu sàn đấu giá linh kiện PC cũ.
-   - Danh mục linh kiện nổi bật (GPU, CPU, Mainboard, RAM, SSD/HDD, PSU).
-   - Phiên đấu giá Hot nhất, phiên sắp kết thúc (Live Countdown).
-   - Đặt giá nhanh (Quick Bid) 1-chạm cập nhật giá thời gian thực.
-   - Cam kết sàn (Bao test 7 ngày, kiểm định Furmark, MemTest86).
-2. **Danh sách sản phẩm & Bộ lọc (`products.html`)**:
-   - Bộ lọc linh kiện đa năng (danh mục, khoảng giá, tình trạng New/Like New/Used).
-   - Sắp xếp (giá tăng/giảm, sắp hết hạn, lượt bid nhiều nhất).
-   - Tìm kiếm từ khóa thời gian thực.
-   - Đồng bộ giá hiện tại và số lượt bid từ storage.
-3. **Chi tiết phiên đấu giá (`product-detail.html`)**:
-   - Gallery ảnh linh kiện và kiểm định thực tế.
-   - Thông số kỹ thuật chi tiết, đánh giá tình trạng linh kiện.
-   - Bảng so sánh giá thị trường linh kiện mới vs giá đấu hiện tại.
-   - Bộ đếm thời gian ngược (Live Countdown).
-   - Khung đặt giá (Bidding Box): Kiểm tra hợp lệ bước giá, tự động cập nhật giá cao nhất.
-   - Lịch sử đặt giá (Bid history log).
-   - Chặn người bán tự đấu giá sản phẩm của chính mình (Anti self-bidding).
-4. **Tạo phiên đấu giá mới (`sell.html`)**:
-   - Biểu mẫu đăng linh kiện đấu giá: Tên, loại linh kiện, thông số, ảnh demo, giá khởi điểm, bước giá, hạn kết thúc.
-   - Form validation chuẩn HTML5/JS và lưu dữ liệu phiên vào `localStorage`.
-   - Gắn đúng người bán (`sellerName`, `sellerId`) và đồng bộ vào danh sách đang bán.
-5. **Đăng nhập (`login.html`)**:
-   - Xác thực tài khoản mô phỏng, lưu trạng thái phiên đăng nhập vào `localStorage`.
-   - Tích hợp 3 nút chọn nhanh tài khoản demo 1-chạm (`Đấu giá 1`, `Đấu giá 2`, `Người bán`).
-6. **Đăng ký tài khoản (`register.html`)**:
-   - Form đăng ký thành viên mới, khởi tạo số dư ví ảo mô phỏng ban đầu.
-7. **Hồ sơ cá nhân & Đấu giá của tôi (`profile.html`)**:
-   - Thông tin cá nhân người dùng, số dư ví ảo mô phỏng.
-   - Tab quản lý phiên đấu giá đang tham gia: Tự động đối soát trạng thái đang dẫn đầu (Lead) hoặc bị vượt giá (Outbid), tính toán nút trả giá tiếp chính xác.
-   - Tab quản lý các phiên do chính người dùng đăng bán (đồng bộ từ `sell.html`).
-   - Tab danh sách theo dõi (Watchlist).
-8. **Trang thông báo lỗi 404 (`404.html`)**:
-   - Giao diện báo lỗi trang không tồn tại thân thiện, kèm nút điều hướng về Trang chủ.
+Khác với trang thương mại điện tử thông thường, trọng tâm của PCBid là **đấu giá theo thời gian thực**: người bán đặt giá khởi điểm, bước giá và thời hạn; người mua theo dõi đồng hồ đếm ngược, trả giá cạnh tranh, giữ cọc 10% và hoàn tất đơn hàng sau khi thắng.
+
+Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thuần). Các tính năng vốn cần máy chủ như nhiều người cùng đấu giá, thanh toán, nhắn tin, đơn hàng đều được **mô phỏng bằng `localStorage`** đúng theo yêu cầu học phần.
 
 ---
 
-## 4. Cấu trúc thư mục dự án
+## 2. Tính năng nổi bật
+
+### Đấu giá thời gian thực
+- Đồng hồ đếm ngược theo giây, kiểm tra bước giá tối thiểu, chặn người bán tự đặt giá phiên của mình.
+- **Lịch sử đặt giá** gồm lượt đặt thật và lượt mẫu sinh cố định theo từng phiên, hiển thị **họ tên + UID che bớt** (`#PCB-7K***XA`).
+- **Bot đặt giá mô phỏng** (`js/bot-bidder.js`): cứ 15–60 giây một người dùng mẫu đặt giá thật vào một phiên đang mở. Chỉ một tab chạy bot nhờ cơ chế khóa trong `localStorage`, có mức trần giá theo giá thị trường.
+- **Băng chuyền "Trực tiếp sàn đấu giá"** ở trang chủ hiện các lượt đặt mới nhất; bấm tên người để mở hồ sơ, bấm tên linh kiện để mở phiên.
+- Trang chi tiết tự cập nhật giá, số lượt, lịch sử và báo ngay khi bạn **bị vượt giá**.
+
+### Ví ảo, tiền cọc & quy trình sau khi thắng
+- Mỗi lượt đang dẫn đầu bị **giữ cọc 10%**; bị vượt giá thì cọc tự hoàn.
+- **Phiên kết thúc** → người thắng tiếp tục bị giữ cọc, đơn hàng chuyển sang **"Chờ thanh toán"** (hạn 1 phút để dễ trình diễn):
+  1. Người mua chọn địa chỉ nhận hàng và thanh toán phần còn lại từ ví ảo.
+  2. Người bán xác nhận đã giao hàng.
+  3. Người mua xác nhận đã nhận → tiền chuyển vào ví người bán.
+  4. Quá hạn thanh toán → người mua **mất cọc**, cọc chuyển cho người bán, phiên có thể đăng bán lại.
+- Sổ giao dịch ví (`pcbid_wallet_ledger`) ghi mọi khoản cộng / trừ của cả người mua lẫn người bán.
+- Nút **"Kết thúc phiên ngay (demo)"** giúp trình diễn toàn bộ quy trình mà không phải chờ hết giờ.
+
+### Quản lý đấu giá tách hai luồng Mua / Bán
+- Icon xe hàng trên header mở khu vực **Quản lý đấu giá**, tách biệt với phần cài đặt tài khoản.
+- **Mua hàng:** Phiên đang tham gia · Đơn mua · Danh sách theo dõi.
+- **Bán hàng:** Phiên đang bán · Đơn bán.
+- Thẻ đơn hàng có dòng thời gian 4 bước, đồng hồ hạn thanh toán, nút thao tác theo vai trò và nút nhắn tin với bên còn lại.
+
+### Đăng bán linh kiện
+- Chọn mẫu từ catalogue chuẩn để tự điền thông số, bổ sung thông số riêng.
+- Tải tối đa 6 ảnh (nén trước khi lưu), chọn ảnh bìa, gợi ý ảnh liên quan theo mẫu.
+- Thanh tiến trình 3 bước, xem trước thẻ đấu giá trực tiếp.
+- Đăng xong có đồng hồ 10 giây tự chuyển sang trang Sàn đấu giá, phiên vừa đăng được ưu tiên hiển thị kèm nhãn **"Bạn vừa đăng"**.
+- Người bán có bảng quản lý riêng trên trang chi tiết: đóng phiên ngay, đăng bán lại, xem lịch sử đặt giá.
+
+### Tài khoản, hồ sơ & quyền riêng tư
+- Đăng nhập **kiểm tra đúng email / tên đăng nhập và mật khẩu**; mật khẩu được băm trước khi lưu (mô phỏng).
+- Đăng ký kiểm tra trùng email / số điện thoại, tự tạo tên đăng nhập không trùng.
+- Thông tin tài khoản: họ đệm và tên tách riêng, giới tính, tiểu sử, ngày sinh chỉ được đổi 1 lần (có biểu tượng khóa), kiểm tra trùng email / số điện thoại ngay khi rời ô (dòng chữ đỏ và dấu X đỏ).
+- Ảnh đại diện tải lên kèm công cụ cắt ảnh bằng Canvas; mặc định là chữ cái đầu của tên.
+- **Hồ sơ công khai** (`profile.html?user=<tên đăng nhập>`): tiểu sử, liên hệ, phiên đang bán / đang tham gia, danh sách theo dõi, nút **Nhắn tin**; từng mục bật / tắt công khai bằng nút gạt.
+- **Sổ địa chỉ nhận hàng** giống Shopee: nhiều địa chỉ với tên và số điện thoại người nhận khác nhau, địa chỉ mặc định luôn đứng đầu.
+
+### Nhắn tin người mua - người bán
+- Hộp chat nổi 2 cột trên mọi trang: tìm theo tên, lọc **Tất cả / Đã ghim / Chưa đọc**, menu ba chấm để ghim, đánh dấu đã đọc / chưa đọc, xóa đoạn chat.
+- Gửi văn bản, biểu tượng cảm xúc, **hình ảnh, video**, thẻ **sản phẩm** của người bán và thẻ **đơn hàng** giữa hai bên.
+- Hiện đúng ảnh đại diện của người bên kia; người bán mẫu tự trả lời theo nội dung câu hỏi.
+
+### Thông báo
+- Bấm chuông mở **bảng thông báo nhanh** ngay trên trang; trang Thông báo đầy đủ trong hồ sơ.
+- Thông báo cho mọi tình huống: bị vượt giá, sắp kết thúc, thắng / không thắng, từng bước của đơn mua và đơn bán.
+
+### Đa ngôn ngữ & giao diện
+- Chuyển **Tiếng Việt / English / 日本語** bằng nút quả địa cầu trên thanh trên cùng (hoặc trong menu tài khoản trên điện thoại). Bộ dịch quét chữ trên trang, kể cả nội dung sinh động bằng JavaScript; ngôn ngữ được nhớ cho mọi trang.
+- Bộ icon **Lucide** lưu thành tệp SVG trong `images/icons/lucide/`, hiển thị bằng CSS `mask-image` để đổi màu theo chữ.
+- Hộp thoại xác nhận / thông báo riêng thay cho `alert()` / `confirm()` của trình duyệt.
+- Phóng to ảnh sản phẩm khi rê chuột, lăn chuột để zoom.
+- Responsive từ 320px, không tràn ngang.
+
+---
+
+## 3. Công nghệ & ràng buộc kỹ thuật
+
+| Hạng mục | Lựa chọn |
+| :--- | :--- |
+| Ngôn ngữ | HTML5 ngữ nghĩa, CSS3 (Flexbox, Grid, Media Queries, Custom Properties), JavaScript ES6+ (ES Modules) |
+| Đặt tên | CSS theo **BEM** (`block__element--modifier`), JavaScript theo **camelCase** |
+| Component | Header / Footer tách thư mục riêng, nạp động bằng `fetch()` từ `js/main.js` |
+| Dữ liệu | Catalogue 200 linh kiện trong `data/*.json`, trạng thái lưu trong `localStorage` |
+| Triển khai | Static hosting (GitHub Pages / Vercel) |
+
+**Tuyệt đối không sử dụng:** framework / thư viện CSS (Bootstrap, Tailwind…), framework / thư viện JS (React, Vue, jQuery…), backend (Node.js, PHP…), cơ sở dữ liệu thật (MySQL, Firebase…), `npm` / `package.json`, cổng thanh toán thật. Chi tiết xem [`AGENTS.md`](AGENTS.md).
+
+---
+
+## 4. 8 màn hình chính thức
+
+| # | Trang | Nội dung chính |
+| :-: | :--- | :--- |
+| 1 | `index.html` | Hero, danh mục, băng chuyền trực tiếp, phiên hot, sắp kết thúc, sản phẩm mới, đặt giá nhanh, cam kết sàn |
+| 2 | `products.html` | Bộ lọc danh mục / khoảng giá / tình trạng / kiểm định, sắp xếp, tìm kiếm, phân trang, nhãn "Bạn vừa đăng" |
+| 3 | `product-detail.html` | Gallery + zoom, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá, lịch sử đặt giá, bảng quản lý của người bán, đơn hàng sau đấu giá, liên hệ người bán |
+| 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình |
+| 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo |
+| 6 | `register.html` | Đăng ký, kiểm tra trùng email / số điện thoại, khởi tạo ví ảo |
+| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản, địa chỉ nhận hàng, bảo mật & quyền riêng tư, hồ sơ công khai `?user=` |
+| 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
+
+> Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html`. Tệp `my-auctions.html` chỉ chuyển hướng về `profile.html#my-auctions`.
+
+---
+
+## 5. Cấu trúc thư mục
 
 ```text
 pc-bid/
 ├── components/
-│   ├── header/
-│   │   ├── header.html        # Template HTML Header (Top bar, Search, Avatar Dropdown, Categories Nav)
-│   │   ├── header.css         # Style BEM riêng cho Header & Dropdown menu
-│   │   └── header.js          # Logic Header (Auth state, Avatar Dropdown, Search, Active link)
-│   └── footer/
-│       ├── footer.html        # Template HTML Footer 4 cột
-│       └── footer.css         # Style BEM riêng cho Footer
+│   ├── header/                 # Thanh trên cùng (ngôn ngữ), tìm kiếm, danh mục, thông báo nhanh, menu tài khoản
+│   └── footer/                 # Footer 4 cột
 ├── css/
-│   ├── reset.css              # Reset CSS mặc định trình duyệt
-│   ├── style.css              # Biến màu sắc, typography, utilities toàn hệ thống
-│   ├── home.css               # Style nội dung riêng cho Trang chủ
-│   ├── products.css           # Style trang danh sách & bộ lọc
-│   ├── product-detail.css     # Style chi tiết sản phẩm & phòng đấu giá
-│   ├── sell.css               # Style trang đăng bán đấu giá
-│   ├── auth.css               # Style trang đăng nhập / đăng ký
-│   └── profile.css            # Style trang cá nhân & quản lý
-├── js/
-│   ├── data.js                # Mock dataset ban đầu (sản phẩm, tài khoản mẫu)
-│   ├── storage.js             # Wrapper tiện ích đọc/ghi localStorage
-│   ├── main.js                # Nạp component động (#app-header, #app-footer)
-│   ├── index.js               # Logic trang chủ, sync giá & Quick Bid thời gian thực
-│   ├── products.js            # Logic bộ lọc, tìm kiếm, phân trang, sync giá
-│   ├── product-detail.js      # Logic đặt giá, validate bước giá, countdown, anti self-bidding
-│   ├── sell.js                # Logic đăng bán sản phẩm mới, gắn seller session
-│   ├── auth.js                # Logic xác thực, seed sẵn 3 tài khoản demo
-│   └── profile.js             # Logic tab quản lý đấu giá, ví ảo, tự tính Lead/Outbid
+│   ├── reset.css · style.css   # Reset, biến màu, thành phần dùng chung (hộp thoại, chat, đơn hàng, địa chỉ, icon)
+│   ├── home.css · products.css · product-detail.css · sell.css · auth.css · profile.css
+├── data/                       # Catalogue linh kiện: cpu, gpu, mainboard, ram, storage, psu, cooling, case (.json)
 ├── images/
-│   ├── logo/                  # Logo PCBid các kích thước
-│   ├── icons/                 # Vector SVG icon trích xuất từ Figma
-│   ├── products/              # Hình ảnh linh kiện máy tính
-│   └── banners/               # Banner quảng bá, slider
-├── data/
-│   └── products.json          # Mock data JSON sản phẩm
-├── index.html
-├── products.html
-├── product-detail.html
-├── sell.html
-├── login.html
-├── register.html
-├── profile.html
-├── 404.html
-├── README.md
-├── AGENTS.md
-└── .gitignore
+│   ├── icons/                  # Icon trích xuất từ Figma
+│   │   └── lucide/             # Icon Lucide dạng SVG
+│   ├── logo/ · banners/ · products/
+├── js/
+│   ├── main.js                 # Nạp Header / Footer, khởi động bot, xử lý sau đấu giá, chat, đa ngôn ngữ
+│   ├── index.js · products.js · product-detail.js · sell.js · auth.js · profile.js   # Logic từng trang
+│   ├── accounts.js             # Tài khoản demo / mẫu, UID, avatar, mật khẩu, kiểm tra trùng
+│   ├── user-data.js            # Danh sách riêng theo từng tài khoản (watchlist, đang bán, đã đọc...)
+│   ├── auction-time.js         # Thời điểm kết thúc phiên thống nhất cho mọi trang
+│   ├── bid-history.js          # Nạp phiên, sinh lịch sử đặt giá dùng chung
+│   ├── bot-bidder.js           # Bot đặt giá mô phỏng
+│   ├── wallet.js               # Ví ảo, tiền cọc, sổ giao dịch, thông báo
+│   ├── settlement.js           # Đơn hàng sau đấu giá: thanh toán, giao hàng, quá hạn
+│   ├── order-view.js           # Thẻ đơn hàng dùng chung
+│   ├── address-book.js         # Sổ địa chỉ nhận hàng
+│   ├── chat.js                 # Hộp chat người mua - người bán
+│   ├── dialog.js               # Hộp thoại xác nhận / thông báo
+│   ├── avatar-cropper.js       # Cắt ảnh đại diện bằng Canvas
+│   ├── icons.js                # Sinh thẻ icon Lucide
+│   └── i18n.js · i18n-dict.js  # Bộ dịch và từ điển Việt - Anh - Nhật
+├── index.html · products.html · product-detail.html · sell.html
+├── login.html · register.html · profile.html · 404.html
+├── AGENTS.md                   # Quy tắc bắt buộc cho thành viên và AI Agent
+└── README.md
 ```
 
 ---
 
-## 5. Quy chuẩn lập trình (Coding Conventions)
+## 6. Mô phỏng dữ liệu bằng localStorage
 
-* **CSS:**
-  * Áp dụng phương pháp đặt tên theo chuẩn **BEM** (`block__element--modifier`).
-  * Tránh xung đột CSS giữa các trang bằng cách gắn id riêng cho `<body>` hoặc thẻ bao chính (ví dụ: `#home-page`, `#product-page`).
-* **JavaScript:**
-  * Đặt tên biến và hàm theo chuẩn **camelCase** rõ nghĩa (`currentBid`, `calculateTimeRemaining()`, `handlePlaceBid()`).
-  * Tổ chức code theo mô-đun rõ ràng, sử dụng ES Modules (`import`/`export`), lắng nghe sự kiện khi DOM đã sẵn sàng (`DOMContentLoaded`).
-* **HTML:**
-  * Sử dụng thẻ ngữ nghĩa (`<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<footer>`).
-  * Mọi ảnh phải có thuộc tính `alt`, ưu tiên `loading="lazy"` cho ảnh dưới khung nhìn.
-  * Hợp chuẩn W3C Validator.
+| Khóa | Nội dung |
+| :--- | :--- |
+| `pcbid_products` | Phiên người dùng đăng bán và bản cập nhật của phiên catalogue (giá, lượt, trạng thái, thời điểm kết thúc) |
+| `pcbid_bids` | Toàn bộ lượt đặt giá thật (của người dùng và bot) |
+| `pcbid_currentUser` · `pcbid_user` | Phiên đăng nhập hiện tại |
+| `pcbid_registered_users` | Tài khoản đã đăng ký / tài khoản demo đã chỉnh sửa |
+| `pcbid_orders` | Đơn hàng sau đấu giá |
+| `pcbid_wallet_ledger` | Sổ giao dịch ví (thanh toán, nhận tiền bán, mất / nhận cọc) |
+| `pcbid_chats` | Cuộc trò chuyện người mua - người bán |
+| `pcbid_lang` | Ngôn ngữ giao diện đã chọn |
+| `pcbid_bot_state` · `pcbid_bot_seeded` | Nhịp và khóa chạy bot giữa các tab |
+| `pcbid_settled` · `pcbid_settlement_since` | Các phiên đã xử lý kết quả |
+| `pcbid_watchlist__<tài khoản>` · `pcbid_my_auctions_selling__<tài khoản>` · `pcbid_notifications_read__<tài khoản>` · `pcbid_addresses__<tài khoản>` | Dữ liệu riêng của từng tài khoản |
 
----
-
-## 6. Quy trình làm việc nhóm & Git Workflow (Bắt buộc)
-
-Để tránh xung đột mã nguồn và đảm bảo chất lượng code, nhóm áp dụng nghiêm ngặt quy trình **Feature Branch & Pull Request**:
-
-1. **Tuyệt đối không push trực tiếp lên `main`**: Toàn bộ thay đổi phải thông qua Pull Request.
-2. **Tạo nhánh mới (Feature Branch)** khi bắt đầu làm việc:
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feat/<ten-tinh-nang>   # hoặc fix/<ten-loi>
-   ```
-3. **Phát triển và Commit**: Tuân thủ chuẩn Conventional Commits:
-   - `feat: thêm bộ lọc sản phẩm theo mức giá`
-   - `fix: xử lý lỗi đếm ngược thời gian đấu giá`
-4. **Tạo Pull Request (PR)**:
-   - Đẩy nhánh lên GitHub: `git push -u origin feat/<ten-tinh-nang>`
-   - Mở Pull Request vào nhánh `main` kèm mô tả chi tiết và hình ảnh demo/kết quả test.
-5. **Code Review & Merge**:
-   - Ít nhất một thành viên khác trong nhóm/nhóm trưởng kiểm tra code và chạy thử nghiệm.
-   - Chỉ khi được Approve thì mới được phép merge vào `main`.
+Các trang đồng bộ với nhau qua sự kiện `storage` (giữa các tab) và các sự kiện tùy biến như `pcbid:bid-placed`, `pcbid:orders-updated`, `pcbid:notifications-updated` (trong cùng tab).
 
 ---
 
-## 7. Hướng dẫn chạy & Kiểm thử
+## 7. Hướng dẫn chạy dự án
 
-### 7.1. Khởi chạy dự án
-1. Clone repository về máy:
+1. Clone repository:
    ```bash
    git clone https://github.com/PC-BID-Organization/pc-bid.git
-   cd pc-bid
    ```
-2. Mở thư mục dự án bằng **Visual Studio Code**.
-3. Cài đặt tiện ích mở rộng **Live Server** trên VS Code.
-4. Click chuột phải vào file `index.html` và chọn **Open with Live Server** (cần thiết để nạp component Header/Footer qua HTTP request cục bộ tránh lỗi CORS).
-5. Dự án thuần Frontend, không cần cài đặt `npm` hay server backend.
+2. Mở thư mục bằng **Visual Studio Code**, cài tiện ích **Live Server**.
+3. Chuột phải `index.html` → **Open with Live Server**.
 
-### 7.2. Tài khoản mẫu để kiểm thử (Demo Accounts)
-Hệ thống đã tạo sẵn 3 tài khoản trong code (có thể click nút đăng nhập nhanh ở trang `login.html`):
+> Cần chạy qua máy chủ tĩnh (Live Server, GitHub Pages, Vercel…) vì Header / Footer được nạp bằng `fetch()` và icon dùng CSS `mask-image`. Mở trực tiếp tệp bằng `file://` sẽ không hiển thị đầy đủ. Dự án không cần cài `npm` hay backend.
 
-| Tài khoản | Tên hiển thị | Vai trò | Số dư ví | Mật khẩu |
-| :--- | :--- | :--- | :--- | :--- |
-| `bidder1@pcbid.vn` | **Nguyễn Văn A (Đấu Giá 1)** | Người mua | 50.000.000 đ | `123456` |
-| `bidder2@pcbid.vn` | **Lê Thị C (Đấu Giá 2)** | Người mua | 60.000.000 đ | `123456` |
-| `seller@pcbid.vn` | **Trần Văn B (Người Bán)** | Người bán | 80.000.000 đ | `123456` |
+Muốn làm mới toàn bộ dữ liệu mô phỏng: DevTools → **Application** → **Local Storage** → xóa các khóa bắt đầu bằng `pcbid_`, rồi tải lại trang.
+
+---
+
+## 8. Tài khoản demo & kịch bản trình diễn
+
+Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nhanh ở `login.html`. Mật khẩu chung: `123456` (đổi được trong mục Bảo mật).
+
+| Email | Họ tên | Số dư ví ban đầu |
+| :--- | :--- | :--- |
+| `bidder1@pcbid.vn` | Nguyễn Hùng Phong | 50.000.000 đ |
+| `bidder2@pcbid.vn` | Nguyễn Nhật Huy | 60.000.000 đ |
+| `bidder3@pcbid.vn` | Huỳnh Nhật Minh | 55.000.000 đ |
+| `seller@pcbid.vn` | Nguyễn Gia Huy (có sẵn phiên đăng bán) | 80.000.000 đ |
+
+**Kịch bản gợi ý (khoảng 5 phút):**
+1. Trang chủ: xem băng chuyền "Trực tiếp sàn đấu giá" cập nhật khi bot đặt giá.
+2. Đăng nhập `bidder1`, mở một phiên, đặt giá → số dư khả dụng trong menu avatar giảm đúng tiền cọc 10%.
+3. Bấm **"Kết thúc phiên ngay (demo)"** → đơn "Chờ thanh toán" xuất hiện kèm đồng hồ 1 phút.
+4. Chọn địa chỉ nhận hàng, thanh toán → người bán mẫu tự giao hàng sau vài giây → bấm "Đã nhận được hàng" → hoàn tất.
+5. Bấm **"Liên hệ người bán"**, gửi câu hỏi / ảnh / thẻ sản phẩm, xem người bán tự trả lời.
+6. Đăng nhập `seller`, đăng bán một linh kiện → đồng hồ 10 giây → phiên đứng đầu Sàn đấu giá với nhãn "Bạn vừa đăng".
+7. Chuyển ngôn ngữ sang **English / 日本語** bằng nút quả địa cầu.
+
+---
+
+## 9. Quy chuẩn lập trình
+
+- **CSS:** BEM, biến màu dùng chung trong `css/style.css`, không dùng framework.
+- **JavaScript:** camelCase cho biến / hàm, PascalCase cho class; ES Modules (`import` / `export`); thao tác DOM trực tiếp và `addEventListener`.
+- **HTML:** thẻ ngữ nghĩa (`header`, `nav`, `main`, `section`, `article`, `aside`, `footer`), ảnh có `alt`, ưu tiên `loading="lazy"`, hợp chuẩn W3C.
+- **Chú thích:** viết **bằng tiếng Việt có dấu** trong HTML / CSS / JS; chỉ giữ tiếng Anh cho thuật ngữ phổ biến (DOM, localStorage, render, fetch…).
+- **Khả năng truy cập:** hỗ trợ bàn phím (Tab, Esc), `aria-*` cho menu / hộp thoại, tôn trọng `prefers-reduced-motion`.
+
+---
+
+## 10. Quy trình Git của nhóm
+
+1. **Không push trực tiếp lên `main`.**
+2. Tạo nhánh từ `main`: `feat/<tính-năng>`, `fix/<lỗi>`, `docs/<tài-liệu>`, `style/<giao-diện>`.
+   ```bash
+   git checkout main
+   ```
+   ```bash
+   git pull origin main
+   ```
+   ```bash
+   git checkout -b feat/ten-tinh-nang
+   ```
+3. Commit theo **Conventional Commits**, ví dụ `feat: add buyer-seller chat`, `fix: refresh wallet balance after bidding`.
+4. Push nhánh và mở **Pull Request** vào `main`, mô tả rõ thay đổi kèm ảnh demo.
+5. Chỉ merge sau khi có thành viên review và approve. Nên chọn **Create a merge commit** hoặc **Rebase and merge** để giữ nguyên tác giả từng commit.
+6. Không commit tệp nhị phân lớn hay tài liệu đồ án (`*.pdf`, `*.docx`, `*.pptx`).
+
+---
+
+## 11. Giới hạn của bản mô phỏng
+
+- Dữ liệu nằm trong `localStorage` nên **mỗi trình duyệt có dữ liệu riêng**; tài khoản, tin nhắn, đơn hàng không đồng bộ giữa các máy.
+- Bot, đơn hàng quá hạn và câu trả lời tự động chỉ chạy khi đang mở ít nhất một tab PCBid.
+- Mật khẩu được băm bằng hàm FNV-1a phía trình duyệt, **không phải cơ chế bảo mật thật**.
+- Video gửi trong chat giới hạn 1,5MB vì bộ nhớ `localStorage` chỉ khoảng 5MB.
+- Bộ dịch giữ nguyên tên sản phẩm, thông số dạng giá trị, tên người dùng và nội dung tin nhắn.

@@ -4,13 +4,21 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
-import { getAvailableBalance, getUnreadNotificationCount } from '../../js/wallet.js';
+import { getAvailableBalance, getUnreadNotificationCount, getUserNotifications, markNotificationsRead, getParticipatingAuctions } from '../../js/wallet.js';
+// Thời điểm kết thúc / trạng thái phiên để chỉ đếm phiên còn diễn ra
+import { getAuctionEndTimestamp, isAuctionClosed } from '../../js/auction-time.js';
+// Đơn hàng sau đấu giá để đếm số việc cần xử lý trên icon Quản lý đấu giá
+import { getOrdersForUser, orderNeedsAction } from '../../js/settlement.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
 import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from '../../js/dialog.js';
+// Bộ icon Lucide dùng chung
+import { icon, NOTIFY_ICON_NAMES } from '../../js/icons.js';
+// Chuyển đổi ngôn ngữ giao diện
+import { LANGUAGES, getLanguage, setLanguage } from '../../js/i18n.js';
 // Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 
@@ -20,6 +28,312 @@ export function initHeader() {
   initMobileNavToggle();
   initCategorySelectSync();
   initHeaderUserStatus();
+  initNotifyPanel();
+  refreshTradeBadge();
+  initLanguageSwitcher();
+}
+
+/**
+ * Tô đậm ngôn ngữ đang chọn ở mọi vị trí (thanh trên cùng và menu tài khoản)
+ */
+function syncLanguageButtons() {
+  const lang = getLanguage();
+  const current = LANGUAGES.find(l => l.code === lang);
+  const codeEl = document.getElementById('header-lang-code');
+  if (codeEl && current) codeEl.textContent = current.short;
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    const active = el.dataset.lang === lang;
+    el.classList.toggle('is-active', active);
+    if (el.getAttribute('role') === 'menuitemradio') el.setAttribute('aria-checked', String(active));
+    else el.setAttribute('aria-pressed', String(active));
+  });
+}
+
+/**
+ * Nút chọn ngôn ngữ trên thanh trên cùng và hàng chọn ngôn ngữ trong menu tài khoản (màn hình nhỏ)
+ */
+function initLanguageSwitcher() {
+  const btn = document.getElementById('header-lang-btn');
+  const menu = document.getElementById('header-lang-menu');
+
+  const closeMenu = () => {
+    if (!menu || !btn) return;
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  };
+
+  if (btn && menu && !btn.dataset.bound) {
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) menu.querySelector('.is-active')?.focus();
+    });
+    document.addEventListener('click', e => {
+      if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        closeMenu();
+        btn.focus();
+      }
+    });
+  }
+
+  // Ủy quyền sự kiện: menu tài khoản được vẽ lại nhiều lần nên gắn một lần trên document
+  if (!window.__pcbidLangBound) {
+    window.__pcbidLangBound = true;
+    document.addEventListener('click', e => {
+      const option = e.target.closest('[data-lang]');
+      if (!option) return;
+      setLanguage(option.dataset.lang);
+      closeMenu();
+    });
+    window.addEventListener('pcbid:language-changed', syncLanguageButtons);
+  }
+  syncLanguageButtons();
+}
+
+/* ==========================================================================
+   BẢNG THÔNG BÁO NHANH (bấm chuông) & SỐ ĐẾM ICON QUẢN LÝ ĐẤU GIÁ
+   ========================================================================== */
+
+
+// Số thông báo hiển thị trước khi bấm "Xem thông báo trước đó"
+const NOTIFY_PANEL_LIMIT = 5;
+
+// Trạng thái bảng thông báo nhanh: bộ lọc Tất cả / Chưa đọc, đã mở rộng danh sách, menu ba chấm
+const notifyState = { filter: 'all', expanded: false, menuOpen: false };
+
+/**
+ * Đóng bảng thông báo nhanh và đặt lại trạng thái thu gọn cho lần mở sau
+ */
+function closeNotifyPanel() {
+  const panel = document.getElementById('header-notify-panel');
+  const btn = document.getElementById('header-notify-btn');
+  if (panel) panel.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+  notifyState.expanded = false;
+  notifyState.menuOpen = false;
+}
+
+/**
+ * Đổi mốc thời gian thành dạng ngắn như "Vừa xong", "5 phút", "3 giờ", "2 ngày"
+ * @param {number} time - Mốc thời gian (ms)
+ * @returns {string}
+ */
+function formatNotifyAgo(time) {
+  if (!time) return '';
+  const minutes = Math.floor(Math.max(0, Date.now() - time) / 60000);
+  if (minutes < 1) return 'Vừa xong';
+  if (minutes < 60) return `${minutes} phút`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} giờ`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} ngày`;
+  return `${Math.floor(days / 7)} tuần`;
+}
+
+/**
+ * HTML một dòng thông báo: ảnh sản phẩm tròn kèm huy hiệu loại, nội dung và thời gian
+ * @param {Object} n - Thông báo
+ * @returns {string}
+ */
+function renderNotifyItem(n) {
+  const image = n.image || 'images/placeholder-product.svg';
+  return `
+    <li>
+      <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
+        <span class="header__notify-avatar">
+          <img src="${escapeHeaderHtml(image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+          <span class="header__notify-icon header__notify-icon--${n.type}">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 12 })}</span>
+        </span>
+        <span class="header__notify-body">
+          <span class="header__notify-item-title">${escapeHeaderHtml(n.title)}</span>
+          <span class="header__notify-item-msg">${escapeHeaderHtml(n.message)}</span>
+          <span class="header__notify-time">${formatNotifyAgo(n.eventTime)}</span>
+        </span>
+        ${n.read ? '' : '<span class="header__notify-dot"><span class="header__notify-sr">Chưa đọc</span></span>'}
+      </a>
+    </li>
+  `;
+}
+
+/**
+ * Render nội dung bảng thông báo nhanh theo dữ liệu mới nhất (bố cục giống bảng thông báo Facebook)
+ */
+function renderNotifyPanel() {
+  const panel = document.getElementById('header-notify-panel');
+  if (!panel) return;
+  const user = readLoggedInUser();
+  if (!user) {
+    panel.classList.remove('header__notify-panel--expanded');
+    panel.innerHTML = `
+      <div class="header__notify-head"><strong class="header__notify-title">Thông báo</strong></div>
+      <p class="header__notify-empty">Đăng nhập để nhận thông báo khi bị vượt giá, thắng phiên và theo dõi đơn hàng.</p>
+      <a href="login.html" class="header__notify-more">Đăng nhập ngay</a>
+    `;
+    return;
+  }
+
+  const all = getUserNotifications(user);
+  const unreadCount = all.filter(n => !n.read).length;
+  // Chưa đọc lên trước, trong cùng nhóm thì thông báo mới nhất đứng trên (sắp xếp trước khi cắt danh sách)
+  const filtered = (notifyState.filter === 'unread' ? all.filter(n => !n.read) : [...all])
+    .sort((a, b) => (a.read - b.read) || ((b.eventTime || 0) - (a.eventTime || 0)));
+  const shown = notifyState.expanded ? filtered : filtered.slice(0, NOTIFY_PANEL_LIMIT);
+  // Chia nhóm như Facebook: "Mới" (chưa đọc) và "Trước đó" (đã đọc)
+  const groups = [
+    { label: 'Mới', items: shown.filter(n => !n.read) },
+    { label: 'Trước đó', items: shown.filter(n => n.read) }
+  ].filter(g => g.items.length);
+
+  panel.classList.toggle('header__notify-panel--expanded', notifyState.expanded);
+  panel.innerHTML = `
+    <div class="header__notify-head">
+      <strong class="header__notify-title">Thông báo</strong>
+      <div class="header__notify-menu-wrap">
+        <button type="button" class="header__notify-menu-btn" data-notify-menu aria-label="Tùy chọn thông báo" aria-haspopup="true" aria-expanded="${notifyState.menuOpen}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" /></svg>
+        </button>
+        <div class="header__notify-menu" role="menu" ${notifyState.menuOpen ? '' : 'hidden'}>
+          <button type="button" role="menuitem" class="header__notify-menu-item" data-notify-readall ${unreadCount ? '' : 'disabled'}>
+            ${icon('check', { size: 16 })} Đánh dấu tất cả là đã đọc
+          </button>
+          <a role="menuitem" class="header__notify-menu-item" href="profile.html#notifications">
+            ${icon('bell', { size: 16 })} Mở trang thông báo
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="header__notify-tabs" role="group" aria-label="Lọc thông báo">
+      <button type="button" class="header__notify-tab${notifyState.filter === 'all' ? ' is-active' : ''}" data-notify-filter="all" aria-pressed="${notifyState.filter === 'all'}">Tất cả</button>
+      <button type="button" class="header__notify-tab${notifyState.filter === 'unread' ? ' is-active' : ''}" data-notify-filter="unread" aria-pressed="${notifyState.filter === 'unread'}">Chưa đọc</button>
+    </div>
+    <div class="header__notify-scroll">
+      ${groups.length ? groups.map((g, i) => `
+        <div class="header__notify-group-head">
+          <span class="header__notify-group">${g.label}</span>
+          ${i === 0 ? '<a href="profile.html#notifications" class="header__notify-seeall">Xem tất cả</a>' : ''}
+        </div>
+        <ul class="header__notify-list">${g.items.map(renderNotifyItem).join('')}</ul>
+      `).join('') : `<p class="header__notify-empty">${notifyState.filter === 'unread'
+        ? 'Bạn đã đọc hết thông báo.'
+        : 'Chưa có thông báo nào. Đặt giá một phiên để bắt đầu nhận thông báo.'}</p>`}
+      ${!notifyState.expanded && filtered.length > NOTIFY_PANEL_LIMIT
+        ? '<button type="button" class="header__notify-more" data-notify-more>Xem thông báo trước đó</button>'
+        : ''}
+    </div>
+  `;
+}
+
+/**
+ * Bấm chuông: mở / đóng bảng thông báo nhanh thay vì chuyển thẳng sang trang thông báo
+ */
+function initNotifyPanel() {
+  const btn = document.getElementById('header-notify-btn');
+  const panel = document.getElementById('header-notify-panel');
+  if (!btn || !panel || btn.dataset.bound) return;
+  btn.dataset.bound = '1';
+
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const willOpen = panel.hidden;
+    // Đóng menu tài khoản nếu đang mở để hai bảng không chồng lên nhau
+    const userDropdown = document.getElementById('header-user-dropdown');
+    if (userDropdown && !userDropdown.hidden) {
+      userDropdown.hidden = true;
+      document.getElementById('header-user-avatar-btn')?.setAttribute('aria-expanded', 'false');
+    }
+    if (willOpen) renderNotifyPanel();
+    panel.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', String(willOpen));
+  });
+
+  panel.addEventListener('click', e => {
+    const user = readLoggedInUser();
+    // Các nút điều khiển vẽ lại bảng nên chặn lan sự kiện để bảng không tự đóng
+    if (e.target.closest('[data-notify-readall]')) {
+      e.stopPropagation();
+      if (user) markNotificationsRead(user, getUserNotifications(user).map(n => n.id));
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    if (e.target.closest('[data-notify-menu]')) {
+      e.stopPropagation();
+      notifyState.menuOpen = !notifyState.menuOpen;
+      renderNotifyPanel();
+      return;
+    }
+    const filterBtn = e.target.closest('[data-notify-filter]');
+    if (filterBtn) {
+      e.stopPropagation();
+      notifyState.filter = filterBtn.dataset.notifyFilter;
+      notifyState.expanded = false;
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    // "Xem thông báo trước đó": hiện toàn bộ danh sách, bảng chuyển sang dạng cuộn
+    if (e.target.closest('[data-notify-more]')) {
+      e.stopPropagation();
+      notifyState.expanded = true;
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    // Bấm vùng khác trong bảng thì đóng menu ba chấm nếu đang mở
+    if (notifyState.menuOpen && !e.target.closest('.header__notify-menu')) {
+      e.stopPropagation();
+      notifyState.menuOpen = false;
+      renderNotifyPanel();
+      return;
+    }
+    // Bấm một thông báo: đánh dấu đã đọc rồi mở phiên tương ứng
+    const item = e.target.closest('[data-notify-id]');
+    if (item && user) markNotificationsRead(user, [item.dataset.notifyId]);
+  });
+
+  document.addEventListener('click', e => {
+    if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) closeNotifyPanel();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      closeNotifyPanel();
+      btn.focus();
+    }
+  });
+
+  // Đang mở mà có thông báo mới (bot vượt giá, đơn hàng đổi trạng thái): vẽ lại
+  const refreshIfOpen = () => { if (!panel.hidden) renderNotifyPanel(); };
+  window.addEventListener('pcbid:notifications-updated', refreshIfOpen);
+  window.addEventListener('pcbid:bid-placed', refreshIfOpen);
+  window.addEventListener('storage', refreshIfOpen);
+}
+
+/**
+ * Số đếm trên icon Quản lý đấu giá: số đơn hàng đang chờ bạn xử lý
+ * (thanh toán, xác nhận đã nhận hàng, hoặc giao hàng với vai trò người bán)
+ */
+function refreshTradeBadge() {
+  const badge = document.getElementById('header-trade-badge');
+  if (!badge) return;
+  const user = readLoggedInUser();
+  const count = user ? getOrdersForUser(user).filter(orderNeedsAction).length : 0;
+  badge.textContent = count;
+  badge.hidden = count === 0;
+}
+
+if (!window.__pcbidTradeBadgeBound) {
+  window.__pcbidTradeBadgeBound = true;
+  window.addEventListener('pcbid:orders-updated', refreshTradeBadge);
+  window.addEventListener('storage', e => {
+    if (!e.key || e.key === 'pcbid_orders') refreshTradeBadge();
+  });
 }
 
 /**
@@ -215,9 +529,12 @@ function initHeaderUserStatus() {
     const displayName = user.fullname || user.username || 'Thành viên';
     // Avatar mặc định: chữ cái đầu của TÊN, đồng bộ với trang Hồ sơ và trang chi tiết
     const initials = getAvatarInitial(user);
-    // Mọi tài khoản đều là thành viên đấu giá (ai cũng có thể đăng bán)
-    const roleText = '👤 Đấu giá viên';
-    const roleClass = 'header__dropdown-role-badge--bidder';
+    // Không phân biệt người bán / người mua: chỉ hiện số phiên đang bán và đang tham gia
+    const now = Date.now();
+    const participatingCount = getParticipatingAuctions(user).filter(item => getAuctionEndTimestamp(item) > now).length;
+    const renderStats = sellingCount => `
+      <span class="header__dropdown-stat">${icon('tag', { size: 12 })} ${sellingCount} phiên đang bán</span>
+      <span class="header__dropdown-stat">${icon('gavel', { size: 12 })} ${participatingCount} phiên đang tham gia</span>`;
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
     avatarBtn.classList.add('header__user-avatar--initial');
@@ -231,7 +548,7 @@ function initHeaderUserStatus() {
           <div class="header__dropdown-avatar">${user.avatarImage ? renderAvatarContent(user, 'header__avatar-photo') : escapeHeaderHtml(initials)}</div>
           <div class="header__dropdown-meta">
             <div class="header__dropdown-name">${escapeHeaderHtml(displayName)}</div>
-            <span class="header__dropdown-role-badge ${roleClass}" id="header-dropdown-role">${roleText}</span>
+            <div class="header__dropdown-stats" id="header-dropdown-stats">${renderStats(0)}</div>
             <div class="header__dropdown-email">${escapeHeaderHtml(user.email || '')}</div>
           </div>
         </div>
@@ -268,9 +585,29 @@ function initHeaderUserStatus() {
             <span>Danh sách theo dõi</span>
           </a>
         </li>
+        <li>
+          <a href="profile.html#buy-orders" class="header__dropdown-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>Đơn mua của tôi</span>
+          </a>
+        </li>
+        <li>
+          <a href="profile.html#sell-orders" class="header__dropdown-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span>Đơn bán của tôi</span>
+          </a>
+        </li>
       </ul>
 
       <div class="header__dropdown-divider"></div>
+      <div class="header__dropdown-lang">
+        <span class="header__dropdown-lang-label">Ngôn ngữ</span>
+        <div class="header__dropdown-lang-options" translate="no">
+          <button type="button" class="header__dropdown-lang-btn" data-lang="vi">VI</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="en">EN</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="ja">JA</button>
+        </div>
+      </div>
 
       <div class="header__dropdown-footer">
         <button type="button" class="header__dropdown-logout-btn" id="header-dropdown-logout-btn">
@@ -280,11 +617,12 @@ function initHeaderUserStatus() {
       </div>
     `;
 
-    // Giống hồ sơ công khai: nếu có đăng bán thì ghi thêm số phiên (nạp catalog bất đồng bộ)
+    // Số phiên đang bán cần nạp catalog nên cập nhật bất đồng bộ (chỉ tính phiên chưa kết thúc)
     loadAllAuctions().then(auctions => {
-      const sellingCount = getSellingAuctions(user.username, auctions).length;
-      const roleEl = document.getElementById('header-dropdown-role');
-      if (roleEl && sellingCount) roleEl.textContent = `${roleText} · ${sellingCount} phiên đăng bán`;
+      const sellingCount = getSellingAuctions(user.username, auctions)
+        .filter(p => !isAuctionClosed(p) && p.endTimestamp > Date.now()).length;
+      const statsEl = document.getElementById('header-dropdown-stats');
+      if (statsEl) statsEl.innerHTML = renderStats(sellingCount);
     }).catch(() => {});
 
     const logoutBtn = document.getElementById('header-dropdown-logout-btn');
@@ -328,16 +666,25 @@ function initHeaderUserStatus() {
         </a>
       </div>
 
+      <div class="header__dropdown-lang">
+        <span class="header__dropdown-lang-label">Ngôn ngữ</span>
+        <div class="header__dropdown-lang-options" translate="no">
+          <button type="button" class="header__dropdown-lang-btn" data-lang="vi">VI</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="en">EN</button>
+          <button type="button" class="header__dropdown-lang-btn" data-lang="ja">JA</button>
+        </div>
+      </div>
+
       <div class="header__dropdown-divider"></div>
 
       <div>
         <div style="font-size: 11px; font-weight: 700; color: #065f46; margin-bottom: 6px;">
-          ⚡ Đăng nhập nhanh tài khoản Demo:
+          ${icon('zap', { size: 13 })} Đăng nhập nhanh tài khoản Demo:
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px;">
           ${SAMPLE_ACCOUNTS.map(acc => `
           <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
-            <span style="font-weight: 600;">👤 ${escapeHeaderHtml(acc.fullname)}</span>
+            <span style="font-weight: 600;">${icon('user', { size: 13 })} ${escapeHeaderHtml(acc.fullname)}</span>
             <span style="font-size: 11px; color: #64748b;">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
           </button>`).join('')}
         </div>
@@ -359,10 +706,18 @@ function initHeaderUserStatus() {
     });
   }
 
+  // Menu vừa vẽ lại: đánh dấu ngôn ngữ đang chọn
+  syncLanguageButtons();
+
   // Đóng/Mở Dropdown khi bấm vào Avatar
   avatarBtn.onclick = (e) => {
     e.stopPropagation();
     const isHidden = dropdown.hidden;
+    // Mở menu: tính lại số dư khả dụng để phản ánh lượt đặt giá / bị vượt giá mới nhất
+    if (isHidden) {
+      refreshHeaderWallet();
+      closeNotifyPanel();
+    }
     dropdown.hidden = !isHidden;
     avatarBtn.setAttribute('aria-expanded', String(isHidden));
   };
@@ -381,6 +736,27 @@ function initHeaderUserStatus() {
       dropdown.hidden = true;
       avatarBtn.setAttribute('aria-expanded', 'false');
     }
+  });
+}
+
+/**
+ * Cập nhật số dư khả dụng trong menu tài khoản từ dữ liệu mới nhất trong localStorage
+ * (tiền cọc thay đổi mỗi khi đặt giá, bị vượt giá hoặc phiên kết thúc)
+ */
+function refreshHeaderWallet() {
+  const walletEl = document.querySelector('#header-user-dropdown .header__dropdown-wallet-val');
+  if (!walletEl) return;
+  const user = readLoggedInUser();
+  if (user) walletEl.textContent = formatHeaderVnd(getAvailableBalance(user));
+}
+
+// Đặt giá trên cùng trang (pcbid:bid-placed) hoặc ở tab khác (storage): làm mới số dư ngay
+if (!window.__pcbidWalletRefreshBound) {
+  window.__pcbidWalletRefreshBound = true;
+  window.addEventListener('pcbid:bid-placed', refreshHeaderWallet);
+  window.addEventListener('pcbid:wallet-updated', refreshHeaderWallet);
+  window.addEventListener('storage', (e) => {
+    if (!e.key || ['pcbid_bids', 'pcbid_products', 'pcbid_currentUser', 'pcbid_user'].includes(e.key)) refreshHeaderWallet();
   });
 }
 

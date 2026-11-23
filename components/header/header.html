@@ -15,6 +15,20 @@
         <a href="#" class="header__top-link">Quy chế hoạt động</a>
         <span class="header__top-divider" id="header-top-auth-divider" style="display: none;">•</span>
         <span id="header-user-status" class="header__top-user-status" style="display: none;"></span>
+        <span class="header__top-divider">•</span>
+        <!-- Chọn ngôn ngữ giao diện: Tiếng Việt / English / 日本語 -->
+        <div class="header__lang" id="header-lang">
+          <button type="button" class="header__lang-btn" id="header-lang-btn" aria-haspopup="true" aria-expanded="false" aria-controls="header-lang-menu" aria-label="Ngôn ngữ / Language">
+            <span class="lucide pcb-icon pcb-icon--globe pcb-icon--s13" aria-hidden="true"></span>
+            <span class="header__lang-code" id="header-lang-code" translate="no">VI</span>
+            <span class="lucide pcb-icon pcb-icon--chevron-down pcb-icon--s12" aria-hidden="true"></span>
+          </button>
+          <ul class="header__lang-menu" id="header-lang-menu" role="menu" translate="no" hidden>
+            <li><button type="button" role="menuitemradio" class="header__lang-option" data-lang="vi" aria-checked="false"><span class="header__lang-option-code">VI</span>Tiếng Việt</button></li>
+            <li><button type="button" role="menuitemradio" class="header__lang-option" data-lang="en" aria-checked="false"><span class="header__lang-option-code">EN</span>English</button></li>
+            <li><button type="button" role="menuitemradio" class="header__lang-option" data-lang="ja" aria-checked="false"><span class="header__lang-option-code">JA</span>日本語</button></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -74,14 +88,24 @@
 
         <!-- Nút danh sách theo dõi (Watchlist) -->
         <a href="profile.html#watchlist" class="header__icon-btn" title="Danh sách theo dõi" aria-label="Danh sách theo dõi">
-          <img src="images/icons/icon-bookmark.svg" alt="Theo dõi" class="header__btn-icon-img" width="15" height="16">
+          <img src="images/icons/icon-bookmark.svg" alt="Theo dõi" class="header__btn-icon-img" width="14" height="17">
           <span class="header__badge" id="header-watchlist-badge">0</span>
         </a>
 
-        <!-- Nút thông báo đấu giá -->
-        <a href="profile.html#notifications" class="header__icon-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá">
-          <img src="images/icons/icon-bell.svg" alt="Thông báo" class="header__btn-icon-img" width="14" height="17">
-          <span class="header__badge" id="header-notification-badge">0</span>
+        <!-- Nút thông báo đấu giá: bấm để mở bảng thông báo nhanh (JS), không có JS thì vào trang thông báo -->
+        <div class="header__notify-wrapper">
+          <a href="profile.html#notifications" class="header__icon-btn" id="header-notify-btn" title="Thông báo đấu giá" aria-label="Thông báo đấu giá" aria-haspopup="true" aria-expanded="false" aria-controls="header-notify-panel">
+            <img src="images/icons/icon-bell.svg" alt="" class="header__btn-icon-img" width="14" height="17">
+            <span class="header__badge" id="header-notification-badge">0</span>
+          </a>
+          <!-- Bảng thông báo nhanh, render động bởi header.js -->
+          <div class="header__notify-panel" id="header-notify-panel" hidden></div>
+        </div>
+
+        <!-- Nút Quản lý đấu giá (mua hàng & bán hàng), tách riêng khỏi phần cài đặt tài khoản -->
+        <a href="profile.html#participating" class="header__icon-btn" id="header-trade-btn" title="Quản lý đấu giá" aria-label="Quản lý đấu giá">
+          <img src="images/icons/icon-cart.svg" alt="" class="header__btn-icon-img" width="17" height="16">
+          <span class="header__badge" id="header-trade-badge" hidden>0</span>
         </a>
 
         <!-- Khối người dùng & Menu dropdown đăng nhập / đăng xuất -->
@@ -119,25 +143,25 @@
           <a href="index.html" class="header__nav-link header__nav-link--active">Trang chủ</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html" class="header__nav-link">Tất cả phiên đấu giá</a>
+          <a href="products.html" class="header__nav-link" title="Tất cả phiên đấu giá">Tất cả phiên</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=vga" class="header__nav-link">Card màn hình (GPU)</a>
+          <a href="products.html?category=vga" class="header__nav-link" title="Card màn hình (GPU)">Card màn hình</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=cpu" class="header__nav-link">Bộ vi xử lý (CPU)</a>
+          <a href="products.html?category=cpu" class="header__nav-link" title="Bộ vi xử lý (CPU)">CPU</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=mainboard" class="header__nav-link">Bo mạch chủ (Mainboard)</a>
+          <a href="products.html?category=mainboard" class="header__nav-link" title="Bo mạch chủ (Mainboard)">Mainboard</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=ram" class="header__nav-link">Bộ nhớ RAM</a>
+          <a href="products.html?category=ram" class="header__nav-link" title="Bộ nhớ RAM">RAM</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=Storage" class="header__nav-link">Ổ cứng SSD/HDD</a>
+          <a href="products.html?category=Storage" class="header__nav-link" title="Ổ cứng SSD/HDD">SSD/HDD</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?category=psu" class="header__nav-link">Nguồn máy tính (PSU)</a>
+          <a href="products.html?category=psu" class="header__nav-link" title="Nguồn máy tính (PSU)">Nguồn PSU</a>
         </li>
         <li class="header__nav-item">
           <a href="products.html?category=cooling" class="header__nav-link">Tản nhiệt</a>
@@ -146,7 +170,7 @@
           <a href="products.html?category=case" class="header__nav-link">Vỏ case</a>
         </li>
         <li class="header__nav-item">
-          <a href="products.html?status=hot" class="header__nav-link">Phiên đang Hot 🔥</a>
+          <a href="products.html?status=hot" class="header__nav-link" title="Phiên đang Hot">Phiên Hot <span class="lucide pcb-icon pcb-icon--flame pcb-icon--s14" aria-hidden="true"></span></a>
         </li>
         <li class="header__nav-item">
           <a href="products.html?status=ending" class="header__nav-link">Sắp kết thúc</a>

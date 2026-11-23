@@ -141,16 +141,30 @@
 
               <div class="pcb-form-group">
                 <label for="sell-model" class="pcb-form-label pcb-form-label--required">Mẫu sản phẩm chuẩn của sàn</label>
+                <!-- Tìm nhanh mẫu theo tên; không có trong danh sách thì chọn "Sản phẩm khác" để tự nhập -->
+                <input type="search" id="sell-model-search" class="pcb-form-input pcb-model-search" placeholder="Tìm mẫu theo tên (VD: 3070, B760, 990 Pro...)"
+                  aria-label="Tìm mẫu sản phẩm" autocomplete="off" disabled>
                 <select id="sell-model" name="model" class="pcb-form-select" disabled required>
                   <option value="" disabled selected>-- Vui lòng chọn danh mục trước --</option>
                 </select>
-                <span class="pcb-form-hint">Danh sách được lọc chính xác theo danh mục đã chọn</span>
+                <span class="pcb-form-hint" id="sell-model-hint">Danh sách được lọc theo danh mục đã chọn. Không thấy món của bạn? Chọn "Sản phẩm khác (tự nhập)".</span>
               </div>
             </div>
 
-            <!-- Khối xem trước thông số kỹ thuật tự động điền -->
+            <!-- Tiêu đề phiên: đề xuất sẵn theo mẫu đã chọn, người bán có thể sửa -->
             <div class="pcb-form-group">
-              <label class="pcb-form-label">Thông số kỹ thuật (tự động điền theo mẫu, có thể bổ sung)</label>
+              <div class="pcb-form-label-row">
+                <label for="sell-title" class="pcb-form-label pcb-form-label--required">Tiêu đề phiên đấu giá</label>
+                <button type="button" class="pcb-form-link-btn" id="btn-reset-title" hidden>Dùng tên mẫu đề xuất</button>
+              </div>
+              <input type="text" id="sell-title" name="title" class="pcb-form-input" maxlength="120" required
+                placeholder="Chọn mẫu sản phẩm để hệ thống đề xuất tiêu đề">
+              <span class="pcb-form-hint">Tự đề xuất theo mẫu đã chọn, bạn có thể sửa lại cho đúng món hàng (5 - 120 ký tự).</span>
+            </div>
+
+            <!-- Thông số kỹ thuật: điền sẵn theo mẫu, người bán sửa / xóa / bổ sung tự do -->
+            <div class="pcb-form-group">
+              <label class="pcb-form-label">Thông số kỹ thuật (điền sẵn theo mẫu, bạn có thể sửa, xóa hoặc bổ sung)</label>
               <div class="pcb-spec-box" id="sell-spec-box">
                 <div class="pcb-spec-box__head">
                   <span class="pcb-spec-box__title">
@@ -241,6 +255,7 @@
               <div class="pcb-form-group">
                 <label for="sell-seal" class="pcb-form-label">Chứng nhận kiểm thử (Tùy chọn)</label>
                 <select id="sell-seal" name="seal" class="pcb-form-select">
+                  <option value="" selected>-- Không có chứng nhận --</option>
                   <option value="Furmark < 75°C">✓ Pass Furmark 15p &lt; 75°C (Đối với VGA)</option>
                   <option value="MemTest 0 Error">✓ Pass MemTest86 0 Error (Đối với RAM/CPU)</option>
                   <option value="CrystalDiskInfo 100%">✓ CrystalDiskInfo Sức khỏe 100% (Đối với SSD)</option>
@@ -361,7 +376,7 @@
               <div class="pcb-card__body">
                 <div class="pcb-card__seals">
                   <span class="pcb-card__seal pcb-card__seal--cat" id="preview-cat">GPU</span>
-                  <span class="pcb-card__seal pcb-card__seal--pass" id="preview-seal">✓ Furmark &lt; 75°C</span>
+                  <span class="pcb-card__seal pcb-card__seal--pass" id="preview-seal" hidden></span>
                 </div>
 
                 <div class="pcb-card__title" id="preview-title" style="pointer-events:none;">
@@ -398,7 +413,7 @@
             <!-- Quy định của người bán trên sàn -->
             <div class="pcb-seller-rules">
               <h4 class="pcb-seller-rules__title">
-                <span>🛡️ Cam kết sàn PCBid</span>
+                <span><span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s13" aria-hidden="true"></span> Cam kết sàn PCBid</span>
               </h4>
               <ul class="pcb-seller-rules__list">
                 <li>Người bán chịu trách nhiệm hoàn toàn về tình trạng mô tả linh kiện.</li>

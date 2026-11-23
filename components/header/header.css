@@ -597,6 +597,8 @@
 .header__nav-list {
   display: flex;
   align-items: center;
+  /* Dàn đều các mục trên một hàng; màn hình hẹp hơn thì cuộn ngang */
+  justify-content: space-between;
   gap: 14px;
   overflow-x: auto;
   white-space: nowrap;
@@ -854,4 +856,554 @@
 .header__user-avatar--initial,
 .header__dropdown-avatar {
   overflow: hidden;
+}
+
+/* ==========================================================================
+   BẢNG THÔNG BÁO NHANH (bấm chuông)
+   ========================================================================== */
+.header__notify-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.header__notify-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -60px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  /* Chưa mở rộng: cao theo nội dung (chỉ giới hạn bởi màn hình); đã mở rộng: chiều cao cố định và cuộn */
+  max-height: calc(100vh - 100px);
+  overflow: hidden;
+  font-family: "Be Vietnam Pro", sans-serif;
+  background: #ffffff;
+  border: 1px solid rgba(226, 191, 178, 0.6);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  animation: pcbDropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header__notify-panel[hidden] {
+  display: none;
+}
+
+.header__notify-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 12px 6px 16px;
+}
+
+.header__notify-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0b1c30;
+}
+
+/* Nút ba chấm và menu tùy chọn ở góc phải tiêu đề */
+.header__notify-menu-wrap {
+  position: relative;
+}
+
+.header__notify-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: #565e74;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 50%;
+}
+
+.header__notify-menu-btn:hover,
+.header__notify-menu-btn:focus-visible,
+.header__notify-menu-btn[aria-expanded="true"] {
+  background-color: #f1f3f6;
+}
+
+.header__notify-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 2;
+  min-width: 240px;
+  padding: 6px;
+  background-color: #ffffff;
+  border: 1px solid #e5e8ec;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(11, 28, 48, 0.16);
+}
+
+.header__notify-menu[hidden] {
+  display: none;
+}
+
+.header__notify-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0b1c30;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.header__notify-menu-item:hover:not(:disabled),
+.header__notify-menu-item:focus-visible {
+  background-color: #f1f3f6;
+}
+
+.header__notify-menu-item:disabled {
+  color: #94a3b8;
+  cursor: default;
+}
+
+/* Hai nút lọc "Tất cả" / "Chưa đọc" */
+.header__notify-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px 16px 6px;
+}
+
+.header__notify-tab {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 999px;
+}
+
+.header__notify-tab:hover,
+.header__notify-tab:focus-visible {
+  background-color: #f1f3f6;
+}
+
+.header__notify-tab.is-active {
+  color: #c2410c;
+  background-color: #fff1e6;
+}
+
+/* Vùng danh sách: mặc định không cuộn, sau khi bấm "Xem thông báo trước đó" thì cuộn được */
+.header__notify-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 8px 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.header__notify-panel--expanded {
+  height: min(720px, calc(100vh - 100px));
+}
+
+.header__notify-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px 4px;
+}
+
+.header__notify-group {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.header__notify-seeall {
+  padding: 4px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ea580c;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.header__notify-seeall:hover,
+.header__notify-seeall:focus-visible {
+  background-color: #fff7ed;
+}
+
+.header__notify-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header__notify-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  color: #0b1c30;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.header__notify-item:hover,
+.header__notify-item:focus-visible {
+  background-color: #f4f5f7;
+}
+
+/* Ảnh sản phẩm tròn, huy hiệu loại thông báo ở góc dưới phải */
+.header__notify-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+}
+
+.header__notify-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f6f7f9;
+  border: 1px solid #eceff3;
+  border-radius: 50%;
+}
+
+.header__notify-icon {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
+  background-color: #64748b;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+.header__notify-icon--danger { background-color: #dc2626; }
+.header__notify-icon--warning { background-color: #d97706; }
+.header__notify-icon--success { background-color: #16a34a; }
+.header__notify-icon--muted { background-color: #64748b; }
+
+.header__notify-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.header__notify-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #565e74;
+}
+
+/* Nội dung tối đa 2 dòng trong bảng nhanh */
+.header__notify-item-msg {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #565e74;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.header__notify-time {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #7a8194;
+}
+
+/* Thông báo chưa đọc: chữ đậm, thời gian màu cam và chấm cam bên phải (giống Facebook) */
+.header__notify-item--unread .header__notify-item-title {
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.header__notify-item--unread .header__notify-item-msg {
+  color: #0b1c30;
+}
+
+.header__notify-item--unread .header__notify-time {
+  font-weight: 700;
+  color: #ea580c;
+}
+
+.header__notify-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #ea580c;
+  border-radius: 50%;
+}
+
+.header__notify-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.header__notify-empty {
+  margin: 0;
+  padding: 24px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  color: #565e74;
+}
+
+/* Nút xám rộng ở cuối danh sách: "Xem thông báo trước đó" / "Đăng nhập ngay" */
+.header__notify-more {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 8px auto 4px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: #f1f3f6;
+  border: none;
+  border-radius: 8px;
+}
+
+.header__notify-more:hover,
+.header__notify-more:focus-visible {
+  background-color: #e6e9ee;
+}
+
+/* Điện thoại: bảng thông báo bám theo khung màn hình thay vì nút chuông */
+@media (max-width: 640px) {
+  .header__notify-wrapper {
+    position: static;
+  }
+
+  .header__notify-panel {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
+
+/* Thống kê phiên đang bán / đang tham gia trong menu tài khoản */
+.header__dropdown-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.header__dropdown-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header__dropdown-stat .lucide {
+  color: #ea580c;
+}
+
+/* Máy tính bảng ngang / laptop nhỏ: thu gọn khoảng cách để thanh danh mục vừa một hàng */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .header__nav-list {
+    gap: 8px;
+  }
+
+  .header__nav-link {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+}
+
+/* ==========================================================================
+   CHỌN NGÔN NGỮ (thanh trên cùng + menu tài khoản trên màn hình nhỏ)
+   ========================================================================== */
+.header__lang {
+  position: relative;
+  display: inline-flex;
+}
+
+.header__lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #565e74;
+  cursor: pointer;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.header__lang-btn:hover,
+.header__lang-btn:focus-visible,
+.header__lang-btn[aria-expanded="true"] {
+  color: #ea580c;
+  background-color: #ffffff;
+  border-color: rgba(226, 191, 178, 0.6);
+}
+
+.header__lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1100;
+  min-width: 160px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid rgba(226, 191, 178, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+  animation: pcbDropdownSlideIn 0.15s ease-out;
+}
+
+.header__lang-menu[hidden] {
+  display: none;
+}
+
+.header__lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #0b1c30;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.header__lang-option:hover,
+.header__lang-option:focus-visible {
+  background-color: #f8fafc;
+}
+
+.header__lang-option.is-active {
+  font-weight: 700;
+  color: #ea580c;
+  background-color: #fff7ed;
+}
+
+.header__lang-option-code {
+  min-width: 24px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.header__lang-option.is-active .header__lang-option-code {
+  color: #ffffff;
+  background-color: #ea580c;
+}
+
+/* Hàng chọn ngôn ngữ trong menu tài khoản: chỉ hiện khi thanh trên cùng bị ẩn (≤ 992px) */
+.header__dropdown-lang {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 4px;
+}
+
+.header__dropdown-lang-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.header__dropdown-lang-options {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+}
+
+.header__dropdown-lang-btn {
+  padding: 4px 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+}
+
+.header__dropdown-lang-btn.is-active {
+  color: #ea580c;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.12);
+}
+
+@media (max-width: 992px) {
+  .header__dropdown-lang {
+    display: flex;
+  }
+}
+
+/* Thanh trên cùng: các liên kết bên phải luôn một dòng, dòng giới thiệu đồ án co lại kèm dấu "…" */
+.header__top-bar-inner {
+  gap: 16px;
+}
+
+.header__course-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.header__course-info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header__top-links {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

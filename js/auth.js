@@ -6,7 +6,8 @@
  */
 
 // Tài khoản demo và tiện ích tên / avatar dùng chung
-import { DEMO_ACCOUNTS, getGivenName } from './accounts.js';
+import { DEMO_ACCOUNTS, getGivenName, getAllAccounts, findAccount, findAccountConflict, normalizePhone,
+  hashPassword, verifyPassword, accountHasPassword, makeUniqueUsername, saveAccount } from './accounts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Khởi tạo chức năng ẩn/hiện mật khẩu (dùng chung cho Đăng ký & Đăng nhập)
@@ -111,13 +112,24 @@ function initLoginForm() {
 
   // Lắng nghe sự kiện click nút chọn nhanh tài khoản demo
   const demoButtons = document.querySelectorAll('.pcb-demo-btn');
+  // Hiển thị đúng họ tên và email hiện tại của từng tài khoản demo (có thể đã đổi trong cài đặt)
+  demoButtons.forEach(btn => {
+    const acc = findAccount({ username: btn.getAttribute('data-demo-user') });
+    const emailEl = btn.querySelector('.pcb-auth-demo__email');
+    if (acc && emailEl) emailEl.textContent = acc.email;
+    const nameEl = btn.querySelector('.pcb-auth-demo__name');
+    if (acc && nameEl) nameEl.textContent = acc.fullname;
+  });
   demoButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const demoKey = btn.getAttribute('data-demo-user');
-      const targetAcc = SAMPLE_ACCOUNTS.find(a => a.username === demoKey) || SAMPLE_ACCOUNTS[0];
+      // Dùng bản đã lưu: email / mật khẩu người dùng đã đổi trong cài đặt tài khoản
+      const targetAcc = findAccount({ username: demoKey }) || SAMPLE_ACCOUNTS.find(a => a.username === demoKey) || SAMPLE_ACCOUNTS[0];
 
       if (inputUsername) inputUsername.value = targetAcc.email;
-      if (inputPassword) inputPassword.value = targetAcc.password;
+      // Tài khoản demo đã đổi mật khẩu: không còn mật khẩu mẫu để điền sẵn
+      if (inputPassword) inputPassword.value = targetAcc.passwordHash ? '' : (targetAcc.password || '');
+      if (targetAcc.passwordHash) inputPassword?.focus();
 
       clearFieldError(inputUsername, 'err-login-username');
       clearFieldError(inputPassword, 'err-login-password');
@@ -158,44 +170,47 @@ function initLoginForm() {
     if (!isValid) return;
 
     // Tra cứu tài khoản từ danh sách đăng ký hoặc danh sách tài khoản mẫu có sẵn
-    const registeredUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    // Ưu tiên bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử... sau khi đăng xuất / đăng nhập lại)
-    const allKnownUsers = [...registeredUsers, ...SAMPLE_ACCOUNTS];
+    // Ưu tiên bản tài khoản đã lưu (giữ ảnh đại diện, tiểu sử, email mới... sau khi đăng xuất / đăng nhập lại);
+    // tài khoản demo đã đổi email thì email cũ không còn đăng nhập được
+    const allKnownUsers = getAllAccounts();
     const lowerInput = usernameVal.toLowerCase();
 
-    // Tìm kiếm theo username, email, hoặc alias linh hoạt
-    const matched = allKnownUsers.find(u => 
-      (u.email && u.email.toLowerCase() === lowerInput) || 
-      (u.username && u.username.toLowerCase() === lowerInput) ||
-      ((lowerInput === 'bidder' || lowerInput === 'bidder1' || lowerInput === 'pcbuilder99') && u.username === 'bidder1') ||
-      (lowerInput === 'bidder2' && u.username === 'bidder2') ||
-      (lowerInput === 'bidder3' && u.username === 'bidder3') ||
-      ((lowerInput === 'seller' || lowerInput === 'techguru_hcm') && u.username === 'seller')
+    // Tìm tài khoản theo email hoặc tên đăng nhập (không phân biệt hoa thường)
+    const matched = allKnownUsers.find(u =>
+      (u.email && u.email.toLowerCase() === lowerInput) ||
+      (u.username && u.username.toLowerCase() === lowerInput)
     );
 
-    let userData;
-    if (matched) {
-      userData = {
-        ...matched,
-        isLoggedIn: true,
-        loggedInAt: new Date().toISOString()
-      };
-    } else {
-      const uname = usernameVal.includes('@') ? usernameVal.split('@')[0] : usernameVal;
-      userData = {
-        id: 'user_' + Date.now(),
-        username: uname,
-        fullname: uname,
-        email: usernameVal.includes('@') ? usernameVal : `${uname}@pcbid.vn`,
-        phone: '0912345678',
-        role: 'bidder',
-        verified: true,
-        walletBalance: 50000000,
-        address: 'Trường Đại học Công nghệ Thông tin, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh',
-        isLoggedIn: true,
-        loggedInAt: new Date().toISOString()
-      };
+    // Không tìm thấy tài khoản hoặc sai mật khẩu: báo chung một lỗi, không tiết lộ email nào đã được đăng ký
+    const loginError = 'Email / tên đăng nhập hoặc mật khẩu không đúng.';
+    if (!matched) {
+      inputUsername?.classList.add('is-invalid');
+      showFieldError(inputPassword, 'err-login-password', loginError);
+      return;
     }
+    if (!accountHasPassword(matched)) {
+      // Tài khoản đăng ký từ phiên bản cũ chưa lưu mật khẩu: lấy mật khẩu lần này làm mật khẩu của tài khoản
+      if (pwdVal.length < 6) {
+        showFieldError(inputPassword, 'err-login-password', 'Mật khẩu phải có ít nhất 6 ký tự.');
+        return;
+      }
+      matched.passwordHash = hashPassword(pwdVal);
+      saveAccount(matched);
+    } else if (!verifyPassword(matched, pwdVal)) {
+      inputUsername?.classList.add('is-invalid');
+      showFieldError(inputPassword, 'err-login-password', loginError);
+      if (inputPassword) {
+        inputPassword.value = '';
+        inputPassword.focus();
+      }
+      return;
+    }
+
+    const userData = {
+      ...matched,
+      isLoggedIn: true,
+      loggedInAt: new Date().toISOString()
+    };
 
     localStorage.removeItem('pcbid_logged_out');
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
@@ -302,6 +317,10 @@ function initRegisterForm() {
     } else if (!emailRegex.test(emailVal)) {
       showFieldError(inputEmail, 'err-email', 'Định dạng email không hợp lệ (VD: user@example.com).');
       isValid = false;
+    } else if (findAccountConflict({ email: emailVal })) {
+      // Email đã thuộc về tài khoản khác (kể cả tài khoản demo đã đổi email)
+      showFieldError(inputEmail, 'err-email', 'Email này đã được đăng ký cho một tài khoản khác.');
+      isValid = false;
     } else {
       clearFieldError(inputEmail, 'err-email');
     }
@@ -314,6 +333,9 @@ function initRegisterForm() {
       isValid = false;
     } else if (!phoneRegex.test(phoneVal)) {
       showFieldError(inputPhone, 'err-phone', 'Số điện thoại phải gồm 10 đến 11 chữ số.');
+      isValid = false;
+    } else if (findAccountConflict({ phone: normalizePhone(phoneVal) })) {
+      showFieldError(inputPhone, 'err-phone', 'Số điện thoại này đã được đăng ký cho một tài khoản khác.');
       isValid = false;
     } else {
       clearFieldError(inputPhone, 'err-phone');
@@ -357,7 +379,10 @@ function initRegisterForm() {
     // Tiến hành lưu thông tin tài khoản người dùng vào LocalStorage
     saveUserAccount({
       id: 'user_' + Date.now(),
-      username: emailVal.split('@')[0],
+      // Tên đăng nhập lấy từ email, tự thêm hậu tố nếu đã có người dùng
+      username: makeUniqueUsername(emailVal),
+      // Chỉ lưu mật khẩu đã băm, không lưu mật khẩu dạng chữ thường
+      passwordHash: hashPassword(pwdVal),
       lastName: lastnameVal,
       givenName: givennameVal,
       fullname: fullnameVal,

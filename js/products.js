@@ -5,6 +5,10 @@
  * Toàn bộ chú thích bằng Tiếng Việt có dấu theo quy định AGENTS.md.
  */
 
+// Bộ icon Lucide dùng chung
+import { icon } from './icons.js';
+// Người đang đăng nhập (chỉ người bán mới thấy nhãn "Bạn vừa đăng")
+import { readLoggedInUser } from './user-data.js';
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 
@@ -639,11 +643,9 @@ function applyFiltersAndRender() {
     list.sort((a, b) => postedAt(b) - postedAt(a));
   }
 
-  // Phiên người bán vừa đăng luôn đứng đầu danh sách
-  if (filterState.highlightId) {
-    const idx = list.findIndex(p => String(p.id) === filterState.highlightId);
-    if (idx > 0) list.unshift(list.splice(idx, 1)[0]);
-  }
+  // Phiên người bán vừa đăng luôn đứng đầu danh sách (chỉ với chính người bán đó)
+  const highlightIdx = list.findIndex(isJustPostedByViewer);
+  if (highlightIdx > 0) list.unshift(list.splice(highlightIdx, 1)[0]);
 
   filteredProducts = list;
 
@@ -771,12 +773,24 @@ function attachCardClickEvents() {
 }
 
 /**
+ * Phiên vừa đăng (products.html?highlight=...) và người đang xem chính là người bán của phiên.
+ * Đổi sang tài khoản khác thì không còn ghim / gắn nhãn "Bạn vừa đăng" nữa.
+ * @param {Object} product
+ * @returns {boolean}
+ */
+function isJustPostedByViewer(product) {
+  if (!filterState.highlightId || String(product.id) !== filterState.highlightId) return false;
+  const viewer = readLoggedInUser();
+  return Boolean(viewer && product.seller && product.seller === viewer.username);
+}
+
+/**
  * Sinh chuỗi HTML của một thẻ Card linh kiện chuẩn PCBid
  */
 function renderCatalogProductCard(product) {
   const detailUrl = `product-detail.html?id=${product.id}`;
   // Phiên người bán vừa đăng: gắn nhãn và viền nổi bật
-  const isJustPosted = filterState.highlightId && String(product.id) === filterState.highlightId;
+  const isJustPosted = isJustPostedByViewer(product);
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
 
@@ -791,7 +805,7 @@ function renderCatalogProductCard(product) {
 
   return `
     <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
-      ${isJustPosted ? '<span class="pcb-card__just-posted">✨ Bạn vừa đăng</span>' : ''}
+      ${isJustPosted ? `<span class="pcb-card__just-posted">${icon('sparkles', { size: 14 })} Bạn vừa đăng</span>` : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
         <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

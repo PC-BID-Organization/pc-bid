@@ -8,8 +8,11 @@
      (vì số tiền giữ cọc được tính lại từ dữ liệu, không lưu cố định).
    - Đặt giá mới trên phiên mình đang dẫn đầu -> chỉ giữ 10% của mức giá mới
      (không cộng dồn với lượt cũ).
-   - walletBalance trong localStorage là TỔNG tiền trong ví.
-     Số dư khả dụng = walletBalance - tiền đang giữ cọc.
+   - Thắng phiên: cọc TIẾP TỤC bị giữ trong lúc chờ thanh toán (đơn "Chờ thanh toán"),
+     thanh toán xong thì trừ toàn bộ giá chốt; quá hạn thì mất cọc (xem settlement.js).
+   - Tổng tiền ví = walletBalance (số dư gốc + tiền nạp) + tổng các giao dịch trong sổ
+     pcbid_wallet_ledger (thanh toán, nhận tiền bán hàng, mất / nhận cọc).
+     Số dư khả dụng = tổng tiền ví - tiền đang giữ cọc.
    ========================================================================== */
 
 import { getAuctionEndTimestamp } from './auction-time.js';
@@ -18,6 +21,66 @@ import { USER_LIST_KEYS, readUserList, writeUserList } from './user-data.js';
 
 // Tỷ lệ tiền cọc trên mỗi mức giá đặt
 export const DEPOSIT_RATE = 0.1;
+
+// Khóa localStorage của đơn hàng sau đấu giá và sổ giao dịch ví
+export const ORDERS_KEY = 'pcbid_orders';
+export const LEDGER_KEY = 'pcbid_wallet_ledger';
+
+/**
+ * Đọc an toàn một mảng trong localStorage
+ * @param {string} key
+ * @returns {Array}
+ */
+function readList(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Kiểm tra bản ghi (đơn hàng / giao dịch) có thuộc về tài khoản không
+ * @param {Object} user - Tài khoản
+ * @param {string} [id] - ID tài khoản trong bản ghi
+ * @param {string} [username] - Tên đăng nhập trong bản ghi
+ * @returns {boolean}
+ */
+export function isSameUser(user, id, username) {
+  if (!user) return false;
+  if (id && user.id) return id === user.id;
+  return Boolean(username) && username === user.username;
+}
+
+/**
+ * Đọc toàn bộ đơn hàng sau đấu giá
+ * @returns {Array}
+ */
+export function readOrders() {
+  return readList(ORDERS_KEY);
+}
+
+/**
+ * Đọc sổ giao dịch ví
+ * @returns {Array}
+ */
+export function readLedger() {
+  return readList(LEDGER_KEY);
+}
+
+/**
+ * Tổng tiền trong ví = số dư gốc (gồm tiền nạp) + các giao dịch trong sổ
+ * @param {Object} user - Người dùng
+ * @returns {number}
+ */
+export function getWalletTotal(user) {
+  if (!user) return 0;
+  const ledgerSum = readLedger()
+    .filter(tx => isSameUser(user, tx.userId, tx.username))
+    .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+  return (Number(user.walletBalance) || 0) + ledgerSum;
+}
 
 // Danh sách phiên đang tham gia mẫu chuẩn cho từng tài khoản demo
 // Giúp mô phỏng hoàn hảo kịch bản 2 tài khoản (bidder1 và bidder2) trả giá đối kháng vượt giá nhau
@@ -243,13 +306,24 @@ export function getParticipatingAuctions(currentUser) {
     }
 
     // Phiên bị người bán đóng sớm hoặc đăng bán lại: dùng thời hạn mới trong pcbid_products
-    const lifecycle = prod && (prod.closedEarly || prod.relisted)
-      ? { endTime: prod.endTime, closedEarly: Boolean(prod.closedEarly), relisted: Boolean(prod.relisted) }
+    // Phiên đã khóa thời điểm kết thúc / đã chốt kết quả: dùng đúng mốc kết thúc và trạng thái đã lưu
+    const lifecycle = prod && (prod.closedEarly || prod.relisted || prod.endLocked)
+      ? {
+          endTime: prod.endTime,
+          closedEarly: Boolean(prod.closedEarly),
+          relisted: Boolean(prod.relisted),
+          endLocked: Boolean(prod.endLocked),
+          ...(prod.status ? { status: prod.status } : {})
+        }
       : {};
+
+    // Thời điểm có lượt đặt giá gần nhất trên phiên (dùng để hiện "x giờ trước" ở thông báo)
+    const lastBidAt = allBidsOnItem.reduce((max, b) => Math.max(max, new Date(b.timestamp).getTime() || 0), 0);
 
     return {
       ...item,
       ...lifecycle,
+      lastBidAt,
       id: idNum,
       bidStep: Number(item.bidStep) || Number(prod?.bidStep) || 100000,
       myBid: myHighestBid,
@@ -292,14 +366,20 @@ export function calcDeposit(amount) {
 export function getDepositHolds(user) {
   if (!user) return [];
   const now = Date.now();
-  return getParticipatingAuctions(user)
-    .filter(item => item.status === 'lead' && getAuctionEndTimestamp(item) > now)
+  // Đơn thắng đấu giá đang chờ thanh toán: cọc vẫn bị giữ
+  const orderHolds = readOrders()
+    .filter(o => o.status === 'awaiting_payment' && isSameUser(user, o.buyerId, o.buyerUsername))
+    .map(o => ({ id: Number(o.productId), name: o.productName, myBid: Number(o.finalPrice) || 0, deposit: Number(o.deposit) || 0, orderId: o.id }));
+  const orderProductIds = new Set(orderHolds.map(h => h.id));
+  const bidHolds = getParticipatingAuctions(user)
+    .filter(item => item.status === 'lead' && getAuctionEndTimestamp(item) > now && !orderProductIds.has(Number(item.id)))
     .map(item => ({
       id: Number(item.id),
       name: item.name,
       myBid: Number(item.myBid) || 0,
       deposit: calcDeposit(item.myBid)
     }));
+  return [...bidHolds, ...orderHolds];
 }
 
 /**
@@ -321,7 +401,7 @@ export function getDepositHold(user, excludeProductId) {
  */
 export function getAvailableBalance(user) {
   if (!user) return 0;
-  return Math.max(0, (Number(user.walletBalance) || 0) - getDepositHold(user));
+  return Math.max(0, getWalletTotal(user) - getDepositHold(user));
 }
 
 /**
@@ -334,8 +414,48 @@ export function getAvailableBalance(user) {
  */
 export function checkBidDeposit(user, productId, amount) {
   const required = calcDeposit(amount);
-  const available = Math.max(0, (Number(user?.walletBalance) || 0) - getDepositHold(user, productId));
+  const available = Math.max(0, getWalletTotal(user) - getDepositHold(user, productId));
   return { ok: available >= required, required, available };
+}
+
+/**
+ * Thông báo theo trạng thái đơn hàng sau đấu giá (vai trò người mua hoặc người bán)
+ * @param {Object} user - Người dùng hiện tại
+ * @param {Array} orders - Danh sách đơn hàng
+ * @param {Function} formatVnd - Hàm định dạng tiền
+ * @returns {Array}
+ */
+function getOrderNotifications(user, orders, formatVnd) {
+  const result = [];
+  orders.forEach(o => {
+    const isBuyer = isSameUser(user, o.buyerId, o.buyerUsername);
+    const isSeller = isSameUser(user, o.sellerId, o.sellerUsername);
+    if (!isBuyer && !isSeller) return;
+    const changedAt = new Date(o.updatedAt || o.createdAt).getTime();
+    const base = { productId: Number(o.productId), endTimestamp: changedAt, eventTime: changedAt, image: o.image || '' };
+    const name = o.productName;
+    const price = formatVnd(o.finalPrice);
+    const remaining = formatVnd((Number(o.finalPrice) || 0) - (Number(o.deposit) || 0));
+    const buyerMessages = {
+      awaiting_payment: ['danger', true, 'Bạn đã thắng — hãy thanh toán ngay', `${name} — giá chốt ${price}. Thanh toán thêm ${remaining} trước khi hết hạn để không bị mất cọc.`],
+      paid: ['success', false, 'Đã thanh toán — chờ người bán giao hàng', `${name} — đã thanh toán ${price} từ ví.`],
+      shipped: ['warning', true, 'Người bán đã giao hàng', `${name} — hãy bấm "Đã nhận được hàng" khi bạn nhận đủ linh kiện.`],
+      completed: ['success', false, 'Giao dịch hoàn tất', `${name} — cảm ơn bạn đã mua hàng trên PCBid.`],
+      forfeited: ['danger', false, 'Quá hạn thanh toán — bạn đã mất cọc', `${name} — tiền cọc ${formatVnd(o.deposit)} đã chuyển cho người bán.`]
+    };
+    const sellerMessages = {
+      awaiting_payment: ['success', false, 'Linh kiện đã có người thắng', `${name} — giá chốt ${price}, đang chờ người mua thanh toán.`],
+      paid: ['warning', true, 'Người mua đã thanh toán — hãy giao hàng', `${name} — bấm "Xác nhận đã giao hàng" sau khi gửi linh kiện.`],
+      shipped: ['muted', false, 'Đã giao hàng — chờ người mua xác nhận', `${name} — tiền ${price} sẽ vào ví khi người mua xác nhận.`],
+      completed: ['success', false, 'Đã nhận tiền bán hàng', `${name} — ${price} đã được cộng vào ví của bạn.`],
+      forfeited: ['muted', false, 'Người mua không thanh toán', `${name} — bạn nhận tiền cọc bồi thường ${formatVnd(o.deposit)}. Có thể đăng bán lại phiên này.`]
+    };
+    const message = (isBuyer ? buyerMessages : sellerMessages)[o.status];
+    if (!message) return;
+    const [type, important, title, text] = message;
+    result.push({ ...base, id: `order_${o.id}_${isBuyer ? 'b' : 's'}_${o.status}`, type, important, title, message: text });
+  });
+  return result;
 }
 
 // Ngưỡng coi là "sắp kết thúc" để nhắc người dùng: 60 phút
@@ -352,13 +472,25 @@ export function getUserNotifications(user) {
   const now = Date.now();
   const formatVnd = value => `${Math.round(Number(value) || 0).toLocaleString('vi-VN')}đ`;
 
+  const orders = readOrders();
+  const orderProductIds = new Set(orders
+    .filter(o => isSameUser(user, o.buyerId, o.buyerUsername) || isSameUser(user, o.sellerId, o.sellerUsername))
+    .map(o => Number(o.productId)));
+
   const notifications = getParticipatingAuctions(user).map(item => {
     const endTimestamp = getAuctionEndTimestamp(item);
     const remaining = endTimestamp - now;
-    const base = { productId: Number(item.id), endTimestamp };
+    // Thời điểm xảy ra sự kiện: phiên đã kết thúc lấy mốc kết thúc, còn lại lấy lượt đặt giá gần nhất.
+    // Phiên mẫu chưa có lượt đặt giá thật: lùi một khoảng cố định theo ID để thời gian ổn định giữa các lần tải
+    const fallbackTime = now - (((Number(item.id) * 37) % 70) + 2) * 3600 * 1000;
+    const eventTime = remaining <= 0 ? endTimestamp : (item.lastBidAt || fallbackTime);
+    const image = (item.images && item.images[0]) || '';
+    const base = { productId: Number(item.id), endTimestamp, eventTime, image };
 
     // Phiên đã kết thúc
     if (remaining <= 0) {
+      // Đã có đơn hàng sau đấu giá: thông báo theo đơn (bên dưới) thay cho thông báo chung
+      if (item.status === 'lead' && orderProductIds.has(Number(item.id))) return null;
       return item.status === 'lead'
         ? { ...base, id: `won_${item.id}_${item.myBid}`, type: 'success', important: false,
             title: 'Bạn đã thắng phiên đấu giá',
@@ -388,13 +520,16 @@ export function getUserNotifications(user) {
       message: `${item.name} — giá của bạn ${formatVnd(item.myBid)}, đang tạm giữ cọc ${formatVnd(calcDeposit(item.myBid))}.` };
   });
 
+  notifications.push(...getOrderNotifications(user, orders, formatVnd));
+
   // Gắn trạng thái đã đọc. ID thông báo chứa mức giá liên quan nên khi tình huống thay đổi
   // (ví dụ bị vượt giá ở mức mới) sẽ sinh thông báo mới, chưa đọc
   const readIds = new Set(readUserList(USER_LIST_KEYS.NOTIFICATIONS_READ, user));
-  notifications.forEach(n => { n.read = readIds.has(n.id); });
+  const list = notifications.filter(Boolean);
+  list.forEach(n => { n.read = readIds.has(n.id); });
 
   // Chưa đọc lên trước, rồi thông báo cần hành động, sau đó theo thời gian kết thúc gần nhất
-  return notifications.sort((a, b) =>
+  return list.sort((a, b) =>
     (a.read - b.read) || (b.important - a.important) || (a.endTimestamp - b.endTimestamp));
 }
 
