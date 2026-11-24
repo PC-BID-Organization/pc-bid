@@ -264,6 +264,8 @@ export const PHRASES = [
   ['Khám phá hàng trăm linh kiện máy tính cũ được kiểm thử nghiêm ngặt (Furmark, MemTest86, CrystalDiskInfo). Đặt giá minh bạch, bao test 7 ngày hoàn tiền 100%.', 'Explore hundreds of rigorously tested used PC parts (Furmark, MemTest86, CrystalDiskInfo). Transparent bidding with a 7-day test and full refund guarantee.', '厳しくテストされた中古PCパーツを多数掲載（Furmark、MemTest86、CrystalDiskInfo）。透明な入札と7日間の全額返金保証。'],
   ['Kiểm định chuẩn', 'Standard testing', '標準検査'],
   ['Mở bộ lọc tìm kiếm', 'Open filters', 'フィルターを開く'],
+  ['Đóng bộ lọc', 'Close filters', 'フィルターを閉じる'],
+  ['Xem kết quả', 'Show results', '結果を表示'],
   ['Bộ lọc tìm kiếm', 'Search filters', '検索フィルター'],
   ['Bộ lọc linh kiện', 'Filters', 'フィルター'],
   ['Thiết lập lại', 'Reset', 'リセット'],

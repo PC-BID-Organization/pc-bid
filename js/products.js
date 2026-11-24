@@ -471,14 +471,8 @@ function initFilterEventListeners() {
     if (e.target.closest('[data-reset-filters]')) resetAllFilters();
   });
 
-  // Nút toggle filter trên mobile
-  const filterToggleBtn = document.getElementById('filter-toggle-btn');
-  const filterSidebar = document.getElementById('pcb-filter-sidebar');
-  if (filterToggleBtn && filterSidebar) {
-    filterToggleBtn.addEventListener('click', () => {
-      filterSidebar.classList.toggle('pcb-filter--open');
-    });
-  }
+  // Ngăn trượt bộ lọc trên điện thoại / máy tính bảng
+  initFilterDrawer();
 
   // Lắng nghe sự kiện phân trang
   const paginationContainer = document.getElementById('pcb-pagination');
@@ -1011,4 +1005,79 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * Ngăn trượt bộ lọc trên điện thoại / máy tính bảng (màn hình <= 992px):
+ * mở bằng nút "Mở bộ lọc tìm kiếm"; đóng bằng nút X, nút "Xem kết quả",
+ * bấm ra nền tối hoặc phím Esc. Khi mở thì khóa cuộn trang phía sau.
+ */
+function initFilterDrawer() {
+  const toggleBtn = document.getElementById('filter-toggle-btn');
+  const sidebar = document.getElementById('pcb-filter-sidebar');
+  const backdrop = document.getElementById('pcb-filter-backdrop');
+  const closeBtn = document.getElementById('filter-close-btn');
+  const doneBtn = document.getElementById('filter-done-btn');
+  const doneCount = document.getElementById('filter-done-count');
+  const catalogCount = document.getElementById('catalog-count');
+  if (!toggleBtn || !sidebar || !backdrop) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 992px)');
+  let hideTimer = 0;
+
+  // Số linh kiện khớp bộ lọc hiện trên nút "Xem kết quả"
+  const syncCount = () => {
+    if (doneCount && catalogCount) doneCount.textContent = `(${catalogCount.textContent.trim()})`;
+  };
+  if (catalogCount) new MutationObserver(syncCount).observe(catalogCount, { childList: true, characterData: true, subtree: true });
+
+  const isOpen = () => sidebar.classList.contains('pcb-filter--open');
+
+  const onKey = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); }
+  };
+
+  const openDrawer = () => {
+    clearTimeout(hideTimer);
+    syncCount();
+    backdrop.hidden = false;
+    // Đợi một khung hình để hiệu ứng trượt / mờ dần chạy được sau khi bỏ hidden
+    requestAnimationFrame(() => {
+      sidebar.classList.add('pcb-filter--open');
+      backdrop.classList.add('pcb-filter-backdrop--visible');
+    });
+    document.documentElement.classList.add('pcb-filter-lock');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    sidebar.setAttribute('role', 'dialog');
+    sidebar.setAttribute('aria-modal', 'true');
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => closeBtn?.focus({ preventScroll: true }), 50);
+  };
+
+  const closeDrawer = (returnFocus = true) => {
+    if (!isOpen()) return;
+    sidebar.classList.remove('pcb-filter--open');
+    backdrop.classList.remove('pcb-filter-backdrop--visible');
+    document.documentElement.classList.remove('pcb-filter-lock');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    sidebar.removeAttribute('role');
+    sidebar.removeAttribute('aria-modal');
+    document.removeEventListener('keydown', onKey);
+    hideTimer = setTimeout(() => { backdrop.hidden = true; }, 250);
+    if (returnFocus) toggleBtn.focus({ preventScroll: true });
+  };
+
+  toggleBtn.addEventListener('click', () => (isOpen() ? closeDrawer() : openDrawer()));
+  closeBtn?.addEventListener('click', () => closeDrawer());
+  doneBtn?.addEventListener('click', () => {
+    closeDrawer(false);
+    // Cuộn tới thanh kết quả để người dùng thấy ngay danh sách đã lọc
+    document.querySelector('.pcb-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  backdrop.addEventListener('click', () => closeDrawer());
+
+  // Xoay ngang / phóng to lên màn hình máy tính: đóng ngăn trượt, trả lại bố cục 2 cột
+  mobileQuery.addEventListener('change', (e) => {
+    if (!e.matches) closeDrawer(false);
+  });
 }

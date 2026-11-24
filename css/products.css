@@ -213,6 +213,20 @@
   margin: 0;
 }
 
+/* Nhóm nút bên phải tiêu đề bộ lọc: Thiết lập lại + Đóng */
+.pcb-filter__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Nút đóng và chân ngăn trượt chỉ dùng trên điện thoại / máy tính bảng */
+.pcb-filter__close-btn,
+.pcb-filter__footer,
+.pcb-filter-backdrop {
+  display: none;
+}
+
 .pcb-filter__reset-btn {
   background: transparent;
   border: none;
@@ -638,23 +652,116 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Bộ lọc thành ngăn trượt nổi, cách mép màn hình 12px, trượt vào từ bên trái */
   .pcb-filter {
-    display: none; /* Ẩn sidebar mặc định trên tablet/mobile, hiển thị khi bấm nút */
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 320px;
-    height: 100vh;
-    height: 100dvh;
+    top: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 2100;
+    display: flex;
+    flex-direction: column;
+    width: min(360px, calc(100vw - 24px));
     max-height: none;
-    z-index: 1000;
-    border-radius: 0;
+    padding: 0 18px;
     overflow-y: auto;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    visibility: hidden;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(11, 28, 48, 0.3);
+    opacity: 0;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  /* Các khối con giữ nguyên chiều cao, phần dư thì cuộn trong ngăn trượt */
+  .pcb-filter > * {
+    flex-shrink: 0;
   }
 
   .pcb-filter--open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s;
+  }
+
+  /* Tiêu đề dính trên cùng khi cuộn trong ngăn trượt, luôn thấy nút đóng */
+  .pcb-filter__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-top: 16px;
+    background: var(--pcb-bg-card, #ffffff);
+  }
+
+  .pcb-filter__close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--pcb-text-main, #0f172a);
+    cursor: pointer;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pcb-filter__close-btn:focus-visible {
+    outline: 3px solid rgba(201, 69, 10, 0.4);
+    outline-offset: 2px;
+  }
+
+  /* Chân ngăn trượt dính dưới cùng: nút "Xem kết quả" */
+  .pcb-filter__footer {
+    position: sticky;
+    bottom: 0;
     display: block;
+    margin-top: auto;
+    padding: 12px 0 16px;
+    background: var(--pcb-bg-card, #ffffff);
+    border-top: 1px solid var(--pcb-border-light, #e2e8f0);
+  }
+
+  .pcb-filter__done-btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    background: var(--pcb-primary, #c9450a);
+    border: none;
+    border-radius: 10px;
+  }
+
+  .pcb-filter__done-count {
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  /* Nền tối phía sau ngăn trượt */
+  .pcb-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2050;
+    display: block;
+    background: rgba(11, 28, 48, 0.5);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .pcb-filter-backdrop--visible {
+    opacity: 1;
+  }
+
+  /* Khóa cuộn trang phía sau khi ngăn trượt đang mở */
+  .pcb-filter-lock,
+  .pcb-filter-lock body {
+    overflow: hidden;
   }
 
   .pcb-filter-toggle-btn {
@@ -701,11 +808,6 @@
 @media (max-width: 420px) {
   .pcb-catalog__grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Sidebar bộ lọc không rộng hơn màn hình điện thoại */
-  .pcb-filter {
-    width: 88vw;
   }
 }
 
@@ -756,4 +858,17 @@
 .pcb-filter__price-apply--inline {
   width: auto;
   padding: 8px 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-filter,
+  .pcb-filter--open,
+  .pcb-filter-backdrop {
+    transition: none;
+  }
+}
+
+/* Nhóm lọc cuối cùng nằm sát chân ngăn trượt: bỏ đường kẻ dưới để không bị hai vạch */
+.pcb-filter__group:has(+ .pcb-filter__footer) {
+  border-bottom: none;
 }
