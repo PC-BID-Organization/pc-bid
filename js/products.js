@@ -482,6 +482,27 @@ function initFilterEventListeners() {
   // Lắng nghe sự kiện phân trang
   const paginationContainer = document.getElementById('pcb-pagination');
   if (paginationContainer) {
+    // Ô "Đến trang": gõ số trang rồi Enter hoặc bấm Đi; số ngoài khoảng được đưa về trang đầu / cuối
+    paginationContainer.addEventListener('submit', (e) => {
+      if (!e.target.matches('[data-page-jump]')) return;
+      e.preventDefault();
+      const input = e.target.querySelector('.pcb-pagination__jump-input');
+      const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+      const pageNum = parseInt(input?.value, 10);
+      if (isNaN(pageNum)) {
+        input?.focus();
+        return;
+      }
+      const target = Math.min(totalPages, Math.max(1, pageNum));
+      if (target !== currentPage) {
+        currentPage = target;
+        renderCurrentPage();
+        scrollToTop();
+      } else if (input) {
+        input.value = '';
+      }
+    });
+
     paginationContainer.addEventListener('click', (e) => {
       const target = e.target.closest('[data-page]');
       if (!target) return;
@@ -930,6 +951,17 @@ function renderPagination(totalItems) {
     <a href="#" class="pcb-pagination__item ${currentPage === totalPages ? 'pcb-pagination__item--disabled' : ''}" data-page="next" aria-label="Trang sau">
       Sau ›
     </a>
+  `;
+
+  // Ô nhảy nhanh tới một trang bất kỳ (VD: gõ 14 rồi Enter) thay vì bấm "Sau" nhiều lần
+  html += `
+    <form class="pcb-pagination__jump" data-page-jump novalidate>
+      <label class="pcb-pagination__jump-label" for="pcb-page-jump-input">Đến trang</label>
+      <input type="number" id="pcb-page-jump-input" class="pcb-pagination__jump-input" inputmode="numeric"
+        min="1" max="${totalPages}" step="1" placeholder="${currentPage}" aria-describedby="pcb-page-jump-total">
+      <span class="pcb-pagination__jump-total" id="pcb-page-jump-total">/ ${totalPages}</span>
+      <button type="submit" class="pcb-pagination__jump-btn">Đi</button>
+    </form>
   `;
 
   container.innerHTML = html;

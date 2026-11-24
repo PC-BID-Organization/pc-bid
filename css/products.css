@@ -589,10 +589,89 @@
    -------------------------------------------------------------------------- */
 .pcb-pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 6px;
   margin-top: 16px;
+}
+
+/* Ô nhảy nhanh tới trang bất kỳ */
+.pcb-pagination__jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 12px;
+  font-size: 13px;
+  color: var(--pcb-text-secondary, #475569);
+  border-left: 1px solid var(--pcb-border-light, #e2e8f0);
+}
+
+.pcb-pagination__jump-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pcb-pagination__jump-input {
+  width: 56px;
+  height: 38px;
+  padding: 0 6px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--pcb-text-main, #0f172a);
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--pcb-border-medium, #cbd5e1);
+  border-radius: var(--pcb-radius-sm, 8px);
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Ẩn nút tăng / giảm mặc định của ô số */
+.pcb-pagination__jump-input::-webkit-inner-spin-button,
+.pcb-pagination__jump-input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.pcb-pagination__jump-input:focus {
+  border-color: var(--pcb-primary, #c9450a);
+  box-shadow: 0 0 0 3px rgba(201, 69, 10, 0.15);
+}
+
+.pcb-pagination__jump-total {
+  white-space: nowrap;
+}
+
+.pcb-pagination__jump-btn {
+  height: 38px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background: var(--pcb-primary, #c9450a);
+  border: none;
+  border-radius: var(--pcb-radius-sm, 8px);
+  transition: background-color 0.15s ease;
+}
+
+.pcb-pagination__jump-btn:hover,
+.pcb-pagination__jump-btn:focus-visible {
+  background: var(--pcb-primary-hover, #a93a08);
+}
+
+/* Điện thoại: ô nhảy trang xuống dòng riêng, căn giữa */
+@media (max-width: 640px) {
+  .pcb-pagination__jump {
+    flex-basis: 100%;
+    justify-content: center;
+    margin: 6px 0 0;
+    padding: 0;
+    border-left: none;
+  }
 }
 
 .pcb-pagination__item {

@@ -186,10 +186,20 @@
    5. GALLERY ẢNH SẢN PHẨM (CỘT TRÁI)
    ========================================================================== */
 
-/* Cột gallery bám dính khi cuộn */
+/* Cột gallery bám dính khi cuộn. Header không dính theo khi cuộn nên chỉ chừa 16px phía trên
+   (trước đây chừa 120px làm phía trên trống một khoảng và ảnh bị đẩy xuống sát mép dưới) */
 .pcb-pd__gallery {
   position: sticky;
-  top: 120px;
+  top: 16px;
+}
+
+/* Máy tính: giới hạn chiều cao khung ảnh để cả ảnh và dải thumbnail luôn nằm trọn trong màn hình
+   khi bám dính (110px = dải thumbnail + khoảng cách, 32px = lề trên dưới) */
+@media (min-width: 1025px) {
+  .pcb-pd__gallery-main {
+    max-height: calc(100vh - 142px);
+    max-height: calc(100dvh - 142px);
+  }
 }
 
 /* Khung ảnh chính lớn */

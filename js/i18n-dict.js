@@ -266,6 +266,8 @@ export const PHRASES = [
   ['Mở bộ lọc tìm kiếm', 'Open filters', 'フィルターを開く'],
   ['Đóng bộ lọc', 'Close filters', 'フィルターを閉じる'],
   ['Xem kết quả', 'Show results', '結果を表示'],
+  ['Đến trang', 'Go to page', 'ページへ移動'],
+  ['Đi', 'Go', '移動'],
   ['Bộ lọc tìm kiếm', 'Search filters', '検索フィルター'],
   ['Bộ lọc linh kiện', 'Filters', 'フィルター'],
   ['Thiết lập lại', 'Reset', 'リセット'],
