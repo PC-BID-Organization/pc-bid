@@ -17,6 +17,8 @@ import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, render
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
+// Trạng thái kiểm định của phiên tự đăng bán
+import { isAwaitingInspection } from './inspection.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
@@ -479,7 +481,14 @@ function renderSellingCard(item) {
   let modifierClass = '';
   let actionButtonsHtml = '';
 
-  if (item.status === 'active') {
+  if (item.status === 'active' && isAwaitingInspection(item)) {
+    // Phiên vừa đăng: đang chờ PCBid Lab kiểm định, chưa mở đặt giá
+    modifierClass = 'pcb-auction-card--selling-active';
+    badgeHtml = `<span class="pcb-status-badge pcb-status-badge--pending">Chờ kiểm định</span>`;
+    actionButtonsHtml = `
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem tiến độ kiểm định</a>
+    `;
+  } else if (item.status === 'active') {
     modifierClass = 'pcb-auction-card--selling-active';
     badgeHtml = `<span class="pcb-status-badge pcb-status-badge--active">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>

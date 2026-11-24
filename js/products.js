@@ -11,6 +11,8 @@ import { icon } from './icons.js';
 import { readLoggedInUser } from './user-data.js';
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
+// Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
+import { isAwaitingInspection, getInspectionSeal } from './inspection.js';
 
 
 /* ==========================================================================
@@ -857,10 +859,14 @@ function renderCatalogProductCard(product) {
             </span>
           </div>
 
+          ${isAwaitingInspection(product) ? `
+          <a href="${detailUrl}" class="pcb-card__btn pcb-card__btn--locked" title="Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt">
+            ${icon('microscope', { size: 14 })} Chờ kiểm định
+          </a>` : `
           <a href="${detailUrl}" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
             Tham gia đấu giá
-          </a>
+          </a>`}
         </div>
       </div>
     </article>
@@ -968,17 +974,10 @@ function getConditionBadge(conditionText) {
 }
 
 function getHardwareSeal(product) {
-  const cat = String(product.category || '').toLowerCase();
-  if (cat.includes('gpu') || cat.includes('vga')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã stress test Furmark ổn định">✓ Furmark &lt; 75°C</span>`;
-  }
-  if (cat.includes('ram')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã chạy MemTest86 không lỗi">✓ MemTest 0 Error</span>`;
-  }
-  if (cat.includes('ssd') || cat.includes('ổ cứng') || cat.includes('storage')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Kiểm tra sức khỏe CrystalDiskInfo 100%">✓ Sức khỏe 100%</span>`;
-  }
-  return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã qua kiểm thử tại UIT Lab">✓ UIT Lab OK</span>`;
+  // Tem theo kết quả PCBid Lab; phiên vừa đăng hiện "Chờ kiểm định"
+  const pending = isAwaitingInspection(product);
+  const title = pending ? 'Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt' : 'Đã qua kiểm định PCBid Lab';
+  return `<span class="pcb-card__seal pcb-card__seal--${pending ? 'pending' : 'pass'}" title="${title}">${pending ? '' : '✓ '}${escapeHtml(getInspectionSeal(product))}</span>`;
 }
 
 function escapeHtml(str) {

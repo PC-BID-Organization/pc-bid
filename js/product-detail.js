@@ -25,6 +25,8 @@ import { icon } from './icons.js';
 import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
+// Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
+import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults } from './inspection.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -390,6 +392,9 @@ function hienThiSanPham(sanPham) {
   // Kiểm tra phiên đã kết thúc chưa để vô hiệu nút đặt giá
   kiemTraPhienKetThuc(sanPham.endTime);
 
+  // Trạng thái kiểm định PCBid Lab (khóa đặt giá khi phiên đang chờ kiểm định)
+  capNhatKiemDinh();
+
   // Đơn hàng sau đấu giá và nút demo kết thúc phiên
   renderKhungDonHang();
   capNhatNutDemo();
@@ -707,12 +712,13 @@ function capNhatCheDoNguoiBan() {
   const sp = sanPhamHienTai;
   const daKetThuc = isAuctionClosed(sp) || getAuctionEndTimestamp(sp) <= Date.now();
   const soLuot = Number(sp.bidCount || 0);
-  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : 'Đang diễn ra';
+  const choKiemDinh = !daKetThuc && isAwaitingInspection(sp);
+  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : choKiemDinh ? 'Chờ kiểm định' : 'Đang diễn ra';
 
   const oTrangThai = document.getElementById('pcb-pd-owner-status');
   if (oTrangThai) {
     oTrangThai.textContent = trangThai;
-    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : 'active';
+    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : choKiemDinh ? 'pending' : 'active';
   }
   const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   ganChu('pcb-pd-owner-price', dinhDangVnd(sp.currentBid || sp.startingPrice));
@@ -1097,6 +1103,64 @@ function hienThiPhienKetThuc() {
  * Kiểm tra ngay khi nạp trang xem phiên đã kết thúc chưa
  * @param {string} thoiGianKetThuc - ISO string thời gian kết thúc
  */
+/**
+ * Hiển thị kết quả kiểm định PCBid Lab và khóa / mở ô đặt giá theo trạng thái kiểm định.
+ * Gọi lại mỗi giây để đếm ngược và tự mở đặt giá khi có kết quả.
+ */
+function capNhatKiemDinh() {
+  const sp = sanPhamHienTai;
+  if (!sp) return;
+  const dangCho = isAwaitingInspection(sp);
+  const giay = getInspectionSecondsLeft(sp);
+
+  const khung = document.getElementById('pcb-pd-inspection');
+  const oTrangThai = document.getElementById('pcb-pd-inspection-status');
+  const danhSach = document.getElementById('pcb-pd-inspection-list');
+  if (khung) khung.classList.toggle('pcb-pd__inspection--pending', dangCho);
+  if (oTrangThai) {
+    const noiDung = dangCho
+      ? `Đang kiểm định, còn khoảng ${giay} giây. Phiên chưa mở đặt giá.`
+      : 'Đạt chuẩn, đã gắn tem PCBid Verified';
+    if (oTrangThai.textContent !== noiDung) oTrangThai.textContent = noiDung;
+  }
+  if (danhSach) {
+    const trangThaiDaVe = dangCho ? 'pending' : 'passed';
+    if (danhSach.dataset.state !== trangThaiDaVe) {
+      danhSach.dataset.state = trangThaiDaVe;
+      danhSach.innerHTML = dangCho ? '' : getInspectionResults(sp)
+        .map(kq => `<li class="pcb-pd__inspection-item"><span>${maHoaHtml(kq.label)}</span><strong>${maHoaHtml(kq.value)}</strong></li>`)
+        .join('');
+    }
+  }
+
+  // Khóa ô đặt giá khi đang chờ kiểm định; chỉ mở lại những ô do chính bước này khóa
+  const thongBaoKhoa = document.getElementById('pcb-pd-inspect-lock');
+  if (thongBaoKhoa) {
+    thongBaoKhoa.hidden = !dangCho;
+    thongBaoKhoa.textContent = dangCho ? `Phiên đang chờ PCBid Lab kiểm định. Đặt giá sẽ mở sau khoảng ${giay} giây.` : '';
+  }
+  const oKhoa = [document.getElementById('pcb-pd-bid-input'), document.getElementById('pcb-pd-submit-btn'),
+    ...document.querySelectorAll('.pcb-pd__quick-btn')].filter(Boolean);
+  oKhoa.forEach(el => {
+    if (dangCho) {
+      if (!el.disabled) el.dataset.khoaKiemDinh = '1';
+      el.disabled = true;
+    } else if (el.dataset.khoaKiemDinh) {
+      el.disabled = false;
+      delete el.dataset.khoaKiemDinh;
+    }
+  });
+
+  // Bảng quản lý của người bán: trạng thái "Chờ kiểm định"
+  const oTrangThaiChu = document.getElementById('pcb-pd-owner-status');
+  if (oTrangThaiChu && dangCho) {
+    oTrangThaiChu.textContent = 'Chờ kiểm định';
+    oTrangThaiChu.dataset.state = 'pending';
+  } else if (oTrangThaiChu && oTrangThaiChu.dataset.state === 'pending') {
+    capNhatCheDoNguoiBan();
+  }
+}
+
 function kiemTraPhienKetThuc(thoiGianKetThuc) {
   if (new Date(thoiGianKetThuc).getTime() <= Date.now()) {
     hienThiPhienKetThuc();
@@ -1229,6 +1293,12 @@ function xuLyDatGia() {
   // Xóa lỗi cũ
   if (oLoi) { oLoi.hidden = true; oLoi.textContent = ''; }
   oNhapGia.classList.remove('pcb-pd__input--error');
+
+  // Phiên chưa qua kiểm định PCBid Lab: chưa nhận lượt đặt giá
+  if (isAwaitingInspection(sanPhamHienTai)) {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.');
+    return;
+  }
 
   // Phiên đã kết thúc hoặc đã chốt: không nhận thêm lượt đặt giá
   if (isAuctionClosed(sanPhamHienTai) || getAuctionEndTimestamp(sanPhamHienTai) <= Date.now()) {
@@ -1705,6 +1775,8 @@ window.addEventListener('storage', (e) => {
 setInterval(() => {
   const khung = document.getElementById('pcb-pd-order-panel');
   if (khung && !khung.hidden) tickOrderCountdowns(khung);
+  // Đếm ngược kiểm định và tự mở đặt giá khi PCBid Lab trả kết quả
+  capNhatKiemDinh();
 }, 1000);
 
 window.addEventListener('storage', (e) => {

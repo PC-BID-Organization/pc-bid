@@ -14,6 +14,8 @@
    ========================================================================== */
 
 import { isAuctionClosed } from './auction-time.js';
+// Bot không đặt giá vào phiên đang chờ kiểm định
+import { isAwaitingInspection } from './inspection.js';
 import { MOCK_BIDDERS } from './accounts.js';
 import { loadAllAuctions, buildBidHistory, readAllBids } from './bid-history.js';
 import { readLoggedInUser } from './user-data.js';
@@ -143,6 +145,7 @@ export async function placeBotBid({ timestamp = Date.now(), excludeIds = new Set
   const candidates = auctions.filter(p =>
     !isAuctionClosed(p) &&
     !p.closedEarly &&
+    !isAwaitingInspection(p, now) &&
     !excludeIds.has(p.id) &&
     p.endTimestamp - now > 60 * 1000 &&
     Number(p.currentBid) + (Number(p.bidStep) || 100000) <= getPriceCap(p)

@@ -5,9 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png">
-  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#c9450a">
   <meta name="description"
     content="Đăng bán đấu giá linh kiện máy tính cũ tại PCBid. Chọn mẫu linh kiện chuẩn từ catalogue, chọn ảnh thực tế và bắt đầu phiên đấu giá minh bạch nhanh chóng.">
   <title>Đăng Bán Đấu Giá Linh Kiện PC | PCBid</title>
@@ -256,15 +259,17 @@
                 </select>
               </div>
 
+              <!-- Kiểm định bắt buộc: người bán không tự gắn chứng nhận, PCBid Lab kiểm định trước khi mở đặt giá -->
               <div class="pcb-form-group">
-                <label for="sell-seal" class="pcb-form-label">Chứng nhận kiểm thử (Tùy chọn)</label>
-                <select id="sell-seal" name="seal" class="pcb-form-select">
-                  <option value="" selected>-- Không có chứng nhận --</option>
-                  <option value="Furmark < 75°C">✓ Pass Furmark 15p &lt; 75°C (Đối với VGA)</option>
-                  <option value="MemTest 0 Error">✓ Pass MemTest86 0 Error (Đối với RAM/CPU)</option>
-                  <option value="CrystalDiskInfo 100%">✓ CrystalDiskInfo Sức khỏe 100% (Đối với SSD)</option>
-                  <option value="UIT Lab OK">✓ Đã kiểm định tại UIT Hardware Lab</option>
-                </select>
+                <span class="pcb-form-label">Kiểm định phần cứng</span>
+                <div class="pcb-inspect-note" role="note">
+                  <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s18 pcb-inspect-note__icon" aria-hidden="true"></span>
+                  <p class="pcb-inspect-note__text">
+                    <strong>Bắt buộc với mọi phiên.</strong> Sau khi đăng, linh kiện ở trạng thái <em>Chờ kiểm định</em>.
+                    PCBid Lab chạy Furmark / MemTest86 / CrystalDiskInfo tùy loại linh kiện (mô phỏng 1 phút),
+                    đạt chuẩn thì gắn tem PCBid Verified và mở đặt giá.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -380,7 +385,7 @@
               <div class="pcb-card__body">
                 <div class="pcb-card__seals">
                   <span class="pcb-card__seal pcb-card__seal--cat" id="preview-cat">GPU</span>
-                  <span class="pcb-card__seal pcb-card__seal--pass" id="preview-seal" hidden></span>
+                  <span class="pcb-card__seal pcb-card__seal--pending" id="preview-seal">Chờ kiểm định</span>
                 </div>
 
                 <div class="pcb-card__title pcb-card__title--static" id="preview-title">
@@ -439,7 +444,7 @@
       <div class="pcb-modal-icon">✓</div>
       <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
       <p class="pcb-modal-desc" id="modal-success-desc">
-        Linh kiện của bạn đã được niêm yết lên sàn PCBid thành công.
+        Phiên đã được tạo và chuyển cho PCBid Lab kiểm định. Đạt chuẩn là phiên tự mở đặt giá (khoảng 1 phút).
       </p>
       <!-- Đồng hồ đếm ngược tự chuyển sang trang Sàn đấu giá -->
       <div class="pcb-modal-countdown" aria-live="polite">

@@ -1196,6 +1196,23 @@
   border: 1px solid #a7f3d0;
 }
 
+/* Phiên đang chờ PCBid Lab kiểm định: tem màu hổ phách, chưa mở đặt giá */
+.pcb-card__seal--pending {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+/* Nút đặt giá khi phiên chưa mở (đang chờ kiểm định) */
+.pcb-card__btn--locked,
+.pcb-card__btn--locked:hover {
+  color: #92400e;
+  cursor: not-allowed;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  box-shadow: none;
+}
+
 .pcb-card__seal--cat {
   background: #f1f5f9;
   color: #475569;

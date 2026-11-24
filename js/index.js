@@ -14,6 +14,8 @@ import { icon } from './icons.js';
 import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
 import { describeBidder, findAccount } from './accounts.js';
+// Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
+import { isAwaitingInspection, getInspectionSeal } from './inspection.js';
 
 
 /* ==========================================================================
@@ -382,12 +384,9 @@ async function loadProducts() {
    ========================================================================== */
 
 function getHardwareSeal(product) {
-  const cat = String(product.category).toUpperCase();
-  if (cat === 'GPU') return '<span class="pcb-card__seal pcb-card__seal--pass">Furmark 65°C</span>';
-  if (cat === 'CPU') return '<span class="pcb-card__seal pcb-card__seal--pass">Socket OK</span>';
-  if (cat === 'RAM') return '<span class="pcb-card__seal pcb-card__seal--pass">MemTest86 OK</span>';
-  if (cat === 'STORAGE') return '<span class="pcb-card__seal pcb-card__seal--pass">Health 100%</span>';
-  return '<span class="pcb-card__seal pcb-card__seal--pass">Đã Test Đạt</span>';
+  // Tem theo kết quả PCBid Lab; phiên vừa đăng hiện "Chờ kiểm định"
+  const modifier = isAwaitingInspection(product) ? 'pending' : 'pass';
+  return `<span class="pcb-card__seal pcb-card__seal--${modifier}">${escapeHtml(getInspectionSeal(product))}</span>`;
 }
 
 function getConditionBadge(conditionStr) {
@@ -487,10 +486,14 @@ function renderProductCard(product, options = {}) {
             </span>
           </div>
 
+          ${isAwaitingInspection(product) ? `
+          <a href="${detailUrl}" class="pcb-card__btn pcb-card__btn--locked" title="Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt">
+            ${icon('microscope', { size: 14 })} Chờ kiểm định
+          </a>` : `
           <button type="button" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
             Đặt giá nhanh
-          </button>
+          </button>`}
         </div>
       </div>
     </article>
@@ -894,6 +897,11 @@ function showToast(message, type = 'success') {
 function openQuickBidModal(productId) {
   const product = allProducts.find(p => p.id === Number(productId));
   if (!product) return;
+  // Phiên chưa qua kiểm định: chưa mở đặt giá, chuyển sang trang chi tiết để xem trạng thái
+  if (isAwaitingInspection(product)) {
+    window.location.href = `product-detail.html?id=${product.id}`;
+    return;
+  }
 
   currentModalProduct = product;
   const step = product.bidStep || 100000;

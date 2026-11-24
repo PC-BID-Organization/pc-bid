@@ -10,6 +10,8 @@
 import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from './user-data.js';
 // Hộp thoại thông báo dùng chung
 import { showAlert, showConfirm } from './dialog.js';
+// Quy trình kiểm định bắt buộc trước khi mở đặt giá
+import { INSPECTION_MS, createInspectionRequest } from './inspection.js';
 
 
 /* ==========================================================================
@@ -1340,7 +1342,6 @@ function initPhotoPicker() {
 function initFormInputsSync() {
   const inputs = [
     'sell-condition',
-    'sell-seal',
     'sell-start-price',
     'sell-bid-step',
     'sell-duration',
@@ -1383,13 +1384,11 @@ function updateLivePreview() {
     previewCondition.textContent = text.includes('Like New') ? 'Like New 99%' : (text.includes('Mới') ? 'Mới 100%' : 'Đã sử dụng');
   }
 
-  // Huy hiệu kiểm thử (Seal)
-  const sealSelect = document.getElementById('sell-seal');
+  // Huy hiệu kiểm định: phiên mới luôn ở trạng thái chờ PCBid Lab kiểm định
   const previewSeal = document.getElementById('preview-seal');
-  if (sealSelect && previewSeal) {
-    // Không chọn chứng nhận thì ẩn huy hiệu
-    previewSeal.textContent = sealSelect.value ? `✓ ${sealSelect.value}` : '';
-    previewSeal.hidden = !sealSelect.value;
+  if (previewSeal) {
+    previewSeal.textContent = 'Chờ kiểm định';
+    previewSeal.hidden = false;
   }
 
   // 2 Thông số kỹ thuật tiêu biểu (theo thông số người bán đã chỉnh)
@@ -1524,16 +1523,16 @@ function initFormSubmitHandler() {
       bidStep: bidStep,
       bidCount: 0,
       marketPriceNew: marketPrice,
-      endTime: new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString(),
+      // Thời hạn tính từ lúc kiểm định xong (cộng thêm thời gian chờ kiểm định)
+      endTime: new Date(Date.now() + INSPECTION_MS + durationDays * 24 * 3600 * 1000).toISOString(),
       seller: sellerName,
       images: [...selectedImages],
       description: description,
       // Thông số của mẫu sau khi người bán chỉnh sửa + thông số tự bổ sung
       specifications: getAllSpecsObject()
     };
-    // Chứng nhận kiểm thử: chỉ lưu khi người bán chủ động chọn
-    const certification = document.getElementById('sell-seal')?.value || '';
-    if (certification) newAuctionProduct.certification = certification;
+    // Yêu cầu kiểm định: phiên chỉ mở đặt giá sau khi PCBid Lab kiểm định đạt
+    newAuctionProduct.inspection = createInspectionRequest();
 
     if (relistTarget) {
       // Đánh dấu phiên mở lại để các trang dùng thời hạn mới thay cho trạng thái "đã kết thúc" cũ
@@ -1577,7 +1576,8 @@ function initFormSubmitHandler() {
         endTime: newAuctionProduct.endTime,
         endTimestamp: new Date(newAuctionProduct.endTime).getTime(),
         images: newAuctionProduct.images,
-        specs: specsList
+        specs: specsList,
+        inspection: newAuctionProduct.inspection
       });
       writeUserList(USER_LIST_KEYS.SELLING, sellerUser, mySelling);
     } catch (e) {

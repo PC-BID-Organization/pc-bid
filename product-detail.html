@@ -5,9 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png">
-  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#c9450a">
   <meta name="description"
     content="PCBid - Chi tiết phiên đấu giá linh kiện máy tính cũ. Xem thông số, đặt giá và theo dõi bảng lịch sử trả giá trực tiếp.">
   <title>Chi Tiết Phiên Đấu Giá | PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
@@ -107,6 +110,16 @@
 
           <!-- Mô tả tình trạng cụ thể -->
           <p class="pcb-pd__condition-text" id="pcb-pd-condition-text"></p>
+
+          <!-- Kết quả kiểm định PCBid Lab: phiên mới đăng hiện trạng thái chờ, đạt chuẩn thì hiện chỉ số đo -->
+          <section class="pcb-pd__inspection" id="pcb-pd-inspection" aria-labelledby="pcb-pd-inspection-title">
+            <h2 class="pcb-pd__inspection-title" id="pcb-pd-inspection-title">
+              <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s16" aria-hidden="true"></span>
+              <span id="pcb-pd-inspection-heading">Kiểm định PCBid Lab</span>
+            </h2>
+            <p class="pcb-pd__inspection-status" id="pcb-pd-inspection-status" aria-live="polite"></p>
+            <ul class="pcb-pd__inspection-list" id="pcb-pd-inspection-list"></ul>
+          </section>
 
           <!-- ===== ĐỒNG HỒ ĐẾM NGƯỢC ===== -->
           <div class="pcb-pd__countdown-wrap" id="pcb-pd-countdown-wrap">
@@ -223,6 +236,9 @@
               </p>
               <p class="pcb-pd__input-error" id="pcb-pd-bid-error" role="alert" hidden></p>
             </div>
+
+            <!-- Thông báo phiên đang chờ kiểm định: chưa mở đặt giá -->
+            <p class="pcb-pd__inspect-lock" id="pcb-pd-inspect-lock" role="status" hidden></p>
 
             <!-- Nút nhảy giá nhanh -->
             <div class="pcb-pd__quick-jumps" aria-label="Tăng giá nhanh">

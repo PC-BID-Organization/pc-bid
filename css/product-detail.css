@@ -1838,3 +1838,87 @@ a.pcb-pd__seller-avatar {
   text-align: center;
   color: var(--color-text-muted);
 }
+
+/* Trạng thái "Chờ kiểm định" trong bảng quản lý của người bán */
+.pcb-pd__owner-status[data-state="pending"] {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+/* ==========================================================================
+   KHUNG KẾT QUẢ KIỂM ĐỊNH PCBID LAB
+   ========================================================================== */
+.pcb-pd__inspection {
+  margin: 4px 0 0;
+  padding: 12px 14px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+}
+
+.pcb-pd__inspection-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #14532d;
+}
+
+.pcb-pd__inspection-status {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.pcb-pd__inspection-list {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-pd__inspection-list:empty {
+  display: none;
+}
+
+.pcb-pd__inspection-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.pcb-pd__inspection-item strong {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Đang chờ kiểm định: nền hổ phách */
+.pcb-pd__inspection--pending {
+  background-color: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.pcb-pd__inspection--pending .pcb-pd__inspection-title,
+.pcb-pd__inspection--pending .pcb-pd__inspection-status {
+  color: #92400e;
+}
+
+/* Thông báo khóa đặt giá trong khung đặt giá */
+.pcb-pd__inspect-lock {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #92400e;
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+}

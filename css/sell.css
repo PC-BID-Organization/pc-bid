@@ -1234,3 +1234,27 @@ button.pcb-thumb-item {
 .pcb-btn--block {
   width: 100%;
 }
+
+/* Khung thông báo kiểm định bắt buộc thay cho ô tự chọn chứng nhận */
+.pcb-inspect-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+}
+
+.pcb-inspect-note__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #b45309;
+}
+
+.pcb-inspect-note__text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #78350f;
+}
