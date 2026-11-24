@@ -1936,8 +1936,13 @@ a.pcb-pd__seller-avatar {
    HỘP THOẠI PHIẾU KIỂM ĐỊNH CỦA PHIÊN (thẻ dialog)
    ========================================================================== */
 .pcb-cert-dialog {
+  /* reset.css xóa margin mặc định của <dialog>: đặt lại margin: auto để phiếu nằm giữa màn hình */
+  position: fixed;
+  inset: 0;
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
   padding: 20px;
   overflow-y: auto;
   color: var(--color-text-main);
@@ -1947,8 +1952,33 @@ a.pcb-pd__seller-avatar {
   box-shadow: 0 24px 60px rgba(11, 28, 48, 0.25);
 }
 
+/* Hiệu ứng mờ dần: phiếu và nền tối cùng hiện / ẩn trong 0,2 giây */
+.pcb-cert-dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
 .pcb-cert-dialog::backdrop {
   background: rgba(15, 23, 42, 0.6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pcb-cert-dialog--visible {
+  opacity: 1;
+  transform: none;
+}
+
+.pcb-cert-dialog--visible::backdrop {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-cert-dialog,
+  .pcb-cert-dialog::backdrop {
+    transition: none;
+  }
 }
 
 .pcb-cert-dialog__head {

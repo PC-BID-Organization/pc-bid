@@ -1217,10 +1217,36 @@ function moPhieuKiemDinh() {
     hopThoai.dataset.bound = '1';
     hopThoai.addEventListener('click', e => {
       // Bấm nút đóng hoặc bấm ra vùng tối bên ngoài phiếu
-      if (e.target.closest('[data-close-cert]') || e.target === hopThoai) hopThoai.close();
+      if (e.target.closest('[data-close-cert]') || e.target === hopThoai) dongPhieuKiemDinh();
+    });
+    // Phím Esc: chặn đóng ngay lập tức để chạy hiệu ứng mờ dần
+    hopThoai.addEventListener('cancel', e => {
+      e.preventDefault();
+      dongPhieuKiemDinh();
     });
   }
   hopThoai.showModal();
+  // Đợi một khung hình rồi mới thêm class để hiệu ứng mờ dần khi mở chạy được
+  requestAnimationFrame(() => requestAnimationFrame(() => hopThoai.classList.add('pcb-cert-dialog--visible')));
+}
+
+/**
+ * Đóng phiếu kiểm định với hiệu ứng mờ dần
+ */
+function dongPhieuKiemDinh() {
+  const hopThoai = document.getElementById('pcb-cert-dialog');
+  if (!hopThoai || !hopThoai.open || hopThoai.dataset.closing) return;
+  hopThoai.dataset.closing = '1';
+  hopThoai.classList.remove('pcb-cert-dialog--visible');
+  const ketThuc = () => {
+    delete hopThoai.dataset.closing;
+    if (hopThoai.open) hopThoai.close();
+  };
+  // Người dùng tắt hiệu ứng chuyển động: đóng ngay
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return ketThuc();
+  hopThoai.addEventListener('transitionend', ketThuc, { once: true });
+  // Dự phòng khi trình duyệt không phát transitionend
+  setTimeout(ketThuc, 260);
 }
 
 function kiemTraPhienKetThuc(thoiGianKetThuc) {
