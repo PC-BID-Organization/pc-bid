@@ -420,6 +420,9 @@
 
 /* Thanh công cụ sắp xếp & kết quả (Toolbar) */
 .pcb-toolbar {
+  /* Tạo lớp xếp chồng riêng để danh sách "Sắp xếp theo" nổi trên lưới thẻ sản phẩm */
+  position: relative;
+  z-index: 5;
   background: var(--pcb-bg-card, #ffffff);
   border: 1px solid var(--pcb-border-light, #e2e8f0);
   border-radius: var(--pcb-radius-md, 12px);
@@ -473,6 +476,24 @@
 
 .pcb-toolbar__sort-select:focus {
   border-color: var(--pcb-primary, #c9450a);
+}
+
+/* Ô "Sắp xếp theo" sau khi đổi sang ô chọn tùy biến (custom-select.js) */
+.pcb-toolbar__controls .pcb-select {
+  flex: 0 0 240px;
+  width: 240px;
+}
+
+.pcb-toolbar__controls .pcb-select__trigger {
+  min-height: 36px;
+  padding: 6px 10px 6px 12px;
+  font-weight: 500;
+  border-width: 1px;
+}
+
+/* Danh sách xổ xuống nằm trên các thẻ sản phẩm bên dưới */
+.pcb-toolbar__controls .pcb-select__list {
+  z-index: 60;
 }
 
 /* Thẻ chip lọc đang hoạt động (Active Filter Tags) */
@@ -813,10 +834,16 @@
 
 /* Điện thoại: ô chọn sắp xếp chiếm trọn chiều ngang, không tràn khỏi thanh công cụ */
 @media (max-width: 640px) {
-  .pcb-toolbar__sort-select {
+  .pcb-toolbar__sort-select,
+  .pcb-toolbar__controls .pcb-select {
     flex: 1 1 100%;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
+  }
+
+  .pcb-toolbar__controls .pcb-select__trigger {
+    min-height: 42px;
   }
 }
 

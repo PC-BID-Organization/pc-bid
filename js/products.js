@@ -17,6 +17,8 @@ import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainin
 import { isWatched, toggleWatch, setWatchButtonState } from './watchlist.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
+// Ô chọn tùy biến thay cho hộp chọn mặc định của trình duyệt
+import { enhanceSelect } from './custom-select.js';
 
 
 /* ==========================================================================
@@ -473,6 +475,9 @@ function initFilterEventListeners() {
 
   // Ngăn trượt bộ lọc trên điện thoại / máy tính bảng
   initFilterDrawer();
+
+  // Ô "Sắp xếp theo" dùng danh sách xổ xuống cùng phong cách PCBid (giống nhau trên máy tính và điện thoại)
+  enhanceSelect(document.getElementById('catalog-sort'));
 
   // Lắng nghe sự kiện phân trang
   const paginationContainer = document.getElementById('pcb-pagination');

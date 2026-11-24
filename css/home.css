@@ -2093,8 +2093,24 @@
 /* ==========================================================================
    13. HỘP THOẠI XEM PHIẾU KIỂM ĐỊNH MẪU (INSPECTION CERTIFICATE MODAL)
    ========================================================================== */
+/* Phiếu kiểm định mẫu: dài hơn màn hình điện thoại thì cuộn bên trong hộp thoại,
+   thanh tiêu đề luôn nằm trên cùng (trước đây bị đẩy khuất khỏi mép trên màn hình) */
 .pcb-cert-modal {
+  display: flex;
+  flex-direction: column;
   max-width: 560px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+}
+
+.pcb-cert-modal .pcb-modal__head {
+  flex-shrink: 0;
+}
+
+.pcb-cert-modal .pcb-modal__body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* ==========================================================================
