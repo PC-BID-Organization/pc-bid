@@ -389,7 +389,9 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  /* Chừa khoảng trống trên / hai bên: thumbnail đang chọn nhích lên 2px, nếu không
+     có padding thì overflow-x: auto sẽ cắt mất viền phía trên */
+  padding: 4px 2px 6px;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-medium) transparent;
 }
