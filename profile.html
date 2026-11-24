@@ -665,18 +665,6 @@
             </form>
 
             <!-- Thanh lưu nổi: hiện khi có thay đổi chưa lưu mà nút "Lưu thay đổi thông tin" đang nằm ngoài màn hình -->
-            <div class="pcb-savebar" id="account-savebar" role="region" aria-label="Thay đổi chưa lưu" hidden>
-              <span class="pcb-savebar__text">
-                <span class="pcb-savebar__dot" aria-hidden="true"></span>
-                <span class="pcb-savebar__label">Có thay đổi chưa lưu</span>
-              </span>
-              <span class="pcb-savebar__actions">
-                <button type="button" class="pcb-savebar__undo" id="account-savebar-undo">Hoàn tác</button>
-                <button type="submit" form="form-account-info" class="pcb-savebar__save">
-                  <span class="lucide pcb-icon pcb-icon--check pcb-icon--s14" aria-hidden="true"></span> Lưu thay đổi
-                </button>
-              </span>
-            </div>
           </div>
 
           <!-- #################### SECTION: ĐỊA CHỈ NHẬN HÀNG #################### -->
@@ -721,23 +709,23 @@
               <div class="pcb-form__grid pcb-form__grid--narrow">
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-current-pass" class="pcb-form__label">MẬT KHẨU HIỆN TẠI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-current-pass" class="pcb-input" required placeholder="Nhập mật khẩu hiện tại">
+                  <input type="password" id="input-current-pass" class="pcb-input" autocomplete="current-password" required placeholder="Nhập mật khẩu hiện tại">
                 </div>
 
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-new-pass" class="pcb-form__label">MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-new-pass" class="pcb-input" required placeholder="Tối thiểu 8 ký tự, gồm chữ và số">
+                  <input type="password" id="input-new-pass" class="pcb-input" autocomplete="new-password" required placeholder="Tối thiểu 8 ký tự, gồm chữ và số">
                 </div>
 
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-confirm-pass" class="pcb-form__label">XÁC NHẬN MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-confirm-pass" class="pcb-input" required placeholder="Nhập lại mật khẩu mới">
+                  <input type="password" id="input-confirm-pass" class="pcb-input" autocomplete="new-password" required placeholder="Nhập lại mật khẩu mới">
                 </div>
               </div>
 
               <div class="pcb-form__actions pcb-form__actions--spaced">
                 <div></div>
-                <button type="submit" class="pcb-btn-primary">
+                <button type="submit" class="pcb-btn-primary" id="btn-save-password">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -774,9 +762,23 @@
               </ul>
               <div class="pcb-form__actions">
                 <div></div>
-                <button type="submit" class="pcb-btn-primary">Lưu cài đặt quyền riêng tư</button>
+                <button type="submit" class="pcb-btn-primary" id="btn-save-privacy">Lưu cài đặt quyền riêng tư</button>
               </div>
             </form>
+          </div>
+
+          <!-- Thanh lưu nổi dùng chung cho các form cài đặt (Thông tin tài khoản, Đổi mật khẩu, Quyền riêng tư) -->
+          <div class="pcb-savebar" id="account-savebar" role="region" aria-label="Thay đổi chưa lưu" hidden>
+            <span class="pcb-savebar__text">
+              <span class="pcb-savebar__dot" aria-hidden="true"></span>
+              <span class="pcb-savebar__label">Có thay đổi chưa lưu</span>
+            </span>
+            <span class="pcb-savebar__actions">
+              <button type="button" class="pcb-savebar__undo" id="account-savebar-undo">Hoàn tác</button>
+              <button type="button" class="pcb-savebar__save" id="account-savebar-save">
+                <span class="lucide pcb-icon pcb-icon--check pcb-icon--s14" aria-hidden="true"></span> Lưu thay đổi
+              </button>
+            </span>
           </div>
 
           <!-- #################### SECTION: HỒ SƠ CÔNG KHAI CỦA NGƯỜI DÙNG (profile.html?user=...) #################### -->

@@ -714,84 +714,240 @@ function showUsernameError() {
 }
 
 /* --------------------------------------------------------------------------
-   THANH LƯU NỔI CỦA FORM THÔNG TIN TÀI KHOẢN
-   Hiện khi có thay đổi chưa lưu và nút "Lưu thay đổi thông tin" đang khuất khỏi màn hình.
-   Trên điện thoại tự ẩn khi đang gõ (bàn phím mở) để không che ô đang nhập.
+   THANH LƯU NỔI & HỎI LƯU KHI RỜI ĐI CHO CÁC FORM CÀI ĐẶT
+   Áp dụng cho: Thông tin tài khoản, Đổi mật khẩu, Quyền riêng tư hồ sơ công khai.
+   - Máy tính: thanh nổi hiện khi có thay đổi chưa lưu và nút lưu của form đang khuất.
+   - Điện thoại: thanh nổi hiện ngay khi có thay đổi, kể cả lúc đang gõ (bàn phím mở),
+     nằm sát phía trên bàn phím và tự cuộn để không che ô đang nhập.
    -------------------------------------------------------------------------- */
-const savebarState = { baseline: '', dirty: false, saveVisible: true, typing: false };
 
 /**
- * Chụp giá trị hiện tại của các ô trong form tài khoản để so sánh có thay đổi hay không
- * @returns {string}
+ * Danh sách form được theo dõi thay đổi chưa lưu
+ * - read: chụp trạng thái hiện tại để so với mốc đã lưu (baseline)
+ * - submit: lưu form, trả về Promise khi lưu xong
+ * - undo: bỏ thay đổi, trả form về dữ liệu đã lưu
  */
-function readAccountFormState() {
-  const form = document.getElementById('form-account-info');
-  if (!form) return '';
-  const values = [...form.querySelectorAll('input, select, textarea')]
-    .filter(el => el.id && !(el.type === 'date' && el.hidden))
-    .map(el => [el.id, el.type === 'checkbox' ? el.checked : el.value]);
-  return JSON.stringify(values);
+const GUARDED_FORMS = [
+  {
+    formId: 'form-account-info',
+    sectionId: 'section-account',
+    saveBtnId: 'btn-save-account',
+    name: 'Thông tin tài khoản',
+    barLabel: 'Có thay đổi chưa lưu',
+    baseline: null,
+    read: () => {
+      const form = document.getElementById('form-account-info');
+      if (!form) return '';
+      const values = [...form.querySelectorAll('input, select, textarea')]
+        .filter(el => el.id && !(el.type === 'date' && el.hidden))
+        .map(el => [el.id, el.type === 'checkbox' ? el.checked : el.value]);
+      return JSON.stringify(values);
+    },
+    submit: async () => {
+      accountSubmitPromise = null;
+      document.getElementById('form-account-info')?.requestSubmit();
+      if (accountSubmitPromise) await accountSubmitPromise;
+    },
+    undo: () => {
+      const form = document.getElementById('form-account-info');
+      if (!form) return;
+      form.querySelectorAll('.pcb-form__error').forEach(el => { el.textContent = ''; });
+      form.querySelectorAll('.pcb-input--error').forEach(el => el.classList.remove('pcb-input--error'));
+      const birthInput = document.getElementById('input-birthdate');
+      if (birthInput) birthInput.hidden = true;
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthHint) birthHint.hidden = true;
+      syncUserInfoUI({ force: true });
+    }
+  },
+  {
+    formId: 'form-change-password',
+    sectionId: 'section-security',
+    saveBtnId: 'btn-save-password',
+    name: 'Đổi mật khẩu',
+    barLabel: 'Mật khẩu mới chưa lưu',
+    // Form đổi mật khẩu luôn bắt đầu trống: có ký tự trong bất kỳ ô nào là có thay đổi
+    baseline: '',
+    read: () => {
+      const form = document.getElementById('form-change-password');
+      return form && [...form.querySelectorAll('input')].some(el => el.value) ? 'dirty' : '';
+    },
+    submit: async () => {
+      document.getElementById('form-change-password')?.requestSubmit();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    },
+    undo: () => document.getElementById('form-change-password')?.reset()
+  },
+  {
+    formId: 'form-privacy',
+    sectionId: 'section-security',
+    saveBtnId: 'btn-save-privacy',
+    name: 'Quyền riêng tư hồ sơ công khai',
+    barLabel: 'Quyền riêng tư chưa lưu',
+    baseline: null,
+    read: () => {
+      const form = document.getElementById('form-privacy');
+      if (!form) return '';
+      return JSON.stringify([...form.querySelectorAll('.pcb-switch__input')].map(el => [el.name, el.checked]));
+    },
+    submit: async () => {
+      document.getElementById('form-privacy')?.requestSubmit();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    },
+    undo: () => fillPrivacyForm(getCurrentUser())
+  }
+];
+
+// Trạng thái thanh lưu nổi: nút lưu nào đang nằm trong màn hình, form nào vừa được sửa gần nhất
+const savebarState = { saveVisible: {}, lastEditedId: null };
+
+// Promise của lần lưu form tài khoản gần nhất (null nếu chưa lưu lần nào)
+let accountSubmitPromise = null;
+
+/** Tìm cấu hình form theo id */
+const getGuardedForm = formId => GUARDED_FORMS.find(f => f.formId === formId);
+
+/**
+ * Form có thay đổi chưa lưu không
+ * @param {string} formId
+ * @returns {boolean}
+ */
+function isFormDirty(formId) {
+  const entry = getGuardedForm(formId);
+  if (!entry || entry.baseline === null) return false;
+  return entry.read() !== entry.baseline;
 }
 
 /**
- * Đánh dấu form đang khớp với dữ liệu đã lưu (sau khi nạp hoặc lưu thành công)
+ * Ghi mốc "đã lưu" cho form (sau khi nạp dữ liệu hoặc lưu thành công)
+ * @param {string} formId
  */
+function markFormSaved(formId) {
+  const entry = getGuardedForm(formId);
+  if (!entry) return;
+  entry.baseline = entry.read();
+  updateSavebar();
+}
+
+/** Giữ tên hàm cũ cho form tài khoản */
 function markAccountFormSaved() {
-  savebarState.baseline = readAccountFormState();
-  savebarState.dirty = false;
-  updateAccountSavebar();
+  markFormSaved('form-account-info');
+}
+
+/** Mục đang hiển thị trong trang Hồ sơ */
+const getVisibleSection = () => document.querySelector('.pcb-profile .pcb-section:not([hidden])');
+
+/**
+ * Các form còn thay đổi chưa lưu trong một mục (hoặc mọi mục nếu không truyền)
+ * @param {string} [sectionId]
+ * @returns {Array<Object>}
+ */
+function getDirtyForms(sectionId) {
+  return GUARDED_FORMS.filter(f => (!sectionId || f.sectionId === sectionId) && isFormDirty(f.formId));
+}
+
+/** Giao diện điện thoại / máy tính bảng cảm ứng */
+const isTouchLayout = () => window.matchMedia('(max-width: 720px), (pointer: coarse)').matches;
+
+/**
+ * Form mà thanh lưu nổi đang phục vụ: ưu tiên form vừa sửa gần nhất trong mục đang mở
+ * @returns {Object|null}
+ */
+function getSavebarTarget() {
+  const section = getVisibleSection();
+  if (!section) return null;
+  const dirty = getDirtyForms(section.id);
+  if (!dirty.length) return null;
+  return dirty.find(f => f.formId === savebarState.lastEditedId) || dirty[0];
+}
+
+/**
+ * Đẩy thanh lưu nổi lên sát phía trên bàn phím ảo (iOS không tự thu nhỏ vùng hiển thị khi mở bàn phím)
+ */
+function positionSavebar() {
+  const bar = document.getElementById('account-savebar');
+  if (!bar) return;
+  const vv = window.visualViewport;
+  const keyboard = vv && isTouchLayout() ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+  bar.style.setProperty('--pcb-savebar-keyboard', `${Math.round(keyboard)}px`);
+}
+
+/**
+ * Ô đang nhập bị thanh lưu nổi che: cuộn trang lên một chút
+ */
+function keepFocusedFieldVisible() {
+  const bar = document.getElementById('account-savebar');
+  const field = document.activeElement;
+  if (!bar || bar.hidden || !field || !field.closest('.pcb-form')) return;
+  const barTop = bar.getBoundingClientRect().top;
+  const fieldBottom = field.getBoundingClientRect().bottom;
+  if (fieldBottom > barTop - 8) window.scrollBy({ top: fieldBottom - barTop + 16, behavior: 'smooth' });
 }
 
 /**
  * Hiện / ẩn thanh lưu nổi theo trạng thái hiện tại
  */
-function updateAccountSavebar() {
+function updateSavebar() {
   const bar = document.getElementById('account-savebar');
-  const section = document.getElementById('section-account');
-  if (!bar || !section) return;
-  const show = savebarState.dirty && !savebarState.saveVisible && !savebarState.typing && !section.hidden;
+  if (!bar) return;
+  const target = getSavebarTarget();
+  // Điện thoại: hiện ngay khi có thay đổi; máy tính: chỉ khi nút lưu của form đang khuất
+  const show = Boolean(target) && (isTouchLayout() || savebarState.saveVisible[target.formId] === false);
+  if (target) {
+    bar.dataset.form = target.formId;
+    const label = bar.querySelector('.pcb-savebar__label');
+    if (label) label.textContent = target.barLabel;
+  }
   if (show === !bar.hidden) return;
   if (show) {
+    positionSavebar();
     bar.hidden = false;
-    // Đợi một khung hình để hiệu ứng trượt lên chạy được
-    requestAnimationFrame(() => bar.classList.add('pcb-savebar--visible'));
+    // Đợi một khung hình để hiệu ứng trượt lên chạy được, rồi kiểm tra ô đang nhập có bị che không
+    requestAnimationFrame(() => {
+      bar.classList.add('pcb-savebar--visible');
+      setTimeout(keepFocusedFieldVisible, 220);
+    });
   } else {
     bar.classList.remove('pcb-savebar--visible');
     bar.hidden = true;
   }
 }
 
-// Promise của lần lưu form tài khoản gần nhất (null nếu chưa lưu lần nào)
-let accountSubmitPromise = null;
+/** Giữ tên hàm cũ */
+function updateAccountSavebar() {
+  updateSavebar();
+}
 
 /**
- * Hỏi người dùng muốn lưu thay đổi trước khi rời đi không
+ * Hỏi người dùng muốn lưu các thay đổi trước khi rời đi không
+ * @param {Array<Object>} dirtyForms - Các form còn thay đổi chưa lưu
  * @returns {Promise<boolean>} true nếu được phép rời đi (đã lưu thành công hoặc chọn không lưu)
  */
-async function confirmLeaveAccountForm() {
+async function confirmLeaveDirtyForms(dirtyForms) {
+  const names = dirtyForms.map(f => f.name).join(', ');
   const choice = await showChoice({
     title: 'Lưu thay đổi trước khi rời đi?',
-    message: 'Bạn có thay đổi trong Thông tin tài khoản chưa được lưu.',
+    message: `Bạn có thay đổi chưa được lưu trong: ${names}.`,
     confirmText: 'Lưu thay đổi',
     extraText: 'Không lưu',
     cancelText: 'Ở lại'
   });
   if (choice === 'cancel') return false;
   if (choice === 'extra') {
-    // Bỏ thay đổi: trả form về dữ liệu đã lưu
-    syncUserInfoUI({ force: true });
+    dirtyForms.forEach(f => f.undo());
+    updateSavebar();
     return true;
   }
-  const form = document.getElementById('form-account-info');
-  accountSubmitPromise = null;
-  form?.requestSubmit();
-  if (accountSubmitPromise) await accountSubmitPromise;
-  // Lưu không thành công (lỗi nhập liệu / người dùng hủy xác nhận): ở lại để sửa
-  return !savebarState.dirty;
+  for (const f of dirtyForms) {
+    await f.submit();
+    // Lưu không thành công (lỗi nhập liệu / người dùng hủy xác nhận): ở lại để sửa
+    if (isFormDirty(f.formId)) return false;
+  }
+  return true;
 }
 
 /**
- * Chặn rời trang khi form tài khoản còn thay đổi chưa lưu:
+ * Chặn rời trang khi các form cài đặt còn thay đổi chưa lưu:
  * - Bấm liên kết sang trang khác / chuyển mục trong Hồ sơ: hộp thoại của web (Lưu / Không lưu / Ở lại)
  * - Tải lại hoặc đóng tab: trình duyệt chỉ cho phép hiện hộp thoại xác nhận mặc định của nó
  */
@@ -799,25 +955,29 @@ function initAccountLeaveGuard() {
   let bypass = false;
 
   window.addEventListener('beforeunload', e => {
-    if (!savebarState.dirty || bypass) return;
+    if (bypass || !getDirtyForms().length) return;
     e.preventDefault();
     e.returnValue = '';
   });
 
   document.addEventListener('click', async e => {
-    if (bypass || !savebarState.dirty) return;
-    const section = document.getElementById('section-account');
-    if (!section || section.hidden) return;
+    if (bypass) return;
+    const section = getVisibleSection();
+    if (!section) return;
+    const dirtyForms = getDirtyForms(section.id);
+    if (!dirtyForms.length) return;
     const link = e.target.closest('a[href]');
     const navBtn = e.target.closest('[data-section]');
+    const href = link?.getAttribute('href') || '';
     const leavingByLink = link && !section.contains(link) && link.target !== '_blank'
-      && !link.hasAttribute('download') && !link.getAttribute('href').startsWith('javascript');
-    const leavingBySection = navBtn && navBtn.dataset.section !== 'section-account';
+      && !link.hasAttribute('download') && href !== '#' && !href.startsWith('javascript')
+      && !href.startsWith('tel:') && !href.startsWith('mailto:');
+    const leavingBySection = navBtn && navBtn.dataset.section !== section.id;
     if (!leavingByLink && !leavingBySection) return;
     // Chặn điều hướng cho tới khi người dùng chọn
     e.preventDefault();
     e.stopImmediatePropagation();
-    if (!(await confirmLeaveAccountForm())) return;
+    if (!(await confirmLeaveDirtyForms(dirtyForms))) return;
     bypass = true;
     if (leavingByLink) {
       window.location.href = link.href;
@@ -832,59 +992,83 @@ function initAccountLeaveGuard() {
  * Gắn các sự kiện cho thanh lưu nổi (gọi một lần khi tải trang)
  */
 function initAccountSavebar() {
-  const form = document.getElementById('form-account-info');
-  const realSave = document.getElementById('btn-save-account');
-  if (!form || !realSave) return;
+  const bar = document.getElementById('account-savebar');
+  if (!bar) return;
 
-  // Mỗi lần người dùng sửa một ô: so với mốc đã lưu
-  const onEdit = () => {
-    savebarState.dirty = readAccountFormState() !== savebarState.baseline;
-    updateAccountSavebar();
-  };
-  form.addEventListener('input', onEdit);
-  form.addEventListener('change', onEdit);
+  GUARDED_FORMS.forEach(entry => {
+    const form = document.getElementById(entry.formId);
+    if (!form) return;
+    if (entry.baseline === null) entry.baseline = entry.read();
+    // Mỗi lần người dùng sửa một ô: so với mốc đã lưu
+    const onEdit = () => {
+      savebarState.lastEditedId = entry.formId;
+      updateSavebar();
+    };
+    form.addEventListener('input', onEdit);
+    form.addEventListener('change', onEdit);
+    form.addEventListener('reset', () => setTimeout(updateSavebar, 0));
 
-  // Nút lưu thật đang nằm trong màn hình thì không cần thanh nổi
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(entries => {
-      savebarState.saveVisible = entries[0].isIntersecting;
-      updateAccountSavebar();
-    }, { threshold: 0.6 }).observe(realSave);
-  }
-
-  // Điện thoại / máy tính bảng: đang gõ vào ô chữ thì tạm ẩn thanh nổi để không che ô nhập
-  const isTouchLayout = () => window.matchMedia('(max-width: 720px), (pointer: coarse)').matches;
-  const isTextField = el => el && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
-    || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'button', 'submit'].includes(el.type)));
-  form.addEventListener('focusin', e => {
-    if (isTouchLayout() && isTextField(e.target)) {
-      savebarState.typing = true;
-      updateAccountSavebar();
+    // Nút lưu thật đang nằm trong màn hình thì máy tính không cần thanh nổi
+    const realSave = document.getElementById(entry.saveBtnId);
+    if (realSave && 'IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        savebarState.saveVisible[entry.formId] = entries[0].isIntersecting;
+        updateSavebar();
+      }, { threshold: 0.6 }).observe(realSave);
     }
   });
-  form.addEventListener('focusout', () => {
-    // Chờ ô tiếp theo nhận focus (chuyển ô liên tục thì vẫn giữ ẩn)
-    setTimeout(() => {
-      savebarState.typing = isTouchLayout() && isTextField(document.activeElement) && form.contains(document.activeElement);
-      updateAccountSavebar();
-    }, 120);
-  });
 
-  // Hoàn tác: đổ lại dữ liệu đã lưu, xóa thông báo lỗi
+  // Nút Lưu / Hoàn tác trên thanh nổi áp dụng cho form đang được phục vụ
+  document.getElementById('account-savebar-save')?.addEventListener('click', async () => {
+    const entry = getGuardedForm(bar.dataset.form);
+    if (!entry) return;
+    await entry.submit();
+    updateSavebar();
+  });
   document.getElementById('account-savebar-undo')?.addEventListener('click', () => {
-    form.querySelectorAll('.pcb-form__error').forEach(el => { el.textContent = ''; });
-    form.querySelectorAll('.pcb-input--error').forEach(el => el.classList.remove('pcb-input--error'));
-    const birthInput = document.getElementById('input-birthdate');
-    if (birthInput) birthInput.hidden = true;
-    const birthHint = document.getElementById('birthdate-hint');
-    if (birthHint) birthHint.hidden = true;
-    syncUserInfoUI({ force: true });
+    const entry = getGuardedForm(bar.dataset.form);
+    if (!entry) return;
+    entry.undo();
+    updateSavebar();
     showToast('Đã hoàn tác các thay đổi chưa lưu.');
   });
+  // Bấm nút trên thanh nổi không làm ô đang nhập mất focus (bàn phím không bị đóng giữa chừng)
+  bar.addEventListener('pointerdown', e => {
+    if (e.target.closest('#account-savebar-undo')) e.preventDefault();
+  });
 
-  // Chuyển sang mục khác trong trang Hồ sơ: ẩn thanh nổi
-  window.addEventListener('hashchange', () => setTimeout(updateAccountSavebar, 0));
-  document.querySelectorAll('[data-section]').forEach(btn => btn.addEventListener('click', () => setTimeout(updateAccountSavebar, 0)));
+  // Bàn phím ảo mở / đóng, xoay màn hình: đặt lại vị trí thanh nổi và giữ ô đang nhập trong tầm nhìn
+  if (window.visualViewport) {
+    const onViewport = () => {
+      positionSavebar();
+      if (!bar.hidden) keepFocusedFieldVisible();
+    };
+    window.visualViewport.addEventListener('resize', onViewport);
+    window.visualViewport.addEventListener('scroll', positionSavebar);
+  }
+  document.addEventListener('focusin', () => {
+    if (!bar.hidden) setTimeout(keepFocusedFieldVisible, 300);
+  });
+  window.matchMedia('(max-width: 720px), (pointer: coarse)').addEventListener('change', updateSavebar);
+
+  // Chuyển sang mục khác trong trang Hồ sơ: cập nhật thanh nổi theo mục mới
+  window.addEventListener('hashchange', () => setTimeout(updateSavebar, 0));
+  document.querySelectorAll('[data-section]').forEach(btn => btn.addEventListener('click', () => setTimeout(updateSavebar, 0)));
+}
+
+/**
+ * Đổ cài đặt quyền riêng tư đã lưu vào form
+ * @param {Object} user
+ */
+function fillPrivacyForm(user) {
+  const privacyForm = document.getElementById('form-privacy');
+  if (!privacyForm || !user) return;
+  const privacy = getPrivacy(user);
+  privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
+    input.checked = Boolean(privacy[input.name]);
+    updateSwitchText(input);
+  });
+  markFormSaved('form-privacy');
 }
 
 /**
@@ -921,7 +1105,7 @@ function syncUserInfoUI(options = {}) {
 
   // Form tài khoản: chỉ đổ lại dữ liệu khi người dùng chưa sửa dở (tránh bot đặt giá / cập nhật ví
   // làm mất phần đang nhập); Hoàn tác và Lưu thành công thì luôn đổ lại
-  if (options.force || !savebarState.dirty) {
+  if (options.force || !isFormDirty('form-account-info')) {
     // Form Account
     const lastNameInput = document.getElementById('input-lastname');
     const givenNameInput = document.getElementById('input-givenname');
@@ -967,15 +1151,8 @@ function syncUserInfoUI(options = {}) {
     markAccountFormSaved();
   }
 
-  // Quyền riêng tư hồ sơ công khai
-  const privacyForm = document.getElementById('form-privacy');
-  if (privacyForm) {
-    const privacy = getPrivacy(user);
-    privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
-      input.checked = Boolean(privacy[input.name]);
-      updateSwitchText(input);
-    });
-  }
+  // Quyền riêng tư hồ sơ công khai: không ghi đè khi người dùng đang đổi dở công tắc
+  if (options.force || !isFormDirty('form-privacy')) fillPrivacyForm(user);
 }
 
 // Trạng thái hiển thị đầy đủ ngày sinh (bấm biểu tượng con mắt)
@@ -2351,33 +2528,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('pageshow', () => {
     if (privacyForm) syncUserInfoUI();
   });
-  // Đánh dấu có thay đổi quyền riêng tư chưa lưu
-  let privacyDirty = false;
   if (privacyForm) {
+    // Công tắc đổi trạng thái: cập nhật chữ Công khai / Riêng tư (thanh lưu nổi tự theo dõi thay đổi)
     privacyForm.addEventListener('change', (e) => {
-      if (e.target.matches('.pcb-switch__input')) {
-        updateSwitchText(e.target);
-        privacyDirty = true;
-      }
+      if (e.target.matches('.pcb-switch__input')) updateSwitchText(e.target);
     });
-    // Bấm "Xem hồ sơ công khai" khi còn thay đổi chưa lưu: hỏi lưu trước
-    const publicLink = document.getElementById('sidebar-public-link');
-    if (publicLink) {
-      publicLink.addEventListener('click', async (e) => {
-        if (!privacyDirty) return;
-        e.preventDefault();
-        const save = await showConfirm({
-          title: 'Chưa lưu cài đặt quyền riêng tư',
-          message: 'Bạn vừa thay đổi quyền riêng tư nhưng chưa lưu. Lưu trước khi xem hồ sơ công khai?',
-          confirmText: 'Lưu và xem',
-          cancelText: 'Bỏ thay đổi'
-        });
-        if (save) privacyForm.requestSubmit();
-        else syncUserInfoUI();
-        privacyDirty = false;
-        window.location.href = publicLink.href;
-      });
-    }
     privacyForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const user = getCurrentUser();
@@ -2385,7 +2540,7 @@ document.addEventListener('DOMContentLoaded', () => {
       privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => { privacy[input.name] = input.checked; });
       user.privacy = privacy;
       saveCurrentUser(user);
-      privacyDirty = false;
+      markFormSaved('form-privacy');
       showToast('Đã lưu cài đặt quyền riêng tư hồ sơ công khai!');
     });
   }
@@ -2432,6 +2587,7 @@ document.addEventListener('DOMContentLoaded', () => {
       delete updated.password;
       saveCurrentUser(updated);
       formPass.reset();
+      updateSavebar();
       showToast('Đổi mật khẩu tài khoản thành công!');
     });
   }

@@ -2845,7 +2845,7 @@
 }
 
 /* ==========================================================================
-   THANH LƯU NỔI (khi có thay đổi chưa lưu và nút lưu đang khuất khỏi màn hình)
+   THANH LƯU NỔI (máy tính: khi nút lưu của form đang khuất; điện thoại: ngay khi có thay đổi chưa lưu)
    ========================================================================== */
 .pcb-savebar {
   position: fixed;
@@ -2940,7 +2940,8 @@
 @media (max-width: 720px) {
   .pcb-savebar {
     right: 76px;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    /* --pcb-savebar-keyboard: chiều cao bàn phím ảo (JS đo bằng visualViewport) để thanh nằm ngay trên bàn phím */
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px) + var(--pcb-savebar-keyboard, 0px));
     left: auto;
     width: auto;
     max-width: calc(100vw - 88px);

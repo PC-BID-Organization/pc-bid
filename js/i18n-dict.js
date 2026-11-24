@@ -580,6 +580,8 @@ export const PHRASES = [
   ['Không lưu', 'Do not save', '保存しない'],
   ['Ở lại', 'Stay', 'このページに残る'],
   ['Có thay đổi chưa lưu', 'Unsaved changes', '未保存の変更があります'],
+  ['Mật khẩu mới chưa lưu', 'New password not saved', '新しいパスワードが未保存です'],
+  ['Quyền riêng tư chưa lưu', 'Privacy settings not saved', 'プライバシー設定が未保存です'],
   ['Thay đổi chưa lưu', 'Unsaved changes', '未保存の変更'],
   ['Hoàn tác', 'Undo', '元に戻す'],
   ['Đã hoàn tác các thay đổi chưa lưu.', 'Unsaved changes were discarded.', '未保存の変更を元に戻しました。'],
@@ -1002,6 +1004,10 @@ export const PHRASES = [
  * ($1, $2... là các nhóm bắt được trong câu gốc)
  */
 export const PATTERNS = [
+  // Hộp thoại hỏi lưu khi rời đi: danh sách các form còn thay đổi chưa lưu
+  [/^Bạn có thay đổi chưa được lưu trong: (.+)\.$/,
+    (_, names) => `You have unsaved changes in: ${names.replace('Thông tin tài khoản', 'Account information').replace('Đổi mật khẩu', 'Change password').replace('Quyền riêng tư hồ sơ công khai', 'Public profile privacy')}.`,
+    (_, names) => `未保存の変更があります: ${names.replace('Thông tin tài khoản', 'アカウント情報').replace('Đổi mật khẩu', 'パスワード変更').replace('Quyền riêng tư hồ sơ công khai', '公開プロフィールのプライバシー').replace(/, /g, '、')}。`],
   [/^(\d+) phút$/, '$1m', '$1分'],
   [/^(\d+) giờ$/, '$1h', '$1時間'],
   [/^(\d+) ngày$/, '$1d', '$1日'],
