@@ -4,11 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#c9450a">
   <meta name="description"
     content="PCBid - Quản lý phiên đấu giá của tôi, theo dõi các sản phẩm đang đặt giá, linh kiện tự đăng bán và danh sách quan tâm trên sàn đấu giá linh kiện PC cũ.">
   <title>Quản Lý Đấu Giá & Hồ Sơ Cá Nhân | PCBid</title>
 
-  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <!-- Phông chữ từ Google Fonts: Be Vietnam Pro & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -64,7 +71,7 @@
                 <!-- Avatar mặc định: chữ cái đầu của tên, JS cập nhật theo tài khoản đang đăng nhập -->
                 <span class="pcb-user-card__avatar-initial" id="sidebar-user-avatar" aria-hidden="true">?</span>
               </div>
-              <span class="pcb-user-card__verified-badge" title="Tài khoản đã xác thực">
+              <span class="pcb-user-card__verified-badge" id="sidebar-verified-badge" title="Tài khoản đã xác thực">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
@@ -85,12 +92,14 @@
             <p class="pcb-user-card__uid" id="sidebar-user-uid">UID: #PCB-00000000</p>
             <a class="pcb-user-card__public-link" id="sidebar-public-link" href="profile.html">Xem hồ sơ công khai →</a>
 
-            <div class="pcb-user-card__tag">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <!-- Trạng thái xác thực: JS cập nhật theo email, số điện thoại và sổ địa chỉ của tài khoản -->
+            <div class="pcb-user-card__tag" id="sidebar-verified-tag">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              Tài khoản đã xác thực
+              <span id="sidebar-verified-text">Tài khoản đã xác thực</span>
             </div>
+            <p class="pcb-user-card__verify-hint" id="sidebar-verify-hint" hidden></p>
 
             <!-- Khung ví ảo mô phỏng (Virtual Wallet Box) -->
             <div class="pcb-wallet">
@@ -211,7 +220,7 @@
               </svg>
             </div>
             <div class="pcb-trust-note__content">
-              <h4 class="pcb-trust-note__title">Bảo vệ tài khoản 2 lớp</h4>
+              <h3 class="pcb-trust-note__title">Bảo vệ tài khoản 2 lớp</h3>
               <p class="pcb-trust-note__desc">Mọi phiên đặt giá trên PCBid đều yêu cầu xác thực ví và mã OTP an toàn.</p>
             </div>
           </div>
@@ -333,7 +342,7 @@
               <div class="pcb-auctions-grid" id="grid-participating">
                 <!-- Render động các thẻ đấu giá kèm Badge Dẫn đầu (Xanh) hoặc Bị vượt giá (Đỏ) -->
               </div>
-              <div class="pcb-empty-state" id="empty-participating" style="display: none;">
+              <div class="pcb-empty-state" id="empty-participating" hidden>
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="10" />
@@ -351,7 +360,7 @@
               <div class="pcb-auctions-grid" id="grid-selling">
                 <!-- Render động các linh kiện người bán đăng với Badge Đang diễn ra, Đã bán, Đã kết thúc -->
               </div>
-              <div class="pcb-empty-state" id="empty-selling" style="display: none;">
+              <div class="pcb-empty-state" id="empty-selling" hidden>
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
@@ -369,7 +378,7 @@
               <div class="pcb-auctions-grid" id="grid-watchlist">
                 <!-- Render danh sách sản phẩm user đã bấm quan tâm -->
               </div>
-              <div class="pcb-empty-state" id="empty-watchlist" style="display: none;">
+              <div class="pcb-empty-state" id="empty-watchlist" hidden>
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -386,7 +395,7 @@
               <div class="pcb-orders-list" id="grid-buy-orders">
                 <!-- Render động các đơn hàng bạn đã thắng đấu giá -->
               </div>
-              <div class="pcb-empty-state" id="empty-buy-orders" style="display: none;">
+              <div class="pcb-empty-state" id="empty-buy-orders" hidden>
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -405,7 +414,7 @@
               <div class="pcb-orders-list" id="grid-sell-orders">
                 <!-- Render động các đơn hàng linh kiện bạn đã bán -->
               </div>
-              <div class="pcb-empty-state" id="empty-sell-orders" style="display: none;">
+              <div class="pcb-empty-state" id="empty-sell-orders" hidden>
                 <div class="pcb-empty-state__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -423,7 +432,7 @@
 
           <!-- #################### SECTION 2: THÔNG TIN TÀI KHOẢN (CHUẨN FIGMA) #################### -->
           <!-- ============ SECTION: THÔNG BÁO ĐẤU GIÁ (sinh động từ các phiên đang tham gia) ============ -->
-          <div class="pcb-section" id="section-notifications" style="display: none;">
+          <div class="pcb-section" id="section-notifications" hidden>
             <div class="pcb-section__header">
               <div class="pcb-section__title-group">
                 <div class="pcb-section__indicator"></div>
@@ -442,14 +451,14 @@
               <!-- JS render danh sách thông báo -->
             </ul>
 
-            <div class="pcb-empty-state" id="empty-notifications" style="display: none;">
+            <div class="pcb-empty-state" id="empty-notifications" hidden>
               <h3 class="pcb-empty-state__title">Chưa có thông báo nào</h3>
               <p class="pcb-empty-state__desc">Hãy tham gia đặt giá một phiên đấu giá để nhận thông báo khi có người vượt giá hoặc phiên sắp kết thúc.</p>
               <a href="products.html" class="pcb-btn-primary">Xem các phiên đấu giá</a>
             </div>
           </div>
 
-          <div class="pcb-section" id="section-account" style="display: none;">
+          <div class="pcb-section" id="section-account" hidden>
             <div class="pcb-section__header">
               <div class="pcb-section__title-group">
                 <div class="pcb-section__indicator"></div>
@@ -504,6 +513,24 @@
                 </div>
 
                 <p class="pcb-form__hint pcb-form__group--full pcb-form__name-hint">Họ tên hiển thị kèm UID che bớt trong lịch sử đặt giá (VD: Nguyễn Hùng Phong · #PCB-1Q***2T). Avatar mặc định lấy chữ cái đầu của Tên.</p>
+
+                <!-- Tên đăng nhập: dùng để đăng nhập thay cho email và làm đường dẫn hồ sơ công khai -->
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-username" class="pcb-form__label">
+                    TÊN ĐĂNG NHẬP <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap pcb-username-wrap">
+                    <span class="pcb-input-icon pcb-username-wrap__at" aria-hidden="true">@</span>
+                    <input type="text" id="input-username" name="username" class="pcb-input" maxlength="20"
+                      required autocomplete="username" spellcheck="false" autocapitalize="none"
+                      placeholder="VD: phong.pcbuilder" aria-describedby="hint-input-username">
+                    <span class="pcb-username-wrap__lock" id="username-lock" title="Tài khoản demo không đổi được tên đăng nhập" hidden>
+                      <span class="lucide pcb-icon pcb-icon--lock pcb-icon--s14" aria-hidden="true"></span>
+                    </span>
+                  </div>
+                  <span class="pcb-form__hint" id="hint-input-username">Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.</span>
+                  <span class="pcb-form__error" id="err-input-username" role="alert"></span>
+                </div>
 
                 <!-- Trường Giới tính -->
                 <div class="pcb-form__group">
@@ -627,7 +654,7 @@
                     Đổi mật khẩu
                   </button>
 
-                  <button type="submit" class="pcb-btn-primary">
+                  <button type="submit" class="pcb-btn-primary" id="btn-save-account">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -636,10 +663,12 @@
                 </div>
               </div>
             </form>
+
+            <!-- Thanh lưu nổi: hiện khi có thay đổi chưa lưu mà nút "Lưu thay đổi thông tin" đang nằm ngoài màn hình -->
           </div>
 
           <!-- #################### SECTION: ĐỊA CHỈ NHẬN HÀNG #################### -->
-          <div class="pcb-section" id="section-addresses" style="display: none;">
+          <div class="pcb-section" id="section-addresses" hidden>
             <div class="pcb-section__header">
               <div class="pcb-section__title-group">
                 <div class="pcb-section__indicator"></div>
@@ -663,7 +692,7 @@
           </div>
 
           <!-- #################### SECTION 3: BẢO MẬT & ĐỔI MẬT KHẨU #################### -->
-          <div class="pcb-section" id="section-security" style="display: none;">
+          <div class="pcb-section" id="section-security" hidden>
             <div class="pcb-section__header">
               <div class="pcb-section__title-group">
                 <div class="pcb-section__indicator"></div>
@@ -677,26 +706,26 @@
             </div>
 
             <form id="form-change-password" class="pcb-form">
-              <div class="pcb-form__grid" style="max-width: 580px;">
+              <div class="pcb-form__grid pcb-form__grid--narrow">
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-current-pass" class="pcb-form__label">MẬT KHẨU HIỆN TẠI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-current-pass" class="pcb-input" required placeholder="Nhập mật khẩu hiện tại">
+                  <input type="password" id="input-current-pass" class="pcb-input" autocomplete="current-password" required placeholder="Nhập mật khẩu hiện tại">
                 </div>
 
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-new-pass" class="pcb-form__label">MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-new-pass" class="pcb-input" required placeholder="Tối thiểu 8 ký tự, gồm chữ và số">
+                  <input type="password" id="input-new-pass" class="pcb-input" autocomplete="new-password" required placeholder="Tối thiểu 8 ký tự, gồm chữ và số">
                 </div>
 
                 <div class="pcb-form__group pcb-form__group--full">
                   <label for="input-confirm-pass" class="pcb-form__label">XÁC NHẬN MẬT KHẨU MỚI <span class="pcb-form__required">*</span></label>
-                  <input type="password" id="input-confirm-pass" class="pcb-input" required placeholder="Nhập lại mật khẩu mới">
+                  <input type="password" id="input-confirm-pass" class="pcb-input" autocomplete="new-password" required placeholder="Nhập lại mật khẩu mới">
                 </div>
               </div>
 
-              <div class="pcb-form__actions" style="margin-top: 24px;">
+              <div class="pcb-form__actions pcb-form__actions--spaced">
                 <div></div>
-                <button type="submit" class="pcb-btn-primary">
+                <button type="submit" class="pcb-btn-primary" id="btn-save-password">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -733,13 +762,27 @@
               </ul>
               <div class="pcb-form__actions">
                 <div></div>
-                <button type="submit" class="pcb-btn-primary">Lưu cài đặt quyền riêng tư</button>
+                <button type="submit" class="pcb-btn-primary" id="btn-save-privacy">Lưu cài đặt quyền riêng tư</button>
               </div>
             </form>
           </div>
 
+          <!-- Thanh lưu nổi dùng chung cho các form cài đặt (Thông tin tài khoản, Đổi mật khẩu, Quyền riêng tư) -->
+          <div class="pcb-savebar" id="account-savebar" role="region" aria-label="Thay đổi chưa lưu" hidden>
+            <span class="pcb-savebar__text">
+              <span class="pcb-savebar__dot" aria-hidden="true"></span>
+              <span class="pcb-savebar__label">Có thay đổi chưa lưu</span>
+            </span>
+            <span class="pcb-savebar__actions">
+              <button type="button" class="pcb-savebar__undo" id="account-savebar-undo">Hoàn tác</button>
+              <button type="button" class="pcb-savebar__save" id="account-savebar-save">
+                <span class="lucide pcb-icon pcb-icon--check pcb-icon--s14" aria-hidden="true"></span> Lưu thay đổi
+              </button>
+            </span>
+          </div>
+
           <!-- #################### SECTION: HỒ SƠ CÔNG KHAI CỦA NGƯỜI DÙNG (profile.html?user=...) #################### -->
-          <div class="pcb-section pcb-public" id="section-public" style="display: none;">
+          <div class="pcb-section pcb-public" id="section-public" hidden>
             <div class="pcb-public__head">
               <div class="pcb-public__avatar" id="public-avatar" aria-hidden="true">?</div>
               <div class="pcb-public__meta">
@@ -796,7 +839,7 @@
     <div class="pcb-modal__card">
       <div class="pcb-modal__header">
         <div class="pcb-modal__title-group">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9450a" stroke-width="2">
             <rect x="2" y="4" width="20" height="16" rx="2" />
             <line x1="2" y1="10" x2="22" y2="10" />
           </svg>
@@ -823,10 +866,10 @@
           <button type="button" class="pcb-preset-btn" data-amount="50000000">+50.000.000 đ</button>
         </div>
 
-        <div class="pcb-input-icon-wrap" style="margin-top: 14px;">
+        <div class="pcb-input-icon-wrap pcb-input-icon-wrap--deposit">
           <input type="number" id="deposit-amount-input" class="pcb-input" value="10000000" min="500000" step="500000"
             placeholder="Hoặc tự nhập số tiền...">
-          <span style="position: absolute; right: 14px; top: 12px; font-weight: 700; color: #565E74;">VND</span>
+          <span class="pcb-input-icon-wrap__unit" aria-hidden="true">VND</span>
         </div>
       </div>
 
@@ -848,7 +891,7 @@
     <div class="pcb-modal__card">
       <div class="pcb-modal__header">
         <div class="pcb-modal__title-group">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9450a" stroke-width="2">
             <path d="M14 2l6 6m-2 2l-6-6M3 21l6-6m2 2l-6 6" />
             <path d="M10 6l8 8-4 4-8-8 4-4z" />
           </svg>
@@ -908,6 +951,8 @@
   <div class="pcb-toast" id="pcb-toast" aria-live="polite">
     <div class="pcb-toast__icon" id="pcb-toast-icon">✓</div>
     <div class="pcb-toast__message" id="pcb-toast-message">Cập nhật thành công!</div>
+    <!-- Nút thao tác đi kèm thông báo (VD: Hoàn tác bỏ theo dõi), chỉ hiện khi cần -->
+    <button type="button" class="pcb-toast__action" id="pcb-toast-action" hidden>Hoàn tác</button>
   </div>
 
   <!-- ==================== SCRIPTS ==================== -->

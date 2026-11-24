@@ -10,7 +10,7 @@ import { getAuctionEndTimestamp, isAuctionClosed } from '../../js/auction-time.j
 // Đơn hàng sau đấu giá để đếm số việc cần xử lý trên icon Quản lý đấu giá
 import { getOrdersForUser, orderNeedsAction } from '../../js/settlement.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
-import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
+import { USER_LIST_KEYS, readLoggedInUser } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 // Hộp thoại xác nhận dùng chung
@@ -21,6 +21,10 @@ import { icon, NOTIFY_ICON_NAMES } from '../../js/icons.js';
 import { LANGUAGES, getLanguage, setLanguage } from '../../js/i18n.js';
 // Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
+// Danh sách theo dõi lưu theo tài khoản (đếm số trên icon bookmark)
+import { getWatchlist } from '../../js/watchlist.js';
+// Ô chọn tùy biến thay cho hộp chọn danh mục mặc định của trình duyệt
+import { enhanceSelect } from '../../js/custom-select.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -361,6 +365,11 @@ function initCategorySelectSync() {
   const label = document.querySelector('.header__search-category-text');
   if (!select || !label) return;
 
+  // Danh sách danh mục xổ xuống kiểu PCBid (giống nhau trên máy tính và điện thoại);
+  // nhãn chữ và mũi tên cũ được ẩn vì ô chọn tùy biến đã có sẵn
+  enhanceSelect(select, { wrapClass: 'header__category-select' });
+  select.closest('.header__search-category')?.classList.add('header__search-category--enhanced');
+
   select.addEventListener('change', () => {
     const selectedOption = select.options[select.selectedIndex];
     label.textContent = selectedOption.text;
@@ -458,19 +467,29 @@ function initMobileNavToggle() {
 // 4 tài khoản demo lấy từ module dùng chung js/accounts.js
 const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
+/**
+ * Số phiên trong danh sách theo dõi của tài khoản đang đăng nhập (icon bookmark trên Header)
+ */
+function refreshWatchlistBadge() {
+  const badge = document.getElementById('header-watchlist-badge');
+  if (!badge) return;
+  try {
+    badge.textContent = getWatchlist().length;
+  } catch {
+    badge.textContent = '0';
+  }
+}
+
 function initHeaderUserStatus() {
   // Cập nhật số lượng Watchlist từ LocalStorage
-  const badge = document.getElementById('header-watchlist-badge');
-  if (badge) {
-    try {
-      const loggedIn = readLoggedInUser();
-      const watchlist = loggedIn
-        ? JSON.parse(localStorage.getItem(userStorageKey(USER_LIST_KEYS.WATCHLIST, loggedIn)) || '[]')
-        : [];
-      badge.textContent = watchlist.length;
-    } catch {
-      badge.textContent = '0';
-    }
+  refreshWatchlistBadge();
+  // Bấm bookmark ở trang bất kỳ (hoặc ở tab khác): cập nhật số đếm ngay
+  if (!window.__pcbidWatchBadgeBound) {
+    window.__pcbidWatchBadgeBound = true;
+    window.addEventListener('pcbid:watchlist-updated', refreshWatchlistBadge);
+    window.addEventListener('storage', e => {
+      if (!e.key || e.key.startsWith(USER_LIST_KEYS.WATCHLIST)) refreshWatchlistBadge();
+    });
   }
 
   // Số thông báo chưa đọc của tài khoản đang đăng nhập
@@ -506,19 +525,19 @@ function initHeaderUserStatus() {
   if (user && user.isLoggedIn !== false) {
     const displayName = user.fullname || user.username || 'Thành viên';
     if (userStatusEl) {
-      userStatusEl.innerHTML = `Xin chào, <strong style="color:#ea580c; font-weight:700;">${escapeHeaderHtml(displayName)}</strong>`;
-      userStatusEl.style.display = 'inline';
+      userStatusEl.innerHTML = `Xin chào, <strong class="header__top-user-name">${escapeHeaderHtml(displayName)}</strong>`;
+      userStatusEl.hidden = false;
     }
     if (topAuthDivider) {
-      topAuthDivider.style.display = 'inline';
+      topAuthDivider.hidden = false;
     }
   } else {
     if (userStatusEl) {
       userStatusEl.innerHTML = '';
-      userStatusEl.style.display = 'none';
+      userStatusEl.hidden = true;
     }
     if (topAuthDivider) {
-      topAuthDivider.style.display = 'none';
+      topAuthDivider.hidden = true;
     }
   }
 
@@ -651,8 +670,8 @@ function initHeaderUserStatus() {
 
     dropdown.innerHTML = `
       <div class="header__dropdown-header">
-        <div style="font-size: 13px; font-weight: 700; color: #0b1c30; margin-bottom: 3px;">Chào mừng đến với PCBid!</div>
-        <div style="font-size: 11px; color: #64748b; line-height: 1.4;">Đăng nhập để tham gia đấu giá linh kiện và quản lý tài khoản.</div>
+        <div class="header__dropdown-welcome">Chào mừng đến với PCBid!</div>
+        <div class="header__dropdown-welcome-sub">Đăng nhập để tham gia đấu giá linh kiện và quản lý tài khoản.</div>
       </div>
 
       <div class="header__dropdown-actions">
@@ -678,14 +697,14 @@ function initHeaderUserStatus() {
       <div class="header__dropdown-divider"></div>
 
       <div>
-        <div style="font-size: 11px; font-weight: 700; color: #065f46; margin-bottom: 6px;">
+        <div class="header__dropdown-quick-title">
           ${icon('zap', { size: 13 })} Đăng nhập nhanh tài khoản Demo:
         </div>
-        <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div class="header__dropdown-quick-list">
           ${SAMPLE_ACCOUNTS.map(acc => `
           <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
-            <span style="font-weight: 600;">${icon('user', { size: 13 })} ${escapeHeaderHtml(acc.fullname)}</span>
-            <span style="font-size: 11px; color: #64748b;">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
+            <span class="header__dropdown-quick-name">${icon('user', { size: 13 })} ${escapeHeaderHtml(acc.fullname)}</span>
+            <span class="header__dropdown-quick-role">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
           </button>`).join('')}
         </div>
       </div>

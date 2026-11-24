@@ -42,11 +42,11 @@
 }
 
 .pcb-breadcrumb__link:hover {
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-breadcrumb__separator {
-  color: var(--pcb-text-faint, #94a3b8);
+  color: var(--pcb-text-faint, #64748b);
   font-size: 11px;
 }
 
@@ -169,6 +169,28 @@
   box-shadow: var(--pcb-shadow-card, 0 1px 3px rgba(15, 23, 42, 0.06));
   position: sticky;
   top: 80px;
+  /* Thanh cuộn riêng: bộ lọc dài hơn màn hình thì cuộn bên trong khung,
+     cuộn tới cuối không kéo theo cả trang (overscroll-behavior: contain) */
+  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-medium, #cbd5e1) transparent;
+}
+
+/* Thanh cuộn mảnh cho trình duyệt nhân Chromium / Safari */
+.pcb-filter::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pcb-filter::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-medium, #cbd5e1);
+  border-radius: 999px;
+}
+
+.pcb-filter::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .pcb-filter__header {
@@ -191,10 +213,24 @@
   margin: 0;
 }
 
+/* Nhóm nút bên phải tiêu đề bộ lọc: Thiết lập lại + Đóng */
+.pcb-filter__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Nút đóng và chân ngăn trượt chỉ dùng trên điện thoại / máy tính bảng */
+.pcb-filter__close-btn,
+.pcb-filter__footer,
+.pcb-filter-backdrop {
+  display: none;
+}
+
 .pcb-filter__reset-btn {
   background: transparent;
   border: none;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -257,7 +293,7 @@
 }
 
 .pcb-filter__checkbox-label:hover {
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-filter__checkbox {
@@ -277,8 +313,8 @@
 }
 
 .pcb-filter__checkbox:checked {
-  background-color: var(--pcb-primary, #ea580c);
-  border-color: var(--pcb-primary, #ea580c);
+  background-color: var(--pcb-primary, #c9450a);
+  border-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-filter__checkbox:checked::before {
@@ -307,14 +343,14 @@
 }
 
 .pcb-filter__radio:checked {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-filter__radio:checked::before {
   content: "";
   width: 9px;
   height: 9px;
-  background-color: var(--pcb-primary, #ea580c);
+  background-color: var(--pcb-primary, #c9450a);
   border-radius: 50%;
 }
 
@@ -324,7 +360,7 @@
 
 .pcb-filter__count {
   font-size: 11px;
-  color: var(--pcb-text-faint, #94a3b8);
+  color: var(--pcb-text-faint, #64748b);
   background: var(--pcb-bg-subtle, #f1f5f9);
   padding: 1px 6px;
   border-radius: 10px;
@@ -351,14 +387,14 @@
 }
 
 .pcb-filter__price-input:focus {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-filter__price-apply {
   width: 100%;
   margin-top: 10px;
   padding: 8px 12px;
-  background: var(--pcb-primary, #ea580c);
+  background: var(--pcb-primary, #c9450a);
   border: none;
   border-radius: var(--pcb-radius-xs, 4px);
   color: #ffffff;
@@ -384,6 +420,9 @@
 
 /* Thanh công cụ sắp xếp & kết quả (Toolbar) */
 .pcb-toolbar {
+  /* Tạo lớp xếp chồng riêng để danh sách "Sắp xếp theo" nổi trên lưới thẻ sản phẩm */
+  position: relative;
+  z-index: 5;
   background: var(--pcb-bg-card, #ffffff);
   border: 1px solid var(--pcb-border-light, #e2e8f0);
   border-radius: var(--pcb-radius-md, 12px);
@@ -404,7 +443,7 @@
 
 .pcb-toolbar__result-count {
   font-weight: 700;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-toolbar__controls {
@@ -436,7 +475,25 @@
 }
 
 .pcb-toolbar__sort-select:focus {
-  border-color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
+}
+
+/* Ô "Sắp xếp theo" sau khi đổi sang ô chọn tùy biến (custom-select.js) */
+.pcb-toolbar__controls .pcb-select {
+  flex: 0 0 240px;
+  width: 240px;
+}
+
+.pcb-toolbar__controls .pcb-select__trigger {
+  min-height: 36px;
+  padding: 6px 10px 6px 12px;
+  font-weight: 500;
+  border-width: 1px;
+}
+
+/* Danh sách xổ xuống nằm trên các thẻ sản phẩm bên dưới */
+.pcb-toolbar__controls .pcb-select__list {
+  z-index: 60;
 }
 
 /* Thẻ chip lọc đang hoạt động (Active Filter Tags) */
@@ -463,7 +520,7 @@
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-filter-chip__remove {
@@ -477,14 +534,14 @@
   background: rgba(234, 88, 12, 0.2);
   border: none;
   padding: 0;
-  color: var(--pcb-primary, #ea580c);
+  color: var(--pcb-primary, #c9450a);
   font-size: 10px;
   line-height: 1;
   transition: all 0.15s ease;
 }
 
 .pcb-filter-chip__remove:hover {
-  background: var(--pcb-primary, #ea580c);
+  background: var(--pcb-primary, #c9450a);
   color: #ffffff;
 }
 
@@ -510,7 +567,7 @@
 .pcb-empty-state__icon {
   width: 56px;
   height: 56px;
-  color: var(--pcb-text-faint, #94a3b8);
+  color: var(--pcb-text-faint, #64748b);
   margin-bottom: 16px;
 }
 
@@ -532,10 +589,89 @@
    -------------------------------------------------------------------------- */
 .pcb-pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 6px;
   margin-top: 16px;
+}
+
+/* Ô nhảy nhanh tới trang bất kỳ */
+.pcb-pagination__jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 12px;
+  font-size: 13px;
+  color: var(--pcb-text-secondary, #475569);
+  border-left: 1px solid var(--pcb-border-light, #e2e8f0);
+}
+
+.pcb-pagination__jump-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pcb-pagination__jump-input {
+  width: 56px;
+  height: 38px;
+  padding: 0 6px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--pcb-text-main, #0f172a);
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--pcb-border-medium, #cbd5e1);
+  border-radius: var(--pcb-radius-sm, 8px);
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Ẩn nút tăng / giảm mặc định của ô số */
+.pcb-pagination__jump-input::-webkit-inner-spin-button,
+.pcb-pagination__jump-input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.pcb-pagination__jump-input:focus {
+  border-color: var(--pcb-primary, #c9450a);
+  box-shadow: 0 0 0 3px rgba(201, 69, 10, 0.15);
+}
+
+.pcb-pagination__jump-total {
+  white-space: nowrap;
+}
+
+.pcb-pagination__jump-btn {
+  height: 38px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background: var(--pcb-primary, #c9450a);
+  border: none;
+  border-radius: var(--pcb-radius-sm, 8px);
+  transition: background-color 0.15s ease;
+}
+
+.pcb-pagination__jump-btn:hover,
+.pcb-pagination__jump-btn:focus-visible {
+  background: var(--pcb-primary-hover, #a93a08);
+}
+
+/* Điện thoại: ô nhảy trang xuống dòng riêng, căn giữa */
+@media (max-width: 640px) {
+  .pcb-pagination__jump {
+    flex-basis: 100%;
+    justify-content: center;
+    margin: 6px 0 0;
+    padding: 0;
+    border-left: none;
+  }
 }
 
 .pcb-pagination__item {
@@ -558,13 +694,13 @@
 }
 
 .pcb-pagination__item:hover:not(.pcb-pagination__item--disabled) {
-  border-color: var(--pcb-primary, #ea580c);
-  color: var(--pcb-primary, #ea580c);
+  border-color: var(--pcb-primary, #c9450a);
+  color: var(--pcb-primary, #c9450a);
 }
 
 .pcb-pagination__item--active {
-  background: var(--pcb-primary, #ea580c);
-  border-color: var(--pcb-primary, #ea580c);
+  background: var(--pcb-primary, #c9450a);
+  border-color: var(--pcb-primary, #c9450a);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
 }
@@ -616,21 +752,116 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Bộ lọc thành ngăn trượt nổi, cách mép màn hình 12px, trượt vào từ bên trái */
   .pcb-filter {
-    display: none; /* Ẩn sidebar mặc định trên tablet/mobile, hiển thị khi bấm nút */
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 320px;
-    height: 100vh;
-    z-index: 1000;
-    border-radius: 0;
+    top: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 2100;
+    display: flex;
+    flex-direction: column;
+    width: min(360px, calc(100vw - 24px));
+    max-height: none;
+    padding: 0 18px;
     overflow-y: auto;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    visibility: hidden;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(11, 28, 48, 0.3);
+    opacity: 0;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  /* Các khối con giữ nguyên chiều cao, phần dư thì cuộn trong ngăn trượt */
+  .pcb-filter > * {
+    flex-shrink: 0;
   }
 
   .pcb-filter--open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s;
+  }
+
+  /* Tiêu đề dính trên cùng khi cuộn trong ngăn trượt, luôn thấy nút đóng */
+  .pcb-filter__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-top: 16px;
+    background: var(--pcb-bg-card, #ffffff);
+  }
+
+  .pcb-filter__close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--pcb-text-main, #0f172a);
+    cursor: pointer;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pcb-filter__close-btn:focus-visible {
+    outline: 3px solid rgba(201, 69, 10, 0.4);
+    outline-offset: 2px;
+  }
+
+  /* Chân ngăn trượt dính dưới cùng: nút "Xem kết quả" */
+  .pcb-filter__footer {
+    position: sticky;
+    bottom: 0;
     display: block;
+    margin-top: auto;
+    padding: 12px 0 16px;
+    background: var(--pcb-bg-card, #ffffff);
+    border-top: 1px solid var(--pcb-border-light, #e2e8f0);
+  }
+
+  .pcb-filter__done-btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    background: var(--pcb-primary, #c9450a);
+    border: none;
+    border-radius: 10px;
+  }
+
+  .pcb-filter__done-count {
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  /* Nền tối phía sau ngăn trượt */
+  .pcb-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2050;
+    display: block;
+    background: rgba(11, 28, 48, 0.5);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .pcb-filter-backdrop--visible {
+    opacity: 1;
+  }
+
+  /* Khóa cuộn trang phía sau khi ngăn trượt đang mở */
+  .pcb-filter-lock,
+  .pcb-filter-lock body {
+    overflow: hidden;
   }
 
   .pcb-filter-toggle-btn {
@@ -678,19 +909,20 @@
   .pcb-catalog__grid {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  /* Sidebar bộ lọc không rộng hơn màn hình điện thoại */
-  .pcb-filter {
-    width: 88vw;
-  }
 }
 
 /* Điện thoại: ô chọn sắp xếp chiếm trọn chiều ngang, không tràn khỏi thanh công cụ */
 @media (max-width: 640px) {
-  .pcb-toolbar__sort-select {
+  .pcb-toolbar__sort-select,
+  .pcb-toolbar__controls .pcb-select {
     flex: 1 1 100%;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
+  }
+
+  .pcb-toolbar__controls .pcb-select__trigger {
+    min-height: 42px;
   }
 }
 
@@ -699,7 +931,7 @@
    ========================================================================== */
 .pcb-card--just-posted {
   position: relative;
-  border-color: var(--pcb-primary, #ea580c) !important;
+  border-color: var(--pcb-primary, #c9450a) !important;
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18), 0 8px 24px rgba(234, 88, 12, 0.12);
 }
 
@@ -711,7 +943,7 @@
   text-align: center;
   letter-spacing: 0.02em;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--pcb-primary, #ea580c), #f97316);
+  background: linear-gradient(135deg, var(--pcb-primary, #c9450a), #f97316);
 }
 
 /* Dải nhãn đẩy ảnh xuống: dời nút theo dõi xuống tương ứng để không đè lên nhãn */
@@ -721,4 +953,28 @@
 
 .pcb-card__just-posted .lucide {
   margin-right: 2px;
+}
+
+/* Dấu gạch nối giữa hai ô khoảng giá */
+.pcb-filter__price-sep {
+  color: #64748b;
+}
+
+/* Nút "Xóa toàn bộ bộ lọc" trong trạng thái không có kết quả */
+.pcb-filter__price-apply--inline {
+  width: auto;
+  padding: 8px 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-filter,
+  .pcb-filter--open,
+  .pcb-filter-backdrop {
+    transition: none;
+  }
+}
+
+/* Nhóm lọc cuối cùng nằm sát chân ngăn trượt: bỏ đường kẻ dưới để không bị hai vạch */
+.pcb-filter__group:has(+ .pcb-filter__footer) {
+  border-bottom: none;
 }

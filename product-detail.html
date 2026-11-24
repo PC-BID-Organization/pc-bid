@@ -4,6 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#c9450a">
   <meta name="description"
     content="PCBid - Chi tiết phiên đấu giá linh kiện máy tính cũ. Xem thông số, đặt giá và theo dõi bảng lịch sử trả giá trực tiếp.">
   <title>Chi Tiết Phiên Đấu Giá | PCBid - Sàn Đấu Giá Linh Kiện PC Cũ</title>
@@ -73,7 +80,7 @@
           <!-- Khung ảnh chính lớn -->
           <div class="pcb-pd__gallery-main">
             <img
-              src=""
+              src="images/placeholder-product.svg"
               alt="Ảnh sản phẩm"
               class="pcb-pd__gallery-main-img"
               id="pcb-pd-main-img"
@@ -81,6 +88,14 @@
             <!-- Gợi ý và mức phóng to khi rê chuột vào ảnh (chỉ hiện trên máy tính có chuột) -->
             <span class="pcb-pd__zoom-hint" aria-hidden="true"><span class="lucide pcb-icon pcb-icon--zoom-in pcb-icon--s14" aria-hidden="true"></span> Rê chuột để phóng to · Lăn chuột để zoom</span>
             <span class="pcb-pd__zoom-level" id="pcb-pd-zoom-level" aria-hidden="true">2.0×</span>
+            <!-- Nút chuyển ảnh trước / sau và bộ đếm vị trí ảnh (ẩn khi chỉ có 1 ảnh) -->
+            <button type="button" class="pcb-pd__gallery-nav pcb-pd__gallery-nav--prev" id="pcb-pd-gallery-prev" aria-label="Ảnh trước" hidden>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="pcb-pd__gallery-nav pcb-pd__gallery-nav--next" id="pcb-pd-gallery-next" aria-label="Ảnh sau" hidden>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <span class="pcb-pd__gallery-counter" id="pcb-pd-gallery-counter" aria-live="polite" hidden>1 / 1</span>
           </div>
 
           <!-- Hàng thumbnail ảnh nhỏ (cuộn xem thêm) -->
@@ -109,6 +124,8 @@
             <div class="pcb-pd__countdown-label">
               <span class="pcb-pd__countdown-icon" aria-hidden="true">&#x23F1;</span>
               Thời gian còn lại
+              <!-- Ghi chú khi phiên đang chờ kiểm định: đồng hồ tạm dừng -->
+              <span class="pcb-pd__countdown-paused" id="pcb-pd-countdown-paused" hidden>· Tạm dừng, bắt đầu tính khi kiểm định xong</span>
             </div>
             <div class="pcb-pd__countdown" id="pcb-pd-countdown" role="timer" aria-live="off">
               <div class="pcb-pd__countdown-unit">
@@ -220,6 +237,9 @@
               <p class="pcb-pd__input-error" id="pcb-pd-bid-error" role="alert" hidden></p>
             </div>
 
+            <!-- Thông báo phiên đang chờ kiểm định: chưa mở đặt giá -->
+            <p class="pcb-pd__inspect-lock" id="pcb-pd-inspect-lock" role="status" hidden></p>
+
             <!-- Nút nhảy giá nhanh -->
             <div class="pcb-pd__quick-jumps" aria-label="Tăng giá nhanh">
               <button type="button" class="pcb-pd__quick-btn" data-amount="100000">+100.000&#x111;</button>
@@ -254,7 +274,7 @@
               <a class="pcb-pd__seller-name" id="pcb-pd-seller-name" href="profile.html">---</a>
               <p class="pcb-pd__seller-uid" id="pcb-pd-seller-uid"></p>
             </div>
-            <div class="pcb-pd__seller-badge" aria-label="Xác thực danh tính">
+            <div class="pcb-pd__seller-badge" id="pcb-pd-seller-badge" title="Người bán đã xác thực danh tính">
               <span class="lucide pcb-icon pcb-icon--circle-check pcb-icon--s13" aria-hidden="true"></span> Đã xác thực
             </div>
             <!-- Nhắn tin hỏi người bán về linh kiện (mở hộp chat nổi) -->
@@ -263,6 +283,27 @@
               Liên hệ người bán
             </button>
           </div>
+
+          <!-- ===== KIỂM ĐỊNH PCBID LAB: trạng thái gọn, xem phiếu kiểm định của phiên ===== -->
+          <section class="pcb-pd__inspection" id="pcb-pd-inspection" aria-labelledby="pcb-pd-inspection-title">
+            <span class="pcb-pd__inspection-icon" aria-hidden="true">
+              <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s18"></span>
+            </span>
+            <div class="pcb-pd__inspection-body">
+              <h2 class="pcb-pd__inspection-title" id="pcb-pd-inspection-title">Kiểm định PCBid Lab</h2>
+              <p class="pcb-pd__inspection-status" id="pcb-pd-inspection-status" aria-live="polite"></p>
+            </div>
+            <div class="pcb-pd__inspection-actions">
+              <!-- Phiên đã đạt: mở phiếu kiểm định riêng của phiên -->
+              <button type="button" class="pcb-pd__inspection-btn" id="pcb-pd-open-cert" hidden>
+                <span class="lucide pcb-icon pcb-icon--receipt pcb-icon--s14" aria-hidden="true"></span> Xem phiếu kiểm định
+              </button>
+              <!-- Công cụ demo: bỏ qua 1 phút chờ để PCBid Lab trả kết quả ngay -->
+              <button type="button" class="pcb-pd__inspect-skip" id="pcb-pd-inspect-skip" hidden>
+                <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Bỏ qua chờ kiểm định (demo)
+              </button>
+            </div>
+          </section>
 
         </div>
         <!-- Kết thúc cột phải -->
@@ -366,6 +407,36 @@
 
   <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
   <div id="app-footer"></div>
+
+  <!-- ===== PHIẾU KIỂM ĐỊNH CỦA PHIÊN (dialog, JS điền dữ liệu theo từng sản phẩm) ===== -->
+  <dialog class="pcb-cert-dialog" id="pcb-cert-dialog" aria-labelledby="pcb-cert-dialog-title">
+    <div class="pcb-cert-dialog__head">
+      <h2 class="pcb-cert-dialog__title" id="pcb-cert-dialog-title">Phiếu kiểm định chất lượng</h2>
+      <button type="button" class="pcb-cert-dialog__close" data-close-cert aria-label="Đóng phiếu kiểm định">
+        <span class="lucide pcb-icon pcb-icon--x pcb-icon--s18" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="pcb-cert-card">
+      <div class="pcb-cert-card__head">
+        <div class="pcb-cert-card__org">
+          <span class="pcb-cert-card__eyebrow">Phiếu kiểm định phần cứng</span>
+          <h3 class="pcb-cert-card__title">Trung tâm kiểm định phần cứng PCBid</h3>
+          <span class="pcb-cert-card__code">Mã chứng chỉ: <strong id="pcb-cert-code">#UIT-QC</strong></span>
+        </div>
+        <div class="pcb-cert-card__stamp" role="img" aria-label="Kết quả: Đạt chuẩn A+">
+          <span class="pcb-cert-card__stamp-top">Đạt chuẩn</span>
+          <span class="pcb-cert-card__stamp-grade" id="pcb-cert-grade">A+</span>
+          <span class="pcb-cert-card__stamp-bottom">PCBid QC</span>
+        </div>
+      </div>
+      <dl class="pcb-cert-list" id="pcb-cert-list"></dl>
+      <div class="pcb-cert-card__foot">
+        <span>Kiểm định viên: <strong id="pcb-cert-inspector">UIT Hardware Lab</strong></span>
+        <span>Ngày cấp: <strong id="pcb-cert-date">Hôm nay</strong></span>
+      </div>
+    </div>
+    <button type="button" class="pcb-cert-dialog__ok" data-close-cert>Đã hiểu</button>
+  </dialog>
 
   <!-- ===== MODAL XÁC NHẬN ĐẶT GIÁ THÀNH CÔNG ===== -->
   <div

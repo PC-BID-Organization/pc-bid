@@ -87,7 +87,7 @@
 }
 
 .footer__link:hover {
-  color: var(--color-primary, #EA580C);
+  color: var(--color-primary, #c9450a);
   transform: translateX(3px);
 }
 
@@ -165,7 +165,7 @@
 .footer__copyright-sub {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(86, 94, 116, 0.8);
+  color: #565e74;
 }
 
 /* Tối ưu hiển thị đa màn hình (Responsive Design) */

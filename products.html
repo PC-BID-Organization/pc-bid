@@ -4,11 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Biểu tượng trang (favicon) trên tab trình duyệt và màn hình chính điện thoại -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#c9450a">
   <meta name="description"
     content="Danh sách các phiên đấu giá linh kiện máy tính cũ tại PCBid - Card màn hình VGA, CPU, RAM, Bo mạch chủ, Nguồn PSU, Ổ cứng SSD đã qua kiểm định chất lượng.">
   <title>Danh sách đấu giá linh kiện PC cũ | PCBid</title>
 
-  <!-- Google Fonts: Be Vietnam Pro & Space Grotesk -->
+  <!-- Phông chữ từ Google Fonts: Be Vietnam Pro & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -81,7 +88,7 @@
       </section>
 
       <!-- Nút mở bộ lọc dành cho thiết bị di động -->
-      <button type="button" class="pcb-filter-toggle-btn" id="filter-toggle-btn">
+      <button type="button" class="pcb-filter-toggle-btn" id="filter-toggle-btn" aria-controls="pcb-filter-sidebar" aria-expanded="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
@@ -95,12 +102,18 @@
         <aside class="pcb-filter" id="pcb-filter-sidebar" aria-label="Bộ lọc tìm kiếm">
           <div class="pcb-filter__header">
             <h2 class="pcb-filter__title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" color="#ea580c">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" color="#c9450a">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
               Bộ lọc linh kiện
             </h2>
-            <button type="button" class="pcb-filter__reset-btn" id="reset-filter-btn">Thiết lập lại</button>
+            <div class="pcb-filter__header-actions">
+              <button type="button" class="pcb-filter__reset-btn" id="reset-filter-btn">Thiết lập lại</button>
+              <!-- Nút đóng bộ lọc (chỉ hiện khi bộ lọc mở dạng ngăn trượt trên điện thoại / máy tính bảng) -->
+              <button type="button" class="pcb-filter__close-btn" id="filter-close-btn" aria-label="Đóng bộ lọc">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
           </div>
 
           <!-- Nhóm 1: Danh mục linh kiện -->
@@ -221,9 +234,9 @@
 
             <!-- Ô nhập giá tự do -->
             <div class="pcb-filter__price-range">
-              <input type="number" class="pcb-filter__price-input" id="price-min" placeholder="Từ ₫" min="0" step="100000">
-              <span style="color:#94a3b8;">-</span>
-              <input type="number" class="pcb-filter__price-input" id="price-max" placeholder="Đến ₫" min="0" step="100000">
+              <input type="number" class="pcb-filter__price-input" id="price-min" placeholder="Từ ₫" min="0" step="100000" aria-label="Giá thấp nhất">
+              <span class="pcb-filter__price-sep" aria-hidden="true">-</span>
+              <input type="number" class="pcb-filter__price-input" id="price-max" placeholder="Đến ₫" min="0" step="100000" aria-label="Giá cao nhất">
             </div>
             <button type="button" class="pcb-filter__price-apply" id="apply-price-btn">Áp dụng giá</button>
           </div>
@@ -281,7 +294,16 @@
               </li>
             </ul>
           </div>
+
+          <!-- Chân ngăn trượt bộ lọc trên điện thoại: xem kết quả và đóng bộ lọc -->
+          <div class="pcb-filter__footer">
+            <button type="button" class="pcb-filter__done-btn" id="filter-done-btn">
+              Xem kết quả <span class="pcb-filter__done-count" id="filter-done-count">(16)</span>
+            </button>
+          </div>
         </aside>
+        <!-- Lớp nền tối phía sau ngăn trượt bộ lọc, bấm vào để đóng -->
+        <div class="pcb-filter-backdrop" id="pcb-filter-backdrop" hidden></div>
 
         <!-- ==================== CỘT PHẢI: NỘI DUNG SẢN PHẨM ==================== -->
         <section class="pcb-catalog__main" aria-label="Danh sách linh kiện đấu giá">
@@ -323,7 +345,7 @@
                ============================================================ -->
           <div class="pcb-catalog__grid" id="catalog-products-grid">
 
-            <!-- Card 1: GPU - ASUS Phoenix GTX 1650 Super -->
+            <!-- Thẻ 1: GPU - ASUS Phoenix GTX 1650 Super -->
             <article class="pcb-card" data-id="2001" data-category="GPU" data-price="2000000" data-bids="6">
               <a href="product-detail.html?id=2001" class="pcb-card__media" aria-label="Xem chi tiết Card màn hình ASUS Phoenix GTX 1650 Super">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -373,7 +395,7 @@
               </div>
             </article>
 
-            <!-- Card 2: GPU - Gigabyte GTX 1660 Super OC -->
+            <!-- Thẻ 2: GPU - Gigabyte GTX 1660 Super OC -->
             <article class="pcb-card" data-id="2002" data-category="GPU" data-price="3400000" data-bids="11">
               <a href="product-detail.html?id=2002" class="pcb-card__media" aria-label="Xem chi tiết Card màn hình Gigabyte GTX 1660 Super">
                 <div class="pcb-card__countdown pcb-card__countdown--urgent" data-timestamp="1794700000000">
@@ -423,7 +445,7 @@
               </div>
             </article>
 
-            <!-- Card 3: CPU - Intel Core i3-10105F -->
+            <!-- Thẻ 3: CPU - Intel Core i3-10105F -->
             <article class="pcb-card" data-id="1001" data-category="CPU" data-price="1350000" data-bids="14">
               <a href="product-detail.html?id=1001" class="pcb-card__media" aria-label="Xem chi tiết CPU Intel Core i3-10105F">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -473,7 +495,7 @@
               </div>
             </article>
 
-            <!-- Card 4: CPU - Intel Core i5-10400F -->
+            <!-- Thẻ 4: CPU - Intel Core i5-10400F -->
             <article class="pcb-card" data-id="1002" data-category="CPU" data-price="2100000" data-bids="8">
               <a href="product-detail.html?id=1002" class="pcb-card__media" aria-label="Xem chi tiết CPU Intel Core i5-10400F">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -523,7 +545,7 @@
               </div>
             </article>
 
-            <!-- Card 5: Mainboard - GIGABYTE B760M GAMING WIFI PLUS -->
+            <!-- Thẻ 5: Mainboard - GIGABYTE B760M GAMING WIFI PLUS -->
             <article class="pcb-card" data-id="3001" data-category="Mainboard" data-price="3000000" data-bids="8">
               <a href="product-detail.html?id=3001" class="pcb-card__media" aria-label="Xem chi tiết Mainboard GIGABYTE B760M">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -573,7 +595,7 @@
               </div>
             </article>
 
-            <!-- Card 6: Mainboard - MSI MAG Z790 TOMAHAWK WIFI DDR5 -->
+            <!-- Thẻ 6: Mainboard - MSI MAG Z790 TOMAHAWK WIFI DDR5 -->
             <article class="pcb-card" data-id="3013" data-category="Mainboard" data-price="4600000" data-bids="12">
               <a href="product-detail.html?id=3013" class="pcb-card__media" aria-label="Xem chi tiết MSI MAG Z790 TOMAHAWK">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -623,7 +645,7 @@
               </div>
             </article>
 
-            <!-- Card 7: RAM - Corsair Vengeance LPX 16GB -->
+            <!-- Thẻ 7: RAM - Corsair Vengeance LPX 16GB -->
             <article class="pcb-card" data-id="4001" data-category="RAM" data-price="750000" data-bids="15">
               <a href="product-detail.html?id=4001" class="pcb-card__media" aria-label="Xem chi tiết RAM Corsair Vengeance LPX">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -673,7 +695,7 @@
               </div>
             </article>
 
-            <!-- Card 8: RAM - G.SKILL Trident Z RGB 16GB -->
+            <!-- Thẻ 8: RAM - G.SKILL Trident Z RGB 16GB -->
             <article class="pcb-card" data-id="4003" data-category="RAM" data-price="950000" data-bids="18">
               <a href="product-detail.html?id=4003" class="pcb-card__media" aria-label="Xem chi tiết RAM G.SKILL Trident Z">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -723,7 +745,7 @@
               </div>
             </article>
 
-            <!-- Card 9: SSD - Samsung 980 PRO 1TB -->
+            <!-- Thẻ 9: SSD - Samsung 980 PRO 1TB -->
             <article class="pcb-card" data-id="5001" data-category="SSD" data-price="1850000" data-bids="20">
               <a href="product-detail.html?id=5001" class="pcb-card__media" aria-label="Xem chi tiết SSD Samsung 980 PRO">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -773,7 +795,7 @@
               </div>
             </article>
 
-            <!-- Card 10: SSD - WD Black SN850X 1TB -->
+            <!-- Thẻ 10: SSD - WD Black SN850X 1TB -->
             <article class="pcb-card" data-id="5003" data-category="SSD" data-price="2100000" data-bids="9">
               <a href="product-detail.html?id=5003" class="pcb-card__media" aria-label="Xem chi tiết SSD WD Black SN850X">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -823,7 +845,7 @@
               </div>
             </article>
 
-            <!-- Card 11: PSU - Corsair RM850x 850W -->
+            <!-- Thẻ 11: PSU - Corsair RM850x 850W -->
             <article class="pcb-card" data-id="6001" data-category="PSU" data-price="2300000" data-bids="10">
               <a href="product-detail.html?id=6001" class="pcb-card__media" aria-label="Xem chi tiết Nguồn Corsair RM850x">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -873,7 +895,7 @@
               </div>
             </article>
 
-            <!-- Card 12: PSU - Seasonic Focus GX-750 -->
+            <!-- Thẻ 12: PSU - Seasonic Focus GX-750 -->
             <article class="pcb-card" data-id="6002" data-category="PSU" data-price="1950000" data-bids="7">
               <a href="product-detail.html?id=6002" class="pcb-card__media" aria-label="Xem chi tiết Nguồn Seasonic Focus GX-750">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -923,7 +945,7 @@
               </div>
             </article>
 
-            <!-- Card 13: Cooling - Cooler Master Hyper 212 Spectrum V3 -->
+            <!-- Thẻ 13: Cooling - Cooler Master Hyper 212 Spectrum V3 -->
             <article class="pcb-card" data-id="8001" data-category="Cooling" data-price="290000" data-bids="9">
               <a href="product-detail.html?id=8001" class="pcb-card__media" aria-label="Xem chi tiết Tản nhiệt Cooler Master Hyper 212">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -973,7 +995,7 @@
               </div>
             </article>
 
-            <!-- Card 14: Cooling - Tản AIO Deepcool LT520 240mm -->
+            <!-- Thẻ 14: Cooling - Tản AIO Deepcool LT520 240mm -->
             <article class="pcb-card" data-id="8008" data-category="Cooling" data-price="1450000" data-bids="16">
               <a href="product-detail.html?id=8008" class="pcb-card__media" aria-label="Xem chi tiết Tản nước Deepcool LT520">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -1023,7 +1045,7 @@
               </div>
             </article>
 
-            <!-- Card 15: Case - Lian Li O11 Dynamic EVO RGB White -->
+            <!-- Thẻ 15: Case - Lian Li O11 Dynamic EVO RGB White -->
             <article class="pcb-card" data-id="7007" data-category="Case" data-price="2800000" data-bids="12">
               <a href="product-detail.html?id=7007" class="pcb-card__media" aria-label="Xem chi tiết Vỏ case Lian Li O11D EVO RGB">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">
@@ -1073,7 +1095,7 @@
               </div>
             </article>
 
-            <!-- Card 16: Case - NZXT H5 Flow Black -->
+            <!-- Thẻ 16: Case - NZXT H5 Flow Black -->
             <article class="pcb-card" data-id="7011" data-category="Case" data-price="1350000" data-bids="7">
               <a href="product-detail.html?id=7011" class="pcb-card__media" aria-label="Xem chi tiết Vỏ case NZXT H5 Flow">
                 <div class="pcb-card__countdown" data-timestamp="1794700000000">

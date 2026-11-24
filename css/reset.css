@@ -11,6 +11,11 @@
   padding: 0;
 }
 
+/* Phần tử có thuộc tính hidden luôn bị ẩn, kể cả khi class đặt display: flex / grid */
+[hidden] {
+  display: none !important;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;

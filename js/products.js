@@ -11,6 +11,14 @@ import { icon } from './icons.js';
 import { readLoggedInUser } from './user-data.js';
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
+// Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
+import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung với Trang chủ, trang chi tiết, Header)
+import { isWatched, toggleWatch, setWatchButtonState } from './watchlist.js';
+// Hộp thoại xác nhận dùng chung
+import { showConfirm } from './dialog.js';
+// Ô chọn tùy biến thay cho hộp chọn mặc định của trình duyệt
+import { enhanceSelect } from './custom-select.js';
 
 
 /* ==========================================================================
@@ -98,7 +106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 function parseUrlParams() {
   const params = new URLSearchParams(window.location.search);
   
-  const cat = params.get('category');
+  // Tên gọi khác của danh mục trong liên kết cũ (VD: ?category=ssd) được quy về giá trị bộ lọc chuẩn
+  const CATEGORY_ALIASES = { ssd: 'storage', hdd: 'storage', nvme: 'storage', gpu: 'vga' };
+  const rawCat = (params.get('category') || '').toLowerCase();
+  const cat = CATEGORY_ALIASES[rawCat] || rawCat;
   if (cat && cat !== 'all') {
     filterState.categories = [cat.toLowerCase()];
     // Cập nhật giao diện checkbox tương ứng
@@ -460,18 +471,41 @@ function initFilterEventListeners() {
     });
   }
 
-  // Nút toggle filter trên mobile
-  const filterToggleBtn = document.getElementById('filter-toggle-btn');
-  const filterSidebar = document.getElementById('pcb-filter-sidebar');
-  if (filterToggleBtn && filterSidebar) {
-    filterToggleBtn.addEventListener('click', () => {
-      filterSidebar.classList.toggle('pcb-filter--open');
-    });
-  }
+  // Nút "Xóa toàn bộ bộ lọc" trong trạng thái không có kết quả (được vẽ lại nên dùng ủy quyền sự kiện)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-reset-filters]')) resetAllFilters();
+  });
+
+  // Ngăn trượt bộ lọc trên điện thoại / máy tính bảng
+  initFilterDrawer();
+
+  // Ô "Sắp xếp theo" dùng danh sách xổ xuống cùng phong cách PCBid (giống nhau trên máy tính và điện thoại)
+  enhanceSelect(document.getElementById('catalog-sort'));
 
   // Lắng nghe sự kiện phân trang
   const paginationContainer = document.getElementById('pcb-pagination');
   if (paginationContainer) {
+    // Ô "Đến trang": gõ số trang rồi Enter hoặc bấm Đi; số ngoài khoảng được đưa về trang đầu / cuối
+    paginationContainer.addEventListener('submit', (e) => {
+      if (!e.target.matches('[data-page-jump]')) return;
+      e.preventDefault();
+      const input = e.target.querySelector('.pcb-pagination__jump-input');
+      const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+      const pageNum = parseInt(input?.value, 10);
+      if (isNaN(pageNum)) {
+        input?.focus();
+        return;
+      }
+      const target = Math.min(totalPages, Math.max(1, pageNum));
+      if (target !== currentPage) {
+        currentPage = target;
+        renderCurrentPage();
+        scrollToTop();
+      } else if (input) {
+        input.value = '';
+      }
+    });
+
     paginationContainer.addEventListener('click', (e) => {
       const target = e.target.closest('[data-page]');
       if (!target) return;
@@ -721,7 +755,7 @@ function renderCurrentPage() {
         </svg>
         <h3 class="pcb-empty-state__title">Không tìm thấy linh kiện phù hợp</h3>
         <p class="pcb-empty-state__desc">Thử nới lỏng các tiêu chí bộ lọc giá, danh mục hoặc tìm kiếm bằng từ khóa khác.</p>
-        <button type="button" class="pcb-filter__price-apply" style="width:auto; padding:8px 20px;" onclick="document.getElementById('reset-filter-btn').click()">
+        <button type="button" class="pcb-filter__price-apply pcb-filter__price-apply--inline" data-reset-filters>
           Xóa toàn bộ bộ lọc
         </button>
       </div>
@@ -762,12 +796,28 @@ function attachCardClickEvents() {
     });
   });
 
-  // Sự kiện nút Theo dõi (Watchlist)
+  // Sự kiện nút Theo dõi (Watchlist): lưu vào danh sách theo dõi của tài khoản
   const watchBtns = document.querySelectorAll('[data-action="watch"]');
   watchBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      btn.classList.toggle('pcb-card__watch--active');
+      const id = Number(btn.dataset.id);
+      const product = rawProducts.find(p => Number(p.id) === id) || { id };
+      const watched = toggleWatch(product);
+      if (watched === null) {
+        const goLogin = await showConfirm({
+          title: 'Cần đăng nhập',
+          message: 'Bạn cần đăng nhập để lưu phiên vào danh sách theo dõi.',
+          confirmText: 'Đăng nhập',
+          cancelText: 'Để sau'
+        });
+        if (goLogin) window.location.href = `login.html?redirect=${encodeURIComponent('products.html')}`;
+        return;
+      }
+      setWatchButtonState(btn, watched);
     });
   });
 }
@@ -793,6 +843,8 @@ function renderCatalogProductCard(product) {
   const isJustPosted = isJustPostedByViewer(product);
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
+  // Trạng thái bookmark theo danh sách theo dõi của tài khoản đang đăng nhập
+  const watched = isWatched(product.id);
 
   const specs = product.specifications || {};
   const specItems = Object.entries(specs).slice(0, 2).map(([k, v]) => {
@@ -807,7 +859,7 @@ function renderCatalogProductCard(product) {
     <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
       ${isJustPosted ? `<span class="pcb-card__just-posted">${icon('sparkles', { size: 14 })} Bạn vừa đăng</span>` : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
-        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
+        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"></circle>
             <polyline points="12 7 12 12 15 15"></polyline>
@@ -818,8 +870,8 @@ function renderCatalogProductCard(product) {
         <img class="pcb-card__img" src="${imageSrc}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.src='images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'">
       </a>
 
-      <button type="button" class="pcb-card__watch" data-action="watch" data-id="${product.id}" aria-label="Lưu theo dõi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button type="button" class="pcb-card__watch${watched ? ' pcb-card__watch--active' : ''}" data-action="watch" data-id="${product.id}" aria-pressed="${watched}" aria-label="${watched ? 'Bỏ theo dõi phiên này' : 'Theo dõi phiên này'}">
+        <svg viewBox="0 0 24 24" fill="${watched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>
       </button>
@@ -852,10 +904,14 @@ function renderCatalogProductCard(product) {
             </span>
           </div>
 
+          ${isAwaitingInspection(product) ? `
+          <a href="${detailUrl}" class="pcb-card__btn pcb-card__btn--locked" title="Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt">
+            ${icon('microscope', { size: 14 })} Chờ kiểm định
+          </a>` : `
           <a href="${detailUrl}" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
             Tham gia đấu giá
-          </a>
+          </a>`}
         </div>
       </div>
     </article>
@@ -871,10 +927,10 @@ function renderPagination(totalItems) {
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   if (totalPages <= 1) {
-    container.style.display = 'none';
+    container.hidden = true;
     return;
   }
-  container.style.display = 'flex';
+  container.hidden = false;
 
   let html = `
     <a href="#" class="pcb-pagination__item ${currentPage === 1 ? 'pcb-pagination__item--disabled' : ''}" data-page="prev" aria-label="Trang trước">
@@ -900,6 +956,17 @@ function renderPagination(totalItems) {
     </a>
   `;
 
+  // Ô nhảy nhanh tới một trang bất kỳ (VD: gõ 14 rồi Enter) thay vì bấm "Sau" nhiều lần
+  html += `
+    <form class="pcb-pagination__jump" data-page-jump novalidate>
+      <label class="pcb-pagination__jump-label" for="pcb-page-jump-input">Đến trang</label>
+      <input type="number" id="pcb-page-jump-input" class="pcb-pagination__jump-input" inputmode="numeric"
+        min="1" max="${totalPages}" step="1" placeholder="${currentPage}" aria-describedby="pcb-page-jump-total">
+      <span class="pcb-pagination__jump-total" id="pcb-page-jump-total">/ ${totalPages}</span>
+      <button type="submit" class="pcb-pagination__jump-btn">Đi</button>
+    </form>
+  `;
+
   container.innerHTML = html;
 }
 
@@ -914,7 +981,8 @@ function updateLiveCountdowns() {
     const ts = parseInt(el.getAttribute('data-timestamp'), 10);
     if (!ts || isNaN(ts)) return;
 
-    const diff = ts - now;
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
+    const diff = getRemainingMs(ts, el.getAttribute('data-start'), now);
     const textSpan = el.querySelector('.pcb-countdown-text');
     if (!textSpan) return;
 
@@ -963,17 +1031,10 @@ function getConditionBadge(conditionText) {
 }
 
 function getHardwareSeal(product) {
-  const cat = String(product.category || '').toLowerCase();
-  if (cat.includes('gpu') || cat.includes('vga')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã stress test Furmark ổn định">✓ Furmark &lt; 75°C</span>`;
-  }
-  if (cat.includes('ram')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã chạy MemTest86 không lỗi">✓ MemTest 0 Error</span>`;
-  }
-  if (cat.includes('ssd') || cat.includes('ổ cứng') || cat.includes('storage')) {
-    return `<span class="pcb-card__seal pcb-card__seal--pass" title="Kiểm tra sức khỏe CrystalDiskInfo 100%">✓ Sức khỏe 100%</span>`;
-  }
-  return `<span class="pcb-card__seal pcb-card__seal--pass" title="Đã qua kiểm thử tại UIT Lab">✓ UIT Lab OK</span>`;
+  // Tem theo kết quả PCBid Lab; phiên vừa đăng hiện "Chờ kiểm định"
+  const pending = isAwaitingInspection(product);
+  const title = pending ? 'Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt' : 'Đã qua kiểm định PCBid Lab';
+  return `<span class="pcb-card__seal pcb-card__seal--${pending ? 'pending' : 'pass'}" title="${title}">${pending ? '' : '✓ '}${escapeHtml(getInspectionSeal(product))}</span>`;
 }
 
 function escapeHtml(str) {
@@ -984,4 +1045,79 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * Ngăn trượt bộ lọc trên điện thoại / máy tính bảng (màn hình <= 992px):
+ * mở bằng nút "Mở bộ lọc tìm kiếm"; đóng bằng nút X, nút "Xem kết quả",
+ * bấm ra nền tối hoặc phím Esc. Khi mở thì khóa cuộn trang phía sau.
+ */
+function initFilterDrawer() {
+  const toggleBtn = document.getElementById('filter-toggle-btn');
+  const sidebar = document.getElementById('pcb-filter-sidebar');
+  const backdrop = document.getElementById('pcb-filter-backdrop');
+  const closeBtn = document.getElementById('filter-close-btn');
+  const doneBtn = document.getElementById('filter-done-btn');
+  const doneCount = document.getElementById('filter-done-count');
+  const catalogCount = document.getElementById('catalog-count');
+  if (!toggleBtn || !sidebar || !backdrop) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 992px)');
+  let hideTimer = 0;
+
+  // Số linh kiện khớp bộ lọc hiện trên nút "Xem kết quả"
+  const syncCount = () => {
+    if (doneCount && catalogCount) doneCount.textContent = `(${catalogCount.textContent.trim()})`;
+  };
+  if (catalogCount) new MutationObserver(syncCount).observe(catalogCount, { childList: true, characterData: true, subtree: true });
+
+  const isOpen = () => sidebar.classList.contains('pcb-filter--open');
+
+  const onKey = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); }
+  };
+
+  const openDrawer = () => {
+    clearTimeout(hideTimer);
+    syncCount();
+    backdrop.hidden = false;
+    // Đợi một khung hình để hiệu ứng trượt / mờ dần chạy được sau khi bỏ hidden
+    requestAnimationFrame(() => {
+      sidebar.classList.add('pcb-filter--open');
+      backdrop.classList.add('pcb-filter-backdrop--visible');
+    });
+    document.documentElement.classList.add('pcb-filter-lock');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    sidebar.setAttribute('role', 'dialog');
+    sidebar.setAttribute('aria-modal', 'true');
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => closeBtn?.focus({ preventScroll: true }), 50);
+  };
+
+  const closeDrawer = (returnFocus = true) => {
+    if (!isOpen()) return;
+    sidebar.classList.remove('pcb-filter--open');
+    backdrop.classList.remove('pcb-filter-backdrop--visible');
+    document.documentElement.classList.remove('pcb-filter-lock');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    sidebar.removeAttribute('role');
+    sidebar.removeAttribute('aria-modal');
+    document.removeEventListener('keydown', onKey);
+    hideTimer = setTimeout(() => { backdrop.hidden = true; }, 250);
+    if (returnFocus) toggleBtn.focus({ preventScroll: true });
+  };
+
+  toggleBtn.addEventListener('click', () => (isOpen() ? closeDrawer() : openDrawer()));
+  closeBtn?.addEventListener('click', () => closeDrawer());
+  doneBtn?.addEventListener('click', () => {
+    closeDrawer(false);
+    // Cuộn tới thanh kết quả để người dùng thấy ngay danh sách đã lọc
+    document.querySelector('.pcb-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  backdrop.addEventListener('click', () => closeDrawer());
+
+  // Xoay ngang / phóng to lên màn hình máy tính: đóng ngăn trượt, trả lại bố cục 2 cột
+  mobileQuery.addEventListener('change', (e) => {
+    if (!e.matches) closeDrawer(false);
+  });
 }

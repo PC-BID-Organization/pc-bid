@@ -11,6 +11,8 @@
 
 import { readUserList, writeUserList, readLoggedInUser } from './user-data.js';
 import { showConfirm } from './dialog.js';
+// Tài khoản demo: tạo sẵn một địa chỉ mặc định từ thông tin mẫu để trình diễn ngay luồng đơn hàng
+import { DEMO_ACCOUNTS } from './accounts.js';
 
 const ADDRESSES_KEY = 'pcbid_addresses';
 // Số điện thoại Việt Nam: 0 hoặc +84, tiếp theo đầu số di động và 8 chữ số
@@ -32,8 +34,40 @@ function escapeHtml(text) {
  */
 export function getAddresses(user = readLoggedInUser()) {
   if (!user) return [];
-  const list = readUserList(ADDRESSES_KEY, user);
+  const list = readUserList(ADDRESSES_KEY, user, getSeedAddresses(user));
   return [...list].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+}
+
+/**
+ * Sổ địa chỉ ban đầu: chỉ tài khoản demo có sẵn một địa chỉ mặc định,
+ * tài khoản tự đăng ký bắt đầu với sổ trống và phải tự thêm
+ * @param {Object} user
+ * @returns {Array}
+ */
+function getSeedAddresses(user) {
+  const demo = DEMO_ACCOUNTS.find(d => d.id === user.id || d.username === user.username);
+  if (!demo || !demo.address) return [];
+  return [{
+    id: `addr_seed_${demo.username}`,
+    fullname: user.fullname || demo.fullname,
+    phone: user.phone || demo.phone,
+    address: demo.address,
+    isDefault: true
+  }];
+}
+
+/**
+ * Trạng thái xác thực tài khoản (mô phỏng): đủ email, số điện thoại và ít nhất một địa chỉ nhận hàng
+ * @param {Object} [user] - Mặc định là người đang đăng nhập
+ * @returns {{verified: boolean, missing: string[]}} missing: các mục còn thiếu
+ */
+export function getVerificationStatus(user = readLoggedInUser()) {
+  if (!user) return { verified: false, missing: [] };
+  const missing = [];
+  if (!String(user.email || '').trim()) missing.push('email');
+  if (!String(user.phone || '').trim()) missing.push('số điện thoại');
+  if (getAddresses(user).length === 0) missing.push('địa chỉ nhận hàng');
+  return { verified: missing.length === 0, missing };
 }
 
 /**

@@ -13,10 +13,12 @@ import { icon, NOTIFY_ICON_NAMES } from './icons.js';
 // Mở hội thoại với tài khoản đang xem hồ sơ
 import { openChatWithUser } from './chat.js';
 // Sổ địa chỉ nhận hàng
-import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo } from './address-book.js';
+import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo, getVerificationStatus } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
+// Trạng thái kiểm định của phiên tự đăng bán
+import { isAwaitingInspection, getCountdownStart, getRemainingMs } from './inspection.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
@@ -24,11 +26,11 @@ import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } f
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
   renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
-  hashPassword, verifyPassword, accountHasPassword } from './accounts.js';
+  hashPassword, verifyPassword, accountHasPassword, isDemoAccount, validateUsername, migrateUsername } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
-import { showAlert, showConfirm } from './dialog.js';
+import { showAlert, showConfirm, showChoice } from './dialog.js';
 
 
 
@@ -167,8 +169,9 @@ function escapeHtml(str) {
 /**
  * Tính toán và chuyển đổi số mili-giây còn lại sang chuỗi hiển thị đồng hồ đếm ngược
  */
-function formatTimeRemaining(endTimestamp) {
-  const diff = endTimestamp - Date.now();
+function formatTimeRemaining(endTimestamp, start = 0) {
+  // start: mốc bắt đầu tính giờ (phiên chờ kiểm định thì đồng hồ đứng yên tới lúc đó)
+  const diff = getRemainingMs(endTimestamp, start);
   if (diff <= 0) return 'Đã hết hạn';
 
   const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -190,21 +193,43 @@ function formatTimeRemaining(endTimestamp) {
 /**
  * Hiển thị thanh thông báo Toast nhanh góc dưới màn hình
  */
-function showToast(message, isSuccess = true) {
+function showToast(message, isSuccess = true, action = null) {
   const toast = document.getElementById('pcb-toast');
   const msgEl = document.getElementById('pcb-toast-message');
   const iconEl = document.getElementById('pcb-toast-icon');
+  const actionBtn = document.getElementById('pcb-toast-action');
   if (!toast || !msgEl || !iconEl) return;
 
   msgEl.textContent = message;
   iconEl.textContent = isSuccess ? '✓' : '!';
   iconEl.style.backgroundColor = isSuccess ? '#10b981' : '#ef4444';
 
+  // Thông báo có nút thao tác (VD: Hoàn tác) hiện lâu hơn để kịp bấm
+  const duration = action ? 5000 : 3500;
+  if (actionBtn) {
+    actionBtn.hidden = !action;
+    actionBtn.onclick = null;
+    if (action) {
+      actionBtn.textContent = action.label;
+      actionBtn.onclick = () => {
+        clearTimeout(toast._timer);
+        toast.classList.remove('pcb-toast--show');
+        actionBtn.onclick = null;
+        action.onClick();
+      };
+    }
+  }
+  // Vạch thời gian chạy ngược cho biết còn bao lâu nút thao tác biến mất
+  toast.classList.toggle('pcb-toast--action', Boolean(action));
+  toast.style.setProperty('--pcb-toast-duration', `${duration}ms`);
+  toast.classList.remove('pcb-toast--show');
+  void toast.offsetWidth; // Khởi động lại hiệu ứng vạch thời gian khi hiện thông báo mới liên tiếp
   toast.classList.add('pcb-toast--show');
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => {
     toast.classList.remove('pcb-toast--show');
-  }, 3500);
+    if (actionBtn) actionBtn.onclick = null;
+  }, duration);
 }
 
 /* ==========================================================================
@@ -374,6 +399,8 @@ function getWatchlistItems() {
 
 function saveWatchlistItems(items) {
   writeUserList(USER_LIST_KEYS.WATCHLIST, getCurrentUser(), items);
+  // Báo Header cập nhật số đếm trên icon bookmark
+  window.dispatchEvent(new CustomEvent('pcbid:watchlist-updated', { detail: { count: items.length } }));
 }
 
 /* ==========================================================================
@@ -479,7 +506,14 @@ function renderSellingCard(item) {
   let modifierClass = '';
   let actionButtonsHtml = '';
 
-  if (item.status === 'active') {
+  if (item.status === 'active' && isAwaitingInspection(item)) {
+    // Phiên vừa đăng: đang chờ PCBid Lab kiểm định, chưa mở đặt giá
+    modifierClass = 'pcb-auction-card--selling-active';
+    badgeHtml = `<span class="pcb-status-badge pcb-status-badge--pending">Chờ kiểm định</span>`;
+    actionButtonsHtml = `
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem tiến độ kiểm định</a>
+    `;
+  } else if (item.status === 'active') {
     modifierClass = 'pcb-auction-card--selling-active';
     badgeHtml = `<span class="pcb-status-badge pcb-status-badge--active">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
@@ -505,7 +539,7 @@ function renderSellingCard(item) {
       Đã kết thúc
     </span>`;
     actionButtonsHtml = `
-      <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid" style="background-color: #565E74;">Đăng bán lại</a>
+      <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid pcb-btn-rebid--muted">Đăng bán lại</a>
       <a href="${detailUrl}" class="pcb-btn-detail">Xem lại</a>
     `;
   }
@@ -545,15 +579,15 @@ function renderSellingCard(item) {
           ${item.status === 'active' ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
+              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}" data-start="${getCountdownStart(item)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
+                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item), getCountdownStart(item))}</span>
               </span>
             </div>
           ` : `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Người mua thắng</span>
-              <span class="pcb-stat-col__val" style="color:${item.highestBidder ? '#059669' : '#64748b'};">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
+              <span class="pcb-stat-col__val ${item.highestBidder ? 'pcb-stat-col__val--winner' : 'pcb-stat-col__val--muted'}">${escapeHtml(item.highestBidder ? describeBidder({ bidderName: item.highestBidder }).name : (Number(item.bidCount || 0) === 0 ? 'Không có lượt đặt giá' : 'Chờ xác nhận'))}</span>
             </div>
           `}
 
@@ -609,7 +643,7 @@ function renderWatchlistCard(item) {
 
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá thị trường mới</span>
-            <span class="pcb-stat-col__val" style="color: #64748B;">${formatVnd(item.marketPriceNew || item.currentBid * 1.5)}</span>
+            <span class="pcb-stat-col__val pcb-stat-col__val--muted">${formatVnd(item.marketPriceNew || item.currentBid * 1.5)}</span>
           </div>
 
           <div class="pcb-stat-col">
@@ -628,7 +662,7 @@ function renderWatchlistCard(item) {
       </div>
 
       <div class="pcb-auction-card__actions">
-        <a href="${detailUrl}" class="pcb-btn-primary" style="padding: 8px 14px; font-size: 13px;">
+        <a href="${detailUrl}" class="pcb-btn-primary pcb-btn-primary--small">
           Vào đấu giá ngay
         </a>
         <button type="button" class="pcb-btn-unwatch" data-action="unwatch" data-id="${item.id}" title="Xóa khỏi danh sách theo dõi">
@@ -665,7 +699,405 @@ let currentMultiplier = 1;
 /**
  * Cập nhật số dư và thông tin người dùng lên toàn bộ giao diện
  */
-function syncUserInfoUI() {
+/**
+ * Nhãn xác thực ở thẻ tài khoản: chỉ "Đã xác thực" khi có đủ email, số điện thoại và địa chỉ nhận hàng,
+ * ngược lại hiện "Chưa xác thực" kèm gợi ý các mục cần bổ sung
+ * @param {Object} user - Người dùng đang đăng nhập
+ */
+function renderVerificationStatus(user) {
+  const { verified, missing } = getVerificationStatus(user);
+  const tag = document.getElementById('sidebar-verified-tag');
+  const text = document.getElementById('sidebar-verified-text');
+  const badge = document.getElementById('sidebar-verified-badge');
+  const hint = document.getElementById('sidebar-verify-hint');
+  if (tag) tag.classList.toggle('pcb-user-card__tag--pending', !verified);
+  if (text) text.textContent = verified ? 'Tài khoản đã xác thực' : 'Chưa xác thực';
+  if (badge) badge.hidden = !verified;
+  if (hint) {
+    hint.hidden = verified;
+    hint.textContent = verified ? '' : `Bổ sung ${missing.join(', ')} để được xác thực.`;
+  }
+}
+
+/**
+ * Hiện / xóa lỗi của ô tên đăng nhập
+ * @returns {boolean} true nếu tên hợp lệ (hoặc không đổi)
+ */
+function showUsernameError() {
+  const input = document.getElementById('input-username');
+  const errEl = document.getElementById('err-input-username');
+  if (!input) return true;
+  const user = getCurrentUser();
+  const value = input.value.trim().toLowerCase();
+  const message = value === user?.username ? '' : validateUsername(value, user);
+  if (errEl) errEl.textContent = message;
+  input.classList.toggle('pcb-input--error', Boolean(message));
+  return !message;
+}
+
+/* --------------------------------------------------------------------------
+   THANH LƯU NỔI & HỎI LƯU KHI RỜI ĐI CHO CÁC FORM CÀI ĐẶT
+   Áp dụng cho: Thông tin tài khoản, Đổi mật khẩu, Quyền riêng tư hồ sơ công khai.
+   - Máy tính: thanh nổi hiện khi có thay đổi chưa lưu và nút lưu của form đang khuất.
+   - Điện thoại: thanh nổi hiện ngay khi có thay đổi, kể cả lúc đang gõ (bàn phím mở),
+     nằm sát phía trên bàn phím và tự cuộn để không che ô đang nhập.
+   -------------------------------------------------------------------------- */
+
+/**
+ * Danh sách form được theo dõi thay đổi chưa lưu
+ * - read: chụp trạng thái hiện tại để so với mốc đã lưu (baseline)
+ * - submit: lưu form, trả về Promise khi lưu xong
+ * - undo: bỏ thay đổi, trả form về dữ liệu đã lưu
+ */
+const GUARDED_FORMS = [
+  {
+    formId: 'form-account-info',
+    sectionId: 'section-account',
+    saveBtnId: 'btn-save-account',
+    name: 'Thông tin tài khoản',
+    barLabel: 'Có thay đổi chưa lưu',
+    baseline: null,
+    read: () => {
+      const form = document.getElementById('form-account-info');
+      if (!form) return '';
+      const values = [...form.querySelectorAll('input, select, textarea')]
+        .filter(el => el.id && !(el.type === 'date' && el.hidden))
+        .map(el => [el.id, el.type === 'checkbox' ? el.checked : el.value]);
+      return JSON.stringify(values);
+    },
+    submit: async () => {
+      accountSubmitPromise = null;
+      document.getElementById('form-account-info')?.requestSubmit();
+      if (accountSubmitPromise) await accountSubmitPromise;
+    },
+    undo: () => {
+      const form = document.getElementById('form-account-info');
+      if (!form) return;
+      form.querySelectorAll('.pcb-form__error').forEach(el => { el.textContent = ''; });
+      form.querySelectorAll('.pcb-input--error').forEach(el => el.classList.remove('pcb-input--error'));
+      const birthInput = document.getElementById('input-birthdate');
+      if (birthInput) birthInput.hidden = true;
+      const birthHint = document.getElementById('birthdate-hint');
+      if (birthHint) birthHint.hidden = true;
+      syncUserInfoUI({ force: true });
+    }
+  },
+  {
+    formId: 'form-change-password',
+    sectionId: 'section-security',
+    saveBtnId: 'btn-save-password',
+    name: 'Đổi mật khẩu',
+    barLabel: 'Mật khẩu mới chưa lưu',
+    // Form đổi mật khẩu luôn bắt đầu trống: có ký tự trong bất kỳ ô nào là có thay đổi
+    baseline: '',
+    read: () => {
+      const form = document.getElementById('form-change-password');
+      return form && [...form.querySelectorAll('input')].some(el => el.value) ? 'dirty' : '';
+    },
+    submit: async () => {
+      document.getElementById('form-change-password')?.requestSubmit();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    },
+    undo: () => document.getElementById('form-change-password')?.reset()
+  },
+  {
+    formId: 'form-privacy',
+    sectionId: 'section-security',
+    saveBtnId: 'btn-save-privacy',
+    name: 'Quyền riêng tư hồ sơ công khai',
+    barLabel: 'Quyền riêng tư chưa lưu',
+    baseline: null,
+    read: () => {
+      const form = document.getElementById('form-privacy');
+      if (!form) return '';
+      return JSON.stringify([...form.querySelectorAll('.pcb-switch__input')].map(el => [el.name, el.checked]));
+    },
+    submit: async () => {
+      document.getElementById('form-privacy')?.requestSubmit();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    },
+    undo: () => fillPrivacyForm(getCurrentUser())
+  }
+];
+
+// Trạng thái thanh lưu nổi: nút lưu nào đang nằm trong màn hình, form nào vừa được sửa gần nhất
+const savebarState = { saveVisible: {}, lastEditedId: null };
+
+// Promise của lần lưu form tài khoản gần nhất (null nếu chưa lưu lần nào)
+let accountSubmitPromise = null;
+
+/** Tìm cấu hình form theo id */
+const getGuardedForm = formId => GUARDED_FORMS.find(f => f.formId === formId);
+
+/**
+ * Form có thay đổi chưa lưu không
+ * @param {string} formId
+ * @returns {boolean}
+ */
+function isFormDirty(formId) {
+  const entry = getGuardedForm(formId);
+  if (!entry || entry.baseline === null) return false;
+  return entry.read() !== entry.baseline;
+}
+
+/**
+ * Ghi mốc "đã lưu" cho form (sau khi nạp dữ liệu hoặc lưu thành công)
+ * @param {string} formId
+ */
+function markFormSaved(formId) {
+  const entry = getGuardedForm(formId);
+  if (!entry) return;
+  entry.baseline = entry.read();
+  updateSavebar();
+}
+
+/** Giữ tên hàm cũ cho form tài khoản */
+function markAccountFormSaved() {
+  markFormSaved('form-account-info');
+}
+
+/** Mục đang hiển thị trong trang Hồ sơ */
+const getVisibleSection = () => document.querySelector('.pcb-profile .pcb-section:not([hidden])');
+
+/**
+ * Các form còn thay đổi chưa lưu trong một mục (hoặc mọi mục nếu không truyền)
+ * @param {string} [sectionId]
+ * @returns {Array<Object>}
+ */
+function getDirtyForms(sectionId) {
+  return GUARDED_FORMS.filter(f => (!sectionId || f.sectionId === sectionId) && isFormDirty(f.formId));
+}
+
+/** Giao diện điện thoại / máy tính bảng cảm ứng */
+const isTouchLayout = () => window.matchMedia('(max-width: 720px), (pointer: coarse)').matches;
+
+/**
+ * Form mà thanh lưu nổi đang phục vụ: ưu tiên form vừa sửa gần nhất trong mục đang mở
+ * @returns {Object|null}
+ */
+function getSavebarTarget() {
+  const section = getVisibleSection();
+  if (!section) return null;
+  const dirty = getDirtyForms(section.id);
+  if (!dirty.length) return null;
+  return dirty.find(f => f.formId === savebarState.lastEditedId) || dirty[0];
+}
+
+/**
+ * Đẩy thanh lưu nổi lên sát phía trên bàn phím ảo (iOS không tự thu nhỏ vùng hiển thị khi mở bàn phím)
+ */
+function positionSavebar() {
+  const bar = document.getElementById('account-savebar');
+  if (!bar) return;
+  const vv = window.visualViewport;
+  const keyboard = vv && isTouchLayout() ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+  bar.style.setProperty('--pcb-savebar-keyboard', `${Math.round(keyboard)}px`);
+}
+
+/**
+ * Ô đang nhập bị thanh lưu nổi che: cuộn trang lên một chút
+ */
+function keepFocusedFieldVisible() {
+  const bar = document.getElementById('account-savebar');
+  const field = document.activeElement;
+  if (!bar || bar.hidden || !field || !field.closest('.pcb-form')) return;
+  const barTop = bar.getBoundingClientRect().top;
+  const fieldBottom = field.getBoundingClientRect().bottom;
+  if (fieldBottom > barTop - 8) window.scrollBy({ top: fieldBottom - barTop + 16, behavior: 'smooth' });
+}
+
+/**
+ * Hiện / ẩn thanh lưu nổi theo trạng thái hiện tại
+ */
+function updateSavebar() {
+  const bar = document.getElementById('account-savebar');
+  if (!bar) return;
+  const target = getSavebarTarget();
+  // Điện thoại: hiện ngay khi có thay đổi; máy tính: chỉ khi nút lưu của form đang khuất
+  const show = Boolean(target) && (isTouchLayout() || savebarState.saveVisible[target.formId] === false);
+  if (target) {
+    bar.dataset.form = target.formId;
+    const label = bar.querySelector('.pcb-savebar__label');
+    if (label) label.textContent = target.barLabel;
+  }
+  if (show === !bar.hidden) return;
+  if (show) {
+    positionSavebar();
+    bar.hidden = false;
+    // Đợi một khung hình để hiệu ứng trượt lên chạy được, rồi kiểm tra ô đang nhập có bị che không
+    requestAnimationFrame(() => {
+      bar.classList.add('pcb-savebar--visible');
+      setTimeout(keepFocusedFieldVisible, 220);
+    });
+  } else {
+    bar.classList.remove('pcb-savebar--visible');
+    bar.hidden = true;
+  }
+}
+
+/** Giữ tên hàm cũ */
+function updateAccountSavebar() {
+  updateSavebar();
+}
+
+/**
+ * Hỏi người dùng muốn lưu các thay đổi trước khi rời đi không
+ * @param {Array<Object>} dirtyForms - Các form còn thay đổi chưa lưu
+ * @returns {Promise<boolean>} true nếu được phép rời đi (đã lưu thành công hoặc chọn không lưu)
+ */
+async function confirmLeaveDirtyForms(dirtyForms) {
+  const names = dirtyForms.map(f => f.name).join(', ');
+  const choice = await showChoice({
+    title: 'Lưu thay đổi trước khi rời đi?',
+    message: `Bạn có thay đổi chưa được lưu trong: ${names}.`,
+    confirmText: 'Lưu thay đổi',
+    extraText: 'Không lưu',
+    cancelText: 'Ở lại'
+  });
+  if (choice === 'cancel') return false;
+  if (choice === 'extra') {
+    dirtyForms.forEach(f => f.undo());
+    updateSavebar();
+    return true;
+  }
+  for (const f of dirtyForms) {
+    await f.submit();
+    // Lưu không thành công (lỗi nhập liệu / người dùng hủy xác nhận): ở lại để sửa
+    if (isFormDirty(f.formId)) return false;
+  }
+  return true;
+}
+
+/**
+ * Chặn rời trang khi các form cài đặt còn thay đổi chưa lưu:
+ * - Bấm liên kết sang trang khác / chuyển mục trong Hồ sơ: hộp thoại của web (Lưu / Không lưu / Ở lại)
+ * - Tải lại hoặc đóng tab: trình duyệt chỉ cho phép hiện hộp thoại xác nhận mặc định của nó
+ */
+function initAccountLeaveGuard() {
+  let bypass = false;
+
+  window.addEventListener('beforeunload', e => {
+    if (bypass || !getDirtyForms().length) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  document.addEventListener('click', async e => {
+    if (bypass) return;
+    const section = getVisibleSection();
+    if (!section) return;
+    const dirtyForms = getDirtyForms(section.id);
+    if (!dirtyForms.length) return;
+    const link = e.target.closest('a[href]');
+    const navBtn = e.target.closest('[data-section]');
+    const href = link?.getAttribute('href') || '';
+    const leavingByLink = link && !section.contains(link) && link.target !== '_blank'
+      && !link.hasAttribute('download') && href !== '#' && !href.startsWith('javascript')
+      && !href.startsWith('tel:') && !href.startsWith('mailto:');
+    const leavingBySection = navBtn && navBtn.dataset.section !== section.id;
+    if (!leavingByLink && !leavingBySection) return;
+    // Chặn điều hướng cho tới khi người dùng chọn
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!(await confirmLeaveDirtyForms(dirtyForms))) return;
+    bypass = true;
+    if (leavingByLink) {
+      window.location.href = link.href;
+    } else {
+      navBtn.click();
+    }
+    setTimeout(() => { bypass = false; }, 0);
+  }, true);
+}
+
+/**
+ * Gắn các sự kiện cho thanh lưu nổi (gọi một lần khi tải trang)
+ */
+function initAccountSavebar() {
+  const bar = document.getElementById('account-savebar');
+  if (!bar) return;
+
+  GUARDED_FORMS.forEach(entry => {
+    const form = document.getElementById(entry.formId);
+    if (!form) return;
+    if (entry.baseline === null) entry.baseline = entry.read();
+    // Mỗi lần người dùng sửa một ô: so với mốc đã lưu
+    const onEdit = () => {
+      savebarState.lastEditedId = entry.formId;
+      updateSavebar();
+    };
+    form.addEventListener('input', onEdit);
+    form.addEventListener('change', onEdit);
+    form.addEventListener('reset', () => setTimeout(updateSavebar, 0));
+
+    // Nút lưu thật đang nằm trong màn hình thì máy tính không cần thanh nổi
+    const realSave = document.getElementById(entry.saveBtnId);
+    if (realSave && 'IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        savebarState.saveVisible[entry.formId] = entries[0].isIntersecting;
+        updateSavebar();
+      }, { threshold: 0.6 }).observe(realSave);
+    }
+  });
+
+  // Nút Lưu / Hoàn tác trên thanh nổi áp dụng cho form đang được phục vụ
+  document.getElementById('account-savebar-save')?.addEventListener('click', async () => {
+    const entry = getGuardedForm(bar.dataset.form);
+    if (!entry) return;
+    await entry.submit();
+    updateSavebar();
+  });
+  document.getElementById('account-savebar-undo')?.addEventListener('click', () => {
+    const entry = getGuardedForm(bar.dataset.form);
+    if (!entry) return;
+    entry.undo();
+    updateSavebar();
+    showToast('Đã hoàn tác các thay đổi chưa lưu.');
+  });
+  // Bấm nút trên thanh nổi không làm ô đang nhập mất focus (bàn phím không bị đóng giữa chừng)
+  bar.addEventListener('pointerdown', e => {
+    if (e.target.closest('#account-savebar-undo')) e.preventDefault();
+  });
+
+  // Bàn phím ảo mở / đóng, xoay màn hình: đặt lại vị trí thanh nổi và giữ ô đang nhập trong tầm nhìn
+  if (window.visualViewport) {
+    const onViewport = () => {
+      positionSavebar();
+      if (!bar.hidden) keepFocusedFieldVisible();
+    };
+    window.visualViewport.addEventListener('resize', onViewport);
+    window.visualViewport.addEventListener('scroll', positionSavebar);
+  }
+  document.addEventListener('focusin', () => {
+    if (!bar.hidden) setTimeout(keepFocusedFieldVisible, 300);
+  });
+  window.matchMedia('(max-width: 720px), (pointer: coarse)').addEventListener('change', updateSavebar);
+
+  // Chuyển sang mục khác trong trang Hồ sơ: cập nhật thanh nổi theo mục mới
+  window.addEventListener('hashchange', () => setTimeout(updateSavebar, 0));
+  document.querySelectorAll('[data-section]').forEach(btn => btn.addEventListener('click', () => setTimeout(updateSavebar, 0)));
+}
+
+/**
+ * Đổ cài đặt quyền riêng tư đã lưu vào form
+ * @param {Object} user
+ */
+function fillPrivacyForm(user) {
+  const privacyForm = document.getElementById('form-privacy');
+  if (!privacyForm || !user) return;
+  const privacy = getPrivacy(user);
+  privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
+    input.checked = Boolean(privacy[input.name]);
+    updateSwitchText(input);
+  });
+  markFormSaved('form-privacy');
+}
+
+/**
+ * Đồng bộ thông tin tài khoản lên thẻ bên trái và các form cài đặt
+ * @param {{force?: boolean}} [options] - force: đổ lại form tài khoản kể cả khi đang có thay đổi chưa lưu
+ */
+function syncUserInfoUI(options = {}) {
   const user = getCurrentUser();
   if (!user) {
     // Người dùng đã đăng xuất: chuyển hướng đến trang đăng nhập
@@ -691,43 +1123,58 @@ function syncUserInfoUI() {
   // Số dư khả dụng = tổng tiền ví - tiền cọc đang giữ (tính lại từ các phiên đang dẫn đầu)
   if (walletEl) walletEl.textContent = formatVnd(getAvailableBalance(user));
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
+  renderVerificationStatus(user);
 
-  // Form Account
-  const lastNameInput = document.getElementById('input-lastname');
-  const givenNameInput = document.getElementById('input-givenname');
-  const emInput = document.getElementById('input-email');
-  const phInput = document.getElementById('input-phone');
-  const smsInput = document.getElementById('pref-sms');
-  const mailInput = document.getElementById('pref-email');
-  const lastUpdateEl = document.getElementById('last-update-time');
+  // Form tài khoản: chỉ đổ lại dữ liệu khi người dùng chưa sửa dở (tránh bot đặt giá / cập nhật ví
+  // làm mất phần đang nhập); Hoàn tác và Lưu thành công thì luôn đổ lại
+  if (options.force || !isFormDirty('form-account-info')) {
+    // Form Account
+    const lastNameInput = document.getElementById('input-lastname');
+    const givenNameInput = document.getElementById('input-givenname');
+    const emInput = document.getElementById('input-email');
+    const phInput = document.getElementById('input-phone');
+    const smsInput = document.getElementById('pref-sms');
+    const mailInput = document.getElementById('pref-email');
+    const lastUpdateEl = document.getElementById('last-update-time');
 
-  // Họ đệm và tên tách riêng; tài khoản cũ chỉ có họ tên đầy đủ thì tự tách theo từ cuối
-  const givenName = user.givenName || getGivenName(user.fullname || '');
-  const lastName = user.lastName ?? String(user.fullname || '').slice(0, Math.max(0, String(user.fullname || '').length - givenName.length)).trim();
-  if (lastNameInput) lastNameInput.value = lastName;
-  if (givenNameInput) givenNameInput.value = givenName;
-  if (emInput) emInput.value = user.email || '';
-  if (phInput) phInput.value = user.phone || '';
-  if (smsInput) smsInput.checked = user.pref_sms !== false;
-  if (mailInput) mailInput.checked = user.pref_email !== false;
-  if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
-
-  // Giới tính, tiểu sử, ngày sinh
-  const genderInput = document.getElementById('input-gender');
-  const bioInput = document.getElementById('input-bio');
-  if (genderInput) genderInput.value = user.gender || '';
-  if (bioInput) bioInput.value = user.bio || '';
-  renderBirthDate(user);
-
-  // Quyền riêng tư hồ sơ công khai
-  const privacyForm = document.getElementById('form-privacy');
-  if (privacyForm) {
-    const privacy = getPrivacy(user);
-    privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => {
-      input.checked = Boolean(privacy[input.name]);
-      updateSwitchText(input);
-    });
+    // Họ đệm và tên tách riêng; tài khoản cũ chỉ có họ tên đầy đủ thì tự tách theo từ cuối
+    const givenName = user.givenName || getGivenName(user.fullname || '');
+    const lastName = user.lastName ?? String(user.fullname || '').slice(0, Math.max(0, String(user.fullname || '').length - givenName.length)).trim();
+    if (lastNameInput) lastNameInput.value = lastName;
+    if (givenNameInput) givenNameInput.value = givenName;
+    if (emInput) emInput.value = user.email || '';
+    if (phInput) phInput.value = user.phone || '';
+    // Tên đăng nhập: tài khoản demo chỉ xem, không đổi được (dữ liệu mẫu gắn với tên này)
+    const usernameInput = document.getElementById('input-username');
+    if (usernameInput) {
+      const laDemo = isDemoAccount(user);
+      usernameInput.value = user.username || '';
+      usernameInput.readOnly = laDemo;
+      usernameInput.classList.toggle('pcb-input--readonly', laDemo);
+      const lockEl = document.getElementById('username-lock');
+      if (lockEl) lockEl.hidden = !laDemo;
+      const hintEl = document.getElementById('hint-input-username');
+      if (hintEl) {
+        hintEl.textContent = laDemo
+          ? 'Tài khoản demo dùng tên đăng nhập cố định để giữ dữ liệu mẫu. Bạn vẫn đăng nhập được bằng tên này hoặc email.'
+          : 'Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.';
+      }
+    }
+    if (smsInput) smsInput.checked = user.pref_sms !== false;
+    if (mailInput) mailInput.checked = user.pref_email !== false;
+    if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
+    // Giới tính, tiểu sử, ngày sinh
+    const genderInput = document.getElementById('input-gender');
+    const bioInput = document.getElementById('input-bio');
+    if (genderInput) genderInput.value = user.gender || '';
+    if (bioInput) bioInput.value = user.bio || '';
+    renderBirthDate(user);
+    // Ghi lại trạng thái form vừa đổ dữ liệu làm mốc so sánh cho thanh lưu nổi
+    markAccountFormSaved();
   }
+
+  // Quyền riêng tư hồ sơ công khai: không ghi đè khi người dùng đang đổi dở công tắc
+  if (options.force || !isFormDirty('form-privacy')) fillPrivacyForm(user);
 }
 
 // Trạng thái hiển thị đầy đủ ngày sinh (bấm biểu tượng con mắt)
@@ -890,12 +1337,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderParticipatingCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'selling') {
@@ -911,12 +1358,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderSellingCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'watchlist') {
@@ -932,12 +1379,12 @@ function renderCurrentAuctionTab() {
     if (grid && empty) {
       if (filtered.length > 0) {
         grid.innerHTML = filtered.map(renderWatchlistCard).join('');
-        grid.style.display = 'flex';
-        empty.style.display = 'none';
+        grid.hidden = false;
+        empty.hidden = true;
       } else {
         grid.innerHTML = '';
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        grid.hidden = true;
+        empty.hidden = false;
       }
     }
   } else if (currentActiveTab === 'buy-orders' || currentActiveTab === 'sell-orders') {
@@ -957,8 +1404,8 @@ function renderCurrentAuctionTab() {
     const empty = document.getElementById(`empty-${currentActiveTab}`);
     if (grid && empty) {
       grid.innerHTML = filtered.map(order => renderOrderCard(order, order.role, { showProduct: true })).join('');
-      grid.style.display = filtered.length ? 'grid' : 'none';
-      empty.style.display = filtered.length ? 'none' : 'block';
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
       bindOrderActions(grid, () => {
         renderCurrentAuctionTab();
         syncUserInfoUI();
@@ -980,7 +1427,7 @@ function switchSection(sectionId) {
 
   // Ẩn tất cả các sections
   document.querySelectorAll('.pcb-section').forEach(sec => {
-    sec.style.display = sec.id === sectionId ? 'block' : 'none';
+    sec.hidden = sec.id !== sectionId;
   });
 
   // Cập nhật trạng thái active nút sidebar
@@ -1079,13 +1526,13 @@ function renderNotifications() {
 
   if (notifications.length === 0) {
     listEl.innerHTML = '';
-    listEl.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = 'block';
+    listEl.hidden = true;
+    if (emptyEl) emptyEl.hidden = false;
     return;
   }
 
-  listEl.style.display = 'flex';
-  if (emptyEl) emptyEl.style.display = 'none';
+  listEl.hidden = false;
+  if (emptyEl) emptyEl.hidden = true;
   listEl.innerHTML = notifications.map(n => `
     <li class="pcb-notify pcb-notify--${n.type} ${n.read ? 'pcb-notify--read' : 'pcb-notify--unread'}" data-notify-id="${escapeHtml(n.id)}">
       <span class="pcb-notify__icon">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 20 })}</span>
@@ -1329,7 +1776,7 @@ async function renderPublicProfile(username) {
   // Ẩn thanh bên quản lý cá nhân, chỉ hiện khu vực hồ sơ công khai
   document.body.classList.add('pcb-profile--public');
   document.querySelectorAll('.pcb-section').forEach(sec => {
-    sec.style.display = sec.id === 'section-public' ? 'block' : 'none';
+    sec.hidden = sec.id !== 'section-public';
   });
   const breadcrumbCurrent = document.getElementById('breadcrumb-current');
   if (breadcrumbCurrent) breadcrumbCurrent.textContent = 'Hồ sơ công khai';
@@ -1545,7 +1992,7 @@ function setupQuickBid(productId) {
     infoContainer.innerHTML = `
       <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-quick-bid-item__img">
       <div>
-        <div style="font-size:11px; color:#EA580C; font-weight:700; text-transform:uppercase;">${escapeHtml(item.category)}</div>
+        <div class="pcb-quick-bid-item__category">${escapeHtml(item.category)}</div>
         <div class="pcb-quick-bid-item__title">${escapeHtml(item.name)}</div>
       </div>
     `;
@@ -1589,7 +2036,7 @@ function startLiveCountdown() {
       if (!ts) return;
       const textEl = el.querySelector('.countdown-text');
       if (textEl) {
-        textEl.textContent = formatTimeRemaining(ts);
+        textEl.textContent = formatTimeRemaining(ts, Number(el.getAttribute('data-start')) || 0);
       }
     });
   }, 1000);
@@ -1637,6 +2084,11 @@ document.addEventListener('DOMContentLoaded', () => {
   //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
   applyHashRoute();
   window.addEventListener('hashchange', applyHashRoute);
+
+  // Thêm / xóa địa chỉ hoặc cập nhật email, số điện thoại: tính lại nhãn xác thực ngay
+  const refreshVerification = () => renderVerificationStatus(getCurrentUser());
+  window.addEventListener('pcbid:addresses-updated', refreshVerification);
+  window.addEventListener('pcbid:account-updated', refreshVerification);
 
   // Nạp dữ liệu phiên mới nhất rồi vẽ lại để thẻ watchlist khớp đúng với trang chi tiết
   loadAllAuctions().then(products => {
@@ -1738,10 +2190,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const unwatchBtn = e.target.closest('[data-action="unwatch"]');
     if (unwatchBtn) {
       const pId = Number(unwatchBtn.getAttribute('data-id'));
-      const watchlist = getWatchlistItems().filter(x => x.id !== pId);
-      saveWatchlistItems(watchlist);
+      // Giữ lại danh sách trước khi xóa để Hoàn tác trả linh kiện về đúng vị trí cũ
+      const before = getWatchlistItems();
+      saveWatchlistItems(before.filter(x => x.id !== pId));
       renderCurrentAuctionTab();
-      showToast('Đã xóa linh kiện khỏi danh sách theo dõi!');
+      showToast('Đã xóa linh kiện khỏi danh sách theo dõi!', true, {
+        label: 'Hoàn tác',
+        onClick: () => {
+          const current = getWatchlistItems();
+          if (current.some(x => x.id === pId)) return;
+          const removed = before.find(x => x.id === pId);
+          const index = before.findIndex(x => x.id === pId);
+          current.splice(Math.min(index, current.length), 0, removed);
+          saveWatchlistItems(current);
+          renderCurrentAuctionTab();
+          showToast('Đã khôi phục linh kiện vào danh sách theo dõi.');
+        }
+      });
       return;
     }
 
@@ -1900,9 +2365,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. Xử lý Form Cập nhật thông tin tài khoản
   const formAccount = document.getElementById('form-account-info');
   if (formAccount) {
-    formAccount.addEventListener('submit', async (e) => {
+    formAccount.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Lưu lại Promise để hộp thoại "rời trang khi chưa lưu" chờ kết quả lưu
+      accountSubmitPromise = handleAccountSubmit();
+    });
+  }
 
+  // 12a. Hỏi lưu trước khi rời trang / chuyển mục khi form tài khoản còn thay đổi chưa lưu
+  initAccountLeaveGuard();
+
+  async function handleAccountSubmit() {
       const user = getCurrentUser();
 
       // Kiểm tra email / số điện thoại: đúng định dạng và không trùng với tài khoản khác (lỗi hiện dưới ô)
@@ -1936,6 +2409,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const newEmail = emailInput.value.trim();
       const newPhone = normalizePhone(phoneInput.value.trim());
 
+      // Tên đăng nhập: kiểm tra định dạng, không trùng; đổi tên thì xác nhận rồi chuyển dữ liệu sang tên mới
+      const usernameInput = document.getElementById('input-username');
+      const oldUsername = user.username;
+      const newUsername = (usernameInput?.value || '').trim().toLowerCase();
+      let doiTenDangNhap = false;
+      if (usernameInput && !isDemoAccount(user) && newUsername !== oldUsername) {
+        if (!showUsernameError()) {
+          usernameInput.focus();
+          return;
+        }
+        const ok = await showConfirm({
+          title: 'Đổi tên đăng nhập?',
+          message: `Tên đăng nhập sẽ đổi từ @${oldUsername} thành @${newUsername}.\n\nLần sau hãy đăng nhập bằng tên mới (hoặc email). Liên kết hồ sơ công khai cũ sẽ không còn dùng được.`,
+          confirmText: 'Đổi tên đăng nhập',
+          cancelText: 'Giữ tên cũ'
+        });
+        if (!ok) {
+          usernameInput.value = oldUsername;
+          showUsernameError();
+          return;
+        }
+        doiTenDangNhap = true;
+      }
+
       // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
       const birthInput = document.getElementById('input-birthdate');
       if (birthInput && !birthInput.hidden && birthInput.value && birthInput.value !== user.birthDate) {
@@ -1968,6 +2465,11 @@ document.addEventListener('DOMContentLoaded', () => {
       user.fullname = `${lastNameVal} ${givenNameVal}`;
       user.email = newEmail;
       user.phone = newPhone;
+      if (doiTenDangNhap) {
+        // Chuyển watchlist, đăng bán, địa chỉ, lượt đặt giá, chat, đơn hàng... sang tên mới trước khi lưu tài khoản
+        migrateUsername(oldUsername, newUsername);
+        user.username = newUsername;
+      }
       user.pref_sms = document.getElementById('pref-sms')?.checked ?? true;
       user.pref_email = document.getElementById('pref-email')?.checked ?? true;
 
@@ -1976,13 +2478,24 @@ document.addEventListener('DOMContentLoaded', () => {
       user.lastUpdated = timeStr;
 
       saveCurrentUser(user);
-      syncUserInfoUI();
-      showToast('Đã lưu thay đổi thông tin cá nhân thành công!');
-    });
+      syncUserInfoUI({ force: true });
+      updateCounters();
+      showToast(doiTenDangNhap ? `Đã đổi tên đăng nhập thành @${user.username}!` : 'Đã lưu thay đổi thông tin cá nhân thành công!');
   }
 
   // 12a. Kiểm tra email / số điện thoại ngay khi rời khỏi ô: hiện dòng lỗi màu đỏ bên dưới
   setupContactFieldValidation();
+  // Thanh lưu nổi khi có thay đổi chưa lưu mà nút lưu đang khuất
+  initAccountSavebar();
+  // Tên đăng nhập: tự chuyển chữ thường, kiểm tra khi rời khỏi ô
+  const usernameField = document.getElementById('input-username');
+  if (usernameField) {
+    usernameField.addEventListener('input', () => {
+      const lower = usernameField.value.toLowerCase().replace(/\s+/g, '');
+      if (lower !== usernameField.value) usernameField.value = lower;
+    });
+    usernameField.addEventListener('blur', () => { if (!usernameField.readOnly) showUsernameError(); });
+  }
 
   // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
   const avatarInput = document.getElementById('input-avatar-file');
@@ -2050,33 +2563,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('pageshow', () => {
     if (privacyForm) syncUserInfoUI();
   });
-  // Đánh dấu có thay đổi quyền riêng tư chưa lưu
-  let privacyDirty = false;
   if (privacyForm) {
+    // Công tắc đổi trạng thái: cập nhật chữ Công khai / Riêng tư (thanh lưu nổi tự theo dõi thay đổi)
     privacyForm.addEventListener('change', (e) => {
-      if (e.target.matches('.pcb-switch__input')) {
-        updateSwitchText(e.target);
-        privacyDirty = true;
-      }
+      if (e.target.matches('.pcb-switch__input')) updateSwitchText(e.target);
     });
-    // Bấm "Xem hồ sơ công khai" khi còn thay đổi chưa lưu: hỏi lưu trước
-    const publicLink = document.getElementById('sidebar-public-link');
-    if (publicLink) {
-      publicLink.addEventListener('click', async (e) => {
-        if (!privacyDirty) return;
-        e.preventDefault();
-        const save = await showConfirm({
-          title: 'Chưa lưu cài đặt quyền riêng tư',
-          message: 'Bạn vừa thay đổi quyền riêng tư nhưng chưa lưu. Lưu trước khi xem hồ sơ công khai?',
-          confirmText: 'Lưu và xem',
-          cancelText: 'Bỏ thay đổi'
-        });
-        if (save) privacyForm.requestSubmit();
-        else syncUserInfoUI();
-        privacyDirty = false;
-        window.location.href = publicLink.href;
-      });
-    }
     privacyForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const user = getCurrentUser();
@@ -2084,7 +2575,7 @@ document.addEventListener('DOMContentLoaded', () => {
       privacyForm.querySelectorAll('.pcb-switch__input').forEach(input => { privacy[input.name] = input.checked; });
       user.privacy = privacy;
       saveCurrentUser(user);
-      privacyDirty = false;
+      markFormSaved('form-privacy');
       showToast('Đã lưu cài đặt quyền riêng tư hồ sơ công khai!');
     });
   }
@@ -2131,6 +2622,7 @@ document.addEventListener('DOMContentLoaded', () => {
       delete updated.password;
       saveCurrentUser(updated);
       formPass.reset();
+      updateSavebar();
       showToast('Đổi mật khẩu tài khoản thành công!');
     });
   }

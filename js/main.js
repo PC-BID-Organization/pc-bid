@@ -15,6 +15,8 @@ import { startBotBidding } from './bot-bidder.js';
 import { startSettlement } from './settlement.js';
 // Hộp chat nổi giữa người mua và người bán
 import { initChatWidget } from './chat.js';
+// Cụm nút liên hệ nổi: Facebook, Zalo, Gọi điện
+import { initContactFloat } from './contact-float.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Nạp đồng thời cả Header và Footer từ tệp HTML thành phần riêng biệt
@@ -34,6 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Hộp chat nổi (chỉ hiện khi đã đăng nhập)
   initChatWidget();
+
+  // Nút liên hệ nổi ở góc phải dưới (mọi trang)
+  initContactFloat();
 });
 
 /**

@@ -186,10 +186,20 @@
    5. GALLERY ẢNH SẢN PHẨM (CỘT TRÁI)
    ========================================================================== */
 
-/* Cột gallery bám dính khi cuộn */
+/* Cột gallery bám dính khi cuộn. Header không dính theo khi cuộn nên chỉ chừa 16px phía trên
+   (trước đây chừa 120px làm phía trên trống một khoảng và ảnh bị đẩy xuống sát mép dưới) */
 .pcb-pd__gallery {
   position: sticky;
-  top: 120px;
+  top: 16px;
+}
+
+/* Máy tính: giới hạn chiều cao khung ảnh để cả ảnh và dải thumbnail luôn nằm trọn trong màn hình
+   khi bám dính (110px = dải thumbnail + khoảng cách, 32px = lề trên dưới) */
+@media (min-width: 1025px) {
+  .pcb-pd__gallery-main {
+    max-height: calc(100vh - 142px);
+    max-height: calc(100dvh - 142px);
+  }
 }
 
 /* Khung ảnh chính lớn */
@@ -289,12 +299,109 @@
   }
 }
 
+/* Nút chuyển ảnh trước / sau nằm hai bên khung ảnh chính */
+.pcb-pd__gallery-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border-light);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(11, 28, 48, 0.16);
+  transform: translateY(-50%);
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  /* Bỏ ô màu xanh nháy lên khi chạm trên điện thoại */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pcb-pd__gallery-nav--prev {
+  left: 12px;
+}
+
+.pcb-pd__gallery-nav--next {
+  right: 12px;
+}
+
+.pcb-pd__gallery-nav:focus-visible {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pcb-pd__gallery-nav:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.pcb-pd__gallery-nav:focus-visible {
+  outline: 3px solid rgba(201, 69, 10, 0.35);
+  outline-offset: 2px;
+}
+
+/* Bộ đếm vị trí ảnh (VD: 2 / 4) ở góc dưới bên phải */
+.pcb-pd__gallery-counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: rgba(11, 28, 48, 0.72);
+  border-radius: 999px;
+}
+
+/* Máy tính có chuột: nút mờ đi, chỉ hiện rõ khi rê chuột vào khung ảnh */
+@media (hover: hover) and (pointer: fine) {
+  .pcb-pd__gallery-nav {
+    opacity: 0;
+  }
+
+  .pcb-pd__gallery-main:hover .pcb-pd__gallery-nav,
+  .pcb-pd__gallery-nav:focus-visible {
+    opacity: 1;
+  }
+
+  /* Hover tô cam chỉ dùng cho chuột (màn hình cảm ứng không bị kẹt màu sau khi chạm) */
+  .pcb-pd__gallery-nav:hover {
+    color: #ffffff;
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+/* Điện thoại: nút nhỏ lại cho gọn */
+@media (max-width: 575px) {
+  .pcb-pd__gallery-nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pcb-pd__gallery-nav--prev {
+    left: 8px;
+  }
+
+  .pcb-pd__gallery-nav--next {
+    right: 8px;
+  }
+}
+
 /* Dải thumbnail ảnh nhỏ bên dưới */
 .pcb-pd__gallery-thumbs {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  /* Chừa khoảng trống trên / hai bên: thumbnail đang chọn nhích lên 2px, nếu không
+     có padding thì overflow-x: auto sẽ cắt mất viền phía trên */
+  padding: 4px 2px 6px;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-medium) transparent;
 }
@@ -560,7 +667,7 @@
   align-items: center;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #16A34A;
+  color: #15803D;
   background-color: #DCFCE7;
   border-radius: 4px;
   padding: 2px 6px;
@@ -870,7 +977,7 @@
 .pcb-pd__seller-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #16A34A;
+  color: #15803D;
   background-color: #DCFCE7;
   padding: 4px 10px;
   border-radius: 20px;
@@ -1831,4 +1938,242 @@ a.pcb-pd__seller-avatar {
 
 .pcb-pd__owner-btn[hidden] {
   display: none;
+}
+
+/* Bảng thông số trống */
+.pcb-pd__specs-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Trạng thái "Chờ kiểm định" trong bảng quản lý của người bán */
+.pcb-pd__owner-status[data-state="pending"] {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+/* ==========================================================================
+   KHUNG KIỂM ĐỊNH PCBID LAB (dạng gọn dưới thẻ người bán)
+   ========================================================================== */
+.pcb-pd__inspection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-light);
+  border-radius: 14px;
+}
+
+.pcb-pd__inspection-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: #15803d;
+  background-color: #dcfce7;
+  border-radius: 50%;
+}
+
+.pcb-pd__inspection-body {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.pcb-pd__inspection-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.pcb-pd__inspection-status {
+  margin: 1px 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.pcb-pd__inspection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pcb-pd__inspection-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #15803d;
+  cursor: pointer;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.pcb-pd__inspection-btn:hover,
+.pcb-pd__inspection-btn:focus-visible {
+  background-color: #dcfce7;
+}
+
+/* Đang chờ kiểm định: tông hổ phách */
+.pcb-pd__inspection--pending {
+  background-color: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.pcb-pd__inspection--pending .pcb-pd__inspection-icon {
+  color: #b45309;
+  background-color: #fef3c7;
+}
+
+.pcb-pd__inspection--pending .pcb-pd__inspection-status {
+  color: #92400e;
+}
+
+/* ==========================================================================
+   HỘP THOẠI PHIẾU KIỂM ĐỊNH CỦA PHIÊN (thẻ dialog)
+   ========================================================================== */
+.pcb-cert-dialog {
+  /* reset.css xóa margin mặc định của <dialog>: đặt lại margin: auto để phiếu nằm giữa màn hình */
+  position: fixed;
+  inset: 0;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 20px;
+  overflow-y: auto;
+  color: var(--color-text-main);
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(11, 28, 48, 0.25);
+}
+
+/* Hiệu ứng mờ dần: phiếu và nền tối cùng hiện / ẩn trong 0,2 giây */
+.pcb-cert-dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pcb-cert-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pcb-cert-dialog--visible {
+  opacity: 1;
+  transform: none;
+}
+
+.pcb-cert-dialog--visible::backdrop {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-cert-dialog,
+  .pcb-cert-dialog::backdrop {
+    transition: none;
+  }
+}
+
+.pcb-cert-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pcb-cert-dialog__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pcb-cert-dialog__close {
+  display: inline-flex;
+  padding: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.pcb-cert-dialog__close:hover,
+.pcb-cert-dialog__close:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-cert-dialog__ok {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+}
+
+.pcb-cert-dialog__ok:hover,
+.pcb-cert-dialog__ok:focus-visible {
+  background-color: var(--color-primary-hover);
+}
+
+/* Thông báo khóa đặt giá trong khung đặt giá */
+.pcb-pd__inspect-lock {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #92400e;
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+}
+
+/* Nút demo bỏ qua thời gian chờ kiểm định */
+.pcb-pd__inspect-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #92400e;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 1px dashed #d97706;
+  border-radius: 8px;
+}
+
+.pcb-pd__inspect-skip:hover,
+.pcb-pd__inspect-skip:focus-visible {
+  background-color: #fef3c7;
+}
+
+/* Ghi chú đồng hồ tạm dừng khi phiên đang chờ kiểm định */
+.pcb-pd__countdown-paused {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #b45309;
 }

@@ -7,6 +7,9 @@
 Đồ án môn học: **IE104 - Internet & Công nghệ Web**
 Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**
 Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
+Nhóm thực hiện: **Nguyễn Hùng Phong · Nguyễn Nhật Huy · Huỳnh Nhật Minh · Nguyễn Gia Huy**
+
+🔗 **Bản chạy trực tiếp:** <https://pc-bid-organization.github.io/pc-bid/>
 
 ---
 
@@ -23,6 +26,7 @@ Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
 9. [Quy chuẩn lập trình](#9-quy-chuẩn-lập-trình)
 10. [Quy trình Git của nhóm](#10-quy-trình-git-của-nhóm)
 11. [Giới hạn của bản mô phỏng](#11-giới-hạn-của-bản-mô-phỏng)
+12. [Kiểm tra chất lượng](#12-kiểm-tra-chất-lượng)
 
 ---
 
@@ -44,6 +48,12 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - **Bot đặt giá mô phỏng** (`js/bot-bidder.js`): cứ 15–60 giây một người dùng mẫu đặt giá thật vào một phiên đang mở. Chỉ một tab chạy bot nhờ cơ chế khóa trong `localStorage`, có mức trần giá theo giá thị trường.
 - **Băng chuyền "Trực tiếp sàn đấu giá"** ở trang chủ hiện các lượt đặt mới nhất; bấm tên người để mở hồ sơ, bấm tên linh kiện để mở phiên.
 - Trang chi tiết tự cập nhật giá, số lượt, lịch sử và báo ngay khi bạn **bị vượt giá**.
+
+### Kiểm định phần cứng PCBid Lab
+- Mỗi phiên vừa đăng phải qua **kiểm định 1 phút** (mô phỏng gửi linh kiện tới PCBid Lab) trước khi mở đấu giá. Người bán không tự chọn chứng nhận.
+- Trong lúc chờ: thẻ sản phẩm có tem **"Chờ kiểm định"**, nút đặt giá bị khóa, bot không đặt giá vào phiên và **đồng hồ đếm ngược đứng yên**, chỉ chạy khi kiểm định xong.
+- Nút **"Bỏ qua chờ kiểm định (demo)"** trên trang chi tiết giúp trình diễn ngay không phải đợi.
+- Kiểm định xong, phiên hiện trạng thái **"Đạt chuẩn - PCBid Verified"** kèm nút mở **phiếu kiểm định riêng của từng sản phẩm**: mã chứng chỉ `#UIT-QC-<năm>-<mã phiên>`, xếp hạng, kiểm định viên, ngày cấp và kết quả đo theo loại linh kiện (Furmark, MemTest86, CrystalDiskInfo…).
 
 ### Ví ảo, tiền cọc & quy trình sau khi thắng
 - Mỗi lượt đang dẫn đầu bị **giữ cọc 10%**; bị vượt giá thì cọc tự hoàn.
@@ -71,10 +81,13 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 ### Tài khoản, hồ sơ & quyền riêng tư
 - Đăng nhập **kiểm tra đúng email / tên đăng nhập và mật khẩu**; mật khẩu được băm trước khi lưu (mô phỏng).
 - Đăng ký kiểm tra trùng email / số điện thoại, tự tạo tên đăng nhập không trùng.
+- **Đổi tên đăng nhập** trong phần cài đặt (3–20 ký tự, chữ thường, số, dấu chấm, gạch dưới, không trùng); tên mới dùng được để đăng nhập ngay và dữ liệu cũ (phiên, lượt đặt giá, đơn hàng, theo dõi) được chuyển theo. Tài khoản demo giữ cố định tên đăng nhập.
+- **Thanh lưu nổi** cho các form Thông tin tài khoản, Đổi mật khẩu và Quyền riêng tư: trên máy tính hiện khi nút Lưu đang khuất, trên điện thoại hiện ngay khi có thay đổi (kể cả lúc đang gõ, nằm sát phía trên bàn phím). Rời trang, chuyển mục hoặc tải lại khi chưa lưu sẽ được hỏi **Lưu / Không lưu / Ở lại**.
 - Thông tin tài khoản: họ đệm và tên tách riêng, giới tính, tiểu sử, ngày sinh chỉ được đổi 1 lần (có biểu tượng khóa), kiểm tra trùng email / số điện thoại ngay khi rời ô (dòng chữ đỏ và dấu X đỏ).
 - Ảnh đại diện tải lên kèm công cụ cắt ảnh bằng Canvas; mặc định là chữ cái đầu của tên.
 - **Hồ sơ công khai** (`profile.html?user=<tên đăng nhập>`): tiểu sử, liên hệ, phiên đang bán / đang tham gia, danh sách theo dõi, nút **Nhắn tin**; từng mục bật / tắt công khai bằng nút gạt.
 - **Sổ địa chỉ nhận hàng** giống Shopee: nhiều địa chỉ với tên và số điện thoại người nhận khác nhau, địa chỉ mặc định luôn đứng đầu.
+- **Danh sách theo dõi** lưu riêng cho từng tài khoản; bấm biểu tượng dấu trang ở thẻ sản phẩm hoặc trang chi tiết, số đếm trên header cập nhật ngay. Bỏ theo dõi trong hồ sơ có nút **Hoàn tác** đi kèm thông báo (vạch thời gian 5 giây), bấm là linh kiện quay về đúng vị trí cũ.
 
 ### Nhắn tin người mua - người bán
 - Hộp chat nổi 2 cột trên mọi trang: tìm theo tên, lọc **Tất cả / Đã ghim / Chưa đọc**, menu ba chấm để ghim, đánh dấu đã đọc / chưa đọc, xóa đoạn chat.
@@ -89,7 +102,11 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Chuyển **Tiếng Việt / English / 日本語** bằng nút quả địa cầu trên thanh trên cùng (hoặc trong menu tài khoản trên điện thoại). Bộ dịch quét chữ trên trang, kể cả nội dung sinh động bằng JavaScript; ngôn ngữ được nhớ cho mọi trang.
 - Bộ icon **Lucide** lưu thành tệp SVG trong `images/icons/lucide/`, hiển thị bằng CSS `mask-image` để đổi màu theo chữ.
 - Hộp thoại xác nhận / thông báo riêng thay cho `alert()` / `confirm()` của trình duyệt.
-- Phóng to ảnh sản phẩm khi rê chuột, lăn chuột để zoom.
+- Mọi ô chọn (danh mục cạnh thanh tìm kiếm, sắp xếp ở Sàn đấu giá, các ô trong form Đăng bán) dùng danh sách xổ xuống riêng của PCBid thay cho hộp chọn của trình duyệt, giống nhau trên máy tính và điện thoại, hỗ trợ bàn phím.
+- Trang chi tiết: phóng to ảnh khi rê chuột, lăn chuột để zoom; nút **< >**, phím mũi tên và vuốt ngang trên điện thoại để chuyển ảnh.
+- Trang Sàn đấu giá: bộ lọc có **thanh cuộn riêng** (cuộn bộ lọc không kéo cả trang); trên điện thoại bộ lọc mở dạng ngăn trượt có nút đóng và nút "Xem kết quả". Phân trang có ô **"Đến trang"** để nhảy thẳng tới trang bất kỳ.
+- **Nút liên hệ nổi** Facebook / Zalo / Gọi điện ở góc phải dưới, thu nhỏ trên điện thoại để không che nội dung.
+- Favicon và `site.webmanifest` cho trình duyệt máy tính lẫn điện thoại (thêm vào màn hình chính).
 - Responsive từ 320px, không tràn ngang.
 
 ---
@@ -113,15 +130,15 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 | # | Trang | Nội dung chính |
 | :-: | :--- | :--- |
 | 1 | `index.html` | Hero, danh mục, băng chuyền trực tiếp, phiên hot, sắp kết thúc, sản phẩm mới, đặt giá nhanh, cam kết sàn |
-| 2 | `products.html` | Bộ lọc danh mục / khoảng giá / tình trạng / kiểm định, sắp xếp, tìm kiếm, phân trang, nhãn "Bạn vừa đăng" |
-| 3 | `product-detail.html` | Gallery + zoom, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá, lịch sử đặt giá, bảng quản lý của người bán, đơn hàng sau đấu giá, liên hệ người bán |
-| 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình |
+| 2 | `products.html` | Bộ lọc danh mục / khoảng giá / tình trạng / kiểm định, sắp xếp, tìm kiếm, phân trang có ô nhảy tới trang, nhãn "Bạn vừa đăng" |
+| 3 | `product-detail.html` | Gallery + zoom + chuyển ảnh, khung và phiếu kiểm định, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá, lịch sử đặt giá, bảng quản lý của người bán, đơn hàng sau đấu giá, liên hệ người bán |
+| 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình, gửi kiểm định |
 | 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo |
 | 6 | `register.html` | Đăng ký, kiểm tra trùng email / số điện thoại, khởi tạo ví ảo |
-| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản, địa chỉ nhận hàng, bảo mật & quyền riêng tư, hồ sơ công khai `?user=` |
+| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` |
 | 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
 
-> Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html`. Tệp `my-auctions.html` chỉ chuyển hướng về `profile.html#my-auctions`.
+> Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html` (ví dụ `profile.html#participating`, `profile.html?user=<tên đăng nhập>`).
 
 ---
 
@@ -137,14 +154,16 @@ pc-bid/
 │   ├── home.css · products.css · product-detail.css · sell.css · auth.css · profile.css
 ├── data/                       # Catalogue linh kiện: cpu, gpu, mainboard, ram, storage, psu, cooling, case (.json)
 ├── images/
-│   ├── icons/                  # Icon trích xuất từ Figma
+│   ├── icons/                  # Icon trích xuất từ Figma, favicon / icon ứng dụng
 │   │   └── lucide/             # Icon Lucide dạng SVG
 │   ├── logo/ · banners/ · products/
 ├── js/
 │   ├── main.js                 # Nạp Header / Footer, khởi động bot, xử lý sau đấu giá, chat, đa ngôn ngữ
 │   ├── index.js · products.js · product-detail.js · sell.js · auth.js · profile.js   # Logic từng trang
+│   ├── inspection.js           # Quy trình kiểm định PCBid Lab, phiếu kiểm định từng sản phẩm
 │   ├── accounts.js             # Tài khoản demo / mẫu, UID, avatar, mật khẩu, kiểm tra trùng
 │   ├── user-data.js            # Danh sách riêng theo từng tài khoản (watchlist, đang bán, đã đọc...)
+│   ├── watchlist.js            # Thêm / bỏ theo dõi phiên, đồng bộ nút và số đếm trên header
 │   ├── auction-time.js         # Thời điểm kết thúc phiên thống nhất cho mọi trang
 │   ├── bid-history.js          # Nạp phiên, sinh lịch sử đặt giá dùng chung
 │   ├── bot-bidder.js           # Bot đặt giá mô phỏng
@@ -153,12 +172,15 @@ pc-bid/
 │   ├── order-view.js           # Thẻ đơn hàng dùng chung
 │   ├── address-book.js         # Sổ địa chỉ nhận hàng
 │   ├── chat.js                 # Hộp chat người mua - người bán
-│   ├── dialog.js               # Hộp thoại xác nhận / thông báo
+│   ├── dialog.js               # Hộp thoại xác nhận / thông báo / ba lựa chọn
+│   ├── custom-select.js        # Ô chọn xổ xuống tùy biến thay cho <select> của trình duyệt
+│   ├── contact-float.js        # Cụm nút liên hệ nổi Facebook / Zalo / Gọi điện
 │   ├── avatar-cropper.js       # Cắt ảnh đại diện bằng Canvas
 │   ├── icons.js                # Sinh thẻ icon Lucide
 │   └── i18n.js · i18n-dict.js  # Bộ dịch và từ điển Việt - Anh - Nhật
 ├── index.html · products.html · product-detail.html · sell.html
 ├── login.html · register.html · profile.html · 404.html
+├── favicon.ico · site.webmanifest
 ├── AGENTS.md                   # Quy tắc bắt buộc cho thành viên và AI Agent
 └── README.md
 ```
@@ -179,13 +201,15 @@ pc-bid/
 | `pcbid_lang` | Ngôn ngữ giao diện đã chọn |
 | `pcbid_bot_state` · `pcbid_bot_seeded` | Nhịp và khóa chạy bot giữa các tab |
 | `pcbid_settled` · `pcbid_settlement_since` | Các phiên đã xử lý kết quả |
-| `pcbid_watchlist__<tài khoản>` · `pcbid_my_auctions_selling__<tài khoản>` · `pcbid_notifications_read__<tài khoản>` · `pcbid_addresses__<tài khoản>` | Dữ liệu riêng của từng tài khoản |
+| `pcbid_watchlist__<tài khoản>` · `pcbid_my_auctions_selling__<tài khoản>` · `pcbid_my_auctions_participating__<tài khoản>` · `pcbid_notifications_read__<tài khoản>` · `pcbid_addresses__<tài khoản>` | Dữ liệu riêng của từng tài khoản |
 
-Các trang đồng bộ với nhau qua sự kiện `storage` (giữa các tab) và các sự kiện tùy biến như `pcbid:bid-placed`, `pcbid:orders-updated`, `pcbid:notifications-updated` (trong cùng tab).
+Các trang đồng bộ với nhau qua sự kiện `storage` (giữa các tab) và các sự kiện tùy biến như `pcbid:bid-placed`, `pcbid:orders-updated`, `pcbid:wallet-updated`, `pcbid:watchlist-updated`, `pcbid:account-updated`, `pcbid:notifications-updated` (trong cùng tab).
 
 ---
 
 ## 7. Hướng dẫn chạy dự án
+
+Cách nhanh nhất là mở bản đã triển khai: <https://pc-bid-organization.github.io/pc-bid/>. Muốn chạy trên máy:
 
 1. Clone repository:
    ```bash
@@ -217,8 +241,9 @@ Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nha
 3. Bấm **"Kết thúc phiên ngay (demo)"** → đơn "Chờ thanh toán" xuất hiện kèm đồng hồ 1 phút.
 4. Chọn địa chỉ nhận hàng, thanh toán → người bán mẫu tự giao hàng sau vài giây → bấm "Đã nhận được hàng" → hoàn tất.
 5. Bấm **"Liên hệ người bán"**, gửi câu hỏi / ảnh / thẻ sản phẩm, xem người bán tự trả lời.
-6. Đăng nhập `seller`, đăng bán một linh kiện → đồng hồ 10 giây → phiên đứng đầu Sàn đấu giá với nhãn "Bạn vừa đăng".
-7. Chuyển ngôn ngữ sang **English / 日本語** bằng nút quả địa cầu.
+6. Đăng nhập `seller`, đăng bán một linh kiện → đồng hồ 10 giây → phiên đứng đầu Sàn đấu giá với nhãn "Bạn vừa đăng" và tem "Chờ kiểm định" (đồng hồ phiên đứng yên).
+7. Mở phiên vừa đăng, bấm **"Bỏ qua chờ kiểm định (demo)"** → phiên chuyển "Đạt chuẩn - PCBid Verified", bấm xem phiếu kiểm định của sản phẩm.
+8. Chuyển ngôn ngữ sang **English / 日本語** bằng nút quả địa cầu.
 
 ---
 
@@ -259,3 +284,22 @@ Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nha
 - Mật khẩu được băm bằng hàm FNV-1a phía trình duyệt, **không phải cơ chế bảo mật thật**.
 - Video gửi trong chat giới hạn 1,5MB vì bộ nhớ `localStorage` chỉ khoảng 5MB.
 - Bộ dịch giữ nguyên tên sản phẩm, thông số dạng giá trị, tên người dùng và nội dung tin nhắn.
+- Khi triển khai thật cần backend để xác thực, băm mật khẩu bằng bcrypt / argon2, kiểm tra giá đặt và số dư phía server, dùng HTTPS và phiên đăng nhập an toàn.
+- Nhãn "Đã xác thực" là mô phỏng: tài khoản có đủ email, số điện thoại và ít nhất một địa chỉ nhận hàng thì được gắn nhãn.
+- Kiểm định PCBid Lab là mô phỏng: kết quả đo trên phiếu được sinh cố định theo mã phiên và loại linh kiện, không có kiểm tra phần cứng thật.
+- Nút Facebook / Zalo / Gọi điện dùng thông tin liên hệ minh họa (fanpage UIT và số `0999999999`).
+
+---
+
+## 12. Kiểm tra chất lượng
+
+| Hạng mục | Công cụ | Kết quả |
+| --- | --- | --- |
+| Chuẩn HTML | W3C Nu Html Checker (8 màn hình) | Không có lỗi |
+| Lighthouse (điện thoại) | Accessibility / Best Practices / SEO | 96 – 100 / 100 / 100 (6/8 trang đạt 100 Accessibility) |
+| Lỗi JavaScript | Playwright, 8 màn hình × máy tính / điện thoại × đã / chưa đăng nhập | Không có lỗi |
+| Responsive | Khổ 375px, 390px, 820px, 1280px | Không tràn ngang |
+
+- Màu cam chủ đạo `#c9450a` đạt tỉ lệ tương phản 4,8:1 trên nền trắng (chuẩn WCAG AA cho chữ thường là 4,5:1).
+- Ảnh sản phẩm được thu nhỏ về tối đa 1000px; logo và ảnh minh họa được nén theo kích thước hiển thị.
+- Điểm Performance phụ thuộc máy chủ: GitHub Pages có nén và lưu đệm tệp nên nhanh hơn khi chạy bằng `python -m http.server`.

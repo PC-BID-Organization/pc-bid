@@ -72,14 +72,8 @@ function initPasswordToggles() {
       const isPassword = input.type === 'password';
       input.type = isPassword ? 'text' : 'password';
 
-      // Chuyển đổi trạng thái hiển thị của icon mắt
-      const eyeIcon = btn.querySelector('.pcb-icon-eye');
-      const eyeOffIcon = btn.querySelector('.pcb-icon-eye-off');
-
-      if (eyeIcon && eyeOffIcon) {
-        eyeIcon.style.display = isPassword ? 'none' : 'block';
-        eyeOffIcon.style.display = isPassword ? 'block' : 'none';
-      }
+      // Chuyển đổi icon mắt / mắt gạch chéo bằng class trạng thái trên nút (CSS quyết định icon nào hiện)
+      btn.classList.toggle('pcb-auth-form__toggle-pwd--shown', isPassword);
 
       btn.setAttribute('title', isPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu');
     });
@@ -391,7 +385,6 @@ function initRegisterForm() {
       email: emailVal,
       phone: phoneVal,
       role: 'bidder',
-      verified: true,
       walletBalance: 50000000,
       address: 'Trường Đại học Công nghệ Thông tin, TP. Thủ Đức, TP. Hồ Chí Minh',
       registeredAt: new Date().toISOString()

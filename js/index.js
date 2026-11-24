@@ -14,6 +14,10 @@ import { icon } from './icons.js';
 import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
 import { describeBidder, findAccount } from './accounts.js';
+// Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
+import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung với trang chi tiết, Header)
+import { getWatchlist, toggleWatch, setWatchButtonState } from './watchlist.js';
 
 
 /* ==========================================================================
@@ -191,6 +195,14 @@ let hotFilterCategory = 'all';
 let currentModalProduct = null;
 let currentBidIncrement = 0;
 const watchedProductIds = new Set();
+
+/**
+ * Đồng bộ tập ID đang theo dõi từ watchlist của tài khoản (dùng khi vẽ thẻ sản phẩm)
+ */
+function syncWatchedIds() {
+  watchedProductIds.clear();
+  getWatchlist().forEach(item => watchedProductIds.add(Number(typeof item === 'object' ? item.id : item)));
+}
 
 /* ==========================================================================
    2. TIỆN ÍCH ĐỊNH DẠNG & MÃ HOÁ (UTILITIES)
@@ -382,12 +394,9 @@ async function loadProducts() {
    ========================================================================== */
 
 function getHardwareSeal(product) {
-  const cat = String(product.category).toUpperCase();
-  if (cat === 'GPU') return '<span class="pcb-card__seal pcb-card__seal--pass">Furmark 65°C</span>';
-  if (cat === 'CPU') return '<span class="pcb-card__seal pcb-card__seal--pass">Socket OK</span>';
-  if (cat === 'RAM') return '<span class="pcb-card__seal pcb-card__seal--pass">MemTest86 OK</span>';
-  if (cat === 'STORAGE') return '<span class="pcb-card__seal pcb-card__seal--pass">Health 100%</span>';
-  return '<span class="pcb-card__seal pcb-card__seal--pass">Đã Test Đạt</span>';
+  // Tem theo kết quả PCBid Lab; phiên vừa đăng hiện "Chờ kiểm định"
+  const modifier = isAwaitingInspection(product) ? 'pending' : 'pass';
+  return `<span class="pcb-card__seal pcb-card__seal--${modifier}">${escapeHtml(getInspectionSeal(product))}</span>`;
 }
 
 function getConditionBadge(conditionStr) {
@@ -400,7 +409,7 @@ function getConditionBadge(conditionStr) {
 }
 
 function renderProductCard(product, options = {}) {
-  const isWatched = watchedProductIds.has(product.id);
+  const isWatched = watchedProductIds.has(Number(product.id));
   const detailUrl = `product-detail.html?id=${product.id}`;
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
@@ -415,7 +424,7 @@ function renderProductCard(product, options = {}) {
   let countdownMarkup = '';
   if (options.showCountdown) {
     countdownMarkup = `
-      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
+      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="9"></circle>
           <polyline points="12 7 12 12 15 15"></polyline>
@@ -425,8 +434,8 @@ function renderProductCard(product, options = {}) {
     `;
   } else if (options.isNew) {
     countdownMarkup = `
-      <div class="pcb-card__countdown" style="background:#059669;">
-        <span style="font-size:10px;">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
+      <div class="pcb-card__countdown pcb-card__countdown--new">
+        <span class="pcb-card__new-label">${icon('sparkles', { size: 11 })} MỚI LÊN SÀN</span>
       </div>
     `;
   }
@@ -446,8 +455,8 @@ function renderProductCard(product, options = {}) {
         <img class="pcb-card__img" src="${imageSrc}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.src='images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'">
       </a>
 
-      <button type="button" class="pcb-card__watch ${isWatched ? 'pcb-card__watch--active' : ''}" 
-        data-action="watch" data-id="${product.id}" aria-label="Theo dõi sản phẩm này">
+      <button type="button" class="pcb-card__watch ${isWatched ? 'pcb-card__watch--active' : ''}"
+        data-action="watch" data-id="${product.id}" aria-pressed="${isWatched}" aria-label="${isWatched ? 'Bỏ theo dõi phiên này' : 'Theo dõi phiên này'}">
         <svg viewBox="0 0 24 24" fill="${isWatched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>
@@ -487,10 +496,14 @@ function renderProductCard(product, options = {}) {
             </span>
           </div>
 
+          ${isAwaitingInspection(product) ? `
+          <a href="${detailUrl}" class="pcb-card__btn pcb-card__btn--locked" title="Phiên mở đặt giá sau khi PCBid Lab kiểm định đạt">
+            ${icon('microscope', { size: 14 })} Chờ kiểm định
+          </a>` : `
           <button type="button" class="pcb-card__btn" data-action="quick-bid" data-id="${product.id}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
             Đặt giá nhanh
-          </button>
+          </button>`}
         </div>
       </div>
     </article>
@@ -532,7 +545,7 @@ function renderHotAuctionsShelf() {
   const items = filtered.slice(0, 5);
   
   if (items.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">Chưa có phiên phù hợp trong nhóm này.</div>';
+    container.innerHTML = '<div class="pcb-shelf__empty">Chưa có phiên phù hợp trong nhóm này.</div>';
     return;
   }
   container.innerHTML = items.map(p => renderProductCard(p, { showCountdown: false })).join('');
@@ -646,7 +659,7 @@ function renderSpotlight() {
 
   if (nameEl) {
     nameEl.textContent = product.name;
-    nameEl.closest('h3')?.setAttribute('title', product.name);
+    nameEl.closest('h2')?.setAttribute('title', product.name);
   }
   if (imgEl && product.images && product.images[0]) {
     imgEl.src = encodePath(product.images[0]);
@@ -677,7 +690,8 @@ function updateAllCountdowns() {
 
   elements.forEach(el => {
     const end = parseInt(el.getAttribute('data-timestamp'), 10);
-    const diff = end - now;
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
+    const diff = getRemainingMs(end, el.getAttribute('data-start'), now);
 
     const textEl = el.querySelector('.pcb-countdown-text');
     if (!textEl) return;
@@ -810,6 +824,46 @@ function renderLiveTicker(newBidId = null) {
 }
 
 /**
+ * Cập nhật liên kết "Xem tất cả N phiên đang mở" theo số phiên thật chưa kết thúc
+ * (catalog + phiên người dùng tự đăng, bỏ phiên đã hết giờ / đã đóng)
+ * @param {Array} auctions - Danh sách phiên từ loadAllAuctions()
+ */
+function updateOpenAuctionCount(auctions) {
+  const openAuctions = auctions.filter(p => !isAuctionClosed(p));
+  const el = document.getElementById('pcb-open-count-link');
+  if (el) el.textContent = `Xem tất cả ${openAuctions.length} phiên đang mở`;
+
+  // Số phiên mở theo từng danh mục (cùng cách phân loại với bộ lọc ở trang Sàn đấu giá)
+  const counts = { vga: 0, cpu: 0, mainboard: 0, ram: 0, storage: 0, psu: 0, cooling: 0, case: 0 };
+  openAuctions.forEach(p => {
+    const key = getFilterCategory(p.category);
+    if (key) counts[key]++;
+  });
+  document.querySelectorAll('[data-cat-count]').forEach(span => {
+    const value = counts[span.dataset.catCount] ?? 0;
+    span.textContent = span.classList.contains('pcb-cat-tile__count') ? `${value} phiên mở` : String(value);
+  });
+}
+
+/**
+ * Quy đổi tên danh mục của sản phẩm về giá trị bộ lọc ở trang Sàn đấu giá
+ * @param {string} category
+ * @returns {string|null}
+ */
+function getFilterCategory(category) {
+  const c = String(category || '').toLowerCase();
+  if (c.includes('gpu') || c.includes('vga')) return 'vga';
+  if (c.includes('cpu')) return 'cpu';
+  if (c.includes('main') || c.includes('bo mạch')) return 'mainboard';
+  if (c.includes('ram')) return 'ram';
+  if (c.includes('ssd') || c.includes('hdd') || c.includes('storage') || c.includes('ổ cứng')) return 'storage';
+  if (c.includes('psu') || c.includes('nguồn')) return 'psu';
+  if (c.includes('cool') || c.includes('tản')) return 'cooling';
+  if (c.includes('case') || c.includes('vỏ')) return 'case';
+  return null;
+}
+
+/**
  * Khởi động băng chuyền hoạt động trực tiếp, cập nhật theo thời gian thực
  */
 async function initLiveTicker() {
@@ -819,6 +873,9 @@ async function initLiveTicker() {
   const auctions = await loadAllAuctions();
   tickerProductMap = new Map(auctions.map(p => [Number(p.id), p]));
   renderLiveTicker();
+  updateOpenAuctionCount(auctions);
+  // Phiên hết giờ trong lúc đang xem trang: đếm lại mỗi 30 giây
+  setInterval(async () => updateOpenAuctionCount(await loadAllAuctions()), 30000);
 
   // Tự cuộn sang lượt tiếp theo; dừng khi người dùng rê chuột để kịp bấm vào liên kết
   let paused = false;
@@ -846,6 +903,7 @@ async function initLiveTicker() {
     const latest = await loadAllAuctions();
     tickerProductMap = new Map(latest.map(p => [Number(p.id), p]));
     renderLiveTicker(newBidId);
+    updateOpenAuctionCount(latest);
   };
   window.addEventListener('pcbid:bid-placed', e => refresh(e.detail?.id || null));
   window.addEventListener('storage', e => {
@@ -894,6 +952,11 @@ function showToast(message, type = 'success') {
 function openQuickBidModal(productId) {
   const product = allProducts.find(p => p.id === Number(productId));
   if (!product) return;
+  // Phiên chưa qua kiểm định: chưa mở đặt giá, chuyển sang trang chi tiết để xem trạng thái
+  if (isAwaitingInspection(product)) {
+    window.location.href = `product-detail.html?id=${product.id}`;
+    return;
+  }
 
   currentModalProduct = product;
   const step = product.bidStep || 100000;
@@ -902,7 +965,7 @@ function openQuickBidModal(productId) {
   const modalBackdrop = document.getElementById('pcb-bid-modal');
   if (!modalBackdrop) return;
 
-  document.getElementById('pcb-modal-img').src = product.images && product.images[0] ? encodePath(product.images[0]) : '';
+  document.getElementById('pcb-modal-img').src = product.images && product.images[0] ? encodePath(product.images[0]) : 'images/placeholder-product.svg';
   document.getElementById('pcb-modal-name').textContent = product.name;
   document.getElementById('pcb-modal-cond').textContent = product.condition || 'Đã kiểm định Furmark';
   document.getElementById('pcb-modal-cur-bid').textContent = formatVnd(product.currentBid);
@@ -1114,8 +1177,9 @@ function closeLightbox() {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Tải dữ liệu sản phẩm
+  // 1. Tải dữ liệu sản phẩm và danh sách theo dõi của tài khoản
   await loadProducts();
+  syncWatchedIds();
 
   // 2. Render các thành phần kệ hàng ban đầu
   renderEndingSoonShelf();
@@ -1135,8 +1199,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const endingTabs = document.querySelectorAll('[data-ending-tab]');
   endingTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      endingTabs.forEach(t => t.classList.remove('pcb-shelf__tab--active'));
+      endingTabs.forEach(t => {
+        t.classList.remove('pcb-shelf__tab--active');
+        t.setAttribute('aria-pressed', 'false');
+      });
       tab.classList.add('pcb-shelf__tab--active');
+      tab.setAttribute('aria-pressed', 'true');
       endingSortMode = tab.dataset.endingTab;
       renderEndingSoonShelf();
     });
@@ -1146,8 +1214,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hotTabs = document.querySelectorAll('[data-hot-tab]');
   hotTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      hotTabs.forEach(t => t.classList.remove('pcb-shelf__tab--active'));
+      hotTabs.forEach(t => {
+        t.classList.remove('pcb-shelf__tab--active');
+        t.setAttribute('aria-pressed', 'false');
+      });
       tab.classList.add('pcb-shelf__tab--active');
+      tab.setAttribute('aria-pressed', 'true');
       hotFilterCategory = tab.dataset.hotTab;
       renderHotAuctionsShelf();
     });
@@ -1167,15 +1239,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const watchBtn = e.target.closest('[data-action="watch"]');
     if (watchBtn) {
       const prodId = Number(watchBtn.dataset.id);
-      if (watchedProductIds.has(prodId)) {
-        watchedProductIds.delete(prodId);
-        watchBtn.classList.remove('pcb-card__watch--active');
-        showToast('Đã bỏ theo dõi phiên này');
-      } else {
-        watchedProductIds.add(prodId);
-        watchBtn.classList.add('pcb-card__watch--active');
-        showToast('Đã thêm vào danh sách theo dõi ❤️');
+      const product = allProducts.find(p => Number(p.id) === prodId) || { id: prodId };
+      // Lưu vào watchlist của tài khoản; chưa đăng nhập thì chuyển sang trang đăng nhập
+      const watched = toggleWatch(product);
+      if (watched === null) {
+        showToast('Bạn cần đăng nhập để theo dõi phiên đấu giá.', 'info');
+        setTimeout(() => { window.location.href = `login.html?redirect=${encodeURIComponent('index.html')}`; }, 1200);
+        return;
       }
+      syncWatchedIds();
+      // Cùng một phiên có thể xuất hiện ở nhiều kệ: cập nhật mọi nút của phiên đó
+      document.querySelectorAll(`[data-action="watch"][data-id="${prodId}"]`).forEach(btn => setWatchButtonState(btn, watched));
+      showToast(watched ? 'Đã thêm vào danh sách theo dõi' : 'Đã bỏ theo dõi phiên này');
       return;
     }
 
@@ -1202,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Xem chứng nhận kiểm định
-    if (e.target.closest('#btn-open-cert')) {
+    if (e.target.closest('#btn-open-cert, [data-open-cert]')) {
       openCertModal();
       return;
     }

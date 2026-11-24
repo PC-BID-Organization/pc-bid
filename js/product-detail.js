@@ -13,7 +13,9 @@ import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from '.
 // Bộ sinh lịch sử đặt giá mẫu dùng chung
 import { buildMockBids } from './bid-history.js';
 // Họ tên, UID và avatar chữ cái của người dùng
-import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid } from './accounts.js';
+import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, getUserUid, maskUid, getAllAccounts } from './accounts.js';
+// Trạng thái xác thực của người bán là thành viên (đủ email, số điện thoại, địa chỉ)
+import { getVerificationStatus } from './address-book.js';
 // Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
 import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -23,6 +25,10 @@ import { icon } from './icons.js';
 import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
+// Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
+import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionCertificate, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung)
+import { isWatched, toggleWatch } from './watchlist.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -388,6 +394,9 @@ function hienThiSanPham(sanPham) {
   // Kiểm tra phiên đã kết thúc chưa để vô hiệu nút đặt giá
   kiemTraPhienKetThuc(sanPham.endTime);
 
+  // Trạng thái kiểm định PCBid Lab (khóa đặt giá khi phiên đang chờ kiểm định)
+  capNhatKiemDinh();
+
   // Đơn hàng sau đấu giá và nút demo kết thúc phiên
   renderKhungDonHang();
   capNhatNutDemo();
@@ -494,23 +503,45 @@ function capNhatGia(sanPham) {
 }
 
 /**
- * Render gallery ảnh sản phẩm: ảnh chính + dải thumbnail
+ * Render gallery ảnh sản phẩm: ảnh chính + dải thumbnail + nút chuyển ảnh < >
  * @param {string[]} mảngAnh - Mảng đường dẫn ảnh sản phẩm
  */
 function renderGallery(mảngAnh) {
   const anhChinh = document.getElementById('pcb-pd-main-img');
   const vungThumbnail = document.getElementById('pcb-pd-thumbs');
+  const nutTruoc = document.getElementById('pcb-pd-gallery-prev');
+  const nutSau = document.getElementById('pcb-pd-gallery-next');
+  const boDem = document.getElementById('pcb-pd-gallery-counter');
 
   // Ảnh mặc định nếu không có ảnh nào
   const anhMacDinh = 'images/placeholder.jpg';
   const danhSachAnh = mảngAnh.length > 0 ? mảngAnh : [anhMacDinh];
+  const coNhieuAnh = danhSachAnh.length > 1;
+  let chiSoHienTai = 0;
 
-  // Thiết lập ảnh chính đầu tiên
   if (anhChinh) {
-    anhChinh.src = danhSachAnh[0];
     anhChinh.alt = sanPhamHienTai ? sanPhamHienTai.name : 'Ảnh sản phẩm';
     anhChinh.onerror = () => { anhChinh.src = anhMacDinh; };
   }
+
+  /**
+   * Chuyển ảnh chính tới vị trí chiSo (vòng lại đầu / cuối khi vượt giới hạn)
+   * @param {number} chiSo
+   */
+  const chuyenAnh = (chiSo) => {
+    chiSoHienTai = (chiSo + danhSachAnh.length) % danhSachAnh.length;
+    if (anhChinh) anhChinh.src = danhSachAnh[chiSoHienTai];
+    if (boDem) boDem.textContent = `${chiSoHienTai + 1} / ${danhSachAnh.length}`;
+    if (vungThumbnail) {
+      vungThumbnail.querySelectorAll('.pcb-pd__gallery-thumb').forEach((el, i) => {
+        const dangChon = i === chiSoHienTai;
+        el.classList.toggle('pcb-pd__gallery-thumb--active', dangChon);
+        el.setAttribute('aria-current', dangChon ? 'true' : 'false');
+        // Cuộn dải thumbnail để ảnh đang chọn luôn nằm trong tầm nhìn
+        if (dangChon) vungThumbnail.scrollTo({ left: el.offsetLeft - (vungThumbnail.clientWidth - el.offsetWidth) / 2, behavior: 'smooth' });
+      });
+    }
+  };
 
   // Tạo các thumbnail bên dưới
   if (vungThumbnail) {
@@ -518,7 +549,7 @@ function renderGallery(mảngAnh) {
 
     danhSachAnh.forEach((duongDanAnh, chiSo) => {
       const phanTuThumb = document.createElement('div');
-      phanTuThumb.className = `pcb-pd__gallery-thumb${chiSo === 0 ? ' pcb-pd__gallery-thumb--active' : ''}`;
+      phanTuThumb.className = 'pcb-pd__gallery-thumb';
       phanTuThumb.setAttribute('role', 'listitem');
 
       const imgThumb = document.createElement('img');
@@ -529,21 +560,44 @@ function renderGallery(mảngAnh) {
 
       phanTuThumb.appendChild(imgThumb);
 
-      // Xử lý sự kiện click để đổi ảnh chính
-      phanTuThumb.addEventListener('click', () => {
-        if (anhChinh) {
-          anhChinh.src = duongDanAnh;
-        }
-        // Cập nhật trạng thái active cho thumbnail
-        vungThumbnail.querySelectorAll('.pcb-pd__gallery-thumb').forEach(el => {
-          el.classList.remove('pcb-pd__gallery-thumb--active');
-        });
-        phanTuThumb.classList.add('pcb-pd__gallery-thumb--active');
-      });
+      // Bấm vào thumbnail để đổi ảnh chính
+      phanTuThumb.addEventListener('click', () => chuyenAnh(chiSo));
 
       vungThumbnail.appendChild(phanTuThumb);
     });
   }
+
+  // Nút < > và bộ đếm chỉ hiện khi sản phẩm có từ 2 ảnh trở lên
+  [nutTruoc, nutSau, boDem].forEach(el => { if (el) el.hidden = !coNhieuAnh; });
+  if (nutTruoc) nutTruoc.onclick = (e) => { e.stopPropagation(); chuyenAnh(chiSoHienTai - 1); };
+  if (nutSau) nutSau.onclick = (e) => { e.stopPropagation(); chuyenAnh(chiSoHienTai + 1); };
+
+  // Phím mũi tên trái / phải khi đang focus vào nút chuyển ảnh
+  const khung = document.querySelector('.pcb-pd__gallery-main');
+  if (khung && coNhieuAnh) {
+    khung.onkeydown = (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); chuyenAnh(chiSoHienTai - 1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); chuyenAnh(chiSoHienTai + 1); }
+    };
+
+    // Vuốt ngang trên điện thoại để chuyển ảnh
+    let diemBatDau = null;
+    khung.ontouchstart = (e) => {
+      const cham = e.touches[0];
+      diemBatDau = { x: cham.clientX, y: cham.clientY };
+    };
+    khung.ontouchend = (e) => {
+      if (!diemBatDau) return;
+      const cham = e.changedTouches[0];
+      const dx = cham.clientX - diemBatDau.x;
+      const dy = cham.clientY - diemBatDau.y;
+      diemBatDau = null;
+      // Chỉ tính là vuốt khi kéo ngang đủ xa và ngang nhiều hơn dọc (tránh nhầm với cuộn trang)
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) chuyenAnh(chiSoHienTai + (dx < 0 ? 1 : -1));
+    };
+  }
+
+  chuyenAnh(0);
 }
 
 // Giới hạn và mức phóng to mặc định của ảnh chính
@@ -567,6 +621,13 @@ function khoiDongZoomAnh() {
 
   // Áp dụng mức phóng to với tâm phóng là vị trí con trỏ trong khung ảnh
   const apDungZoom = (suKien) => {
+    // Con trỏ nằm trên nút < > hoặc bộ đếm: trả ảnh về kích thước gốc để dễ bấm
+    if (suKien.target.closest('.pcb-pd__gallery-nav, .pcb-pd__gallery-counter')) {
+      khung.classList.remove('pcb-pd__gallery-main--zooming');
+      anh.style.transform = 'none';
+      return;
+    }
+    khung.classList.add('pcb-pd__gallery-main--zooming');
     const khungAnh = khung.getBoundingClientRect();
     const x = Math.min(100, Math.max(0, ((suKien.clientX - khungAnh.left) / khungAnh.width) * 100));
     const y = Math.min(100, Math.max(0, ((suKien.clientY - khungAnh.top) / khungAnh.height) * 100));
@@ -600,6 +661,7 @@ function khoiDongZoomAnh() {
   // Lăn chuột lên để phóng to, lăn xuống để thu nhỏ; chặn cuộn trang khi đang zoom
   khung.addEventListener('wheel', (e) => {
     e.preventDefault();
+    if (e.target.closest('.pcb-pd__gallery-nav, .pcb-pd__gallery-counter')) return;
     const heSo = e.deltaY < 0 ? 1.2 : 1 / 1.2;
     mucZoom = Math.min(ZOOM_TOI_DA, Math.max(ZOOM_TOI_THIEU, mucZoom * heSo));
     apDungZoom(e);
@@ -629,6 +691,14 @@ function hienThiNguoiBan(tenNguoiBan) {
   // UID che bớt của người bán (người bán ngoài hệ thống dùng UID sinh từ tên đăng nhập)
   const oUid = document.getElementById('pcb-pd-seller-uid');
   if (oUid) oUid.textContent = `UID: ${maskUid(getUserUid(taiKhoan?.id || `seller_${tenNguoiBan}`))}`;
+
+  // Nhãn "Đã xác thực": người bán mẫu của sàn luôn được xác thực; thành viên tự đăng ký thì
+  // chỉ có nhãn khi đã bổ sung đủ email, số điện thoại và địa chỉ nhận hàng
+  const nhanXacThuc = document.getElementById('pcb-pd-seller-badge');
+  if (nhanXacThuc) {
+    const laThanhVien = getAllAccounts().some(a => a.username === tenNguoiBan);
+    nhanXacThuc.hidden = laThanhVien && !getVerificationStatus(taiKhoan).verified;
+  }
 
   // Nút liên hệ người bán: ẩn khi chính người bán xem phiên của mình
   const nutLienHe = document.getElementById('pcb-pd-contact-seller');
@@ -697,12 +767,13 @@ function capNhatCheDoNguoiBan() {
   const sp = sanPhamHienTai;
   const daKetThuc = isAuctionClosed(sp) || getAuctionEndTimestamp(sp) <= Date.now();
   const soLuot = Number(sp.bidCount || 0);
-  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : 'Đang diễn ra';
+  const choKiemDinh = !daKetThuc && isAwaitingInspection(sp);
+  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : choKiemDinh ? 'Chờ kiểm định' : 'Đang diễn ra';
 
   const oTrangThai = document.getElementById('pcb-pd-owner-status');
   if (oTrangThai) {
     oTrangThai.textContent = trangThai;
-    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : 'active';
+    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : choKiemDinh ? 'pending' : 'active';
   }
   const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   ganChu('pcb-pd-owner-price', dinhDangVnd(sp.currentBid || sp.startingPrice));
@@ -974,7 +1045,7 @@ function renderThongSo(thongSo) {
 
   const mục = Object.entries(thongSo);
   if (mục.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color: var(--color-text-muted);">Chưa có thông số kỹ thuật.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="2" class="pcb-pd__specs-empty">Chưa có thông số kỹ thuật.</td></tr>';
     return;
   }
 
@@ -999,7 +1070,11 @@ function khoiDongDemNguoc(thoiGianKetThuc) {
   if (idIntervalDemNguoc) clearInterval(idIntervalDemNguoc);
 
   const capNhatDemNguoc = () => {
-    const thoiGianConLai = new Date(thoiGianKetThuc).getTime() - Date.now();
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên ở đúng thời hạn phiên, chỉ chạy sau khi có kết quả
+    const mocBatDau = sanPhamHienTai ? getCountdownStart(sanPhamHienTai) : 0;
+    const thoiGianConLai = getRemainingMs(new Date(thoiGianKetThuc).getTime(), mocBatDau);
+    const ghiChuTamDung = document.getElementById('pcb-pd-countdown-paused');
+    if (ghiChuTamDung) ghiChuTamDung.hidden = !mocBatDau;
 
     if (thoiGianConLai <= 0) {
       hienThiDemNguoc(0, 0, 0, 0);
@@ -1087,6 +1162,146 @@ function hienThiPhienKetThuc() {
  * Kiểm tra ngay khi nạp trang xem phiên đã kết thúc chưa
  * @param {string} thoiGianKetThuc - ISO string thời gian kết thúc
  */
+/**
+ * Hiển thị kết quả kiểm định PCBid Lab và khóa / mở ô đặt giá theo trạng thái kiểm định.
+ * Gọi lại mỗi giây để đếm ngược và tự mở đặt giá khi có kết quả.
+ */
+function capNhatKiemDinh() {
+  const sp = sanPhamHienTai;
+  if (!sp) return;
+  const dangCho = isAwaitingInspection(sp);
+  const giay = getInspectionSecondsLeft(sp);
+
+  const khung = document.getElementById('pcb-pd-inspection');
+  const oTrangThai = document.getElementById('pcb-pd-inspection-status');
+  if (khung) khung.classList.toggle('pcb-pd__inspection--pending', dangCho);
+  if (oTrangThai) {
+    const noiDung = dangCho
+      ? `Đang kiểm định, còn khoảng ${giay} giây. Phiên chưa mở đặt giá.`
+      : 'Đạt chuẩn - PCBid Verified';
+    if (oTrangThai.textContent !== noiDung) oTrangThai.textContent = noiDung;
+  }
+
+  // Nút xem phiếu kiểm định: chỉ có khi phiên đã đạt
+  const nutPhieu = document.getElementById('pcb-pd-open-cert');
+  if (nutPhieu) {
+    nutPhieu.hidden = dangCho;
+    if (!nutPhieu.dataset.bound) {
+      nutPhieu.dataset.bound = '1';
+      nutPhieu.addEventListener('click', moPhieuKiemDinh);
+    }
+  }
+
+  // Nút demo bỏ qua thời gian chờ: chỉ hiện khi phiên đang chờ kiểm định
+  const nutBoQua = document.getElementById('pcb-pd-inspect-skip');
+  if (nutBoQua) {
+    nutBoQua.hidden = !dangCho;
+    if (!nutBoQua.dataset.bound) {
+      nutBoQua.dataset.bound = '1';
+      nutBoQua.addEventListener('click', () => {
+        if (!sanPhamHienTai || !skipInspectionForDemo(sanPhamHienTai.id)) return;
+        // Đọc lại phiên đã cập nhật (mốc kiểm định và giờ kết thúc đã dời) để mở đặt giá ngay
+        try {
+          const banMoi = JSON.parse(localStorage.getItem('pcbid_products') || '[]')
+            .find(p => Number(p.id) === Number(sanPhamHienTai.id));
+          if (banMoi) {
+            sanPhamHienTai.inspection = banMoi.inspection;
+            sanPhamHienTai.endTime = banMoi.endTime;
+          }
+        } catch {
+          // Bỏ qua lỗi đọc dữ liệu, lần tải trang sau sẽ hiển thị đúng
+        }
+        khoiDongDemNguoc(sanPhamHienTai.endTime);
+        capNhatKiemDinh();
+        capNhatCheDoNguoiBan();
+      });
+    }
+  }
+
+  // Khóa ô đặt giá khi đang chờ kiểm định; chỉ mở lại những ô do chính bước này khóa
+  const thongBaoKhoa = document.getElementById('pcb-pd-inspect-lock');
+  if (thongBaoKhoa) {
+    thongBaoKhoa.hidden = !dangCho;
+    thongBaoKhoa.textContent = dangCho ? `Phiên đang chờ PCBid Lab kiểm định. Đặt giá sẽ mở sau khoảng ${giay} giây.` : '';
+  }
+  const oKhoa = [document.getElementById('pcb-pd-bid-input'), document.getElementById('pcb-pd-submit-btn'),
+    ...document.querySelectorAll('.pcb-pd__quick-btn')].filter(Boolean);
+  oKhoa.forEach(el => {
+    if (dangCho) {
+      if (!el.disabled) el.dataset.khoaKiemDinh = '1';
+      el.disabled = true;
+    } else if (el.dataset.khoaKiemDinh) {
+      el.disabled = false;
+      delete el.dataset.khoaKiemDinh;
+    }
+  });
+
+  // Bảng quản lý của người bán: trạng thái "Chờ kiểm định"
+  const oTrangThaiChu = document.getElementById('pcb-pd-owner-status');
+  if (oTrangThaiChu && dangCho) {
+    oTrangThaiChu.textContent = 'Chờ kiểm định';
+    oTrangThaiChu.dataset.state = 'pending';
+  } else if (oTrangThaiChu && oTrangThaiChu.dataset.state === 'pending') {
+    capNhatCheDoNguoiBan();
+  }
+}
+
+/**
+ * Mở phiếu kiểm định riêng của phiên đang xem (mã chứng chỉ, kết quả đo, kiểm định viên, ngày cấp)
+ */
+function moPhieuKiemDinh() {
+  const hopThoai = document.getElementById('pcb-cert-dialog');
+  if (!hopThoai || !sanPhamHienTai) return;
+  const phieu = getInspectionCertificate(sanPhamHienTai);
+  const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  ganChu('pcb-cert-code', phieu.code);
+  ganChu('pcb-cert-grade', phieu.grade);
+  ganChu('pcb-cert-inspector', phieu.inspector);
+  ganChu('pcb-cert-date', phieu.date);
+  const danhSach = document.getElementById('pcb-cert-list');
+  if (danhSach) {
+    danhSach.innerHTML = phieu.rows.map(dong => `
+      <div class="pcb-cert-list__row">
+        <dt>${maHoaHtml(dong.label)}</dt>
+        <dd${dong.good ? ' class="pcb-cert-list__good"' : ''}>${maHoaHtml(dong.value)}</dd>
+      </div>`).join('');
+  }
+  if (!hopThoai.dataset.bound) {
+    hopThoai.dataset.bound = '1';
+    hopThoai.addEventListener('click', e => {
+      // Bấm nút đóng hoặc bấm ra vùng tối bên ngoài phiếu
+      if (e.target.closest('[data-close-cert]') || e.target === hopThoai) dongPhieuKiemDinh();
+    });
+    // Phím Esc: chặn đóng ngay lập tức để chạy hiệu ứng mờ dần
+    hopThoai.addEventListener('cancel', e => {
+      e.preventDefault();
+      dongPhieuKiemDinh();
+    });
+  }
+  hopThoai.showModal();
+  // Đợi một khung hình rồi mới thêm class để hiệu ứng mờ dần khi mở chạy được
+  requestAnimationFrame(() => requestAnimationFrame(() => hopThoai.classList.add('pcb-cert-dialog--visible')));
+}
+
+/**
+ * Đóng phiếu kiểm định với hiệu ứng mờ dần
+ */
+function dongPhieuKiemDinh() {
+  const hopThoai = document.getElementById('pcb-cert-dialog');
+  if (!hopThoai || !hopThoai.open || hopThoai.dataset.closing) return;
+  hopThoai.dataset.closing = '1';
+  hopThoai.classList.remove('pcb-cert-dialog--visible');
+  const ketThuc = () => {
+    delete hopThoai.dataset.closing;
+    if (hopThoai.open) hopThoai.close();
+  };
+  // Người dùng tắt hiệu ứng chuyển động: đóng ngay
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return ketThuc();
+  hopThoai.addEventListener('transitionend', ketThuc, { once: true });
+  // Dự phòng khi trình duyệt không phát transitionend
+  setTimeout(ketThuc, 260);
+}
+
 function kiemTraPhienKetThuc(thoiGianKetThuc) {
   if (new Date(thoiGianKetThuc).getTime() <= Date.now()) {
     hienThiPhienKetThuc();
@@ -1219,6 +1434,12 @@ function xuLyDatGia() {
   // Xóa lỗi cũ
   if (oLoi) { oLoi.hidden = true; oLoi.textContent = ''; }
   oNhapGia.classList.remove('pcb-pd__input--error');
+
+  // Phiên chưa qua kiểm định PCBid Lab: chưa nhận lượt đặt giá
+  if (isAwaitingInspection(sanPhamHienTai)) {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.');
+    return;
+  }
 
   // Phiên đã kết thúc hoặc đã chốt: không nhận thêm lượt đặt giá
   if (isAuctionClosed(sanPhamHienTai) || getAuctionEndTimestamp(sanPhamHienTai) <= Date.now()) {
@@ -1469,9 +1690,7 @@ function capNhatNutWatchlist(idSanPham) {
   const iconTim = document.getElementById('pcb-pd-watchlist-icon');
   const nhan = document.getElementById('pcb-pd-watchlist-label');
 
-  const watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, readLoggedInUser());
-
-  const daCoTrong = watchlist.some(item => (typeof item === "object" ? item.id : item) === idSanPham);
+  const daCoTrong = isWatched(idSanPham);
   if (nut) {
     nut.setAttribute('aria-pressed', daCoTrong ? 'true' : 'false');
     nut.classList.toggle('pcb-pd__watchlist-btn--active', daCoTrong);
@@ -1492,36 +1711,10 @@ function batTatWatchlist(idSanPham) {
     setTimeout(() => { window.location.href = 'login.html'; }, 1200);
     return;
   }
-  let watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung);
-
-  const daCoTrong = watchlist.some(item => (typeof item === 'object' ? item.id : item) === idSanPham);
-  if (daCoTrong) {
-    watchlist = watchlist.filter(item => (typeof item === 'object' ? item.id : item) !== idSanPham);
-    hienThiToast('Đã xóa khỏi danh sách theo dõi.', 'info');
-  } else {
-    const specsList = sanPhamHienTai?.specifications
-      ? Object.entries(sanPhamHienTai.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
-      : [];
-    const itemObj = {
-      id: sanPhamHienTai.id,
-      name: sanPhamHienTai.name,
-      category: sanPhamHienTai.category,
-      currentBid: sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice,
-      marketPriceNew: sanPhamHienTai.marketPriceNew || Math.round((sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) * 1.5),
-      bidCount: sanPhamHienTai.bidCount || 0,
-      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
-      images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-      specs: specsList
-    };
-    watchlist.unshift(itemObj);
-    hienThiToast('Đã thêm vào danh sách theo dõi!', 'success');
-  }
-
-  writeUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung, watchlist);
+  // Lưu qua module dùng chung để Trang chủ, Danh sách và Header thấy cùng một danh sách
+  const daThem = toggleWatch(sanPhamHienTai || { id: idSanPham }, nguoiDung);
+  hienThiToast(daThem ? 'Đã thêm vào danh sách theo dõi!' : 'Đã xóa khỏi danh sách theo dõi.', daThem ? 'success' : 'info');
   capNhatNutWatchlist(idSanPham);
-
-  const headerBadge = document.getElementById('header-watchlist-badge');
-  if (headerBadge) headerBadge.textContent = watchlist.length;
 }
 
 /* ==========================================================================
@@ -1695,6 +1888,8 @@ window.addEventListener('storage', (e) => {
 setInterval(() => {
   const khung = document.getElementById('pcb-pd-order-panel');
   if (khung && !khung.hidden) tickOrderCountdowns(khung);
+  // Đếm ngược kiểm định và tự mở đặt giá khi PCBid Lab trả kết quả
+  capNhatKiemDinh();
 }, 1000);
 
 window.addEventListener('storage', (e) => {
