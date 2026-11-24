@@ -289,6 +289,101 @@
   }
 }
 
+/* Nút chuyển ảnh trước / sau nằm hai bên khung ảnh chính */
+.pcb-pd__gallery-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--color-text-main);
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border-light);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(11, 28, 48, 0.16);
+  transform: translateY(-50%);
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  /* Bỏ ô màu xanh nháy lên khi chạm trên điện thoại */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pcb-pd__gallery-nav--prev {
+  left: 12px;
+}
+
+.pcb-pd__gallery-nav--next {
+  right: 12px;
+}
+
+.pcb-pd__gallery-nav:focus-visible {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pcb-pd__gallery-nav:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.pcb-pd__gallery-nav:focus-visible {
+  outline: 3px solid rgba(201, 69, 10, 0.35);
+  outline-offset: 2px;
+}
+
+/* Bộ đếm vị trí ảnh (VD: 2 / 4) ở góc dưới bên phải */
+.pcb-pd__gallery-counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: rgba(11, 28, 48, 0.72);
+  border-radius: 999px;
+}
+
+/* Máy tính có chuột: nút mờ đi, chỉ hiện rõ khi rê chuột vào khung ảnh */
+@media (hover: hover) and (pointer: fine) {
+  .pcb-pd__gallery-nav {
+    opacity: 0;
+  }
+
+  .pcb-pd__gallery-main:hover .pcb-pd__gallery-nav,
+  .pcb-pd__gallery-nav:focus-visible {
+    opacity: 1;
+  }
+
+  /* Hover tô cam chỉ dùng cho chuột (màn hình cảm ứng không bị kẹt màu sau khi chạm) */
+  .pcb-pd__gallery-nav:hover {
+    color: #ffffff;
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+/* Điện thoại: nút nhỏ lại cho gọn */
+@media (max-width: 575px) {
+  .pcb-pd__gallery-nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pcb-pd__gallery-nav--prev {
+    left: 8px;
+  }
+
+  .pcb-pd__gallery-nav--next {
+    right: 8px;
+  }
+}
+
 /* Dải thumbnail ảnh nhỏ bên dưới */
 .pcb-pd__gallery-thumbs {
   display: flex;

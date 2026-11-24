@@ -503,23 +503,45 @@ function capNhatGia(sanPham) {
 }
 
 /**
- * Render gallery ảnh sản phẩm: ảnh chính + dải thumbnail
+ * Render gallery ảnh sản phẩm: ảnh chính + dải thumbnail + nút chuyển ảnh < >
  * @param {string[]} mảngAnh - Mảng đường dẫn ảnh sản phẩm
  */
 function renderGallery(mảngAnh) {
   const anhChinh = document.getElementById('pcb-pd-main-img');
   const vungThumbnail = document.getElementById('pcb-pd-thumbs');
+  const nutTruoc = document.getElementById('pcb-pd-gallery-prev');
+  const nutSau = document.getElementById('pcb-pd-gallery-next');
+  const boDem = document.getElementById('pcb-pd-gallery-counter');
 
   // Ảnh mặc định nếu không có ảnh nào
   const anhMacDinh = 'images/placeholder.jpg';
   const danhSachAnh = mảngAnh.length > 0 ? mảngAnh : [anhMacDinh];
+  const coNhieuAnh = danhSachAnh.length > 1;
+  let chiSoHienTai = 0;
 
-  // Thiết lập ảnh chính đầu tiên
   if (anhChinh) {
-    anhChinh.src = danhSachAnh[0];
     anhChinh.alt = sanPhamHienTai ? sanPhamHienTai.name : 'Ảnh sản phẩm';
     anhChinh.onerror = () => { anhChinh.src = anhMacDinh; };
   }
+
+  /**
+   * Chuyển ảnh chính tới vị trí chiSo (vòng lại đầu / cuối khi vượt giới hạn)
+   * @param {number} chiSo
+   */
+  const chuyenAnh = (chiSo) => {
+    chiSoHienTai = (chiSo + danhSachAnh.length) % danhSachAnh.length;
+    if (anhChinh) anhChinh.src = danhSachAnh[chiSoHienTai];
+    if (boDem) boDem.textContent = `${chiSoHienTai + 1} / ${danhSachAnh.length}`;
+    if (vungThumbnail) {
+      vungThumbnail.querySelectorAll('.pcb-pd__gallery-thumb').forEach((el, i) => {
+        const dangChon = i === chiSoHienTai;
+        el.classList.toggle('pcb-pd__gallery-thumb--active', dangChon);
+        el.setAttribute('aria-current', dangChon ? 'true' : 'false');
+        // Cuộn dải thumbnail để ảnh đang chọn luôn nằm trong tầm nhìn
+        if (dangChon) vungThumbnail.scrollTo({ left: el.offsetLeft - (vungThumbnail.clientWidth - el.offsetWidth) / 2, behavior: 'smooth' });
+      });
+    }
+  };
 
   // Tạo các thumbnail bên dưới
   if (vungThumbnail) {
@@ -527,7 +549,7 @@ function renderGallery(mảngAnh) {
 
     danhSachAnh.forEach((duongDanAnh, chiSo) => {
       const phanTuThumb = document.createElement('div');
-      phanTuThumb.className = `pcb-pd__gallery-thumb${chiSo === 0 ? ' pcb-pd__gallery-thumb--active' : ''}`;
+      phanTuThumb.className = 'pcb-pd__gallery-thumb';
       phanTuThumb.setAttribute('role', 'listitem');
 
       const imgThumb = document.createElement('img');
@@ -538,21 +560,44 @@ function renderGallery(mảngAnh) {
 
       phanTuThumb.appendChild(imgThumb);
 
-      // Xử lý sự kiện click để đổi ảnh chính
-      phanTuThumb.addEventListener('click', () => {
-        if (anhChinh) {
-          anhChinh.src = duongDanAnh;
-        }
-        // Cập nhật trạng thái active cho thumbnail
-        vungThumbnail.querySelectorAll('.pcb-pd__gallery-thumb').forEach(el => {
-          el.classList.remove('pcb-pd__gallery-thumb--active');
-        });
-        phanTuThumb.classList.add('pcb-pd__gallery-thumb--active');
-      });
+      // Bấm vào thumbnail để đổi ảnh chính
+      phanTuThumb.addEventListener('click', () => chuyenAnh(chiSo));
 
       vungThumbnail.appendChild(phanTuThumb);
     });
   }
+
+  // Nút < > và bộ đếm chỉ hiện khi sản phẩm có từ 2 ảnh trở lên
+  [nutTruoc, nutSau, boDem].forEach(el => { if (el) el.hidden = !coNhieuAnh; });
+  if (nutTruoc) nutTruoc.onclick = (e) => { e.stopPropagation(); chuyenAnh(chiSoHienTai - 1); };
+  if (nutSau) nutSau.onclick = (e) => { e.stopPropagation(); chuyenAnh(chiSoHienTai + 1); };
+
+  // Phím mũi tên trái / phải khi đang focus vào nút chuyển ảnh
+  const khung = document.querySelector('.pcb-pd__gallery-main');
+  if (khung && coNhieuAnh) {
+    khung.onkeydown = (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); chuyenAnh(chiSoHienTai - 1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); chuyenAnh(chiSoHienTai + 1); }
+    };
+
+    // Vuốt ngang trên điện thoại để chuyển ảnh
+    let diemBatDau = null;
+    khung.ontouchstart = (e) => {
+      const cham = e.touches[0];
+      diemBatDau = { x: cham.clientX, y: cham.clientY };
+    };
+    khung.ontouchend = (e) => {
+      if (!diemBatDau) return;
+      const cham = e.changedTouches[0];
+      const dx = cham.clientX - diemBatDau.x;
+      const dy = cham.clientY - diemBatDau.y;
+      diemBatDau = null;
+      // Chỉ tính là vuốt khi kéo ngang đủ xa và ngang nhiều hơn dọc (tránh nhầm với cuộn trang)
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) chuyenAnh(chiSoHienTai + (dx < 0 ? 1 : -1));
+    };
+  }
+
+  chuyenAnh(0);
 }
 
 // Giới hạn và mức phóng to mặc định của ảnh chính
@@ -576,6 +621,13 @@ function khoiDongZoomAnh() {
 
   // Áp dụng mức phóng to với tâm phóng là vị trí con trỏ trong khung ảnh
   const apDungZoom = (suKien) => {
+    // Con trỏ nằm trên nút < > hoặc bộ đếm: trả ảnh về kích thước gốc để dễ bấm
+    if (suKien.target.closest('.pcb-pd__gallery-nav, .pcb-pd__gallery-counter')) {
+      khung.classList.remove('pcb-pd__gallery-main--zooming');
+      anh.style.transform = 'none';
+      return;
+    }
+    khung.classList.add('pcb-pd__gallery-main--zooming');
     const khungAnh = khung.getBoundingClientRect();
     const x = Math.min(100, Math.max(0, ((suKien.clientX - khungAnh.left) / khungAnh.width) * 100));
     const y = Math.min(100, Math.max(0, ((suKien.clientY - khungAnh.top) / khungAnh.height) * 100));
@@ -609,6 +661,7 @@ function khoiDongZoomAnh() {
   // Lăn chuột lên để phóng to, lăn xuống để thu nhỏ; chặn cuộn trang khi đang zoom
   khung.addEventListener('wheel', (e) => {
     e.preventDefault();
+    if (e.target.closest('.pcb-pd__gallery-nav, .pcb-pd__gallery-counter')) return;
     const heSo = e.deltaY < 0 ? 1.2 : 1 / 1.2;
     mucZoom = Math.min(ZOOM_TOI_DA, Math.max(ZOOM_TOI_THIEU, mucZoom * heSo));
     apDungZoom(e);
