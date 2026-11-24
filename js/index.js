@@ -824,6 +824,18 @@ function renderLiveTicker(newBidId = null) {
 }
 
 /**
+ * Cập nhật liên kết "Xem tất cả N phiên đang mở" theo số phiên thật chưa kết thúc
+ * (catalog + phiên người dùng tự đăng, bỏ phiên đã hết giờ / đã đóng)
+ * @param {Array} auctions - Danh sách phiên từ loadAllAuctions()
+ */
+function updateOpenAuctionCount(auctions) {
+  const el = document.getElementById('pcb-open-count-link');
+  if (!el) return;
+  const openCount = auctions.filter(p => !isAuctionClosed(p)).length;
+  el.textContent = `Xem tất cả ${openCount} phiên đang mở`;
+}
+
+/**
  * Khởi động băng chuyền hoạt động trực tiếp, cập nhật theo thời gian thực
  */
 async function initLiveTicker() {
@@ -833,6 +845,9 @@ async function initLiveTicker() {
   const auctions = await loadAllAuctions();
   tickerProductMap = new Map(auctions.map(p => [Number(p.id), p]));
   renderLiveTicker();
+  updateOpenAuctionCount(auctions);
+  // Phiên hết giờ trong lúc đang xem trang: đếm lại mỗi 30 giây
+  setInterval(async () => updateOpenAuctionCount(await loadAllAuctions()), 30000);
 
   // Tự cuộn sang lượt tiếp theo; dừng khi người dùng rê chuột để kịp bấm vào liên kết
   let paused = false;
@@ -860,6 +875,7 @@ async function initLiveTicker() {
     const latest = await loadAllAuctions();
     tickerProductMap = new Map(latest.map(p => [Number(p.id), p]));
     renderLiveTicker(newBidId);
+    updateOpenAuctionCount(latest);
   };
   window.addEventListener('pcbid:bid-placed', e => refresh(e.detail?.id || null));
   window.addEventListener('storage', e => {
