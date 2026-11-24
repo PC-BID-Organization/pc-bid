@@ -26,7 +26,7 @@ import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 // Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
-import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
+import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionCertificate, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -1119,21 +1119,21 @@ function capNhatKiemDinh() {
 
   const khung = document.getElementById('pcb-pd-inspection');
   const oTrangThai = document.getElementById('pcb-pd-inspection-status');
-  const danhSach = document.getElementById('pcb-pd-inspection-list');
   if (khung) khung.classList.toggle('pcb-pd__inspection--pending', dangCho);
   if (oTrangThai) {
     const noiDung = dangCho
       ? `Đang kiểm định, còn khoảng ${giay} giây. Phiên chưa mở đặt giá.`
-      : 'Đạt chuẩn, đã gắn tem PCBid Verified';
+      : 'Đạt chuẩn - PCBid Verified';
     if (oTrangThai.textContent !== noiDung) oTrangThai.textContent = noiDung;
   }
-  if (danhSach) {
-    const trangThaiDaVe = dangCho ? 'pending' : 'passed';
-    if (danhSach.dataset.state !== trangThaiDaVe) {
-      danhSach.dataset.state = trangThaiDaVe;
-      danhSach.innerHTML = dangCho ? '' : getInspectionResults(sp)
-        .map(kq => `<li class="pcb-pd__inspection-item"><span>${maHoaHtml(kq.label)}</span><strong>${maHoaHtml(kq.value)}</strong></li>`)
-        .join('');
+
+  // Nút xem phiếu kiểm định: chỉ có khi phiên đã đạt
+  const nutPhieu = document.getElementById('pcb-pd-open-cert');
+  if (nutPhieu) {
+    nutPhieu.hidden = dangCho;
+    if (!nutPhieu.dataset.bound) {
+      nutPhieu.dataset.bound = '1';
+      nutPhieu.addEventListener('click', moPhieuKiemDinh);
     }
   }
 
@@ -1189,6 +1189,36 @@ function capNhatKiemDinh() {
   } else if (oTrangThaiChu && oTrangThaiChu.dataset.state === 'pending') {
     capNhatCheDoNguoiBan();
   }
+}
+
+/**
+ * Mở phiếu kiểm định riêng của phiên đang xem (mã chứng chỉ, kết quả đo, kiểm định viên, ngày cấp)
+ */
+function moPhieuKiemDinh() {
+  const hopThoai = document.getElementById('pcb-cert-dialog');
+  if (!hopThoai || !sanPhamHienTai) return;
+  const phieu = getInspectionCertificate(sanPhamHienTai);
+  const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  ganChu('pcb-cert-code', phieu.code);
+  ganChu('pcb-cert-grade', phieu.grade);
+  ganChu('pcb-cert-inspector', phieu.inspector);
+  ganChu('pcb-cert-date', phieu.date);
+  const danhSach = document.getElementById('pcb-cert-list');
+  if (danhSach) {
+    danhSach.innerHTML = phieu.rows.map(dong => `
+      <div class="pcb-cert-list__row">
+        <dt>${maHoaHtml(dong.label)}</dt>
+        <dd${dong.good ? ' class="pcb-cert-list__good"' : ''}>${maHoaHtml(dong.value)}</dd>
+      </div>`).join('');
+  }
+  if (!hopThoai.dataset.bound) {
+    hopThoai.dataset.bound = '1';
+    hopThoai.addEventListener('click', e => {
+      // Bấm nút đóng hoặc bấm ra vùng tối bên ngoài phiếu
+      if (e.target.closest('[data-close-cert]') || e.target === hopThoai) hopThoai.close();
+    });
+  }
+  hopThoai.showModal();
 }
 
 function kiemTraPhienKetThuc(thoiGianKetThuc) {

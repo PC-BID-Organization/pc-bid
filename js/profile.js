@@ -26,7 +26,7 @@ import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } f
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
   renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
-  hashPassword, verifyPassword, accountHasPassword } from './accounts.js';
+  hashPassword, verifyPassword, accountHasPassword, isDemoAccount, validateUsername, migrateUsername } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
@@ -695,6 +695,22 @@ function renderVerificationStatus(user) {
   }
 }
 
+/**
+ * Hiện / xóa lỗi của ô tên đăng nhập
+ * @returns {boolean} true nếu tên hợp lệ (hoặc không đổi)
+ */
+function showUsernameError() {
+  const input = document.getElementById('input-username');
+  const errEl = document.getElementById('err-input-username');
+  if (!input) return true;
+  const user = getCurrentUser();
+  const value = input.value.trim().toLowerCase();
+  const message = value === user?.username ? '' : validateUsername(value, user);
+  if (errEl) errEl.textContent = message;
+  input.classList.toggle('pcb-input--error', Boolean(message));
+  return !message;
+}
+
 function syncUserInfoUI() {
   const user = getCurrentUser();
   if (!user) {
@@ -739,6 +755,22 @@ function syncUserInfoUI() {
   if (givenNameInput) givenNameInput.value = givenName;
   if (emInput) emInput.value = user.email || '';
   if (phInput) phInput.value = user.phone || '';
+  // Tên đăng nhập: tài khoản demo chỉ xem, không đổi được (dữ liệu mẫu gắn với tên này)
+  const usernameInput = document.getElementById('input-username');
+  if (usernameInput) {
+    const laDemo = isDemoAccount(user);
+    usernameInput.value = user.username || '';
+    usernameInput.readOnly = laDemo;
+    usernameInput.classList.toggle('pcb-input--readonly', laDemo);
+    const lockEl = document.getElementById('username-lock');
+    if (lockEl) lockEl.hidden = !laDemo;
+    const hintEl = document.getElementById('hint-input-username');
+    if (hintEl) {
+      hintEl.textContent = laDemo
+        ? 'Tài khoản demo dùng tên đăng nhập cố định để giữ dữ liệu mẫu. Bạn vẫn đăng nhập được bằng tên này hoặc email.'
+        : 'Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.';
+    }
+  }
   if (smsInput) smsInput.checked = user.pref_sms !== false;
   if (mailInput) mailInput.checked = user.pref_email !== false;
   if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
@@ -1972,6 +2004,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const newEmail = emailInput.value.trim();
       const newPhone = normalizePhone(phoneInput.value.trim());
 
+      // Tên đăng nhập: kiểm tra định dạng, không trùng; đổi tên thì xác nhận rồi chuyển dữ liệu sang tên mới
+      const usernameInput = document.getElementById('input-username');
+      const oldUsername = user.username;
+      const newUsername = (usernameInput?.value || '').trim().toLowerCase();
+      let doiTenDangNhap = false;
+      if (usernameInput && !isDemoAccount(user) && newUsername !== oldUsername) {
+        if (!showUsernameError()) {
+          usernameInput.focus();
+          return;
+        }
+        const ok = await showConfirm({
+          title: 'Đổi tên đăng nhập?',
+          message: `Tên đăng nhập sẽ đổi từ @${oldUsername} thành @${newUsername}.\n\nLần sau hãy đăng nhập bằng tên mới (hoặc email). Liên kết hồ sơ công khai cũ sẽ không còn dùng được.`,
+          confirmText: 'Đổi tên đăng nhập',
+          cancelText: 'Giữ tên cũ'
+        });
+        if (!ok) {
+          usernameInput.value = oldUsername;
+          showUsernameError();
+          return;
+        }
+        doiTenDangNhap = true;
+      }
+
       // Ngày sinh: chỉ được thay đổi một lần, xác nhận trước khi khóa vĩnh viễn
       const birthInput = document.getElementById('input-birthdate');
       if (birthInput && !birthInput.hidden && birthInput.value && birthInput.value !== user.birthDate) {
@@ -2004,6 +2060,11 @@ document.addEventListener('DOMContentLoaded', () => {
       user.fullname = `${lastNameVal} ${givenNameVal}`;
       user.email = newEmail;
       user.phone = newPhone;
+      if (doiTenDangNhap) {
+        // Chuyển watchlist, đăng bán, địa chỉ, lượt đặt giá, chat, đơn hàng... sang tên mới trước khi lưu tài khoản
+        migrateUsername(oldUsername, newUsername);
+        user.username = newUsername;
+      }
       user.pref_sms = document.getElementById('pref-sms')?.checked ?? true;
       user.pref_email = document.getElementById('pref-email')?.checked ?? true;
 
@@ -2013,12 +2074,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       saveCurrentUser(user);
       syncUserInfoUI();
-      showToast('Đã lưu thay đổi thông tin cá nhân thành công!');
+      updateCounters();
+      showToast(doiTenDangNhap ? `Đã đổi tên đăng nhập thành @${user.username}!` : 'Đã lưu thay đổi thông tin cá nhân thành công!');
     });
   }
 
   // 12a. Kiểm tra email / số điện thoại ngay khi rời khỏi ô: hiện dòng lỗi màu đỏ bên dưới
   setupContactFieldValidation();
+  // Tên đăng nhập: tự chuyển chữ thường, kiểm tra khi rời khỏi ô
+  const usernameField = document.getElementById('input-username');
+  if (usernameField) {
+    usernameField.addEventListener('input', () => {
+      const lower = usernameField.value.toLowerCase().replace(/\s+/g, '');
+      if (lower !== usernameField.value) usernameField.value = lower;
+    });
+    usernameField.addEventListener('blur', () => { if (!usernameField.readOnly) showUsernameError(); });
+  }
 
   // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
   const avatarInput = document.getElementById('input-avatar-file');

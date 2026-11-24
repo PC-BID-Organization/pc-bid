@@ -514,6 +514,24 @@
 
                 <p class="pcb-form__hint pcb-form__group--full pcb-form__name-hint">Họ tên hiển thị kèm UID che bớt trong lịch sử đặt giá (VD: Nguyễn Hùng Phong · #PCB-1Q***2T). Avatar mặc định lấy chữ cái đầu của Tên.</p>
 
+                <!-- Tên đăng nhập: dùng để đăng nhập thay cho email và làm đường dẫn hồ sơ công khai -->
+                <div class="pcb-form__group pcb-form__group--full">
+                  <label for="input-username" class="pcb-form__label">
+                    TÊN ĐĂNG NHẬP <span class="pcb-form__required">*</span>
+                  </label>
+                  <div class="pcb-input-icon-wrap pcb-username-wrap">
+                    <span class="pcb-input-icon pcb-username-wrap__at" aria-hidden="true">@</span>
+                    <input type="text" id="input-username" name="username" class="pcb-input" maxlength="20"
+                      required autocomplete="username" spellcheck="false" autocapitalize="none"
+                      placeholder="VD: phong.pcbuilder" aria-describedby="hint-input-username">
+                    <span class="pcb-username-wrap__lock" id="username-lock" title="Tài khoản demo không đổi được tên đăng nhập" hidden>
+                      <span class="lucide pcb-icon pcb-icon--lock pcb-icon--s14" aria-hidden="true"></span>
+                    </span>
+                  </div>
+                  <span class="pcb-form__hint" id="hint-input-username">Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.</span>
+                  <span class="pcb-form__error" id="err-input-username" role="alert"></span>
+                </div>
+
                 <!-- Trường Giới tính -->
                 <div class="pcb-form__group">
                   <label for="input-gender" class="pcb-form__label">GIỚI TÍNH</label>

@@ -111,20 +111,6 @@
           <!-- Mô tả tình trạng cụ thể -->
           <p class="pcb-pd__condition-text" id="pcb-pd-condition-text"></p>
 
-          <!-- Kết quả kiểm định PCBid Lab: phiên mới đăng hiện trạng thái chờ, đạt chuẩn thì hiện chỉ số đo -->
-          <section class="pcb-pd__inspection" id="pcb-pd-inspection" aria-labelledby="pcb-pd-inspection-title">
-            <h2 class="pcb-pd__inspection-title" id="pcb-pd-inspection-title">
-              <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s16" aria-hidden="true"></span>
-              <span id="pcb-pd-inspection-heading">Kiểm định PCBid Lab</span>
-            </h2>
-            <p class="pcb-pd__inspection-status" id="pcb-pd-inspection-status" aria-live="polite"></p>
-            <ul class="pcb-pd__inspection-list" id="pcb-pd-inspection-list"></ul>
-            <!-- Công cụ demo: bỏ qua 1 phút chờ để PCBid Lab trả kết quả ngay -->
-            <button type="button" class="pcb-pd__inspect-skip" id="pcb-pd-inspect-skip" hidden>
-              <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Bỏ qua chờ kiểm định (demo)
-            </button>
-          </section>
-
           <!-- ===== ĐỒNG HỒ ĐẾM NGƯỢC ===== -->
           <div class="pcb-pd__countdown-wrap" id="pcb-pd-countdown-wrap">
             <div class="pcb-pd__countdown-label">
@@ -290,6 +276,27 @@
             </button>
           </div>
 
+          <!-- ===== KIỂM ĐỊNH PCBID LAB: trạng thái gọn, xem phiếu kiểm định của phiên ===== -->
+          <section class="pcb-pd__inspection" id="pcb-pd-inspection" aria-labelledby="pcb-pd-inspection-title">
+            <span class="pcb-pd__inspection-icon" aria-hidden="true">
+              <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s18"></span>
+            </span>
+            <div class="pcb-pd__inspection-body">
+              <h2 class="pcb-pd__inspection-title" id="pcb-pd-inspection-title">Kiểm định PCBid Lab</h2>
+              <p class="pcb-pd__inspection-status" id="pcb-pd-inspection-status" aria-live="polite"></p>
+            </div>
+            <div class="pcb-pd__inspection-actions">
+              <!-- Phiên đã đạt: mở phiếu kiểm định riêng của phiên -->
+              <button type="button" class="pcb-pd__inspection-btn" id="pcb-pd-open-cert" hidden>
+                <span class="lucide pcb-icon pcb-icon--receipt pcb-icon--s14" aria-hidden="true"></span> Xem phiếu kiểm định
+              </button>
+              <!-- Công cụ demo: bỏ qua 1 phút chờ để PCBid Lab trả kết quả ngay -->
+              <button type="button" class="pcb-pd__inspect-skip" id="pcb-pd-inspect-skip" hidden>
+                <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Bỏ qua chờ kiểm định (demo)
+              </button>
+            </div>
+          </section>
+
         </div>
         <!-- Kết thúc cột phải -->
 
@@ -392,6 +399,36 @@
 
   <!-- ==================== KHUNG NẠP ĐỘNG FOOTER ==================== -->
   <div id="app-footer"></div>
+
+  <!-- ===== PHIẾU KIỂM ĐỊNH CỦA PHIÊN (dialog, JS điền dữ liệu theo từng sản phẩm) ===== -->
+  <dialog class="pcb-cert-dialog" id="pcb-cert-dialog" aria-labelledby="pcb-cert-dialog-title">
+    <div class="pcb-cert-dialog__head">
+      <h2 class="pcb-cert-dialog__title" id="pcb-cert-dialog-title">Phiếu kiểm định chất lượng</h2>
+      <button type="button" class="pcb-cert-dialog__close" data-close-cert aria-label="Đóng phiếu kiểm định">
+        <span class="lucide pcb-icon pcb-icon--x pcb-icon--s18" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="pcb-cert-card">
+      <div class="pcb-cert-card__head">
+        <div class="pcb-cert-card__org">
+          <span class="pcb-cert-card__eyebrow">Phiếu kiểm định phần cứng</span>
+          <h3 class="pcb-cert-card__title">Trung tâm kiểm định phần cứng PCBid</h3>
+          <span class="pcb-cert-card__code">Mã chứng chỉ: <strong id="pcb-cert-code">#UIT-QC</strong></span>
+        </div>
+        <div class="pcb-cert-card__stamp" role="img" aria-label="Kết quả: Đạt chuẩn A+">
+          <span class="pcb-cert-card__stamp-top">Đạt chuẩn</span>
+          <span class="pcb-cert-card__stamp-grade" id="pcb-cert-grade">A+</span>
+          <span class="pcb-cert-card__stamp-bottom">PCBid QC</span>
+        </div>
+      </div>
+      <dl class="pcb-cert-list" id="pcb-cert-list"></dl>
+      <div class="pcb-cert-card__foot">
+        <span>Kiểm định viên: <strong id="pcb-cert-inspector">UIT Hardware Lab</strong></span>
+        <span>Ngày cấp: <strong id="pcb-cert-date">Hôm nay</strong></span>
+      </div>
+    </div>
+    <button type="button" class="pcb-cert-dialog__ok" data-close-cert>Đã hiểu</button>
+  </dialog>
 
   <!-- ===== MODAL XÁC NHẬN ĐẶT GIÁ THÀNH CÔNG ===== -->
   <div

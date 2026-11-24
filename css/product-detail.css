@@ -1846,68 +1846,156 @@ a.pcb-pd__seller-avatar {
 }
 
 /* ==========================================================================
-   KHUNG KẾT QUẢ KIỂM ĐỊNH PCBID LAB
+   KHUNG KIỂM ĐỊNH PCBID LAB (dạng gọn dưới thẻ người bán)
    ========================================================================== */
 .pcb-pd__inspection {
-  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-top: 12px;
   padding: 12px 14px;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-light);
+  border-radius: 14px;
+}
+
+.pcb-pd__inspection-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: #15803d;
+  background-color: #dcfce7;
+  border-radius: 50%;
+}
+
+.pcb-pd__inspection-body {
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
 .pcb-pd__inspection-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 4px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #14532d;
-}
-
-.pcb-pd__inspection-status {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.pcb-pd__inspection-status {
+  margin: 1px 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
   color: #15803d;
 }
 
-.pcb-pd__inspection-list {
-  display: grid;
-  gap: 4px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pcb-pd__inspection-list:empty {
-  display: none;
-}
-
-.pcb-pd__inspection-item {
+.pcb-pd__inspection-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 2px 12px;
+  gap: 8px;
+}
+
+.pcb-pd__inspection-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font: inherit;
   font-size: 0.8125rem;
-  color: #475569;
+  font-weight: 700;
+  color: #15803d;
+  cursor: pointer;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
 }
 
-.pcb-pd__inspection-item strong {
-  font-weight: 600;
-  color: #0f172a;
+.pcb-pd__inspection-btn:hover,
+.pcb-pd__inspection-btn:focus-visible {
+  background-color: #dcfce7;
 }
 
-/* Đang chờ kiểm định: nền hổ phách */
+/* Đang chờ kiểm định: tông hổ phách */
 .pcb-pd__inspection--pending {
   background-color: #fffbeb;
   border-color: #fcd34d;
 }
 
-.pcb-pd__inspection--pending .pcb-pd__inspection-title,
+.pcb-pd__inspection--pending .pcb-pd__inspection-icon {
+  color: #b45309;
+  background-color: #fef3c7;
+}
+
 .pcb-pd__inspection--pending .pcb-pd__inspection-status {
   color: #92400e;
+}
+
+/* ==========================================================================
+   HỘP THOẠI PHIẾU KIỂM ĐỊNH CỦA PHIÊN (thẻ dialog)
+   ========================================================================== */
+.pcb-cert-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 20px;
+  overflow-y: auto;
+  color: var(--color-text-main);
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(11, 28, 48, 0.25);
+}
+
+.pcb-cert-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.pcb-cert-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pcb-cert-dialog__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pcb-cert-dialog__close {
+  display: inline-flex;
+  padding: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.pcb-cert-dialog__close:hover,
+.pcb-cert-dialog__close:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-cert-dialog__ok {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+}
+
+.pcb-cert-dialog__ok:hover,
+.pcb-cert-dialog__ok:focus-visible {
+  background-color: var(--color-primary-hover);
 }
 
 /* Thông báo khóa đặt giá trong khung đặt giá */
@@ -1928,7 +2016,6 @@ a.pcb-pd__seller-avatar {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
   padding: 7px 12px;
   font: inherit;
   font-size: 0.8125rem;

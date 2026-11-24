@@ -444,3 +444,100 @@ try {
 } catch {
   // Bỏ qua khi localStorage không khả dụng
 }
+
+/* ==========================================================================
+   TÊN ĐĂNG NHẬP (USERNAME): KIỂM TRA VÀ ĐỔI TÊN
+   ========================================================================== */
+
+// 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới; không bắt đầu / kết thúc bằng dấu
+const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._]{1,18})[a-z0-9]$/;
+
+// Các trường dữ liệu lưu tên đăng nhập của người dùng (người bán, người đặt giá, người mua...)
+const USERNAME_FIELDS = ['seller', 'bidderName', 'sellerUsername', 'buyerUsername', 'winner', 'highestBidder', 'username'];
+
+/**
+ * Tài khoản demo dựng sẵn: dữ liệu mẫu gắn với tên đăng nhập nên không cho đổi
+ * @param {Object} user
+ * @returns {boolean}
+ */
+export function isDemoAccount(user) {
+  return DEMO_ACCOUNTS.some(d => d.id === user?.id || d.username === user?.username);
+}
+
+/**
+ * Kiểm tra tên đăng nhập mới
+ * @param {string} name - Tên muốn dùng
+ * @param {Object} [exclude] - Tài khoản hiện tại (bỏ qua khi kiểm tra trùng)
+ * @returns {string} Thông báo lỗi, chuỗi rỗng nếu hợp lệ
+ */
+export function validateUsername(name, exclude) {
+  const value = String(name || '').trim().toLowerCase();
+  if (!value) return 'Vui lòng nhập tên đăng nhập.';
+  if (value.length < 3 || value.length > 20) return 'Tên đăng nhập dài từ 3 đến 20 ký tự.';
+  if (!USERNAME_PATTERN.test(value)) return 'Chỉ dùng chữ thường không dấu, số, dấu chấm hoặc gạch dưới; không bắt đầu / kết thúc bằng dấu.';
+  if (value.includes('@')) return 'Tên đăng nhập không được chứa ký tự @.';
+  const isSelf = u => exclude && ((exclude.id && u.id === exclude.id) || u.username === exclude.username);
+  const taken = [...getAllAccounts(), ...MOCK_BIDDERS].some(u => !isSelf(u) && String(u.username || '').toLowerCase() === value);
+  if (taken) return 'Tên đăng nhập này đã có người sử dụng.';
+  // Không trùng email của tài khoản khác để ô đăng nhập "Tên đăng nhập / Email" không bị nhập nhằng
+  const asEmail = getAllAccounts().some(u => !isSelf(u) && String(u.email || '').toLowerCase() === value);
+  if (asEmail) return 'Tên đăng nhập này đã có người sử dụng.';
+  return '';
+}
+
+/**
+ * Thay giá trị tên đăng nhập cũ bằng tên mới trong một cấu trúc dữ liệu bất kỳ (đệ quy)
+ * @param {*} data
+ * @param {string} oldName
+ * @param {string} newName
+ * @returns {boolean} true nếu có thay đổi
+ */
+function replaceUsernameDeep(data, oldName, newName) {
+  let changed = false;
+  if (Array.isArray(data)) {
+    data.forEach(item => { if (replaceUsernameDeep(item, oldName, newName)) changed = true; });
+  } else if (data && typeof data === 'object') {
+    Object.keys(data).forEach(key => {
+      if (USERNAME_FIELDS.includes(key) && data[key] === oldName) {
+        data[key] = newName;
+        changed = true;
+      } else if (data[key] && typeof data[key] === 'object') {
+        if (replaceUsernameDeep(data[key], oldName, newName)) changed = true;
+      }
+    });
+  }
+  return changed;
+}
+
+/**
+ * Chuyển toàn bộ dữ liệu của tài khoản sang tên đăng nhập mới:
+ * - Đổi tên các key cá nhân dạng pcbid_xxx__<tên cũ> (watchlist, đăng bán, địa chỉ, thông báo đã đọc...)
+ * - Cập nhật tên trong phiên đấu giá, lượt đặt giá, cuộc trò chuyện, đơn hàng và sổ ví
+ * Danh sách tài khoản (pcbid_registered_users) được cập nhật riêng qua saveAccount.
+ * @param {string} oldName
+ * @param {string} newName
+ */
+export function migrateUsername(oldName, newName) {
+  if (!oldName || !newName || oldName === newName) return;
+  const suffix = `__${oldName}`;
+  Object.keys(localStorage).forEach(key => {
+    if (!key.startsWith('pcbid_')) return;
+    // Key cá nhân của tài khoản: chuyển sang key mới
+    if (key.endsWith(suffix)) {
+      const newKey = `${key.slice(0, -suffix.length)}__${newName}`;
+      if (localStorage.getItem(newKey) === null) localStorage.setItem(newKey, localStorage.getItem(key));
+      localStorage.removeItem(key);
+      return;
+    }
+    if (key === STORAGE_KEY_USERS || key === STORAGE_KEY_CURRENT || key === 'pcbid_user') return;
+    // Dữ liệu dùng chung: thay tên trong các trường lưu tên đăng nhập
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      if (data && typeof data === 'object' && replaceUsernameDeep(data, oldName, newName)) {
+        localStorage.setItem(key, JSON.stringify(data));
+      }
+    } catch {
+      // Giá trị không phải JSON: bỏ qua
+    }
+  });
+}

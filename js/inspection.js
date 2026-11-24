@@ -184,3 +184,42 @@ export function getCountdownStart(product) {
 export function getRemainingMs(endTimestamp, start = 0, now = Date.now()) {
   return Number(endTimestamp) - Math.max(now, Number(start) || 0);
 }
+
+// Kiểm định viên của PCBid Lab (luân phiên theo ID phiên để mỗi phiếu khác nhau nhưng ổn định)
+const INSPECTORS = ['Nguyễn Trọng Thao', 'Lê Minh Khang', 'Trần Bảo Ngọc', 'Phạm Quốc Huy'];
+
+/**
+ * Định dạng ngày dd/mm/yyyy
+ * @param {number} time
+ * @returns {string}
+ */
+function formatDate(time) {
+  const d = new Date(time);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+/**
+ * Nội dung phiếu kiểm định của một phiên đã đạt (giống phiếu mẫu ở Trang chủ nhưng theo từng sản phẩm)
+ * @param {Object} product - Phiên đấu giá
+ * @returns {{code: string, grade: string, inspector: string, date: string, rows: Array<{label: string, value: string, good?: boolean}>}}
+ */
+export function getInspectionCertificate(product) {
+  const id = Number(product?.id) || 0;
+  const doneAt = getInspectionDoneAt(product);
+  // Phiên có sẵn trên sàn: ngày cấp lùi vài ngày trước theo ID; phiên tự đăng: đúng lúc kiểm định xong
+  const issuedAt = doneAt || Date.now() - ((id % 9) + 1) * 86400000;
+  const year = new Date(issuedAt).getFullYear();
+  const results = getInspectionResults(product);
+  return {
+    code: `#UIT-QC-${year}-${String(id % 10000).padStart(4, '0')}`,
+    grade: stableNumber(product, 0, 3) === 0 ? 'A' : 'A+',
+    inspector: `${INSPECTORS[id % INSPECTORS.length]} (UIT Hardware Lab)`,
+    date: formatDate(issuedAt),
+    rows: [
+      { label: 'Thiết bị kiểm định', value: product?.name || '---' },
+      ...results.map((r, i) => ({ ...r, good: i === 0 })),
+      { label: 'Tình trạng người bán mô tả', value: product?.condition || 'Đã sử dụng' },
+      { label: 'Bảo đảm của sàn PCBid', value: 'Bao test 7 ngày, 1 đổi 1 hoặc hoàn tiền về ví cọc' }
+    ]
+  };
+}

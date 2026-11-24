@@ -2821,3 +2821,24 @@
   color: #c9450a;
   text-transform: uppercase;
 }
+
+/* Ô tên đăng nhập: ký tự @ thay cho icon, biểu tượng khóa với tài khoản demo */
+.pcb-username-wrap__at {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #64748b;
+}
+
+.pcb-username-wrap__lock {
+  position: absolute;
+  right: 14px;
+  display: inline-flex;
+  color: #64748b;
+}
+
+.pcb-input--readonly {
+  color: #475569;
+  cursor: not-allowed;
+  background-color: #f1f5f9;
+}
