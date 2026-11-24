@@ -160,6 +160,61 @@
   cursor: pointer;
 }
 
+/* --------------------------------------------------------------------------
+   Ô CHỌN DANH MỤC TÙY BIẾN (custom-select.js) BÊN TRÁI Ô TÌM KIẾM
+   -------------------------------------------------------------------------- */
+.header__search-category--enhanced {
+  padding: 0;
+}
+
+.header__search-category--enhanced .header__search-category-text,
+.header__search-category--enhanced .header__search-arrow {
+  display: none;
+}
+
+/* Khối bao co theo độ dài chữ (không chiếm 100% như ô chọn trong form) */
+.header__category-select {
+  width: auto;
+  height: 100%;
+  contain: none;
+}
+
+.header__category-select .pcb-select__trigger {
+  gap: 6px;
+  height: 100%;
+  min-height: 0;
+  max-width: 190px;
+  padding: 0 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0b1c30;
+  background: transparent;
+  border: none;
+  border-radius: 5px 0 0 5px;
+}
+
+.header__category-select .pcb-select__trigger:focus-visible,
+.header__category-select.pcb-select--open .pcb-select__trigger {
+  box-shadow: inset 0 0 0 2px rgba(201, 69, 10, 0.35);
+}
+
+.header__category-select .pcb-select__chevron {
+  width: 14px;
+  height: 14px;
+  color: #0b1c30;
+}
+
+/* Danh sách rộng hơn nút để hiện đủ tên danh mục */
+.header__category-select .pcb-select__list {
+  right: auto;
+  left: 0;
+  z-index: 1100;
+  width: max-content;
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
+}
+
 /* Khung nhập liệu từ khóa: bắt đầu từ x=86px */
 .header__search-input-box {
   display: flex;
@@ -1451,4 +1506,12 @@
 .header__dropdown-quick-role {
   font-size: 11px;
   color: #64748b;
+}
+
+/* Điện thoại: nút chọn danh mục gọn lại, tên dài bị cắt "…" để nhường chỗ cho ô nhập từ khóa */
+@media (max-width: 640px) {
+  .header__category-select .pcb-select__trigger {
+    max-width: 110px;
+    padding: 0 8px;
+  }
 }

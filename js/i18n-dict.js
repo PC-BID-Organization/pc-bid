@@ -584,6 +584,8 @@ export const PHRASES = [
   ['Quyền riêng tư chưa lưu', 'Privacy settings not saved', 'プライバシー設定が未保存です'],
   ['Thay đổi chưa lưu', 'Unsaved changes', '未保存の変更'],
   ['Hoàn tác', 'Undo', '元に戻す'],
+  ['Đã khôi phục linh kiện vào danh sách theo dõi.', 'Restored to your watchlist.', 'ウォッチリストに戻しました。'],
+  ['Đã xóa linh kiện khỏi danh sách theo dõi!', 'Removed from your watchlist!', 'ウォッチリストから削除しました！'],
   ['Đã hoàn tác các thay đổi chưa lưu.', 'Unsaved changes were discarded.', '未保存の変更を元に戻しました。'],
   ['Bỏ theo dõi phiên này', 'Unwatch this auction', 'このオークションのウォッチを解除'],
   ['Theo dõi phiên này', 'Watch this auction', 'このオークションをウォッチ'],

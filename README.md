@@ -74,7 +74,7 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 ### Đăng bán linh kiện
 - Chọn mẫu từ catalogue chuẩn để tự điền thông số, bổ sung thông số riêng.
 - Tải tối đa 6 ảnh (nén trước khi lưu), chọn ảnh bìa, gợi ý ảnh liên quan theo mẫu.
-- Thanh tiến trình 3 bước, xem trước thẻ đấu giá trực tiếp; các ô chọn dùng danh sách xổ xuống riêng của PCBid, giống nhau trên máy tính và điện thoại.
+- Thanh tiến trình 3 bước, xem trước thẻ đấu giá trực tiếp.
 - Đăng xong có đồng hồ 10 giây tự chuyển sang trang Sàn đấu giá, phiên vừa đăng được ưu tiên hiển thị kèm nhãn **"Bạn vừa đăng"**.
 - Người bán có bảng quản lý riêng trên trang chi tiết: đóng phiên ngay, đăng bán lại, xem lịch sử đặt giá.
 
@@ -82,12 +82,12 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Đăng nhập **kiểm tra đúng email / tên đăng nhập và mật khẩu**; mật khẩu được băm trước khi lưu (mô phỏng).
 - Đăng ký kiểm tra trùng email / số điện thoại, tự tạo tên đăng nhập không trùng.
 - **Đổi tên đăng nhập** trong phần cài đặt (3–20 ký tự, chữ thường, số, dấu chấm, gạch dưới, không trùng); tên mới dùng được để đăng nhập ngay và dữ liệu cũ (phiên, lượt đặt giá, đơn hàng, theo dõi) được chuyển theo. Tài khoản demo giữ cố định tên đăng nhập.
-- **Thanh lưu nổi** hiện khi có thay đổi chưa lưu mà nút Lưu đang khuất; rời trang hoặc tải lại khi chưa lưu sẽ được hỏi **Lưu / Không lưu / Ở lại**.
+- **Thanh lưu nổi** cho các form Thông tin tài khoản, Đổi mật khẩu và Quyền riêng tư: trên máy tính hiện khi nút Lưu đang khuất, trên điện thoại hiện ngay khi có thay đổi (kể cả lúc đang gõ, nằm sát phía trên bàn phím). Rời trang, chuyển mục hoặc tải lại khi chưa lưu sẽ được hỏi **Lưu / Không lưu / Ở lại**.
 - Thông tin tài khoản: họ đệm và tên tách riêng, giới tính, tiểu sử, ngày sinh chỉ được đổi 1 lần (có biểu tượng khóa), kiểm tra trùng email / số điện thoại ngay khi rời ô (dòng chữ đỏ và dấu X đỏ).
 - Ảnh đại diện tải lên kèm công cụ cắt ảnh bằng Canvas; mặc định là chữ cái đầu của tên.
 - **Hồ sơ công khai** (`profile.html?user=<tên đăng nhập>`): tiểu sử, liên hệ, phiên đang bán / đang tham gia, danh sách theo dõi, nút **Nhắn tin**; từng mục bật / tắt công khai bằng nút gạt.
 - **Sổ địa chỉ nhận hàng** giống Shopee: nhiều địa chỉ với tên và số điện thoại người nhận khác nhau, địa chỉ mặc định luôn đứng đầu.
-- **Danh sách theo dõi** lưu riêng cho từng tài khoản; bấm biểu tượng dấu trang ở thẻ sản phẩm hoặc trang chi tiết, số đếm trên header cập nhật ngay.
+- **Danh sách theo dõi** lưu riêng cho từng tài khoản; bấm biểu tượng dấu trang ở thẻ sản phẩm hoặc trang chi tiết, số đếm trên header cập nhật ngay. Bỏ theo dõi trong hồ sơ có nút **Hoàn tác** đi kèm thông báo (vạch thời gian 5 giây), bấm là linh kiện quay về đúng vị trí cũ.
 
 ### Nhắn tin người mua - người bán
 - Hộp chat nổi 2 cột trên mọi trang: tìm theo tên, lọc **Tất cả / Đã ghim / Chưa đọc**, menu ba chấm để ghim, đánh dấu đã đọc / chưa đọc, xóa đoạn chat.
@@ -102,6 +102,7 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Chuyển **Tiếng Việt / English / 日本語** bằng nút quả địa cầu trên thanh trên cùng (hoặc trong menu tài khoản trên điện thoại). Bộ dịch quét chữ trên trang, kể cả nội dung sinh động bằng JavaScript; ngôn ngữ được nhớ cho mọi trang.
 - Bộ icon **Lucide** lưu thành tệp SVG trong `images/icons/lucide/`, hiển thị bằng CSS `mask-image` để đổi màu theo chữ.
 - Hộp thoại xác nhận / thông báo riêng thay cho `alert()` / `confirm()` của trình duyệt.
+- Mọi ô chọn (danh mục cạnh thanh tìm kiếm, sắp xếp ở Sàn đấu giá, các ô trong form Đăng bán) dùng danh sách xổ xuống riêng của PCBid thay cho hộp chọn của trình duyệt, giống nhau trên máy tính và điện thoại, hỗ trợ bàn phím.
 - Trang chi tiết: phóng to ảnh khi rê chuột, lăn chuột để zoom; nút **< >**, phím mũi tên và vuốt ngang trên điện thoại để chuyển ảnh.
 - Trang Sàn đấu giá: bộ lọc có **thanh cuộn riêng** (cuộn bộ lọc không kéo cả trang); trên điện thoại bộ lọc mở dạng ngăn trượt có nút đóng và nút "Xem kết quả".
 - **Nút liên hệ nổi** Facebook / Zalo / Gọi điện ở góc phải dưới, thu nhỏ trên điện thoại để không che nội dung.
@@ -134,7 +135,7 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 | 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình, gửi kiểm định |
 | 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo |
 | 6 | `register.html` | Đăng ký, kiểm tra trùng email / số điện thoại, khởi tạo ví ảo |
-| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư, hồ sơ công khai `?user=` |
+| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` |
 | 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
 
 > Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html` (ví dụ `profile.html#participating`, `profile.html?user=<tên đăng nhập>`).

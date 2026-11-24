@@ -23,6 +23,8 @@ import { LANGUAGES, getLanguage, setLanguage } from '../../js/i18n.js';
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
 // Danh sách theo dõi lưu theo tài khoản (đếm số trên icon bookmark)
 import { getWatchlist } from '../../js/watchlist.js';
+// Ô chọn tùy biến thay cho hộp chọn danh mục mặc định của trình duyệt
+import { enhanceSelect } from '../../js/custom-select.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -362,6 +364,11 @@ function initCategorySelectSync() {
   const select = document.querySelector('.header__search-select');
   const label = document.querySelector('.header__search-category-text');
   if (!select || !label) return;
+
+  // Danh sách danh mục xổ xuống kiểu PCBid (giống nhau trên máy tính và điện thoại);
+  // nhãn chữ và mũi tên cũ được ẩn vì ô chọn tùy biến đã có sẵn
+  enhanceSelect(select, { wrapClass: 'header__category-select' });
+  select.closest('.header__search-category')?.classList.add('header__search-category--enhanced');
 
   select.addEventListener('change', () => {
     const selectedOption = select.options[select.selectedIndex];

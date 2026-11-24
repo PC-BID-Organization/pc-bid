@@ -26,15 +26,16 @@ function escapeHtml(text) {
 /**
  * Biến một thẻ <select> thành ô chọn tùy biến
  * @param {HTMLSelectElement} select
+ * @param {{wrapClass?: string}} [config] - wrapClass: class bổ sung cho khối bao để tùy chỉnh giao diện
  */
-export function enhanceSelect(select) {
+export function enhanceSelect(select, config = {}) {
   if (!select || select.dataset.enhanced) return;
   select.dataset.enhanced = '1';
   const id = select.id || `pcb-select-${++uid}`;
   const listId = `${id}-listbox`;
 
   const wrap = document.createElement('div');
-  wrap.className = 'pcb-select';
+  wrap.className = config.wrapClass ? `pcb-select ${config.wrapClass}` : 'pcb-select';
   wrap.innerHTML = `
     <button type="button" class="pcb-select__trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="${listId}">
       <span class="pcb-select__value"></span>
@@ -62,6 +63,12 @@ export function enhanceSelect(select) {
       e.preventDefault();
       if (!trigger.disabled) trigger.focus();
     });
+  }
+  else if (select.getAttribute('aria-label')) {
+    // Không có thẻ <label for>: dùng aria-label của <select> gốc, giá trị đang chọn làm mô tả
+    trigger.setAttribute('aria-label', select.getAttribute('aria-label'));
+    trigger.setAttribute('aria-describedby', `${id}-value`);
+    list.setAttribute('aria-label', select.getAttribute('aria-label'));
   }
   valueEl.id = `${id}-value`;
 

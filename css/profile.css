@@ -1484,7 +1484,79 @@
   pointer-events: auto;
 }
 
+/* Nút thao tác trong thông báo (Hoàn tác) */
+.pcb-toast__action {
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fdba74;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 999px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pcb-toast__action:hover,
+.pcb-toast__action:focus-visible {
+  color: #ffffff;
+  background: var(--color-primary, #c9450a);
+  outline: none;
+}
+
+/* Vạch thời gian chạy ngược ở cạnh dưới: hết vạch thì thông báo và nút Hoàn tác biến mất */
+.pcb-toast--action {
+  overflow: hidden;
+}
+
+.pcb-toast--action::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  content: '';
+  background: #fb923c;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.pcb-toast--action.pcb-toast--show::after {
+  animation: pcb-toast-countdown var(--pcb-toast-duration, 5000ms) linear forwards;
+}
+
+@keyframes pcb-toast-countdown {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Điện thoại: thông báo trải ngang, không tràn khỏi màn hình */
+@media (max-width: 480px) {
+  .pcb-toast {
+    right: 12px;
+    bottom: 16px;
+    left: 12px;
+    padding: 10px 10px 10px 14px;
+    font-size: 13px;
+  }
+
+  .pcb-toast__message {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-toast--action.pcb-toast--show::after {
+    animation: none;
+  }
+}
+
 .pcb-toast__icon {
+  flex-shrink: 0;
   width: 22px;
   height: 22px;
   background-color: #10b981;

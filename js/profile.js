@@ -193,21 +193,43 @@ function formatTimeRemaining(endTimestamp, start = 0) {
 /**
  * Hiển thị thanh thông báo Toast nhanh góc dưới màn hình
  */
-function showToast(message, isSuccess = true) {
+function showToast(message, isSuccess = true, action = null) {
   const toast = document.getElementById('pcb-toast');
   const msgEl = document.getElementById('pcb-toast-message');
   const iconEl = document.getElementById('pcb-toast-icon');
+  const actionBtn = document.getElementById('pcb-toast-action');
   if (!toast || !msgEl || !iconEl) return;
 
   msgEl.textContent = message;
   iconEl.textContent = isSuccess ? '✓' : '!';
   iconEl.style.backgroundColor = isSuccess ? '#10b981' : '#ef4444';
 
+  // Thông báo có nút thao tác (VD: Hoàn tác) hiện lâu hơn để kịp bấm
+  const duration = action ? 5000 : 3500;
+  if (actionBtn) {
+    actionBtn.hidden = !action;
+    actionBtn.onclick = null;
+    if (action) {
+      actionBtn.textContent = action.label;
+      actionBtn.onclick = () => {
+        clearTimeout(toast._timer);
+        toast.classList.remove('pcb-toast--show');
+        actionBtn.onclick = null;
+        action.onClick();
+      };
+    }
+  }
+  // Vạch thời gian chạy ngược cho biết còn bao lâu nút thao tác biến mất
+  toast.classList.toggle('pcb-toast--action', Boolean(action));
+  toast.style.setProperty('--pcb-toast-duration', `${duration}ms`);
+  toast.classList.remove('pcb-toast--show');
+  void toast.offsetWidth; // Khởi động lại hiệu ứng vạch thời gian khi hiện thông báo mới liên tiếp
   toast.classList.add('pcb-toast--show');
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => {
     toast.classList.remove('pcb-toast--show');
-  }, 3500);
+    if (actionBtn) actionBtn.onclick = null;
+  }, duration);
 }
 
 /* ==========================================================================
@@ -2168,10 +2190,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const unwatchBtn = e.target.closest('[data-action="unwatch"]');
     if (unwatchBtn) {
       const pId = Number(unwatchBtn.getAttribute('data-id'));
-      const watchlist = getWatchlistItems().filter(x => x.id !== pId);
-      saveWatchlistItems(watchlist);
+      // Giữ lại danh sách trước khi xóa để Hoàn tác trả linh kiện về đúng vị trí cũ
+      const before = getWatchlistItems();
+      saveWatchlistItems(before.filter(x => x.id !== pId));
       renderCurrentAuctionTab();
-      showToast('Đã xóa linh kiện khỏi danh sách theo dõi!');
+      showToast('Đã xóa linh kiện khỏi danh sách theo dõi!', true, {
+        label: 'Hoàn tác',
+        onClick: () => {
+          const current = getWatchlistItems();
+          if (current.some(x => x.id === pId)) return;
+          const removed = before.find(x => x.id === pId);
+          const index = before.findIndex(x => x.id === pId);
+          current.splice(Math.min(index, current.length), 0, removed);
+          saveWatchlistItems(current);
+          renderCurrentAuctionTab();
+          showToast('Đã khôi phục linh kiện vào danh sách theo dõi.');
+        }
+      });
       return;
     }
 
