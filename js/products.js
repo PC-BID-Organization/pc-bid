@@ -12,7 +12,7 @@ import { readLoggedInUser } from './user-data.js';
 // Hàm tính thời điểm kết thúc phiên dùng chung cho mọi trang
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
-import { isAwaitingInspection, getInspectionSeal } from './inspection.js';
+import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
 
 
 /* ==========================================================================
@@ -814,7 +814,7 @@ function renderCatalogProductCard(product) {
     <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
       ${isJustPosted ? `<span class="pcb-card__just-posted">${icon('sparkles', { size: 14 })} Bạn vừa đăng</span>` : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
-        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
+        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"></circle>
             <polyline points="12 7 12 12 15 15"></polyline>
@@ -925,7 +925,8 @@ function updateLiveCountdowns() {
     const ts = parseInt(el.getAttribute('data-timestamp'), 10);
     if (!ts || isNaN(ts)) return;
 
-    const diff = ts - now;
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
+    const diff = getRemainingMs(ts, el.getAttribute('data-start'), now);
     const textSpan = el.querySelector('.pcb-countdown-text');
     if (!textSpan) return;
 

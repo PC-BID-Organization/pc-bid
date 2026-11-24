@@ -15,7 +15,7 @@ import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
 import { describeBidder, findAccount } from './accounts.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
-import { isAwaitingInspection, getInspectionSeal } from './inspection.js';
+import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
 
 
 /* ==========================================================================
@@ -414,7 +414,7 @@ function renderProductCard(product, options = {}) {
   let countdownMarkup = '';
   if (options.showCountdown) {
     countdownMarkup = `
-      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}">
+      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="9"></circle>
           <polyline points="12 7 12 12 15 15"></polyline>
@@ -680,7 +680,8 @@ function updateAllCountdowns() {
 
   elements.forEach(el => {
     const end = parseInt(el.getAttribute('data-timestamp'), 10);
-    const diff = end - now;
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
+    const diff = getRemainingMs(end, el.getAttribute('data-start'), now);
 
     const textEl = el.querySelector('.pcb-countdown-text');
     if (!textEl) return;

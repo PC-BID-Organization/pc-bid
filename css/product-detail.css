@@ -1944,3 +1944,12 @@ a.pcb-pd__seller-avatar {
 .pcb-pd__inspect-skip:focus-visible {
   background-color: #fef3c7;
 }
+
+/* Ghi chú đồng hồ tạm dừng khi phiên đang chờ kiểm định */
+.pcb-pd__countdown-paused {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #b45309;
+}

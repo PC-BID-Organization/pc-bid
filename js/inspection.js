@@ -126,13 +126,22 @@ export function getInspectionResults(product) {
  * @returns {boolean} true nếu đã cập nhật được phiên
  */
 export function skipInspectionForDemo(productId) {
-  const past = new Date(Date.now() - INSPECTION_MS - 1000).toISOString();
+  const now = Date.now();
+  const past = new Date(now - INSPECTION_MS - 1000).toISOString();
+  // Dời giờ kết thúc sớm lên đúng bằng phần thời gian chờ được bỏ qua để phiên vẫn đủ thời hạn
+  const shift = item => {
+    const oldDoneAt = getInspectionDoneAt(item);
+    const delta = Math.max(0, oldDoneAt - (now - 1000));
+    item.inspection = { ...item.inspection, requestedAt: past };
+    if (item.endTime) item.endTime = new Date(new Date(item.endTime).getTime() - delta).toISOString();
+    if (item.endTimestamp) item.endTimestamp = Number(item.endTimestamp) - delta;
+  };
   let updated = false;
   try {
     const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
     products.forEach(p => {
-      if (Number(p.id) === Number(productId) && p.inspection) {
-        p.inspection = { ...p.inspection, requestedAt: past };
+      if (Number(p.id) === Number(productId) && isAwaitingInspection(p, now)) {
+        shift(p);
         updated = true;
       }
     });
@@ -143,8 +152,8 @@ export function skipInspectionForDemo(productId) {
       if (!Array.isArray(list)) return;
       let changed = false;
       list.forEach(item => {
-        if (Number(item.id) === Number(productId) && item.inspection) {
-          item.inspection = { ...item.inspection, requestedAt: past };
+        if (Number(item.id) === Number(productId) && isAwaitingInspection(item, now)) {
+          shift(item);
           changed = true;
         }
       });
@@ -154,4 +163,24 @@ export function skipInspectionForDemo(productId) {
     return false;
   }
   return updated;
+}
+
+/**
+ * Mốc bắt đầu tính giờ của phiên: phiên đang chờ kiểm định thì đồng hồ đứng yên tới lúc có kết quả
+ * @param {Object} product
+ * @returns {number} Thời điểm (ms) hoặc 0 nếu phiên không phải chờ
+ */
+export function getCountdownStart(product) {
+  return isAwaitingInspection(product) ? getInspectionDoneAt(product) : 0;
+}
+
+/**
+ * Thời gian còn lại của phiên, không trừ phần thời gian đang chờ kiểm định
+ * @param {number} endTimestamp - Thời điểm kết thúc
+ * @param {number} [start] - Mốc bắt đầu tính giờ (data-start), 0 nếu đã chạy
+ * @param {number} [now]
+ * @returns {number} Số mili giây còn lại
+ */
+export function getRemainingMs(endTimestamp, start = 0, now = Date.now()) {
+  return Number(endTimestamp) - Math.max(now, Number(start) || 0);
 }

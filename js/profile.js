@@ -18,7 +18,7 @@ import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-
 // Phiên đấu giá và lịch sử đặt giá dùng chung (thật + mẫu)
 import { loadAllAuctions, getAuctionsFromHistory } from './bid-history.js';
 // Trạng thái kiểm định của phiên tự đăng bán
-import { isAwaitingInspection } from './inspection.js';
+import { isAwaitingInspection, getCountdownStart, getRemainingMs } from './inspection.js';
 // Module ví ảo & tiền cọc dùng chung
 import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBidDeposit, getUserNotifications, getUnreadNotificationCount, markNotificationsRead } from './wallet.js';
 // Lưu watchlist và phiên đã đăng bán riêng theo từng tài khoản
@@ -169,8 +169,9 @@ function escapeHtml(str) {
 /**
  * Tính toán và chuyển đổi số mili-giây còn lại sang chuỗi hiển thị đồng hồ đếm ngược
  */
-function formatTimeRemaining(endTimestamp) {
-  const diff = endTimestamp - Date.now();
+function formatTimeRemaining(endTimestamp, start = 0) {
+  // start: mốc bắt đầu tính giờ (phiên chờ kiểm định thì đồng hồ đứng yên tới lúc đó)
+  const diff = getRemainingMs(endTimestamp, start);
   if (diff <= 0) return 'Đã hết hạn';
 
   const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -554,9 +555,9 @@ function renderSellingCard(item) {
           ${item.status === 'active' ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}">
+              <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}" data-start="${getCountdownStart(item)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item))}</span>
+                <span class="countdown-text">${formatTimeRemaining(getAuctionEndTimestamp(item), getCountdownStart(item))}</span>
               </span>
             </div>
           ` : `
@@ -1619,7 +1620,7 @@ function startLiveCountdown() {
       if (!ts) return;
       const textEl = el.querySelector('.countdown-text');
       if (textEl) {
-        textEl.textContent = formatTimeRemaining(ts);
+        textEl.textContent = formatTimeRemaining(ts, Number(el.getAttribute('data-start')) || 0);
       }
     });
   }, 1000);

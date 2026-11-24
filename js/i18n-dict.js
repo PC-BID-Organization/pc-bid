@@ -568,6 +568,7 @@ export const PHRASES = [
   ['Chờ kiểm định', 'Awaiting inspection', '検査待ち'],
   ['Xem tiến độ kiểm định', 'View inspection progress', '検査の進捗を見る'],
   ['Bỏ qua chờ kiểm định (demo)', 'Skip inspection wait (demo)', '検査待ちをスキップ（デモ）'],
+  ['· Tạm dừng, bắt đầu tính khi kiểm định xong', '· Paused, starts after inspection', '・一時停止中、検査完了後に開始'],
   ['Kiểm định PCBid Lab', 'PCBid Lab inspection', 'PCBid Lab 検査'],
   ['Đạt chuẩn, đã gắn tem PCBid Verified', 'Passed, PCBid Verified seal applied', '合格・PCBid Verified シール貼付済み'],
   ['Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.', 'This auction is awaiting PCBid Lab inspection and is not open for bidding yet.', 'このオークションは PCBid Lab の検査待ちのため、まだ入札できません。'],

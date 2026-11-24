@@ -26,7 +26,7 @@ import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 // Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
-import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults, skipInspectionForDemo } from './inspection.js';
+import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -1015,7 +1015,11 @@ function khoiDongDemNguoc(thoiGianKetThuc) {
   if (idIntervalDemNguoc) clearInterval(idIntervalDemNguoc);
 
   const capNhatDemNguoc = () => {
-    const thoiGianConLai = new Date(thoiGianKetThuc).getTime() - Date.now();
+    // Phiên đang chờ kiểm định: đồng hồ đứng yên ở đúng thời hạn phiên, chỉ chạy sau khi có kết quả
+    const mocBatDau = sanPhamHienTai ? getCountdownStart(sanPhamHienTai) : 0;
+    const thoiGianConLai = getRemainingMs(new Date(thoiGianKetThuc).getTime(), mocBatDau);
+    const ghiChuTamDung = document.getElementById('pcb-pd-countdown-paused');
+    if (ghiChuTamDung) ghiChuTamDung.hidden = !mocBatDau;
 
     if (thoiGianConLai <= 0) {
       hienThiDemNguoc(0, 0, 0, 0);
@@ -1141,8 +1145,18 @@ function capNhatKiemDinh() {
       nutBoQua.dataset.bound = '1';
       nutBoQua.addEventListener('click', () => {
         if (!sanPhamHienTai || !skipInspectionForDemo(sanPhamHienTai.id)) return;
-        // Cập nhật bản đang hiển thị để mở đặt giá ngay, không cần tải lại trang
-        sanPhamHienTai.inspection = { ...sanPhamHienTai.inspection, requestedAt: new Date(Date.now() - 61 * 1000).toISOString() };
+        // Đọc lại phiên đã cập nhật (mốc kiểm định và giờ kết thúc đã dời) để mở đặt giá ngay
+        try {
+          const banMoi = JSON.parse(localStorage.getItem('pcbid_products') || '[]')
+            .find(p => Number(p.id) === Number(sanPhamHienTai.id));
+          if (banMoi) {
+            sanPhamHienTai.inspection = banMoi.inspection;
+            sanPhamHienTai.endTime = banMoi.endTime;
+          }
+        } catch {
+          // Bỏ qua lỗi đọc dữ liệu, lần tải trang sau sẽ hiển thị đúng
+        }
+        khoiDongDemNguoc(sanPhamHienTai.endTime);
         capNhatKiemDinh();
         capNhatCheDoNguoiBan();
       });
