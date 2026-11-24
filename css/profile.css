@@ -2935,13 +2935,15 @@
   background-color: var(--color-primary-hover, #a93a08);
 }
 
-/* Máy tính bảng / điện thoại: thanh mỏng sát đáy, chừa chỗ cho nút chat nổi bên phải */
+/* Máy tính bảng / điện thoại: thanh gọn vừa nội dung, nằm sát bên trái nút chat nổi */
 @media (max-width: 720px) {
   .pcb-savebar {
     right: 76px;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    left: 12px;
+    left: auto;
     width: auto;
+    max-width: calc(100vw - 88px);
+    gap: 8px;
     padding: 5px 5px 5px 12px;
     transform: translateY(16px);
   }
