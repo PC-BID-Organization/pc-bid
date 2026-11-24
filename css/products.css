@@ -169,6 +169,28 @@
   box-shadow: var(--pcb-shadow-card, 0 1px 3px rgba(15, 23, 42, 0.06));
   position: sticky;
   top: 80px;
+  /* Thanh cuộn riêng: bộ lọc dài hơn màn hình thì cuộn bên trong khung,
+     cuộn tới cuối không kéo theo cả trang (overscroll-behavior: contain) */
+  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-medium, #cbd5e1) transparent;
+}
+
+/* Thanh cuộn mảnh cho trình duyệt nhân Chromium / Safari */
+.pcb-filter::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pcb-filter::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-medium, #cbd5e1);
+  border-radius: 999px;
+}
+
+.pcb-filter::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .pcb-filter__header {
@@ -623,6 +645,8 @@
     left: 0;
     width: 320px;
     height: 100vh;
+    height: 100dvh;
+    max-height: none;
     z-index: 1000;
     border-radius: 0;
     overflow-y: auto;

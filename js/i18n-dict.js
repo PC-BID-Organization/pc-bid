@@ -402,6 +402,10 @@ export const PHRASES = [
   /* ---------- Hộp chat ---------- */
   ['Tin nhắn', 'Messages', 'メッセージ'],
   ['Mở tin nhắn', 'Open messages', 'メッセージを開く'],
+  ['Liên hệ PCBid', 'Contact PCBid', 'PCBidへのお問い合わせ'],
+  ['Facebook PCBid (mở tab mới)', 'PCBid on Facebook (opens in a new tab)', 'PCBid の Facebook（新しいタブで開く）'],
+  ['Chat Zalo 0999999999 (mở tab mới)', 'Chat on Zalo 0999999999 (opens in a new tab)', 'Zalo でチャット 0999999999（新しいタブで開く）'],
+  ['Gọi hotline 0999999999', 'Call hotline 0999999999', 'ホットライン 0999999999 に電話'],
   ['Đóng tin nhắn', 'Close messages', 'メッセージを閉じる'],
   ['Danh sách cuộc trò chuyện', 'Conversations', '会話一覧'],
   ['Tìm theo tên', 'Search by name', '名前で検索'],
