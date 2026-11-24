@@ -829,10 +829,38 @@ function renderLiveTicker(newBidId = null) {
  * @param {Array} auctions - Danh sách phiên từ loadAllAuctions()
  */
 function updateOpenAuctionCount(auctions) {
+  const openAuctions = auctions.filter(p => !isAuctionClosed(p));
   const el = document.getElementById('pcb-open-count-link');
-  if (!el) return;
-  const openCount = auctions.filter(p => !isAuctionClosed(p)).length;
-  el.textContent = `Xem tất cả ${openCount} phiên đang mở`;
+  if (el) el.textContent = `Xem tất cả ${openAuctions.length} phiên đang mở`;
+
+  // Số phiên mở theo từng danh mục (cùng cách phân loại với bộ lọc ở trang Sàn đấu giá)
+  const counts = { vga: 0, cpu: 0, mainboard: 0, ram: 0, storage: 0, psu: 0, cooling: 0, case: 0 };
+  openAuctions.forEach(p => {
+    const key = getFilterCategory(p.category);
+    if (key) counts[key]++;
+  });
+  document.querySelectorAll('[data-cat-count]').forEach(span => {
+    const value = counts[span.dataset.catCount] ?? 0;
+    span.textContent = span.classList.contains('pcb-cat-tile__count') ? `${value} phiên mở` : String(value);
+  });
+}
+
+/**
+ * Quy đổi tên danh mục của sản phẩm về giá trị bộ lọc ở trang Sàn đấu giá
+ * @param {string} category
+ * @returns {string|null}
+ */
+function getFilterCategory(category) {
+  const c = String(category || '').toLowerCase();
+  if (c.includes('gpu') || c.includes('vga')) return 'vga';
+  if (c.includes('cpu')) return 'cpu';
+  if (c.includes('main') || c.includes('bo mạch')) return 'mainboard';
+  if (c.includes('ram')) return 'ram';
+  if (c.includes('ssd') || c.includes('hdd') || c.includes('storage') || c.includes('ổ cứng')) return 'storage';
+  if (c.includes('psu') || c.includes('nguồn')) return 'psu';
+  if (c.includes('cool') || c.includes('tản')) return 'cooling';
+  if (c.includes('case') || c.includes('vỏ')) return 'case';
+  return null;
 }
 
 /**

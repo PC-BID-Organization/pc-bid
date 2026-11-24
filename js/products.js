@@ -106,7 +106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 function parseUrlParams() {
   const params = new URLSearchParams(window.location.search);
   
-  const cat = params.get('category');
+  // Tên gọi khác của danh mục trong liên kết cũ (VD: ?category=ssd) được quy về giá trị bộ lọc chuẩn
+  const CATEGORY_ALIASES = { ssd: 'storage', hdd: 'storage', nvme: 'storage', gpu: 'vga' };
+  const rawCat = (params.get('category') || '').toLowerCase();
+  const cat = CATEGORY_ALIASES[rawCat] || rawCat;
   if (cat && cat !== 'all') {
     filterState.categories = [cat.toLowerCase()];
     // Cập nhật giao diện checkbox tương ứng
