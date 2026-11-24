@@ -1922,3 +1922,25 @@ a.pcb-pd__seller-avatar {
   border: 1px solid #fcd34d;
   border-radius: 10px;
 }
+
+/* Nút demo bỏ qua thời gian chờ kiểm định */
+.pcb-pd__inspect-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #92400e;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 1px dashed #d97706;
+  border-radius: 8px;
+}
+
+.pcb-pd__inspect-skip:hover,
+.pcb-pd__inspect-skip:focus-visible {
+  background-color: #fef3c7;
+}

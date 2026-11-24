@@ -567,6 +567,7 @@ export const PHRASES = [
   ['. PCBid Lab chạy Furmark / MemTest86 / CrystalDiskInfo tùy loại linh kiện (mô phỏng 1 phút), đạt chuẩn thì gắn tem PCBid Verified và mở đặt giá.', '. PCBid Lab runs Furmark / MemTest86 / CrystalDiskInfo depending on the part (simulated, 1 minute); once it passes, the PCBid Verified seal is applied and bidding opens.', 'の状態になります。PCBid Lab が部品に応じて Furmark / MemTest86 / CrystalDiskInfo を実施し（約1分のシミュレーション）、合格すると PCBid Verified シールを貼付して入札を開始します。'],
   ['Chờ kiểm định', 'Awaiting inspection', '検査待ち'],
   ['Xem tiến độ kiểm định', 'View inspection progress', '検査の進捗を見る'],
+  ['Bỏ qua chờ kiểm định (demo)', 'Skip inspection wait (demo)', '検査待ちをスキップ（デモ）'],
   ['Kiểm định PCBid Lab', 'PCBid Lab inspection', 'PCBid Lab 検査'],
   ['Đạt chuẩn, đã gắn tem PCBid Verified', 'Passed, PCBid Verified seal applied', '合格・PCBid Verified シール貼付済み'],
   ['Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.', 'This auction is awaiting PCBid Lab inspection and is not open for bidding yet.', 'このオークションは PCBid Lab の検査待ちのため、まだ入札できません。'],

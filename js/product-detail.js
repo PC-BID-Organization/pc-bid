@@ -26,7 +26,7 @@ import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
 import { showConfirm } from './dialog.js';
 // Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
-import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults } from './inspection.js';
+import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionResults, skipInspectionForDemo } from './inspection.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -1130,6 +1130,22 @@ function capNhatKiemDinh() {
       danhSach.innerHTML = dangCho ? '' : getInspectionResults(sp)
         .map(kq => `<li class="pcb-pd__inspection-item"><span>${maHoaHtml(kq.label)}</span><strong>${maHoaHtml(kq.value)}</strong></li>`)
         .join('');
+    }
+  }
+
+  // Nút demo bỏ qua thời gian chờ: chỉ hiện khi phiên đang chờ kiểm định
+  const nutBoQua = document.getElementById('pcb-pd-inspect-skip');
+  if (nutBoQua) {
+    nutBoQua.hidden = !dangCho;
+    if (!nutBoQua.dataset.bound) {
+      nutBoQua.dataset.bound = '1';
+      nutBoQua.addEventListener('click', () => {
+        if (!sanPhamHienTai || !skipInspectionForDemo(sanPhamHienTai.id)) return;
+        // Cập nhật bản đang hiển thị để mở đặt giá ngay, không cần tải lại trang
+        sanPhamHienTai.inspection = { ...sanPhamHienTai.inspection, requestedAt: new Date(Date.now() - 61 * 1000).toISOString() };
+        capNhatKiemDinh();
+        capNhatCheDoNguoiBan();
+      });
     }
   }
 

@@ -118,3 +118,40 @@ export function getInspectionResults(product) {
   };
   return [...byCategory[categoryKey(product)], ...common];
 }
+
+/**
+ * Công cụ demo: bỏ qua thời gian chờ kiểm định của một phiên (PCBid Lab trả kết quả ngay).
+ * Lùi mốc gửi yêu cầu về quá khứ trong pcbid_products và bản sao ở danh sách đăng bán của người bán.
+ * @param {number} productId - ID phiên
+ * @returns {boolean} true nếu đã cập nhật được phiên
+ */
+export function skipInspectionForDemo(productId) {
+  const past = new Date(Date.now() - INSPECTION_MS - 1000).toISOString();
+  let updated = false;
+  try {
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    products.forEach(p => {
+      if (Number(p.id) === Number(productId) && p.inspection) {
+        p.inspection = { ...p.inspection, requestedAt: past };
+        updated = true;
+      }
+    });
+    if (updated) localStorage.setItem('pcbid_products', JSON.stringify(products));
+    // Bản sao trong danh sách "Linh kiện tôi đã đăng bán" của từng tài khoản
+    Object.keys(localStorage).filter(key => key.startsWith('pcbid_my_auctions_selling')).forEach(key => {
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!Array.isArray(list)) return;
+      let changed = false;
+      list.forEach(item => {
+        if (Number(item.id) === Number(productId) && item.inspection) {
+          item.inspection = { ...item.inspection, requestedAt: past };
+          changed = true;
+        }
+      });
+      if (changed) localStorage.setItem(key, JSON.stringify(list));
+    });
+  } catch {
+    return false;
+  }
+  return updated;
+}
