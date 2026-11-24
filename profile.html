@@ -654,7 +654,7 @@
                     Đổi mật khẩu
                   </button>
 
-                  <button type="submit" class="pcb-btn-primary">
+                  <button type="submit" class="pcb-btn-primary" id="btn-save-account">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -663,6 +663,20 @@
                 </div>
               </div>
             </form>
+
+            <!-- Thanh lưu nổi: hiện khi có thay đổi chưa lưu mà nút "Lưu thay đổi thông tin" đang nằm ngoài màn hình -->
+            <div class="pcb-savebar" id="account-savebar" role="region" aria-label="Thay đổi chưa lưu" hidden>
+              <span class="pcb-savebar__text">
+                <span class="pcb-savebar__dot" aria-hidden="true"></span>
+                <span class="pcb-savebar__label">Có thay đổi chưa lưu</span>
+              </span>
+              <span class="pcb-savebar__actions">
+                <button type="button" class="pcb-savebar__undo" id="account-savebar-undo">Hoàn tác</button>
+                <button type="submit" form="form-account-info" class="pcb-savebar__save">
+                  <span class="lucide pcb-icon pcb-icon--check pcb-icon--s14" aria-hidden="true"></span> Lưu thay đổi
+                </button>
+              </span>
+            </div>
           </div>
 
           <!-- #################### SECTION: ĐỊA CHỈ NHẬN HÀNG #################### -->

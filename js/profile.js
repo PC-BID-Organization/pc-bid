@@ -713,7 +713,118 @@ function showUsernameError() {
   return !message;
 }
 
-function syncUserInfoUI() {
+/* --------------------------------------------------------------------------
+   THANH LƯU NỔI CỦA FORM THÔNG TIN TÀI KHOẢN
+   Hiện khi có thay đổi chưa lưu và nút "Lưu thay đổi thông tin" đang khuất khỏi màn hình.
+   Trên điện thoại tự ẩn khi đang gõ (bàn phím mở) để không che ô đang nhập.
+   -------------------------------------------------------------------------- */
+const savebarState = { baseline: '', dirty: false, saveVisible: true, typing: false };
+
+/**
+ * Chụp giá trị hiện tại của các ô trong form tài khoản để so sánh có thay đổi hay không
+ * @returns {string}
+ */
+function readAccountFormState() {
+  const form = document.getElementById('form-account-info');
+  if (!form) return '';
+  const values = [...form.querySelectorAll('input, select, textarea')]
+    .filter(el => el.id && !(el.type === 'date' && el.hidden))
+    .map(el => [el.id, el.type === 'checkbox' ? el.checked : el.value]);
+  return JSON.stringify(values);
+}
+
+/**
+ * Đánh dấu form đang khớp với dữ liệu đã lưu (sau khi nạp hoặc lưu thành công)
+ */
+function markAccountFormSaved() {
+  savebarState.baseline = readAccountFormState();
+  savebarState.dirty = false;
+  updateAccountSavebar();
+}
+
+/**
+ * Hiện / ẩn thanh lưu nổi theo trạng thái hiện tại
+ */
+function updateAccountSavebar() {
+  const bar = document.getElementById('account-savebar');
+  const section = document.getElementById('section-account');
+  if (!bar || !section) return;
+  const show = savebarState.dirty && !savebarState.saveVisible && !savebarState.typing && !section.hidden;
+  if (show === !bar.hidden) return;
+  if (show) {
+    bar.hidden = false;
+    // Đợi một khung hình để hiệu ứng trượt lên chạy được
+    requestAnimationFrame(() => bar.classList.add('pcb-savebar--visible'));
+  } else {
+    bar.classList.remove('pcb-savebar--visible');
+    bar.hidden = true;
+  }
+}
+
+/**
+ * Gắn các sự kiện cho thanh lưu nổi (gọi một lần khi tải trang)
+ */
+function initAccountSavebar() {
+  const form = document.getElementById('form-account-info');
+  const realSave = document.getElementById('btn-save-account');
+  if (!form || !realSave) return;
+
+  // Mỗi lần người dùng sửa một ô: so với mốc đã lưu
+  const onEdit = () => {
+    savebarState.dirty = readAccountFormState() !== savebarState.baseline;
+    updateAccountSavebar();
+  };
+  form.addEventListener('input', onEdit);
+  form.addEventListener('change', onEdit);
+
+  // Nút lưu thật đang nằm trong màn hình thì không cần thanh nổi
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(entries => {
+      savebarState.saveVisible = entries[0].isIntersecting;
+      updateAccountSavebar();
+    }, { threshold: 0.6 }).observe(realSave);
+  }
+
+  // Điện thoại / máy tính bảng: đang gõ vào ô chữ thì tạm ẩn thanh nổi để không che ô nhập
+  const isTouchLayout = () => window.matchMedia('(max-width: 720px), (pointer: coarse)').matches;
+  const isTextField = el => el && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
+    || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'button', 'submit'].includes(el.type)));
+  form.addEventListener('focusin', e => {
+    if (isTouchLayout() && isTextField(e.target)) {
+      savebarState.typing = true;
+      updateAccountSavebar();
+    }
+  });
+  form.addEventListener('focusout', () => {
+    // Chờ ô tiếp theo nhận focus (chuyển ô liên tục thì vẫn giữ ẩn)
+    setTimeout(() => {
+      savebarState.typing = isTouchLayout() && isTextField(document.activeElement) && form.contains(document.activeElement);
+      updateAccountSavebar();
+    }, 120);
+  });
+
+  // Hoàn tác: đổ lại dữ liệu đã lưu, xóa thông báo lỗi
+  document.getElementById('account-savebar-undo')?.addEventListener('click', () => {
+    form.querySelectorAll('.pcb-form__error').forEach(el => { el.textContent = ''; });
+    form.querySelectorAll('.pcb-input--error').forEach(el => el.classList.remove('pcb-input--error'));
+    const birthInput = document.getElementById('input-birthdate');
+    if (birthInput) birthInput.hidden = true;
+    const birthHint = document.getElementById('birthdate-hint');
+    if (birthHint) birthHint.hidden = true;
+    syncUserInfoUI({ force: true });
+    showToast('Đã hoàn tác các thay đổi chưa lưu.');
+  });
+
+  // Chuyển sang mục khác trong trang Hồ sơ: ẩn thanh nổi
+  window.addEventListener('hashchange', () => setTimeout(updateAccountSavebar, 0));
+  document.querySelectorAll('[data-section]').forEach(btn => btn.addEventListener('click', () => setTimeout(updateAccountSavebar, 0)));
+}
+
+/**
+ * Đồng bộ thông tin tài khoản lên thẻ bên trái và các form cài đặt
+ * @param {{force?: boolean}} [options] - force: đổ lại form tài khoản kể cả khi đang có thay đổi chưa lưu
+ */
+function syncUserInfoUI(options = {}) {
   const user = getCurrentUser();
   if (!user) {
     // Người dùng đã đăng xuất: chuyển hướng đến trang đăng nhập
@@ -741,48 +852,53 @@ function syncUserInfoUI() {
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
   renderVerificationStatus(user);
 
-  // Form Account
-  const lastNameInput = document.getElementById('input-lastname');
-  const givenNameInput = document.getElementById('input-givenname');
-  const emInput = document.getElementById('input-email');
-  const phInput = document.getElementById('input-phone');
-  const smsInput = document.getElementById('pref-sms');
-  const mailInput = document.getElementById('pref-email');
-  const lastUpdateEl = document.getElementById('last-update-time');
+  // Form tài khoản: chỉ đổ lại dữ liệu khi người dùng chưa sửa dở (tránh bot đặt giá / cập nhật ví
+  // làm mất phần đang nhập); Hoàn tác và Lưu thành công thì luôn đổ lại
+  if (options.force || !savebarState.dirty) {
+    // Form Account
+    const lastNameInput = document.getElementById('input-lastname');
+    const givenNameInput = document.getElementById('input-givenname');
+    const emInput = document.getElementById('input-email');
+    const phInput = document.getElementById('input-phone');
+    const smsInput = document.getElementById('pref-sms');
+    const mailInput = document.getElementById('pref-email');
+    const lastUpdateEl = document.getElementById('last-update-time');
 
-  // Họ đệm và tên tách riêng; tài khoản cũ chỉ có họ tên đầy đủ thì tự tách theo từ cuối
-  const givenName = user.givenName || getGivenName(user.fullname || '');
-  const lastName = user.lastName ?? String(user.fullname || '').slice(0, Math.max(0, String(user.fullname || '').length - givenName.length)).trim();
-  if (lastNameInput) lastNameInput.value = lastName;
-  if (givenNameInput) givenNameInput.value = givenName;
-  if (emInput) emInput.value = user.email || '';
-  if (phInput) phInput.value = user.phone || '';
-  // Tên đăng nhập: tài khoản demo chỉ xem, không đổi được (dữ liệu mẫu gắn với tên này)
-  const usernameInput = document.getElementById('input-username');
-  if (usernameInput) {
-    const laDemo = isDemoAccount(user);
-    usernameInput.value = user.username || '';
-    usernameInput.readOnly = laDemo;
-    usernameInput.classList.toggle('pcb-input--readonly', laDemo);
-    const lockEl = document.getElementById('username-lock');
-    if (lockEl) lockEl.hidden = !laDemo;
-    const hintEl = document.getElementById('hint-input-username');
-    if (hintEl) {
-      hintEl.textContent = laDemo
-        ? 'Tài khoản demo dùng tên đăng nhập cố định để giữ dữ liệu mẫu. Bạn vẫn đăng nhập được bằng tên này hoặc email.'
-        : 'Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.';
+    // Họ đệm và tên tách riêng; tài khoản cũ chỉ có họ tên đầy đủ thì tự tách theo từ cuối
+    const givenName = user.givenName || getGivenName(user.fullname || '');
+    const lastName = user.lastName ?? String(user.fullname || '').slice(0, Math.max(0, String(user.fullname || '').length - givenName.length)).trim();
+    if (lastNameInput) lastNameInput.value = lastName;
+    if (givenNameInput) givenNameInput.value = givenName;
+    if (emInput) emInput.value = user.email || '';
+    if (phInput) phInput.value = user.phone || '';
+    // Tên đăng nhập: tài khoản demo chỉ xem, không đổi được (dữ liệu mẫu gắn với tên này)
+    const usernameInput = document.getElementById('input-username');
+    if (usernameInput) {
+      const laDemo = isDemoAccount(user);
+      usernameInput.value = user.username || '';
+      usernameInput.readOnly = laDemo;
+      usernameInput.classList.toggle('pcb-input--readonly', laDemo);
+      const lockEl = document.getElementById('username-lock');
+      if (lockEl) lockEl.hidden = !laDemo;
+      const hintEl = document.getElementById('hint-input-username');
+      if (hintEl) {
+        hintEl.textContent = laDemo
+          ? 'Tài khoản demo dùng tên đăng nhập cố định để giữ dữ liệu mẫu. Bạn vẫn đăng nhập được bằng tên này hoặc email.'
+          : 'Dùng để đăng nhập thay cho email và hiển thị trong đường dẫn hồ sơ công khai. 3 - 20 ký tự: chữ thường không dấu, số, dấu chấm hoặc gạch dưới.';
+      }
     }
+    if (smsInput) smsInput.checked = user.pref_sms !== false;
+    if (mailInput) mailInput.checked = user.pref_email !== false;
+    if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
+    // Giới tính, tiểu sử, ngày sinh
+    const genderInput = document.getElementById('input-gender');
+    const bioInput = document.getElementById('input-bio');
+    if (genderInput) genderInput.value = user.gender || '';
+    if (bioInput) bioInput.value = user.bio || '';
+    renderBirthDate(user);
+    // Ghi lại trạng thái form vừa đổ dữ liệu làm mốc so sánh cho thanh lưu nổi
+    markAccountFormSaved();
   }
-  if (smsInput) smsInput.checked = user.pref_sms !== false;
-  if (mailInput) mailInput.checked = user.pref_email !== false;
-  if (lastUpdateEl) lastUpdateEl.textContent = user.lastUpdated || 'Hôm nay';
-
-  // Giới tính, tiểu sử, ngày sinh
-  const genderInput = document.getElementById('input-gender');
-  const bioInput = document.getElementById('input-bio');
-  if (genderInput) genderInput.value = user.gender || '';
-  if (bioInput) bioInput.value = user.bio || '';
-  renderBirthDate(user);
 
   // Quyền riêng tư hồ sơ công khai
   const privacyForm = document.getElementById('form-privacy');
@@ -2075,7 +2191,7 @@ document.addEventListener('DOMContentLoaded', () => {
       user.lastUpdated = timeStr;
 
       saveCurrentUser(user);
-      syncUserInfoUI();
+      syncUserInfoUI({ force: true });
       updateCounters();
       showToast(doiTenDangNhap ? `Đã đổi tên đăng nhập thành @${user.username}!` : 'Đã lưu thay đổi thông tin cá nhân thành công!');
     });
@@ -2083,6 +2199,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 12a. Kiểm tra email / số điện thoại ngay khi rời khỏi ô: hiện dòng lỗi màu đỏ bên dưới
   setupContactFieldValidation();
+  // Thanh lưu nổi khi có thay đổi chưa lưu mà nút lưu đang khuất
+  initAccountSavebar();
   // Tên đăng nhập: tự chuyển chữ thường, kiểm tra khi rời khỏi ô
   const usernameField = document.getElementById('input-username');
   if (usernameField) {

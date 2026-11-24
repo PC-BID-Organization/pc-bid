@@ -2842,3 +2842,135 @@
   cursor: not-allowed;
   background-color: #f1f5f9;
 }
+
+/* ==========================================================================
+   THANH LƯU NỔI (khi có thay đổi chưa lưu và nút lưu đang khuất khỏi màn hình)
+   ========================================================================== */
+.pcb-savebar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(560px, calc(100vw - 340px));
+  padding: 8px 8px 8px 16px;
+  color: #ffffff;
+  background-color: #0f172a;
+  border-radius: 999px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pcb-savebar--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.pcb-savebar__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pcb-savebar__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #fb923c;
+  border-radius: 50%;
+}
+
+.pcb-savebar__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pcb-savebar__actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.pcb-savebar__undo,
+.pcb-savebar__save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  border-radius: 999px;
+}
+
+.pcb-savebar__undo {
+  color: #cbd5e1;
+  background: transparent;
+}
+
+.pcb-savebar__undo:hover,
+.pcb-savebar__undo:focus-visible {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.pcb-savebar__save {
+  color: #ffffff;
+  background-color: var(--color-primary, #c9450a);
+}
+
+.pcb-savebar__save:hover,
+.pcb-savebar__save:focus-visible {
+  background-color: var(--color-primary-hover, #a93a08);
+}
+
+/* Máy tính bảng / điện thoại: thanh mỏng sát đáy, chừa chỗ cho nút chat nổi bên phải */
+@media (max-width: 720px) {
+  .pcb-savebar {
+    right: 76px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    width: auto;
+    padding: 5px 5px 5px 12px;
+    transform: translateY(16px);
+  }
+
+  .pcb-savebar--visible {
+    transform: translateY(0);
+  }
+
+  .pcb-savebar__undo,
+  .pcb-savebar__save {
+    padding: 7px 11px;
+    font-size: 12.5px;
+  }
+}
+
+/* Điện thoại nhỏ: chỉ giữ chấm báo hiệu, nhường chỗ cho hai nút */
+@media (max-width: 420px) {
+  .pcb-savebar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-savebar {
+    transition: none;
+  }
+}
