@@ -448,7 +448,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 1000;
+  /* Nằm trên nút Tin nhắn (1500) và cụm nút liên hệ nổi (1400) */
+  z-index: 2600;
   display: flex;
   align-items: center;
   justify-content: center;
