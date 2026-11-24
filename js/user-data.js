@@ -16,7 +16,7 @@ export const USER_LIST_KEYS = {
 };
 
 // Các tài khoản demo dựng sẵn được nạp dữ liệu mẫu ở lần đầu
-export const DEMO_USERNAMES = ['bidder1', 'bidder2', 'seller'];
+export const DEMO_USERNAMES = ['bidder1', 'bidder2', 'bidder3', 'seller'];
 
 /**
  * Đọc người dùng đang đăng nhập từ localStorage
