@@ -1148,13 +1148,23 @@
   transition: all 0.2s ease;
 }
 
-.pcb-card__watch:hover {
-  background: #ffffff;
-  color: var(--pcb-primary);
-  transform: scale(1.1);
+/* Hiệu ứng rê chuột chỉ dành cho thiết bị có chuột: trên điện thoại không bị "dính" sau khi chạm */
+@media (hover: hover) {
+  .pcb-card__watch:hover {
+    background: #ffffff;
+    color: var(--pcb-primary);
+    transform: scale(1.1);
+  }
 }
 
-.pcb-card__watch--active {
+.pcb-card__watch:focus-visible {
+  outline: 2px solid var(--pcb-primary);
+  outline-offset: 2px;
+}
+
+/* Đã theo dõi: nền đỏ nhạt, icon bookmark tô đỏ đầy (kể cả khi rê chuột / vừa chạm) */
+.pcb-card__watch--active,
+.pcb-card__watch--active:hover {
   background: #fee2e2;
   border-color: #fca5a5;
   color: #dc2626;
@@ -1163,6 +1173,27 @@
 .pcb-card__watch svg {
   width: 14px;
   height: 14px;
+}
+
+.pcb-card__watch--active svg {
+  fill: currentColor;
+}
+
+/* Hiệu ứng nảy nhẹ ngay lúc bấm lưu theo dõi */
+.pcb-card__watch--pop svg {
+  animation: pcb-watch-pop 0.25s ease-out;
+}
+
+@keyframes pcb-watch-pop {
+  0% { transform: scale(0.7); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-card__watch--pop svg {
+    animation: none;
+  }
 }
 
 /* Thân card */

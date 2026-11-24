@@ -16,6 +16,8 @@ import { loadAllAuctions, readAllBids } from './bid-history.js';
 import { describeBidder, findAccount } from './accounts.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
 import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung với trang chi tiết, Header)
+import { getWatchlist, toggleWatch, setWatchButtonState } from './watchlist.js';
 
 
 /* ==========================================================================
@@ -193,6 +195,14 @@ let hotFilterCategory = 'all';
 let currentModalProduct = null;
 let currentBidIncrement = 0;
 const watchedProductIds = new Set();
+
+/**
+ * Đồng bộ tập ID đang theo dõi từ watchlist của tài khoản (dùng khi vẽ thẻ sản phẩm)
+ */
+function syncWatchedIds() {
+  watchedProductIds.clear();
+  getWatchlist().forEach(item => watchedProductIds.add(Number(typeof item === 'object' ? item.id : item)));
+}
 
 /* ==========================================================================
    2. TIỆN ÍCH ĐỊNH DẠNG & MÃ HOÁ (UTILITIES)
@@ -399,7 +409,7 @@ function getConditionBadge(conditionStr) {
 }
 
 function renderProductCard(product, options = {}) {
-  const isWatched = watchedProductIds.has(product.id);
+  const isWatched = watchedProductIds.has(Number(product.id));
   const detailUrl = `product-detail.html?id=${product.id}`;
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
@@ -445,8 +455,8 @@ function renderProductCard(product, options = {}) {
         <img class="pcb-card__img" src="${imageSrc}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.src='images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'">
       </a>
 
-      <button type="button" class="pcb-card__watch ${isWatched ? 'pcb-card__watch--active' : ''}" 
-        data-action="watch" data-id="${product.id}" aria-label="Theo dõi sản phẩm này">
+      <button type="button" class="pcb-card__watch ${isWatched ? 'pcb-card__watch--active' : ''}"
+        data-action="watch" data-id="${product.id}" aria-pressed="${isWatched}" aria-label="${isWatched ? 'Bỏ theo dõi phiên này' : 'Theo dõi phiên này'}">
         <svg viewBox="0 0 24 24" fill="${isWatched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>
@@ -1123,8 +1133,9 @@ function closeLightbox() {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Tải dữ liệu sản phẩm
+  // 1. Tải dữ liệu sản phẩm và danh sách theo dõi của tài khoản
   await loadProducts();
+  syncWatchedIds();
 
   // 2. Render các thành phần kệ hàng ban đầu
   renderEndingSoonShelf();
@@ -1184,15 +1195,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const watchBtn = e.target.closest('[data-action="watch"]');
     if (watchBtn) {
       const prodId = Number(watchBtn.dataset.id);
-      if (watchedProductIds.has(prodId)) {
-        watchedProductIds.delete(prodId);
-        watchBtn.classList.remove('pcb-card__watch--active');
-        showToast('Đã bỏ theo dõi phiên này');
-      } else {
-        watchedProductIds.add(prodId);
-        watchBtn.classList.add('pcb-card__watch--active');
-        showToast('Đã thêm vào danh sách theo dõi ❤️');
+      const product = allProducts.find(p => Number(p.id) === prodId) || { id: prodId };
+      // Lưu vào watchlist của tài khoản; chưa đăng nhập thì chuyển sang trang đăng nhập
+      const watched = toggleWatch(product);
+      if (watched === null) {
+        showToast('Bạn cần đăng nhập để theo dõi phiên đấu giá.', 'info');
+        setTimeout(() => { window.location.href = `login.html?redirect=${encodeURIComponent('index.html')}`; }, 1200);
+        return;
       }
+      syncWatchedIds();
+      // Cùng một phiên có thể xuất hiện ở nhiều kệ: cập nhật mọi nút của phiên đó
+      document.querySelectorAll(`[data-action="watch"][data-id="${prodId}"]`).forEach(btn => setWatchButtonState(btn, watched));
+      showToast(watched ? 'Đã thêm vào danh sách theo dõi' : 'Đã bỏ theo dõi phiên này');
       return;
     }
 

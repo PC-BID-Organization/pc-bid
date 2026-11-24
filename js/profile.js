@@ -377,6 +377,8 @@ function getWatchlistItems() {
 
 function saveWatchlistItems(items) {
   writeUserList(USER_LIST_KEYS.WATCHLIST, getCurrentUser(), items);
+  // Báo Header cập nhật số đếm trên icon bookmark
+  window.dispatchEvent(new CustomEvent('pcbid:watchlist-updated', { detail: { count: items.length } }));
 }
 
 /* ==========================================================================

@@ -27,6 +27,8 @@ import { openChat } from './chat.js';
 import { showConfirm } from './dialog.js';
 // Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
 import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionCertificate, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung)
+import { isWatched, toggleWatch } from './watchlist.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -1609,9 +1611,7 @@ function capNhatNutWatchlist(idSanPham) {
   const iconTim = document.getElementById('pcb-pd-watchlist-icon');
   const nhan = document.getElementById('pcb-pd-watchlist-label');
 
-  const watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, readLoggedInUser());
-
-  const daCoTrong = watchlist.some(item => (typeof item === "object" ? item.id : item) === idSanPham);
+  const daCoTrong = isWatched(idSanPham);
   if (nut) {
     nut.setAttribute('aria-pressed', daCoTrong ? 'true' : 'false');
     nut.classList.toggle('pcb-pd__watchlist-btn--active', daCoTrong);
@@ -1632,36 +1632,10 @@ function batTatWatchlist(idSanPham) {
     setTimeout(() => { window.location.href = 'login.html'; }, 1200);
     return;
   }
-  let watchlist = readUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung);
-
-  const daCoTrong = watchlist.some(item => (typeof item === 'object' ? item.id : item) === idSanPham);
-  if (daCoTrong) {
-    watchlist = watchlist.filter(item => (typeof item === 'object' ? item.id : item) !== idSanPham);
-    hienThiToast('Đã xóa khỏi danh sách theo dõi.', 'info');
-  } else {
-    const specsList = sanPhamHienTai?.specifications
-      ? Object.entries(sanPhamHienTai.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
-      : [];
-    const itemObj = {
-      id: sanPhamHienTai.id,
-      name: sanPhamHienTai.name,
-      category: sanPhamHienTai.category,
-      currentBid: sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice,
-      marketPriceNew: sanPhamHienTai.marketPriceNew || Math.round((sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) * 1.5),
-      bidCount: sanPhamHienTai.bidCount || 0,
-      endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
-      images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
-      specs: specsList
-    };
-    watchlist.unshift(itemObj);
-    hienThiToast('Đã thêm vào danh sách theo dõi!', 'success');
-  }
-
-  writeUserList(USER_LIST_KEYS.WATCHLIST, nguoiDung, watchlist);
+  // Lưu qua module dùng chung để Trang chủ, Danh sách và Header thấy cùng một danh sách
+  const daThem = toggleWatch(sanPhamHienTai || { id: idSanPham }, nguoiDung);
+  hienThiToast(daThem ? 'Đã thêm vào danh sách theo dõi!' : 'Đã xóa khỏi danh sách theo dõi.', daThem ? 'success' : 'info');
   capNhatNutWatchlist(idSanPham);
-
-  const headerBadge = document.getElementById('header-watchlist-badge');
-  if (headerBadge) headerBadge.textContent = watchlist.length;
 }
 
 /* ==========================================================================

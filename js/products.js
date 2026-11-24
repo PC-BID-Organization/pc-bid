@@ -13,6 +13,10 @@ import { readLoggedInUser } from './user-data.js';
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
 import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Danh sách theo dõi lưu theo tài khoản (dùng chung với Trang chủ, trang chi tiết, Header)
+import { isWatched, toggleWatch, setWatchButtonState } from './watchlist.js';
+// Hộp thoại xác nhận dùng chung
+import { showConfirm } from './dialog.js';
 
 
 /* ==========================================================================
@@ -769,12 +773,28 @@ function attachCardClickEvents() {
     });
   });
 
-  // Sự kiện nút Theo dõi (Watchlist)
+  // Sự kiện nút Theo dõi (Watchlist): lưu vào danh sách theo dõi của tài khoản
   const watchBtns = document.querySelectorAll('[data-action="watch"]');
   watchBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      btn.classList.toggle('pcb-card__watch--active');
+      const id = Number(btn.dataset.id);
+      const product = rawProducts.find(p => Number(p.id) === id) || { id };
+      const watched = toggleWatch(product);
+      if (watched === null) {
+        const goLogin = await showConfirm({
+          title: 'Cần đăng nhập',
+          message: 'Bạn cần đăng nhập để lưu phiên vào danh sách theo dõi.',
+          confirmText: 'Đăng nhập',
+          cancelText: 'Để sau'
+        });
+        if (goLogin) window.location.href = `login.html?redirect=${encodeURIComponent('products.html')}`;
+        return;
+      }
+      setWatchButtonState(btn, watched);
     });
   });
 }
@@ -800,6 +820,8 @@ function renderCatalogProductCard(product) {
   const isJustPosted = isJustPostedByViewer(product);
   const conditionLabel = getConditionBadge(product.condition);
   const sealBadge = getHardwareSeal(product);
+  // Trạng thái bookmark theo danh sách theo dõi của tài khoản đang đăng nhập
+  const watched = isWatched(product.id);
 
   const specs = product.specifications || {};
   const specItems = Object.entries(specs).slice(0, 2).map(([k, v]) => {
@@ -825,8 +847,8 @@ function renderCatalogProductCard(product) {
         <img class="pcb-card__img" src="${imageSrc}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.src='images/products/mainboard/3013-msi-mag-z790-tomahawk-1.jpg'">
       </a>
 
-      <button type="button" class="pcb-card__watch" data-action="watch" data-id="${product.id}" aria-label="Lưu theo dõi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button type="button" class="pcb-card__watch${watched ? ' pcb-card__watch--active' : ''}" data-action="watch" data-id="${product.id}" aria-pressed="${watched}" aria-label="${watched ? 'Bỏ theo dõi phiên này' : 'Theo dõi phiên này'}">
+        <svg viewBox="0 0 24 24" fill="${watched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>
       </button>

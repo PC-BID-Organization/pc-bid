@@ -10,7 +10,7 @@ import { getAuctionEndTimestamp, isAuctionClosed } from '../../js/auction-time.j
 // Đơn hàng sau đấu giá để đếm số việc cần xử lý trên icon Quản lý đấu giá
 import { getOrdersForUser, orderNeedsAction } from '../../js/settlement.js';
 // Đếm watchlist riêng của tài khoản đang đăng nhập
-import { USER_LIST_KEYS, readLoggedInUser, userStorageKey } from '../../js/user-data.js';
+import { USER_LIST_KEYS, readLoggedInUser } from '../../js/user-data.js';
 // Tài khoản demo và avatar chữ cái dùng chung
 import { DEMO_ACCOUNTS, getAvatarInitial, renderAvatarContent, findAccount } from '../../js/accounts.js';
 // Hộp thoại xác nhận dùng chung
@@ -21,6 +21,8 @@ import { icon, NOTIFY_ICON_NAMES } from '../../js/icons.js';
 import { LANGUAGES, getLanguage, setLanguage } from '../../js/i18n.js';
 // Danh sách phiên đấu giá dùng chung để đếm số phiên đang đăng bán
 import { loadAllAuctions, getSellingAuctions } from '../../js/bid-history.js';
+// Danh sách theo dõi lưu theo tài khoản (đếm số trên icon bookmark)
+import { getWatchlist } from '../../js/watchlist.js';
 
 export function initHeader() {
   initSearchHandler();
@@ -458,19 +460,29 @@ function initMobileNavToggle() {
 // 4 tài khoản demo lấy từ module dùng chung js/accounts.js
 const SAMPLE_ACCOUNTS = DEMO_ACCOUNTS;
 
+/**
+ * Số phiên trong danh sách theo dõi của tài khoản đang đăng nhập (icon bookmark trên Header)
+ */
+function refreshWatchlistBadge() {
+  const badge = document.getElementById('header-watchlist-badge');
+  if (!badge) return;
+  try {
+    badge.textContent = getWatchlist().length;
+  } catch {
+    badge.textContent = '0';
+  }
+}
+
 function initHeaderUserStatus() {
   // Cập nhật số lượng Watchlist từ LocalStorage
-  const badge = document.getElementById('header-watchlist-badge');
-  if (badge) {
-    try {
-      const loggedIn = readLoggedInUser();
-      const watchlist = loggedIn
-        ? JSON.parse(localStorage.getItem(userStorageKey(USER_LIST_KEYS.WATCHLIST, loggedIn)) || '[]')
-        : [];
-      badge.textContent = watchlist.length;
-    } catch {
-      badge.textContent = '0';
-    }
+  refreshWatchlistBadge();
+  // Bấm bookmark ở trang bất kỳ (hoặc ở tab khác): cập nhật số đếm ngay
+  if (!window.__pcbidWatchBadgeBound) {
+    window.__pcbidWatchBadgeBound = true;
+    window.addEventListener('pcbid:watchlist-updated', refreshWatchlistBadge);
+    window.addEventListener('storage', e => {
+      if (!e.key || e.key.startsWith(USER_LIST_KEYS.WATCHLIST)) refreshWatchlistBadge();
+    });
   }
 
   // Số thông báo chưa đọc của tài khoản đang đăng nhập
