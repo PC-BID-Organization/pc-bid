@@ -16,10 +16,11 @@
  * @param {string} options.message - Nội dung (xuống dòng bằng \n)
  * @param {string} [options.confirmText] - Chữ trên nút đồng ý
  * @param {string|null} [options.cancelText] - Chữ trên nút hủy (null = không có nút hủy)
+ * @param {string|null} [options.extraText] - Chữ trên nút lựa chọn thứ ba (null = không có)
  * @param {'info'|'warning'|'danger'|'success'} [options.tone] - Sắc thái biểu tượng và nút chính
- * @returns {Promise<boolean>} true khi bấm nút đồng ý
+ * @returns {Promise<'ok'|'cancel'|'extra'>} Nút người dùng đã bấm
  */
-function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồng ý', cancelText = 'Hủy', tone = 'info' }) {
+function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồng ý', cancelText = 'Hủy', extraText = null, tone = 'info' }) {
   return new Promise(resolve => {
     const previousFocus = document.activeElement;
     const icons = { info: 'i', warning: '!', danger: '!', success: '✓' };
@@ -34,6 +35,7 @@ function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồn
         <p class="pcb-dialog__message" id="pcb-dialog-message"></p>
         <div class="pcb-dialog__actions">
           ${cancelText ? '<button type="button" class="pcb-dialog__btn pcb-dialog__btn--ghost" data-dialog="cancel"></button>' : ''}
+          ${extraText ? '<button type="button" class="pcb-dialog__btn pcb-dialog__btn--ghost pcb-dialog__btn--extra" data-dialog="extra"></button>' : ''}
           <button type="button" class="pcb-dialog__btn pcb-dialog__btn--primary" data-dialog="ok"></button>
         </div>
       </div>
@@ -43,6 +45,7 @@ function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồn
     overlay.querySelector('.pcb-dialog__message').textContent = message;
     overlay.querySelector('[data-dialog="ok"]').textContent = confirmText;
     if (cancelText) overlay.querySelector('[data-dialog="cancel"]').textContent = cancelText;
+    if (extraText) overlay.querySelector('[data-dialog="extra"]').textContent = extraText;
     document.body.appendChild(overlay);
 
     const okBtn = overlay.querySelector('[data-dialog="ok"]');
@@ -60,7 +63,7 @@ function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồn
     const onKey = e => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        close(false);
+        close('cancel');
       } else if (e.key === 'Tab') {
         // Giữ focus trong hộp thoại
         const buttons = [...overlay.querySelectorAll('button')];
@@ -73,8 +76,9 @@ function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồn
     document.addEventListener('keydown', onKey, true);
 
     overlay.addEventListener('click', e => {
-      if (e.target.closest('[data-dialog="ok"]')) close(true);
-      else if (e.target.closest('[data-dialog="cancel"]') || e.target === overlay) close(false);
+      if (e.target.closest('[data-dialog="ok"]')) close('ok');
+      else if (e.target.closest('[data-dialog="extra"]')) close('extra');
+      else if (e.target.closest('[data-dialog="cancel"]') || e.target === overlay) close('cancel');
     });
   });
 }
@@ -84,7 +88,16 @@ function openDialog({ title = 'Thông báo', message = '', confirmText = 'Đồn
  * @param {Object} options - Xem openDialog; mặc định tone 'warning'
  * @returns {Promise<boolean>}
  */
-export function showConfirm(options) {
+export async function showConfirm(options) {
+  return (await openDialog({ tone: 'warning', ...options })) === 'ok';
+}
+
+/**
+ * Hộp thoại ba lựa chọn (VD: Lưu / Không lưu / Ở lại)
+ * @param {Object} options - Xem openDialog; extraText là nút thứ ba
+ * @returns {Promise<'ok'|'cancel'|'extra'>} Bấm ra ngoài hoặc Esc tính là 'cancel'
+ */
+export function showChoice(options) {
   return openDialog({ tone: 'warning', ...options });
 }
 

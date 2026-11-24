@@ -30,7 +30,7 @@ import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
-import { showAlert, showConfirm } from './dialog.js';
+import { showAlert, showConfirm, showChoice } from './dialog.js';
 
 
 
@@ -759,6 +759,73 @@ function updateAccountSavebar() {
     bar.classList.remove('pcb-savebar--visible');
     bar.hidden = true;
   }
+}
+
+// Promise của lần lưu form tài khoản gần nhất (null nếu chưa lưu lần nào)
+let accountSubmitPromise = null;
+
+/**
+ * Hỏi người dùng muốn lưu thay đổi trước khi rời đi không
+ * @returns {Promise<boolean>} true nếu được phép rời đi (đã lưu thành công hoặc chọn không lưu)
+ */
+async function confirmLeaveAccountForm() {
+  const choice = await showChoice({
+    title: 'Lưu thay đổi trước khi rời đi?',
+    message: 'Bạn có thay đổi trong Thông tin tài khoản chưa được lưu.',
+    confirmText: 'Lưu thay đổi',
+    extraText: 'Không lưu',
+    cancelText: 'Ở lại'
+  });
+  if (choice === 'cancel') return false;
+  if (choice === 'extra') {
+    // Bỏ thay đổi: trả form về dữ liệu đã lưu
+    syncUserInfoUI({ force: true });
+    return true;
+  }
+  const form = document.getElementById('form-account-info');
+  accountSubmitPromise = null;
+  form?.requestSubmit();
+  if (accountSubmitPromise) await accountSubmitPromise;
+  // Lưu không thành công (lỗi nhập liệu / người dùng hủy xác nhận): ở lại để sửa
+  return !savebarState.dirty;
+}
+
+/**
+ * Chặn rời trang khi form tài khoản còn thay đổi chưa lưu:
+ * - Bấm liên kết sang trang khác / chuyển mục trong Hồ sơ: hộp thoại của web (Lưu / Không lưu / Ở lại)
+ * - Tải lại hoặc đóng tab: trình duyệt chỉ cho phép hiện hộp thoại xác nhận mặc định của nó
+ */
+function initAccountLeaveGuard() {
+  let bypass = false;
+
+  window.addEventListener('beforeunload', e => {
+    if (!savebarState.dirty || bypass) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  document.addEventListener('click', async e => {
+    if (bypass || !savebarState.dirty) return;
+    const section = document.getElementById('section-account');
+    if (!section || section.hidden) return;
+    const link = e.target.closest('a[href]');
+    const navBtn = e.target.closest('[data-section]');
+    const leavingByLink = link && !section.contains(link) && link.target !== '_blank'
+      && !link.hasAttribute('download') && !link.getAttribute('href').startsWith('javascript');
+    const leavingBySection = navBtn && navBtn.dataset.section !== 'section-account';
+    if (!leavingByLink && !leavingBySection) return;
+    // Chặn điều hướng cho tới khi người dùng chọn
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!(await confirmLeaveAccountForm())) return;
+    bypass = true;
+    if (leavingByLink) {
+      window.location.href = link.href;
+    } else {
+      navBtn.click();
+    }
+    setTimeout(() => { bypass = false; }, 0);
+  }, true);
 }
 
 /**
@@ -2086,9 +2153,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. Xử lý Form Cập nhật thông tin tài khoản
   const formAccount = document.getElementById('form-account-info');
   if (formAccount) {
-    formAccount.addEventListener('submit', async (e) => {
+    formAccount.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Lưu lại Promise để hộp thoại "rời trang khi chưa lưu" chờ kết quả lưu
+      accountSubmitPromise = handleAccountSubmit();
+    });
+  }
 
+  // 12a. Hỏi lưu trước khi rời trang / chuyển mục khi form tài khoản còn thay đổi chưa lưu
+  initAccountLeaveGuard();
+
+  async function handleAccountSubmit() {
       const user = getCurrentUser();
 
       // Kiểm tra email / số điện thoại: đúng định dạng và không trùng với tài khoản khác (lỗi hiện dưới ô)
@@ -2194,7 +2269,6 @@ document.addEventListener('DOMContentLoaded', () => {
       syncUserInfoUI({ force: true });
       updateCounters();
       showToast(doiTenDangNhap ? `Đã đổi tên đăng nhập thành @${user.username}!` : 'Đã lưu thay đổi thông tin cá nhân thành công!');
-    });
   }
 
   // 12a. Kiểm tra email / số điện thoại ngay khi rời khỏi ô: hiện dòng lỗi màu đỏ bên dưới

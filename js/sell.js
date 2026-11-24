@@ -12,6 +12,8 @@ import { USER_LIST_KEYS, readLoggedInUser, readUserList, writeUserList } from '.
 import { showAlert, showConfirm } from './dialog.js';
 // Quy trình kiểm định bắt buộc trước khi mở đặt giá
 import { INSPECTION_MS, createInspectionRequest } from './inspection.js';
+// Ô chọn tùy biến cùng phong cách PCBid
+import { enhanceSelects } from './custom-select.js';
 
 
 /* ==========================================================================
@@ -453,6 +455,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await requireLoginToSell();
     return;
   }
+
+  // Ô chọn dùng giao diện riêng của PCBid thay cho bảng chọn mặc định của trình duyệt (nhất là trên điện thoại)
+  enhanceSelects('#sell-auction-form .pcb-form-select');
 
   initCatalogueEvents();
   initFormInputsSync();

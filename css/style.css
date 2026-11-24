@@ -117,6 +117,13 @@
   gap: 10px;
 }
 
+/* Hộp thoại ba lựa chọn trên màn hình hẹp: xếp dọc, nút chính ở trên cùng */
+@media (max-width: 480px) {
+  .pcb-dialog__actions:has(.pcb-dialog__btn--extra) {
+    flex-direction: column-reverse;
+  }
+}
+
 .pcb-dialog__btn {
   flex: 1;
   padding: 11px 14px;
@@ -2434,3 +2441,186 @@ a.pcb-chat__peer-name:focus-visible {
   }
 }
 
+
+/* ==========================================================================
+   Ô CHỌN TÙY BIẾN (custom-select.js): danh sách xổ xuống cùng phong cách PCBid
+   ========================================================================== */
+.pcb-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  /* Chiều rộng không phụ thuộc chữ bên trong: tên mẫu dài bị cắt "…" thay vì kéo giãn cả form */
+  contain: inline-size;
+}
+
+/* Thẻ <select> gốc: ẩn khỏi mắt nhưng vẫn nằm trong form để gửi dữ liệu và kiểm tra required.
+   Bộ chọn cụ thể hơn để không bị CSS của từng trang (VD: .pcb-form-select { width: 100% }) ghi đè */
+.pcb-select select.pcb-select__native {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  min-width: 0;
+  height: 1px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pcb-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-text-main, #0f172a);
+  text-align: left;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pcb-select__trigger:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.pcb-select__trigger:focus-visible,
+.pcb-select--open .pcb-select__trigger {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201, 69, 10, 0.15);
+}
+
+.pcb-select__trigger:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.pcb-select__trigger--placeholder .pcb-select__value {
+  color: #64748b;
+}
+
+.pcb-select__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pcb-select__chevron {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.pcb-select--open .pcb-select__chevron {
+  transform: rotate(180deg);
+}
+
+.pcb-select__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 50;
+  max-height: 280px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  box-shadow: 0 14px 32px rgba(11, 28, 48, 0.16);
+  animation: pcb-select-in 0.14s ease-out;
+}
+
+/* Gần đáy màn hình: danh sách mở lên phía trên nút */
+.pcb-select--up .pcb-select__list {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+@keyframes pcb-select-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pcb-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-main, #0f172a);
+  cursor: pointer;
+  border-radius: 7px;
+}
+
+.pcb-select__option--active,
+.pcb-select__option:hover {
+  background: #f1f5f9;
+}
+
+.pcb-select__option[aria-selected="true"] {
+  font-weight: 700;
+  color: var(--color-primary);
+  background: #fff4ed;
+}
+
+.pcb-select__option--placeholder {
+  color: #64748b;
+}
+
+.pcb-select__option[aria-disabled="true"] {
+  color: #94a3b8;
+  cursor: not-allowed;
+  background: none;
+}
+
+.pcb-select__check {
+  flex-shrink: 0;
+  visibility: hidden;
+}
+
+.pcb-select__option[aria-selected="true"] .pcb-select__check {
+  visibility: visible;
+}
+
+/* Điện thoại: dòng lựa chọn cao hơn để dễ chạm */
+@media (max-width: 720px) {
+  .pcb-select__trigger {
+    min-height: 46px;
+    font-size: 14px;
+  }
+
+  .pcb-select__option {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .pcb-select__list {
+    max-height: min(320px, 50vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-select__list {
+    animation: none;
+  }
+}
