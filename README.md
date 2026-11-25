@@ -1,15 +1,14 @@
 <p align="center">
-  <img src="images/logo/pcbid-logo-full.png" alt="PCBid Logo" width="450" />
+  <img src="images/logo/pcbid-logo-ee2439.png" alt="PCBid Logo" width="280" />
 </p>
 
 # PCBid - Website Đấu Giá Linh Kiện PC Cũ
 
-Đồ án môn học: **IE104 - Internet & Công nghệ Web**
-Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**
-Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**
-Nhóm thực hiện: **Nguyễn Hùng Phong · Nguyễn Nhật Huy · Huỳnh Nhật Minh · Nguyễn Gia Huy**
+Đồ án môn học: **IE104 - Internet & Công nghệ Web**<br>
+Giảng viên hướng dẫn: **ThS. Võ Tấn Khoa**<br>
+Trường: **Đại học Công nghệ Thông tin - ĐHQG-HCM (UIT)**<br>
 
-🔗 **Bản chạy trực tiếp:** <https://pc-bid-organization.github.io/pc-bid/>
+**Live Github Pages:** <https://pc-bid-organization.github.io/pc-bid/>
 
 ---
 
