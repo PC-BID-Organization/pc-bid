@@ -506,7 +506,24 @@ function renderSellingCard(item) {
   let modifierClass = '';
   let actionButtonsHtml = '';
 
-  if (item.status === 'active' && isAwaitingInspection(item)) {
+  if (item.status === 'pending_approval' || item.approvalStatus === 'pending') {
+    modifierClass = 'pcb-auction-card--selling-active';
+    badgeHtml = `<span class="pcb-status-badge" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">
+      ⏳ Chờ Admin duyệt
+    </span>`;
+    actionButtonsHtml = `
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết &amp; Thẩm định</a>
+    `;
+  } else if (item.status === 'rejected') {
+    modifierClass = 'pcb-auction-card--selling-ended';
+    badgeHtml = `<span class="pcb-status-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;">
+      ❌ Bị từ chối
+    </span>`;
+    actionButtonsHtml = `
+      <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid pcb-btn-rebid--muted">Chỉnh sửa &amp; Nộp lại</a>
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
+    `;
+  } else if (item.status === 'active' && isAwaitingInspection(item)) {
     // Phiên vừa đăng: đang chờ PCBid Lab kiểm định, chưa mở đặt giá
     modifierClass = 'pcb-auction-card--selling-active';
     badgeHtml = `<span class="pcb-status-badge pcb-status-badge--pending">Chờ kiểm định</span>`;
@@ -606,6 +623,176 @@ function renderSellingCard(item) {
 }
 
 /**
+ * Lấy danh sách toàn bộ các phiên đang chờ Quản trị viên thẩm định & phê duyệt
+ * @returns {Array}
+ */
+function getPendingApprovals() {
+  try {
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    return products.filter(p => p.status === 'pending_approval' || p.approvalStatus === 'pending');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Render thẻ phiên đấu giá đang chờ Quản trị viên thẩm định & phê duyệt
+ * @param {Object} item - Thông tin phiên đấu giá
+ * @returns {string} HTML thẻ
+ */
+function renderAdminApprovalCard(item) {
+  const detailUrl = `product-detail.html?id=${item.id}`;
+  const imageSrc = (item.images && item.images[0]) ? item.images[0] : 'images/placeholder-product.svg';
+  const startPrice = formatVnd(item.startingPrice || 0);
+  const ceilingPrice = item.ceilingPrice ? formatVnd(item.ceilingPrice) : 'Không đặt';
+  const bidStep = formatVnd(item.bidStep || 50000);
+  const seller = item.seller || 'Người bán';
+
+  return `
+    <article class="pcb-auction-card pcb-auction-card--admin-review" data-id="${item.id}" style="border: 1.5px solid #c7d2fe; background: #ffffff;">
+      <a href="${detailUrl}" class="pcb-auction-card__media-link" aria-label="Xem chi tiết ${escapeHtml(item.name)}">
+        <span class="pcb-auction-card__category-badge" style="background: #4f46e5;">${escapeHtml(item.category || 'PC')}</span>
+        <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+      </a>
+
+      <div class="pcb-auction-card__body">
+        <div class="pcb-auction-card__top-row">
+          <span class="pcb-status-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
+            ⏳ Chờ Admin duyệt
+          </span>
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
+            Người bán: <strong>${escapeHtml(seller)}</strong>
+          </span>
+        </div>
+
+        <a href="${detailUrl}" class="pcb-auction-card__title" title="${escapeHtml(item.name)}">
+          ${escapeHtml(item.name)}
+        </a>
+
+        <div class="pcb-auction-card__stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;">
+          <div class="pcb-stat-col">
+            <span class="pcb-stat-col__lbl">Giá khởi điểm</span>
+            <span class="pcb-stat-col__val">${startPrice}</span>
+          </div>
+          <div class="pcb-stat-col">
+            <span class="pcb-stat-col__lbl">Bước giá</span>
+            <span class="pcb-stat-col__val">${bidStep}</span>
+          </div>
+          <div class="pcb-stat-col">
+            <span class="pcb-stat-col__lbl">Giá trần chốt ngay</span>
+            <span class="pcb-stat-col__val" style="color: #b45309; font-weight: 700;">${ceilingPrice}</span>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; margin-top: 4px; font-size: 0.75rem; color: #475569;">
+          <span>📋 Thẩm định: Đã có ảnh thật, thông số kỹ thuật &amp; mô tả. Sẵn sàng duyệt mở phiên.</span>
+        </div>
+      </div>
+
+      <div class="pcb-auction-card__actions" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 140px;">
+        <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-admin-quick-approve="${item.id}" style="background: #16a34a; border-color: #16a34a; justify-content: center;">
+          ✓ Duyệt mở phiên
+        </button>
+        <button type="button" class="pcb-btn-rebid" data-admin-quick-reject="${item.id}" style="color: #dc2626; border-color: #fecaca; background: #fee2e2; justify-content: center;">
+          ✕ Từ chối
+        </button>
+        <a href="${detailUrl}" class="pcb-btn-detail" style="text-align: center; justify-content: center;">
+          🔍 Xem chi tiết
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+/**
+ * Phê duyệt phiên đấu giá theo ID (dành cho Admin)
+ * @param {number} id
+ */
+async function approveProductById(id) {
+  try {
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const idx = products.findIndex(p => Number(p.id) === Number(id));
+    if (idx !== -1) {
+      products[idx].status = 'active';
+      products[idx].approvalStatus = 'approved';
+      products[idx].approvedAt = new Date().toISOString();
+      localStorage.setItem('pcbid_products', JSON.stringify(products));
+    }
+    // Cập nhật tất cả danh sách bán của người dùng trong localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('pcbid_my_auctions_selling')) {
+        try {
+          const list = JSON.parse(localStorage.getItem(k) || '[]');
+          let changed = false;
+          list.forEach(p => {
+            if (Number(p.id) === Number(id)) {
+              p.status = 'active';
+              p.approvalStatus = 'approved';
+              changed = true;
+            }
+          });
+          if (changed) localStorage.setItem(k, JSON.stringify(list));
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  await showAlert({
+    title: 'Phê duyệt thành công!',
+    message: 'Phiên đấu giá đã được phê duyệt và chính thức mở công khai trên sàn PCBid.',
+    tone: 'success'
+  });
+  renderCurrentAuctionTab();
+  updateCounters();
+}
+
+/**
+ * Từ chối phiên đấu giá theo ID (dành cho Admin)
+ * @param {number} id
+ */
+async function rejectProductById(id) {
+  try {
+    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
+    const idx = products.findIndex(p => Number(p.id) === Number(id));
+    if (idx !== -1) {
+      products[idx].status = 'rejected';
+      products[idx].approvalStatus = 'rejected';
+      products[idx].rejectedAt = new Date().toISOString();
+      localStorage.setItem('pcbid_products', JSON.stringify(products));
+    }
+    // Cập nhật tất cả danh sách bán của người dùng trong localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('pcbid_my_auctions_selling')) {
+        try {
+          const list = JSON.parse(localStorage.getItem(k) || '[]');
+          let changed = false;
+          list.forEach(p => {
+            if (Number(p.id) === Number(id)) {
+              p.status = 'rejected';
+              p.approvalStatus = 'rejected';
+              changed = true;
+            }
+          });
+          if (changed) localStorage.setItem(k, JSON.stringify(list));
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  await showAlert({
+    title: 'Đã từ chối',
+    message: 'Phiên đấu giá đã bị từ chối phê duyệt do không đủ cơ sở xác thực có hàng.',
+    tone: 'danger'
+  });
+  renderCurrentAuctionTab();
+  updateCounters();
+}
+
+/**
  * Render thẻ cho Tab "Danh sách theo dõi (Watchlist)"
  */
 function renderWatchlistCard(item) {
@@ -680,13 +867,14 @@ function renderWatchlistCard(item) {
 
 let currentActiveSection = 'section-auctions';
 
-// Mỗi tab thuộc một luồng làm việc riêng: Mua hàng hoặc Bán hàng
+// Mỗi tab thuộc một luồng làm việc riêng: Mua hàng, Bán hàng hoặc Quản trị viên (Admin)
 const TAB_GROUP = {
   participating: 'buy',
   'buy-orders': 'buy',
   watchlist: 'buy',
   selling: 'sell',
-  'sell-orders': 'sell'
+  'sell-orders': 'sell',
+  'admin-approvals': 'admin'
 };
 let currentActiveTab = 'participating';
 let currentSearchKeyword = '';
@@ -1125,6 +1313,13 @@ function syncUserInfoUI(options = {}) {
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
   renderVerificationStatus(user);
 
+  // Hiển thị nút Thẩm định & Duyệt (Admin) trên công tắc giao dịch nếu là tài khoản Admin
+  const adminTradeBtn = document.getElementById('trade-btn-admin');
+  const isAdmin = user && (user.role === 'admin' || user.username === 'admin');
+  if (adminTradeBtn) {
+    adminTradeBtn.hidden = !isAdmin;
+  }
+
   // Form tài khoản: chỉ đổ lại dữ liệu khi người dùng chưa sửa dở (tránh bot đặt giá / cập nhật ví
   // làm mất phần đang nhập); Hoàn tác và Lưu thành công thì luôn đổ lại
   if (options.force || !isFormDirty('form-account-info')) {
@@ -1254,6 +1449,16 @@ function updateCounters() {
     }
   });
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
+
+  // Bộ đếm phiên chờ Quản trị viên duyệt
+  const pendingApprovals = getPendingApprovals();
+  const countAdminEl = document.getElementById('count-admin-approvals');
+  const badgeAdminEl = document.getElementById('trade-badge-admin');
+  if (countAdminEl) countAdminEl.textContent = pendingApprovals.length;
+  if (badgeAdminEl) {
+    badgeAdminEl.textContent = pendingApprovals.length;
+    badgeAdminEl.hidden = pendingApprovals.length === 0;
+  }
 
   // Số thông báo chưa đọc
   const navNotifyEl = document.getElementById('nav-notifications-count');
@@ -1411,6 +1616,39 @@ function renderCurrentAuctionTab() {
         syncUserInfoUI();
       });
     }
+  } else if (currentActiveTab === 'admin-approvals') {
+    const list = getPendingApprovals();
+    const filtered = list.filter(item => {
+      return !kw || item.name.toLowerCase().includes(kw) || (item.category && item.category.toLowerCase().includes(kw));
+    });
+
+    const grid = document.getElementById('grid-admin-approvals');
+    const empty = document.getElementById('empty-admin-approvals');
+    if (grid && empty) {
+      if (filtered.length > 0) {
+        grid.innerHTML = filtered.map(renderAdminApprovalCard).join('');
+        grid.hidden = false;
+        empty.hidden = true;
+
+        // Gắn sự kiện duyệt nhanh / từ chối nhanh
+        grid.querySelectorAll('[data-admin-quick-approve]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = Number(btn.dataset.adminQuickApprove);
+            approveProductById(id);
+          });
+        });
+        grid.querySelectorAll('[data-admin-quick-reject]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = Number(btn.dataset.adminQuickReject);
+            rejectProductById(id);
+          });
+        });
+      } else {
+        grid.innerHTML = '';
+        grid.hidden = true;
+        empty.hidden = false;
+      }
+    }
   }
 
   updateCounters();
@@ -1488,6 +1726,9 @@ function applyHashRoute() {
   } else if (hash === '#selling') {
     switchSection('section-auctions');
     switchAuctionTab('selling');
+  } else if (hash === '#admin-approvals' || hash === '#admin') {
+    switchSection('section-auctions');
+    switchAuctionTab('admin-approvals');
   } else if (hash === '#buy-orders' || hash === '#orders') {
     switchSection('section-auctions');
     switchAuctionTab('buy-orders');
@@ -1913,11 +2154,19 @@ function switchAuctionTab(tabName) {
   });
   const titleEl = document.getElementById('trade-title');
   const subtitleEl = document.getElementById('trade-subtitle');
-  if (titleEl) titleEl.textContent = group === 'sell' ? 'Quản lý đấu giá · Bán hàng' : 'Quản lý đấu giá · Mua hàng';
+  if (titleEl) {
+    titleEl.textContent = group === 'admin'
+      ? 'Quản lý đấu giá · Quản trị viên (Admin)'
+      : group === 'sell'
+        ? 'Quản lý đấu giá · Bán hàng'
+        : 'Quản lý đấu giá · Mua hàng';
+  }
   if (subtitleEl) {
-    subtitleEl.textContent = group === 'sell'
-      ? 'Quản lý các phiên bạn đăng bán, theo dõi người mua thanh toán và xác nhận giao hàng.'
-      : 'Theo dõi các phiên bạn đang trả giá, thanh toán đơn đã thắng và danh sách linh kiện quan tâm.';
+    subtitleEl.textContent = group === 'admin'
+      ? 'Thẩm định hồ sơ phiên đấu giá, kiểm tra cơ sở có hàng và phê duyệt mở phiên công khai trên sàn.'
+      : group === 'sell'
+        ? 'Quản lý các phiên bạn đăng bán, theo dõi người mua thanh toán và xác nhận giao hàng.'
+        : 'Theo dõi các phiên bạn đang trả giá, thanh toán đơn đã thắng và danh sách linh kiện quan tâm.';
   }
   const breadcrumbCurrent = document.getElementById('breadcrumb-current');
   if (breadcrumbCurrent && currentActiveSection === 'section-auctions') breadcrumbCurrent.textContent = titleEl?.textContent || 'Quản lý đấu giá';
@@ -1931,7 +2180,12 @@ function switchAuctionTab(tabName) {
 
   // Cập nhật pane nội dung
   document.querySelectorAll('.pcb-tab-pane').forEach(pane => {
-    pane.classList.toggle('pcb-tab-pane--active', pane.id === `tab-content-${tabName}`);
+    const isTarget = pane.id === `tab-content-${tabName}`;
+    pane.classList.toggle('pcb-tab-pane--active', isTarget);
+    if (isTarget) {
+      pane.hidden = false;
+      pane.removeAttribute('hidden');
+    }
   });
 
   renderFilterChips();
@@ -2160,10 +2414,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mục Địa chỉ nhận hàng
   setupAddressSection();
 
-  // Công tắc Mua hàng / Bán hàng: mở tab đầu tiên của luồng tương ứng
+  // Công tắc Mua hàng / Bán hàng / Admin: mở tab đầu tiên của luồng tương ứng
   document.querySelectorAll('.pcb-trade-switch__btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      switchAuctionTab(btn.dataset.tradeMode === 'sell' ? 'selling' : 'participating');
+      const mode = btn.dataset.tradeMode;
+      if (mode === 'admin') {
+        switchAuctionTab('admin-approvals');
+      } else if (mode === 'sell') {
+        switchAuctionTab('selling');
+      } else {
+        switchAuctionTab('participating');
+      }
     });
   });
 

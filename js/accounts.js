@@ -109,6 +109,29 @@ export const DEMO_ACCOUNTS = [
     birthDate: null,
     bio: 'Chuyên thanh lý linh kiện PC đã qua kiểm định, cam kết mô tả đúng tình trạng và bao test 7 ngày.',
     isLoggedIn: true
+  },
+  {
+    id: 'user_admin_demo',
+    username: 'admin',
+    password: '123456',
+    lastName: 'Quản trị viên',
+    givenName: 'Admin',
+    fullname: 'Quản trị viên (Admin)',
+    email: 'admin@pcbid.vn',
+    phone: '0999888777',
+    role: 'admin',
+    verified: true,
+    walletBalance: 100000000,
+    address: 'Trụ sở Thẩm định PCBid Lab, TP. Thủ Đức, TP. Hồ Chí Minh',
+    rating: 5.0,
+    reviewCount: 500,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: 'Hôm nay, 15:00',
+    gender: 'male',
+    birthDate: '1995-01-01',
+    bio: 'Tài khoản Quản trị viên PCBid. Phụ trách thẩm định nguồn gốc linh kiện, kiểm tra cơ sở có hàng và phê duyệt mở phiên đấu giá.',
+    isLoggedIn: true
   }
 ];
 

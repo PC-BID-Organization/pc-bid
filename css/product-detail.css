@@ -772,10 +772,18 @@
   background-color: var(--color-bg-white);
 }
 
-/* Trạng thái lỗi cho ô nhập giá */
+/* Trạng thái hợp lệ cho ô nhập giá: khung viền xanh lá (Visual feedback) */
+.pcb-pd__input--valid {
+  border-color: #16A34A !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18) !important;
+  background-color: #F0FDF4 !important;
+}
+
+/* Trạng thái sai giá / chưa đủ giá: khung viền đỏ (Visual feedback) */
 .pcb-pd__input--error {
-  border-color: #DC2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  border-color: #DC2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
+  background-color: #FEF2F2 !important;
 }
 
 /* Ký hiệu đồng tiền đặt ở góc phải ô nhập */
@@ -792,6 +800,33 @@
 .pcb-pd__input-hint {
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+}
+
+/* Thông báo thị giác trực tiếp dưới ô nhập */
+.pcb-pd__input-feedback {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.4;
+}
+
+.pcb-pd__input-feedback--valid {
+  color: #15803D;
+}
+
+.pcb-pd__input-feedback--error {
+  color: #DC2626;
+}
+
+.pcb-pd__input-feedback--ceiling {
+  color: #B45309;
+  background-color: #FEF3C7;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #FCD34D;
 }
 
 /* Thông báo lỗi xác thực đặt giá */
@@ -2176,4 +2211,255 @@ a.pcb-pd__seller-avatar {
   text-transform: none;
   letter-spacing: 0;
   color: #b45309;
+}
+
+/* ==========================================================================
+   GIÁ TRẦN (CEILING / BUYOUT PRICE) & THÔNG BÁO THỊ GIÁC THEO THỜI GIAN THỰC
+   ========================================================================== */
+
+/* Trạng thái chạm hoặc vượt giá trần trên ô nhập */
+.pcb-pd__input--ceiling {
+  border-color: #d97706 !important;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25) !important;
+  background-color: #fffbeb !important;
+}
+
+.pcb-pd__input-feedback--valid {
+  color: #15803d;
+}
+
+.pcb-pd__input-feedback--error {
+  color: #b91c1c;
+}
+
+.pcb-pd__input-feedback--ceiling {
+  color: #b45309;
+  font-weight: 700;
+}
+
+/* Thanh thông báo Giá trần trong khung đặt giá */
+.pcb-pd__ceiling-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+}
+
+.pcb-pd__ceiling-notice-text {
+  color: #92400e;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.pcb-pd__ceiling-notice-text strong {
+  color: #b45309;
+  font-weight: 800;
+}
+
+.pcb-pd__ceiling-quick-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #d97706;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pcb-pd__ceiling-quick-btn:hover,
+.pcb-pd__ceiling-quick-btn:focus-visible {
+  background-color: #b45309;
+}
+
+/* ==========================================================================
+   BẢNG QUẢN TRỊ VIÊN THẨM ĐỊNH & DUYỆT PHIÊN (ADMIN APPROVAL PANEL)
+   ========================================================================== */
+.pcb-pd__admin-panel {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 2px solid #6366f1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+}
+
+.pcb-pd__admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.pcb-pd__admin-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4338ca;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.pcb-pd__admin-status {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #d97706;
+  background-color: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+}
+
+.pcb-pd__admin-desc {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.pcb-pd__admin-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.pcb-pd__admin-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+}
+
+.pcb-pd__admin-check input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+.pcb-pd__admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pcb-pd__admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.pcb-pd__admin-btn--approve {
+  flex: 1;
+  color: #ffffff;
+  background-color: #16a34a;
+}
+
+.pcb-pd__admin-btn--approve:hover {
+  background-color: #15803d;
+}
+
+.pcb-pd__admin-btn--reject {
+  color: #dc2626;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.pcb-pd__admin-btn--reject:hover {
+  background-color: #fca5a5;
+}
+
+/* Banner thông báo chờ duyệt cho người mua */
+.pcb-pd__pending-approval-banner {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+}
+
+.pcb-pd__pending-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.pcb-pd__pending-text {
+  flex: 1;
+}
+
+.pcb-pd__pending-text strong {
+  display: block;
+  font-size: 0.9375rem;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.pcb-pd__pending-text p {
+  margin: 0 0 10px;
+  font-size: 0.8125rem;
+  color: #78350f;
+  line-height: 1.45;
+}
+
+.pcb-pd__demo-admin-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4f46e5;
+  background-color: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pcb-pd__demo-admin-switch:hover {
+  background-color: #e0e7ff;
+}
+
+/* Huy hiệu đếm ngược chế độ chỉ kết thúc theo Giá trần */
+.pcb-pd__ceiling-timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fef3c7;
+  border: 1.5px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-weight: 600;
+  font-size: 13.5px;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
 }

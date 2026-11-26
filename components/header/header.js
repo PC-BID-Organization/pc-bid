@@ -580,6 +580,14 @@ function initHeaderUserStatus() {
       <div class="header__dropdown-divider"></div>
 
       <ul class="header__dropdown-list">
+        ${user.role === 'admin' ? `
+        <li>
+          <a href="profile.html#admin-approvals" class="header__dropdown-item" style="color: #4f46e5; font-weight: 700; background: #eef2ff;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>🛡️ Quản lý &amp; Duyệt phiên (Admin)</span>
+          </a>
+        </li>
+        ` : ''}
         <li>
           <a href="profile.html" class="header__dropdown-item">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>

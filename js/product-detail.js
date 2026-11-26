@@ -17,14 +17,14 @@ import { describeBidder, findAccount, getAvatarInitial, renderAvatarContent, get
 // Trạng thái xác thực của người bán là thành viên (đủ email, số điện thoại, địa chỉ)
 import { getVerificationStatus } from './address-book.js';
 // Đơn hàng sau đấu giá: tìm đơn, demo kết thúc phiên và giao diện thẻ đơn hàng
-import { getOrderForProduct, endAuctionNowForDemo } from './settlement.js';
+import { getOrderForProduct, endAuctionNowForDemo, runSettlement } from './settlement.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
 // Bộ icon Lucide dùng chung
 import { icon } from './icons.js';
 // Hộp chat với người bán
 import { openChat } from './chat.js';
 // Hộp thoại xác nhận dùng chung
-import { showConfirm } from './dialog.js';
+import { showConfirm, showAlert } from './dialog.js';
 // Quy trình kiểm định PCBid Lab: phiên mới đăng chỉ mở đặt giá sau khi kiểm định đạt
 import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionCertificate, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
 // Danh sách theo dõi lưu theo tài khoản (dùng chung)
@@ -141,7 +141,94 @@ let idIntervalCapNhat = null;
  * @returns {string} Chuỗi tiền đã định dạng (ví dụ: "5.800.000đ")
  */
 function dinhDangVnd(soTien) {
-  return soTien.toLocaleString('vi-VN') + 'đ';
+  return (Number(soTien) || 0).toLocaleString('vi-VN') + 'đ';
+}
+
+/**
+ * Định dạng số nguyên với dấu chấm ngăn cách hàng nghìn (1.300.000)
+ * @param {number|string} so - Giá trị số cần định dạng
+ * @returns {string} Chuỗi số có dấu chấm
+ */
+function dinhDangSoCham(so) {
+  if (!so && so !== 0) return '';
+  const num = typeof so === 'number' ? so : Number(String(so).replace(/\D/g, ''));
+  if (isNaN(num) || num === 0) return '';
+  return num.toLocaleString('vi-VN');
+}
+
+/**
+ * Trích xuất giá trị số nguyên từ chuỗi có chứa dấu chấm hoặc ký tự khác
+ * @param {string|number} chuoi - Chuỗi đầu vào
+ * @returns {number} Số nguyên
+ */
+function trichXuatSo(chuoi) {
+  if (typeof chuoi === 'number') return chuoi;
+  const raw = String(chuoi || '').replace(/\D/g, '');
+  return raw ? parseInt(raw, 10) : 0;
+}
+
+/**
+ * Kiểm tra tính hợp lệ của số tiền nhập theo thời gian thực và cập nhật viền xanh / đỏ
+ * @param {HTMLInputElement} oNhapGia - Ô nhập tiền
+ * @param {boolean} [kichHoatDinhDang=true] - Có tự format lại dấu chấm trên ô nhập hay không
+ */
+function kiemTraVaDinhDangGiaRealtime(oNhapGia, kichHoatDinhDang = true) {
+  if (!oNhapGia || !sanPhamHienTai) return;
+  const oFeedback = document.getElementById('pcb-pd-bid-feedback');
+  const oLoi = document.getElementById('pcb-pd-bid-error');
+  if (oLoi) { oLoi.hidden = true; oLoi.textContent = ''; }
+
+  const rawVal = oNhapGia.value;
+  const soTien = trichXuatSo(rawVal);
+
+  if (!rawVal.trim() || soTien === 0) {
+    oNhapGia.classList.remove('pcb-pd__input--valid', 'pcb-pd__input--error', 'pcb-pd__input--ceiling');
+    if (oFeedback) { oFeedback.hidden = true; oFeedback.innerHTML = ''; }
+    return;
+  }
+
+  // Định dạng lại dấu chấm nếu được yêu cầu
+  if (kichHoatDinhDang) {
+    const formatted = dinhDangSoCham(soTien);
+    if (oNhapGia.value !== formatted) {
+      oNhapGia.value = formatted;
+    }
+  }
+
+  const giaHienTai = Number(sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice || 0);
+  const buocGia = Number(sanPhamHienTai.bidStep || 50000);
+  const giaToiThieu = giaHienTai + buocGia;
+  const giaTran = Number(sanPhamHienTai.ceilingPrice || 0);
+
+  // Xóa class trạng thái cũ
+  oNhapGia.classList.remove('pcb-pd__input--valid', 'pcb-pd__input--error', 'pcb-pd__input--ceiling');
+  if (oFeedback) {
+    oFeedback.hidden = false;
+    oFeedback.className = 'pcb-pd__input-feedback';
+  }
+
+  if (giaTran > 0 && soTien >= giaTran) {
+    // Chạm hoặc vượt mức giá trần: viền hổ phách/vàng và thông báo thắng ngay
+    oNhapGia.classList.add('pcb-pd__input--ceiling');
+    if (oFeedback) {
+      oFeedback.classList.add('pcb-pd__input-feedback--ceiling');
+      oFeedback.innerHTML = `⚡ <strong>Đạt Giá Trần (${dinhDangVnd(giaTran)})!</strong> Bạn sẽ thắng và kết thúc phiên ngay khi Xác nhận.`;
+    }
+  } else if (soTien >= giaToiThieu) {
+    // Giá hợp lệ: Khung viền xanh lá (Visual feedback)
+    oNhapGia.classList.add('pcb-pd__input--valid');
+    if (oFeedback) {
+      oFeedback.classList.add('pcb-pd__input-feedback--valid');
+      oFeedback.innerHTML = `✓ <strong>Giá đặt hợp lệ:</strong> Đủ điều kiện cao hơn mức tối thiểu (${dinhDangVnd(giaToiThieu)})`;
+    }
+  } else {
+    // Giá chưa đủ: Khung viền đỏ (Visual feedback)
+    oNhapGia.classList.add('pcb-pd__input--error');
+    if (oFeedback) {
+      oFeedback.classList.add('pcb-pd__input-feedback--error');
+      oFeedback.innerHTML = `✕ <strong>Giá chưa hợp lệ:</strong> Cần tối thiểu ${dinhDangVnd(giaToiThieu)} (hiện tại + bước giá)`;
+    }
+  }
 }
 
 /**
@@ -368,8 +455,9 @@ function hienThiSanPham(sanPham) {
   // Thiết lập giá trị ban đầu cho ô nhập giá (= giá hiện tại + 1 bước giá)
   const oNhapGia = document.getElementById('pcb-pd-bid-input');
   if (oNhapGia) {
-    oNhapGia.value = (sanPham.currentBid || sanPham.startingPrice) + (sanPham.bidStep || 0);
-    oNhapGia.min = (sanPham.currentBid || sanPham.startingPrice) + (sanPham.bidStep || 0);
+    const giaKhoiTao = (sanPham.currentBid || sanPham.startingPrice) + (sanPham.bidStep || 0);
+    oNhapGia.value = dinhDangSoCham(giaKhoiTao);
+    kiemTraVaDinhDangGiaRealtime(oNhapGia, false);
   }
 
   // Thông tin người bán
@@ -396,6 +484,9 @@ function hienThiSanPham(sanPham) {
 
   // Trạng thái kiểm định PCBid Lab (khóa đặt giá khi phiên đang chờ kiểm định)
   capNhatKiemDinh();
+
+  // Quy trình thẩm định & phê duyệt Admin (khóa đặt giá khi phiên chờ Admin duyệt)
+  capNhatTrangThaiDuyetAdmin();
 
   // Đơn hàng sau đấu giá và nút demo kết thúc phiên
   renderKhungDonHang();
@@ -490,6 +581,26 @@ function capNhatGia(sanPham) {
   if (oGiaThiTruong) oGiaThiTruong.textContent = dinhDangVnd(sanPham.marketPriceNew || 0);
   if (oGiaHienTai) oGiaHienTai.textContent = dinhDangVnd(sanPham.currentBid || sanPham.startingPrice || 0);
 
+  // Cập nhật Giá trần (kết thúc ngay) nếu có
+  const giaTran = Number(sanPham.ceilingPrice || 0);
+  const oGiaTranBlock = document.getElementById('pcb-pd-ceiling-block');
+  const oGiaTranDivider = document.getElementById('pcb-pd-ceiling-divider');
+  const oGiaTranVal = document.getElementById('pcb-pd-ceiling-price');
+  const oGiaTranNotice = document.getElementById('pcb-pd-ceiling-notice');
+  const oGiaTranNoticePrice = document.getElementById('pcb-pd-ceiling-notice-price');
+
+  if (giaTran > 0) {
+    if (oGiaTranBlock) oGiaTranBlock.hidden = false;
+    if (oGiaTranDivider) oGiaTranDivider.hidden = false;
+    if (oGiaTranVal) oGiaTranVal.textContent = dinhDangVnd(giaTran);
+    if (oGiaTranNotice) oGiaTranNotice.hidden = false;
+    if (oGiaTranNoticePrice) oGiaTranNoticePrice.textContent = dinhDangVnd(giaTran);
+  } else {
+    if (oGiaTranBlock) oGiaTranBlock.hidden = true;
+    if (oGiaTranDivider) oGiaTranDivider.hidden = true;
+    if (oGiaTranNotice) oGiaTranNotice.hidden = true;
+  }
+
   // Tính phần trăm tiết kiệm so với giá thị trường
   if (oGiamGia && sanPham.marketPriceNew && sanPham.currentBid) {
     const phanTramGiam = Math.round((1 - sanPham.currentBid / sanPham.marketPriceNew) * 100);
@@ -499,6 +610,58 @@ function capNhatGia(sanPham) {
     } else {
       oGiamGia.hidden = true;
     }
+  }
+}
+
+/**
+ * Cập nhật hiển thị Bảng Thẩm định & Duyệt phiên của Quản trị viên (Admin)
+ * Khóa đặt giá khi phiên chưa được duyệt, cho phép Admin duyệt/từ chối ngay trên trang
+ */
+function capNhatTrangThaiDuyetAdmin() {
+  const adminPanel = document.getElementById('pcb-pd-admin-panel');
+  const pendingBanner = document.getElementById('pcb-pd-pending-banner');
+  const hopDatGia = document.getElementById('pcb-pd-bidbox');
+  const demNguoc = document.getElementById('pcb-pd-countdown');
+  if (!sanPhamHienTai) return;
+
+  const nguoiDung = readLoggedInUser();
+  const isAdmin = nguoiDung && (nguoiDung.role === 'admin' || nguoiDung.username === 'admin');
+  const isPending = sanPhamHienTai.status === 'pending_approval' || sanPhamHienTai.approvalStatus === 'pending';
+  const isRejected = sanPhamHienTai.status === 'rejected';
+
+  // Tham số ?admin_preview=1 để xem ngay với quyền admin khi vừa đăng bán
+  const params = new URLSearchParams(window.location.search);
+  const forceAdmin = params.get('admin_preview') === '1';
+
+  if (isPending) {
+    if (hopDatGia) hopDatGia.hidden = true;
+    if (demNguoc) demNguoc.hidden = true;
+
+    if (isAdmin || forceAdmin) {
+      if (adminPanel) adminPanel.hidden = false;
+      if (pendingBanner) pendingBanner.hidden = true;
+    } else {
+      if (adminPanel) adminPanel.hidden = true;
+      if (pendingBanner) pendingBanner.hidden = false;
+    }
+  } else if (isRejected) {
+    if (hopDatGia) hopDatGia.hidden = true;
+    if (demNguoc) demNguoc.hidden = true;
+    if (adminPanel) adminPanel.hidden = true;
+    if (pendingBanner) {
+      pendingBanner.hidden = false;
+      pendingBanner.innerHTML = `
+        <div class="pcb-pd__pending-icon">❌</div>
+        <div class="pcb-pd__pending-text">
+          <strong style="color: #dc2626;">Phiên đấu giá đã bị Quản trị viên từ chối phê duyệt</strong>
+          <p>Lý do: Chưa đủ cơ sở thẩm định nguồn gốc linh kiện hoặc mô tả chưa trung thực.</p>
+        </div>
+      `;
+    }
+  } else {
+    // Đã duyệt (status === 'active' hoặc 'sold' / 'ended')
+    if (adminPanel) adminPanel.hidden = true;
+    if (pendingBanner) pendingBanner.hidden = true;
   }
 }
 
@@ -1069,6 +1232,24 @@ function khoiDongDemNguoc(thoiGianKetThuc) {
   // Dọn dẹp interval cũ nếu có
   if (idIntervalDemNguoc) clearInterval(idIntervalDemNguoc);
 
+  // Chế độ chỉ kết thúc khi chạm giá trần (không giới hạn thời gian):
+  if (sanPhamHienTai?.endMode === 'ceiling_only' && !isAuctionClosed(sanPhamHienTai)) {
+    const demNguoc = document.getElementById('pcb-pd-countdown');
+    if (demNguoc) {
+      demNguoc.innerHTML = `
+        <div class="pcb-pd__ceiling-timer-badge">
+          <span style="font-size:18px;">⚡</span>
+          <span>Đấu giá vô hạn giờ: Mở liên tục cho đến khi có người chốt GIÁ TRẦN!</span>
+        </div>
+      `;
+    }
+    const thoiGianKetThucText = document.getElementById('pcb-pd-endtime-text');
+    if (thoiGianKetThucText) {
+      thoiGianKetThucText.textContent = 'Mở cho đến khi đạt Giá trần (Không giới hạn thời gian)';
+    }
+    return;
+  }
+
   const capNhatDemNguoc = () => {
     // Phiên đang chờ kiểm định: đồng hồ đứng yên ở đúng thời hạn phiên, chỉ chạy sau khi có kết quả
     const mocBatDau = sanPhamHienTai ? getCountdownStart(sanPhamHienTai) : 0;
@@ -1143,7 +1324,10 @@ function hienThiPhienKetThuc() {
     const sp = sanPhamHienTai;
     if (sp && sp.winner) {
       const nguoiThang = describeBidder({ bidderName: sp.winner });
-      thongBaoKetThuc.innerHTML = `${icon('bell')} Phiên đấu giá đã kết thúc · Người thắng: ${maHoaHtml(nguoiThang.name)} (${maHoaHtml(nguoiThang.maskedUid || sp.winner)}) với giá ${dinhDangVnd(sp.currentBid)}`;
+      const lyDo = sp.closedByCeiling
+        ? '⚡ Phiên đã chốt ngay do đạt GIÁ TRẦN'
+        : 'Phiên đấu giá đã kết thúc';
+      thongBaoKetThuc.innerHTML = `${icon('bell')} ${lyDo} · Người thắng: ${maHoaHtml(nguoiThang.name)} (${maHoaHtml(nguoiThang.maskedUid || sp.winner)}) với giá ${dinhDangVnd(sp.currentBid)}`;
     } else if (sp && Number(sp.bidCount || 0) === 0) {
       thongBaoKetThuc.innerHTML = `${icon('bell')} Phiên đấu giá đã kết thúc · Không có lượt đặt giá nào`;
     } else {
@@ -1441,6 +1625,12 @@ function xuLyDatGia() {
     return;
   }
 
+  // Phiên chưa qua phê duyệt của Quản trị viên (Admin): chưa nhận lượt đặt giá
+  if (sanPhamHienTai.status === 'pending_approval' || sanPhamHienTai.approvalStatus === 'pending') {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đấu giá đang chờ Quản trị viên thẩm định & phê duyệt, chưa mở nhận giá.');
+    return;
+  }
+
   // Phiên đã kết thúc hoặc đã chốt: không nhận thêm lượt đặt giá
   if (isAuctionClosed(sanPhamHienTai) || getAuctionEndTimestamp(sanPhamHienTai) <= Date.now()) {
     hienThiLoi(oLoi, oNhapGia, 'Phiên đấu giá đã kết thúc, không thể đặt giá thêm.');
@@ -1448,8 +1638,10 @@ function xuLyDatGia() {
     return;
   }
 
-  const soTienNhap = Number(oNhapGia.value);
+  const soTienNhap = trichXuatSo(oNhapGia.value);
   const giaToiThieu = (sanPhamHienTai.currentBid || sanPhamHienTai.startingPrice) + sanPhamHienTai.bidStep;
+  const giaTran = Number(sanPhamHienTai.ceilingPrice || 0);
+  const datChamGiaTran = giaTran > 0 && soTienNhap >= giaTran;
 
   // Kiểm tra người dùng đã đăng nhập chưa
   let nguoiDung = null;
@@ -1495,8 +1687,8 @@ function xuLyDatGia() {
     return;
   }
 
-  // Tất cả hợp lệ: thực hiện đặt giá
-  thucHienDatGia(nguoiDung, soTienNhap);
+  // Tất cả hợp lệ: thực hiện đặt giá (có kèm cờ đạt giá trần kết thúc ngay)
+  thucHienDatGia(nguoiDung, soTienNhap, datChamGiaTran);
 }
 
 /**
@@ -1514,8 +1706,9 @@ function hienThiLoi(oLoi, oNhapGia, thongBao) {
  * Thực hiện lưu lượt đặt giá vào localStorage và cập nhật giao diện
  * @param {Object} nguoiDung - Đối tượng người dùng đang đăng nhập
  * @param {number} soTien - Số tiền đặt giá đã được xác thực
+ * @param {boolean} [datChamGiaTran=false] - Cờ đánh dấu lượt đặt chạm hoặc vượt mức Giá trần
  */
-function thucHienDatGia(nguoiDung, soTien) {
+function thucHienDatGia(nguoiDung, soTien, datChamGiaTran = false) {
   // Tạo bản ghi lượt đặt giá mới
   const luotMoi = {
     id: taoIdNgauNhien(),
@@ -1525,7 +1718,8 @@ function thucHienDatGia(nguoiDung, soTien) {
     bidderFullname: nguoiDung.fullname || nguoiDung.username || '',
     bidderName: nguoiDung.username,
     amount: soTien,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    isCeilingBid: Boolean(datChamGiaTran)
   };
 
   // Lưu vào localStorage key pcbid_bids
@@ -1537,10 +1731,24 @@ function thucHienDatGia(nguoiDung, soTien) {
   // Cập nhật giá hiện tại của sản phẩm trong localStorage
   sanPhamHienTai.currentBid = soTien;
   sanPhamHienTai.bidCount = (sanPhamHienTai.bidCount || 0) + 1;
+
+  if (datChamGiaTran) {
+    // Chạm hoặc vượt Giá trần: chốt phiên ngay lập tức, trao quyền thắng cuộc
+    sanPhamHienTai.status = 'sold';
+    sanPhamHienTai.winner = nguoiDung.username;
+    sanPhamHienTai.closedEarly = true;
+    sanPhamHienTai.closedByCeiling = true;
+    sanPhamHienTai.endLocked = true;
+    sanPhamHienTai.endTime = new Date().toISOString();
+    sanPhamHienTai.endTimestamp = Date.now();
+  } else {
+    // Có người dùng thật tham gia: chốt thời điểm kết thúc để phiên kết thúc thật và có người thắng
+    lockAuctionEndTime(sanPhamHienTai);
+    sanPhamHienTai.endLocked = true;
+  }
+
   capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
-  // Có người dùng thật tham gia: chốt thời điểm kết thúc để phiên kết thúc thật và có người thắng
-  lockAuctionEndTime(sanPhamHienTai);
-  sanPhamHienTai.endLocked = true;
+
   // Báo cho Header và các khu vực khác cập nhật số dư ví, thông báo ngay trên trang này
   window.dispatchEvent(new CustomEvent('pcbid:bid-placed', { detail: { productId: luotMoi.productId } }));
 
@@ -1553,9 +1761,8 @@ function thucHienDatGia(nguoiDung, soTien) {
   const oNhapGia = document.getElementById('pcb-pd-bid-input');
   if (oNhapGia) {
     const giaToiThieuMoi = soTien + sanPhamHienTai.bidStep;
-    oNhapGia.value = giaToiThieuMoi;
-    oNhapGia.min = giaToiThieuMoi;
-    oNhapGia.classList.remove('pcb-pd__input--error');
+    oNhapGia.value = dinhDangSoCham(giaToiThieuMoi);
+    kiemTraVaDinhDangGiaRealtime(oNhapGia, false);
   }
 
   // Đồng bộ phiên vừa đặt giá vào tab "Phiên đang tham gia" (pcbid_my_auctions_participating) của profile.html
@@ -1572,7 +1779,7 @@ function thucHienDatGia(nguoiDung, soTien) {
       currentBid: soTien,
       myBid: soTien,
       bidCount: sanPhamHienTai.bidCount,
-      status: 'lead',
+      status: datChamGiaTran ? 'won' : 'lead',
       bidStep: sanPhamHienTai.bidStep || 100000,
       endTimestamp: getAuctionEndTimestamp(sanPhamHienTai),
       images: sanPhamHienTai.images || ['images/products/gpu/2018-rtx-4070-12gb-1.webp'],
@@ -1592,8 +1799,18 @@ function thucHienDatGia(nguoiDung, soTien) {
   renderLichSu(sanPhamHienTai.id);
   capNhatNutDemo();
 
+  if (datChamGiaTran) {
+    // Kích hoạt xử lý thanh toán / tạo đơn hàng ngay lập tức
+    if (idIntervalDemNguoc) clearInterval(idIntervalDemNguoc);
+    hienThiDemNguoc(0, 0, 0, 0);
+    hienThiPhienKetThuc();
+    runSettlement().then(() => {
+      renderKhungDonHang();
+    });
+  }
+
   // Hiển thị modal thành công
-  hienThiModalThanhCong(sanPhamHienTai.name, soTien);
+  hienThiModalThanhCong(sanPhamHienTai.name, soTien, datChamGiaTran);
 }
 
 /**
@@ -1624,13 +1841,24 @@ function capNhatSanPhamTrongLocalStorage(sanPham) {
  * @param {string} tenSanPham - Tên sản phẩm vừa đặt giá
  * @param {number} soTien - Số tiền vừa đặt thành công
  */
-function hienThiModalThanhCong(tenSanPham, soTien) {
+function hienThiModalThanhCong(tenSanPham, soTien, laGiaTran = false) {
   const modal = document.getElementById('pcb-pd-modal');
   const oTenSP = document.getElementById('pcb-pd-modal-product');
   const oSoTien = document.getElementById('pcb-pd-modal-amount');
+  const oTitle = modal ? modal.querySelector('.pcb-pd__modal-title') : null;
+  const oDesc = modal ? modal.querySelector('.pcb-pd__modal-desc') : null;
 
   if (oTenSP) oTenSP.textContent = tenSanPham;
   if (oSoTien) oSoTien.textContent = dinhDangVnd(soTien);
+
+  if (laGiaTran) {
+    if (oTitle) oTitle.textContent = '🎉 CHÚC MỪNG BẠN ĐÃ THẮNG PHIÊN!';
+    if (oDesc) oDesc.textContent = 'Bạn đã đặt mức Giá trần kết thúc ngay! Phiên đấu giá đã chính thức chốt bán thành công cho bạn. Đơn hàng đã được tạo trong Hồ sơ cá nhân.';
+  } else {
+    if (oTitle) oTitle.textContent = 'Đặt giá thành công!';
+    if (oDesc) oDesc.textContent = 'Lượt đặt giá của bạn đã được ghi nhận vào hệ thống. Bạn đang là người dẫn đầu phiên đấu giá này.';
+  }
+
   if (modal) {
     modal.hidden = false;
     modal.removeAttribute('hidden');
@@ -1771,18 +1999,29 @@ function ganSuKien() {
   // Các nút nhảy giá nhanh (+100k, +200k, ...)
   document.querySelectorAll('.pcb-pd__quick-btn').forEach(nut => {
     nut.addEventListener('click', () => {
-      const soTienTang = Number(nut.dataset.amount);
+      const soTienTang = Number(nut.dataset.amount) || 0;
       const oNhapGia = document.getElementById('pcb-pd-bid-input');
-      if (oNhapGia) {
-        const giaHienTaiONhap = Number(oNhapGia.value) || 0;
-        oNhapGia.value = giaHienTaiONhap + soTienTang;
-        // Xóa trạng thái lỗi khi người dùng thay đổi giá
-        oNhapGia.classList.remove('pcb-pd__input--error');
-        const oLoi = document.getElementById('pcb-pd-bid-error');
-        if (oLoi) { oLoi.hidden = true; }
+      if (oNhapGia && sanPhamHienTai) {
+        const giaHienTaiONhap = trichXuatSo(oNhapGia.value) || 0;
+        const giaMoi = giaHienTaiONhap + soTienTang;
+        oNhapGia.value = dinhDangSoCham(giaMoi);
+        kiemTraVaDinhDangGiaRealtime(oNhapGia, false);
       }
     });
   });
+
+  // Nút điền nhanh Giá trần (kết thúc ngay)
+  const btnCeilingQuick = document.getElementById('pcb-pd-ceiling-quick-btn');
+  if (btnCeilingQuick) {
+    btnCeilingQuick.addEventListener('click', () => {
+      const oNhapGia = document.getElementById('pcb-pd-bid-input');
+      if (oNhapGia && sanPhamHienTai?.ceilingPrice) {
+        oNhapGia.value = dinhDangSoCham(sanPhamHienTai.ceilingPrice);
+        kiemTraVaDinhDangGiaRealtime(oNhapGia, false);
+        oNhapGia.focus();
+      }
+    });
+  }
 
   // Nút đóng modal
   const nutDongModal = document.getElementById('pcb-pd-modal-close');
@@ -1806,13 +2045,73 @@ function ganSuKien() {
     });
   }
 
-  // Xóa lỗi khi người dùng gõ vào ô nhập giá
+  // Ô nhập giá: Định dạng dấu chấm (.) mỗi 3 chữ số & Thông báo thị giác viền xanh / đỏ theo thời gian thực
   const oNhapGia = document.getElementById('pcb-pd-bid-input');
   if (oNhapGia) {
     oNhapGia.addEventListener('input', () => {
-      oNhapGia.classList.remove('pcb-pd__input--error');
-      const oLoi = document.getElementById('pcb-pd-bid-error');
-      if (oLoi) { oLoi.hidden = true; }
+      kiemTraVaDinhDangGiaRealtime(oNhapGia, true);
+    });
+    oNhapGia.addEventListener('blur', () => {
+      kiemTraVaDinhDangGiaRealtime(oNhapGia, true);
+    });
+  }
+
+  // Thao tác Quản trị viên (Admin Approval Actions)
+  const btnAdminApprove = document.getElementById('btn-admin-approve');
+  if (btnAdminApprove) {
+    btnAdminApprove.addEventListener('click', async () => {
+      if (!sanPhamHienTai) return;
+      sanPhamHienTai.status = 'active';
+      sanPhamHienTai.approvalStatus = 'approved';
+      sanPhamHienTai.approvedAt = new Date().toISOString();
+      capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
+
+      // Cập nhật trạng thái trong danh sách đăng bán của người bán (pcbid_my_auctions_selling)
+      try {
+        const allSelling = JSON.parse(localStorage.getItem('pcbid_my_auctions_selling') || '[]');
+        const idx = allSelling.findIndex(p => Number(p.id) === Number(sanPhamHienTai.id));
+        if (idx !== -1) {
+          allSelling[idx].status = 'active';
+          allSelling[idx].approvalStatus = 'approved';
+          localStorage.setItem('pcbid_my_auctions_selling', JSON.stringify(allSelling));
+        }
+      } catch {}
+
+      await showAlert({
+        title: 'Phê duyệt thành công!',
+        message: 'Phiên đấu giá đã được Quản trị viên thẩm định & phê duyệt mở chính thức trên toàn sàn PCBid.',
+        tone: 'success'
+      });
+      window.location.reload();
+    });
+  }
+
+  const btnAdminReject = document.getElementById('btn-admin-reject');
+  if (btnAdminReject) {
+    btnAdminReject.addEventListener('click', async () => {
+      if (!sanPhamHienTai) return;
+      sanPhamHienTai.status = 'rejected';
+      sanPhamHienTai.approvalStatus = 'rejected';
+      sanPhamHienTai.rejectedAt = new Date().toISOString();
+      capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
+
+      await showAlert({
+        title: 'Đã từ chối phiên',
+        message: 'Phiên đấu giá đã bị từ chối do không đủ cơ sở xác thực có hàng.',
+        tone: 'danger'
+      });
+      window.location.reload();
+    });
+  }
+
+  const btnSwitchAdmin = document.getElementById('btn-demo-switch-admin');
+  if (btnSwitchAdmin) {
+    btnSwitchAdmin.addEventListener('click', () => {
+      const adminAcc = findAccount({ username: 'admin' });
+      if (adminAcc) {
+        localStorage.setItem('pcbid_currentUser', JSON.stringify(adminAcc));
+        window.location.reload();
+      }
     });
   }
 }

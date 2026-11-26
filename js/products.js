@@ -273,6 +273,10 @@ async function loadAllProducts() {
     localItems.forEach(item => {
       const idNum = Number(item.id);
       if (!existingIds.has(idNum)) {
+        // Chỉ nhận các phiên đã được Admin phê duyệt hoặc phiên mẫu; bỏ qua phiên chờ duyệt hoặc bị từ chối
+        if (item.status === 'pending_approval' || item.status === 'rejected' || item.approvalStatus === 'pending' || item.approvalStatus === 'rejected') {
+          return;
+        }
         const bInfo = bidSummary.get(idNum);
         let curBid = Number(item.currentBid || item.startingPrice || 0);
         let bCount = Number(item.bidCount || 0);
@@ -288,11 +292,11 @@ async function loadAllProducts() {
       }
     });
 
-    // Chỉ hiển thị các phiên còn mở trên sàn; phiên đã bán / đã kết thúc vẫn xem được qua link chi tiết
-    rawProducts = [...customUserItems, ...mergedList].filter(p => !isAuctionClosed(p));
+    // Chỉ hiển thị các phiên còn mở trên sàn đã được duyệt; phiên đã bán / đã kết thúc vẫn xem được qua link chi tiết
+    rawProducts = [...customUserItems, ...mergedList].filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
   } catch (e) {
     console.warn('[PCBid] Lỗi đồng bộ giá products:', e);
-    if (fetchedItems.length > 0) rawProducts = fetchedItems.filter(p => !isAuctionClosed(p));
+    if (fetchedItems.length > 0) rawProducts = fetchedItems.filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
   }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar
@@ -859,7 +863,7 @@ function renderCatalogProductCard(product) {
     <article class="pcb-card${isJustPosted ? ' pcb-card--just-posted' : ''}" data-id="${product.id}" data-category="${escapeHtml(product.category)}" data-price="${product.currentBid}" data-bids="${product.bidCount || 0}">
       ${isJustPosted ? `<span class="pcb-card__just-posted">${icon('sparkles', { size: 14 })} Bạn vừa đăng</span>` : ''}
       <a href="${detailUrl}" class="pcb-card__media" aria-label="Xem chi tiết ${escapeHtml(product.name)}">
-        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
+        <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}" data-end-mode="${product.endMode || ''}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"></circle>
             <polyline points="12 7 12 12 15 15"></polyline>
@@ -978,13 +982,21 @@ function updateLiveCountdowns() {
   const now = Date.now();
 
   elements.forEach(el => {
+    const textSpan = el.querySelector('.pcb-countdown-text');
+    if (!textSpan) return;
+
+    // Phiên đấu giá chỉ kết thúc khi chạm giá trần (vô hạn giờ)
+    if (el.getAttribute('data-end-mode') === 'ceiling_only') {
+      textSpan.textContent = '⚡ Chờ giá trần';
+      el.classList.remove('pcb-card__countdown--urgent');
+      return;
+    }
+
     const ts = parseInt(el.getAttribute('data-timestamp'), 10);
     if (!ts || isNaN(ts)) return;
 
     // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
     const diff = getRemainingMs(ts, el.getAttribute('data-start'), now);
-    const textSpan = el.querySelector('.pcb-countdown-text');
-    if (!textSpan) return;
 
     if (diff <= 0) {
       textSpan.textContent = 'Hết giờ';

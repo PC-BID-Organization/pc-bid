@@ -254,7 +254,7 @@
               </a>
             </div>
 
-            <!-- Công tắc hai luồng làm việc riêng biệt: Mua hàng / Bán hàng -->
+            <!-- Công tắc luồng làm việc: Mua hàng / Bán hàng / Quản trị viên (Admin) -->
             <div class="pcb-trade-switch" role="group" aria-label="Chọn luồng giao dịch">
               <button type="button" class="pcb-trade-switch__btn pcb-trade-switch__btn--active" data-trade-mode="buy" aria-pressed="true">
                 <span class="lucide pcb-icon pcb-icon--shopping-cart pcb-icon--s15" aria-hidden="true"></span> Mua hàng
@@ -263,6 +263,11 @@
               <button type="button" class="pcb-trade-switch__btn" data-trade-mode="sell" aria-pressed="false">
                 <span class="lucide pcb-icon pcb-icon--tag pcb-icon--s15" aria-hidden="true"></span> Bán hàng
                 <span class="pcb-trade-switch__badge" id="trade-badge-sell" hidden>0</span>
+              </button>
+              <button type="button" class="pcb-trade-switch__btn" id="trade-btn-admin" data-trade-mode="admin" aria-pressed="false" hidden>
+                <span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s15" aria-hidden="true"></span>
+                <span>Thẩm định &amp; Duyệt (Admin)</span>
+                <span class="pcb-trade-switch__badge" id="trade-badge-admin" hidden>0</span>
               </button>
             </div>
 
@@ -317,6 +322,15 @@
                 </svg>
                 <span>Đơn bán</span>
                 <span class="pcb-tab__counter" id="count-sell-orders">0</span>
+              </button>
+
+              <button type="button" class="pcb-tab" id="tab-btn-admin-approvals" role="tab" aria-selected="false"
+                aria-controls="tab-content-admin-approvals" data-tab="admin-approvals" data-group="admin" hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>Duyệt mở phiên</span>
+                <span class="pcb-tab__counter" id="count-admin-approvals">0</span>
               </button>
             </div>
 
@@ -425,6 +439,23 @@
                 <h3 class="pcb-empty-state__title">Chưa có đơn bán nào</h3>
                 <p class="pcb-empty-state__desc">Khi linh kiện bạn đăng bán có người thắng, đơn bán sẽ hiện ở đây để theo dõi thanh toán và xác nhận giao hàng.</p>
                 <a href="sell.html" class="pcb-btn-primary">Đăng phiên bán mới</a>
+              </div>
+            </div>
+
+            <!-- ================= DUYỆT PHIÊN ĐẤU GIÁ (Dành riêng cho Quản trị viên) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-admin-approvals" role="tabpanel" aria-labelledby="tab-btn-admin-approvals">
+              <div class="pcb-auctions-grid" id="grid-admin-approvals">
+                <!-- Render động các phiên chờ Quản trị viên thẩm định & duyệt -->
+              </div>
+              <div class="pcb-empty-state" id="empty-admin-approvals" hidden>
+                <div class="pcb-empty-state__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <polyline points="9 12 11 14 15 10" />
+                  </svg>
+                </div>
+                <h3 class="pcb-empty-state__title">Không có phiên nào đang chờ duyệt</h3>
+                <p class="pcb-empty-state__desc">Tất cả các phiên đăng bán trên sàn đã được thẩm định tính xác thực và phê duyệt mở đầy đủ.</p>
               </div>
             </div>
 
