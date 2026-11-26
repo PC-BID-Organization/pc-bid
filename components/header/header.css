@@ -1522,3 +1522,10 @@
   color: #4f46e5;
   background-color: #eef2ff;
 }
+
+/* Mục "Kiểm duyệt bài đăng" của Kiểm định viên */
+.header__dropdown-item--inspector {
+  font-weight: 700;
+  color: #047857;
+  background-color: #ecfdf5;
+}

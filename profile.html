@@ -265,8 +265,8 @@
                 <span class="pcb-trade-switch__badge" id="trade-badge-sell" hidden>0</span>
               </button>
               <button type="button" class="pcb-trade-switch__btn" id="trade-btn-admin" data-trade-mode="admin" aria-pressed="false" hidden>
-                <span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s15" aria-hidden="true"></span>
-                <span>Thẩm định &amp; Duyệt (Admin)</span>
+                <span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s15" aria-hidden="true" id="trade-btn-admin-icon"></span>
+                <span id="trade-btn-admin-label">Kiểm duyệt</span>
                 <span class="pcb-trade-switch__badge" id="trade-badge-admin" hidden>0</span>
               </button>
             </div>
@@ -326,11 +326,23 @@
 
               <button type="button" class="pcb-tab" id="tab-btn-admin-approvals" role="tab" aria-selected="false"
                 aria-controls="tab-content-admin-approvals" data-tab="admin-approvals" data-group="admin" hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                <span>Duyệt mở phiên</span>
+                <span class="lucide pcb-icon pcb-icon--clipboard-check pcb-icon--s16" aria-hidden="true"></span>
+                <span>Duyệt bài đăng</span>
                 <span class="pcb-tab__counter" id="count-admin-approvals">0</span>
+              </button>
+              <!-- Quản lý phiên: chỉ Quản trị viên (ẩn / hiện lại / gỡ bài đăng) -->
+              <button type="button" class="pcb-tab" id="tab-btn-admin-manage" role="tab" aria-selected="false"
+                aria-controls="tab-content-admin-manage" data-tab="admin-manage" data-group="admin" data-admin-only hidden>
+                <span class="lucide pcb-icon pcb-icon--layout-list pcb-icon--s16" aria-hidden="true"></span>
+                <span>Quản lý phiên</span>
+                <span class="pcb-tab__counter" id="count-admin-manage">0</span>
+              </button>
+              <!-- Báo cáo vi phạm từ người dùng: Quản trị viên và Kiểm định viên cùng xử lý -->
+              <button type="button" class="pcb-tab" id="tab-btn-admin-reports" role="tab" aria-selected="false"
+                aria-controls="tab-content-admin-reports" data-tab="admin-reports" data-group="admin" hidden>
+                <span class="lucide pcb-icon pcb-icon--flag pcb-icon--s16" aria-hidden="true"></span>
+                <span>Báo cáo</span>
+                <span class="pcb-tab__counter" id="count-admin-reports">0</span>
               </button>
             </div>
 
@@ -445,7 +457,7 @@
             <!-- ================= DUYỆT PHIÊN ĐẤU GIÁ (Dành riêng cho Quản trị viên) ================= -->
             <div class="pcb-tab-pane" id="tab-content-admin-approvals" role="tabpanel" aria-labelledby="tab-btn-admin-approvals">
               <div class="pcb-auctions-grid" id="grid-admin-approvals">
-                <!-- Render động các phiên chờ Quản trị viên thẩm định & duyệt -->
+                <!-- Render động các bài đăng chờ Kiểm định viên / Quản trị viên duyệt -->
               </div>
               <div class="pcb-empty-state" id="empty-admin-approvals" hidden>
                 <div class="pcb-empty-state__icon">
@@ -454,8 +466,32 @@
                     <polyline points="9 12 11 14 15 10" />
                   </svg>
                 </div>
-                <h3 class="pcb-empty-state__title">Không có phiên nào đang chờ duyệt</h3>
-                <p class="pcb-empty-state__desc">Tất cả các phiên đăng bán trên sàn đã được thẩm định tính xác thực và phê duyệt mở đầy đủ.</p>
+                <h3 class="pcb-empty-state__title">Không có bài đăng nào đang chờ duyệt</h3>
+                <p class="pcb-empty-state__desc">Bài đăng mới của người bán sẽ hiện ở đây để Kiểm định viên đối chiếu thông tin trước khi gửi PCBid Lab kiểm định.</p>
+              </div>
+            </div>
+
+            <!-- ================= QUẢN LÝ PHIÊN (Chỉ Quản trị viên) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-admin-manage" role="tabpanel" aria-labelledby="tab-btn-admin-manage" hidden>
+              <ul class="pcb-staff-list" id="grid-admin-manage"></ul>
+              <div class="pcb-empty-state" id="empty-admin-manage" hidden>
+                <div class="pcb-empty-state__icon">
+                  <span class="lucide pcb-icon pcb-icon--layout-list pcb-icon--s40" aria-hidden="true"></span>
+                </div>
+                <h3 class="pcb-empty-state__title">Không có phiên phù hợp</h3>
+                <p class="pcb-empty-state__desc">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+              </div>
+            </div>
+
+            <!-- ================= BÁO CÁO VI PHẠM (Quản trị viên & Kiểm định viên) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-admin-reports" role="tabpanel" aria-labelledby="tab-btn-admin-reports" hidden>
+              <ul class="pcb-staff-list" id="grid-admin-reports"></ul>
+              <div class="pcb-empty-state" id="empty-admin-reports" hidden>
+                <div class="pcb-empty-state__icon">
+                  <span class="lucide pcb-icon pcb-icon--flag pcb-icon--s40" aria-hidden="true"></span>
+                </div>
+                <h3 class="pcb-empty-state__title">Không có báo cáo nào</h3>
+                <p class="pcb-empty-state__desc">Báo cáo bài đăng hoặc tài khoản do người dùng gửi sẽ hiện ở đây.</p>
               </div>
             </div>
 
@@ -826,10 +862,17 @@
                 <span class="pcb-public__role" id="public-role"></span>
               </div>
               <!-- Nhắn tin trực tiếp với tài khoản này (mở hộp chat nổi) -->
-              <button type="button" class="pcb-public__chat-btn" id="public-chat-btn" hidden>
-                <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
-                Nhắn tin
-              </button>
+              <div class="pcb-public__actions">
+                <button type="button" class="pcb-public__chat-btn" id="public-chat-btn" hidden>
+                  <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
+                  Nhắn tin
+                </button>
+                <!-- Báo cáo tài khoản vi phạm: gửi tới Quản trị viên và Kiểm định viên -->
+                <button type="button" class="pcb-public__report-btn" id="public-report-btn" hidden>
+                  <span class="lucide pcb-icon pcb-icon--flag pcb-icon--s14" aria-hidden="true"></span>
+                  Báo cáo
+                </button>
+              </div>
             </div>
             <div class="pcb-public__self-note" id="public-self-note" hidden>
               <span>Đây là cách người khác nhìn thấy hồ sơ của bạn.</span>

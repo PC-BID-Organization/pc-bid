@@ -14,6 +14,8 @@ import { showAlert, showConfirm } from './dialog.js';
 import { INSPECTION_MS, createInspectionRequest } from './inspection.js';
 // Ô chọn tùy biến cùng phong cách PCBid
 import { enhanceSelects } from './custom-select.js';
+// Tìm tài khoản Kiểm định viên demo cho nút duyệt nhanh sau khi đăng
+import { findAccount } from './accounts.js';
 
 
 /* ==========================================================================
@@ -1814,10 +1816,12 @@ function initFormSubmitHandler() {
       // Bỏ qua lỗi parse
     }
 
-    // Thời hạn phiên: nếu ceiling_only thì không giới hạn thời gian (null)
-    const auctionEndTime = (endMode === 'ceiling_only')
+    // Thời hạn phiên người bán chọn. Bài mới phải chờ Kiểm định viên duyệt nên chưa có giờ kết thúc:
+    // giờ kết thúc chỉ được tính lúc duyệt (thời gian kiểm định + thời hạn). Đăng bán lại thì tính ngay.
+    const durationMs = endMode === 'ceiling_only' ? 0 : durationDays * 24 * 3600 * 1000;
+    const auctionEndTime = (endMode === 'ceiling_only' || !relistTarget)
       ? null
-      : new Date(Date.now() + INSPECTION_MS + durationDays * 24 * 3600 * 1000).toISOString();
+      : new Date(Date.now() + INSPECTION_MS + durationMs).toISOString();
 
     const newAuctionProduct = {
       // Đăng bán lại: giữ nguyên ID phiên cũ; tạo mới: ID độc nhất theo timestamp
@@ -1833,21 +1837,22 @@ function initFormSubmitHandler() {
       marketPriceNew: marketPrice,
       ceilingPrice: endMode === 'time_only' ? 0 : ceilingPrice,
       endMode: endMode,
-      // Quy trình thẩm định & phê duyệt theo yêu cầu Thầy:
-      // Mọi phiên mới tạo phải qua Quản trị viên (Admin) thẩm định & duyệt trước khi lên sàn
+      // Mọi phiên mới tạo phải qua Kiểm định viên (hoặc Quản trị viên) xét duyệt trước khi lên sàn
       status: relistTarget ? 'active' : 'pending_approval',
       approvalStatus: relistTarget ? 'approved' : 'pending',
       submittedAt: new Date().toISOString(),
       // Thời hạn tính từ lúc kiểm định xong (cộng thêm thời gian chờ kiểm định)
       endTime: auctionEndTime,
+      durationMs,
       seller: sellerName,
       images: [...selectedImages],
       description: description,
       // Thông số của mẫu sau khi người bán chỉnh sửa + thông số tự bổ sung
       specifications: getAllSpecsObject()
     };
-    // Yêu cầu kiểm định: phiên chỉ mở đặt giá sau khi PCBid Lab kiểm định đạt
-    newAuctionProduct.inspection = createInspectionRequest();
+    // Yêu cầu kiểm định PCBid Lab: bài mới chỉ gửi kiểm định khi được duyệt (xem moderation.js),
+    // phiên đăng bán lại đã từng được duyệt nên gửi kiểm định ngay
+    if (relistTarget) newAuctionProduct.inspection = createInspectionRequest();
 
     if (relistTarget) {
       // Đánh dấu phiên mở lại để các trang dùng thời hạn mới thay cho trạng thái "đã kết thúc" cũ
@@ -1894,6 +1899,8 @@ function initFormSubmitHandler() {
         relisted: Boolean(relistTarget),
         endTime: newAuctionProduct.endTime,
         endTimestamp: newAuctionProduct.endTime ? new Date(newAuctionProduct.endTime).getTime() : (Date.now() + 365 * 24 * 3600 * 1000),
+        durationMs: newAuctionProduct.durationMs,
+        submittedAt: newAuctionProduct.submittedAt,
         images: newAuctionProduct.images,
         specs: specsList,
         inspection: newAuctionProduct.inspection
@@ -1922,9 +1929,19 @@ function initFormSubmitHandler() {
         goBtn.focus();
       }
 
+      // Demo: chuyển sang tài khoản Kiểm định viên rồi mở bài đăng để duyệt ngay
       const adminBtn = document.getElementById('sell-success-admin');
       if (adminBtn) {
-        adminBtn.href = nextUrl + '&admin_preview=1';
+        adminBtn.href = nextUrl;
+        adminBtn.addEventListener('click', e => {
+          const inspector = findAccount({ username: 'inspector' });
+          if (!inspector) return;
+          e.preventDefault();
+          localStorage.removeItem('pcbid_logged_out');
+          localStorage.setItem('pcbid_currentUser', JSON.stringify({ ...inspector, isLoggedIn: true }));
+          localStorage.setItem('pcbid_user', JSON.stringify({ ...inspector, isLoggedIn: true }));
+          window.location.href = nextUrl;
+        });
       }
 
       // Đếm ngược 10 giây rồi tự chuyển trang

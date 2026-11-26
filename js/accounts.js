@@ -130,7 +130,31 @@ export const DEMO_ACCOUNTS = [
     lastUpdated: 'Hôm nay, 15:00',
     gender: 'male',
     birthDate: '1995-01-01',
-    bio: 'Tài khoản Quản trị viên PCBid. Phụ trách thẩm định nguồn gốc linh kiện, kiểm tra cơ sở có hàng và phê duyệt mở phiên đấu giá.',
+    bio: 'Tài khoản Quản trị viên PCBid. Quản lý các phiên đấu giá trên sàn: ẩn hoặc gỡ bài đăng vi phạm, xử lý báo cáo và hỗ trợ đội ngũ kiểm định duyệt bài.',
+    isLoggedIn: true
+  },
+  {
+    // Kiểm định viên PCBid Lab: xét duyệt bài đăng mới, yêu cầu người bán bổ sung thông tin, xử lý báo cáo
+    id: 'user_inspector_demo',
+    username: 'inspector',
+    password: '123456',
+    lastName: 'Trần Bảo',
+    givenName: 'Ngọc',
+    fullname: 'Trần Bảo Ngọc',
+    email: 'inspector@pcbid.vn',
+    phone: '0977666555',
+    role: 'inspector',
+    verified: true,
+    walletBalance: 0,
+    address: 'PCBid Lab, Khu phố 6, P. Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh',
+    rating: 5.0,
+    reviewCount: 320,
+    pref_sms: true,
+    pref_email: true,
+    lastUpdated: 'Hôm nay, 15:00',
+    gender: 'female',
+    birthDate: '1998-04-12',
+    bio: 'Kiểm định viên PCBid Lab. Xét duyệt bài đăng mới, đối chiếu ảnh thật và thông số, yêu cầu người bán bổ sung khi hồ sơ chưa đủ trước khi linh kiện được kiểm định và mở đấu giá.',
     isLoggedIn: true
   }
 ];

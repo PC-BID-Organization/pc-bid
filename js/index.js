@@ -16,6 +16,8 @@ import { loadAllAuctions, readAllBids } from './bid-history.js';
 import { describeBidder, findAccount } from './accounts.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
 import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Bỏ các bài đăng bị Quản trị viên ẩn / gỡ khỏi danh sách hiển thị
+import { filterVisibleListings } from './moderation.js';
 // Danh sách theo dõi lưu theo tài khoản (dùng chung với trang chi tiết, Header)
 import { getWatchlist, toggleWatch, setWatchButtonState } from './watchlist.js';
 
@@ -349,8 +351,8 @@ function syncProductsWithStorage(rawList) {
     }
   });
 
-  // Trang chủ chỉ hiển thị các phiên còn mở và đã được phê duyệt
-  return [...customUserProducts, ...merged].filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
+  // Trang chủ chỉ hiển thị các phiên còn mở, đã được duyệt và không bị ẩn / gỡ
+  return filterVisibleListings([...customUserProducts, ...merged]).filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
 }
 
 async function loadProducts() {

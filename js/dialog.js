@@ -110,3 +110,141 @@ export async function showAlert(options) {
   const config = typeof options === 'string' ? { message: options } : options;
   await openDialog({ title: 'Thông báo', confirmText: 'Đã hiểu', cancelText: null, ...config });
 }
+
+/**
+ * Hộp thoại có biểu mẫu nhỏ (chọn lý do + ô nhập nội dung), dùng cho báo cáo vi phạm,
+ * yêu cầu bổ sung thông tin, lý do từ chối / ẩn / gỡ bài đăng...
+ * @param {Object} options
+ * @param {string} options.title - Tiêu đề
+ * @param {string} [options.message] - Mô tả ngắn dưới tiêu đề
+ * @param {Array<Object>} options.fields - Danh sách trường:
+ *   { type: 'radio', name, label, options: string[], required? }
+ *   { type: 'textarea', name, label, placeholder?, maxlength?, required?, minlength? }
+ * @param {string} [options.confirmText] - Chữ trên nút gửi
+ * @param {string} [options.cancelText] - Chữ trên nút hủy
+ * @param {'info'|'warning'|'danger'|'success'} [options.tone]
+ * @returns {Promise<Object|null>} Giá trị các trường theo name, null nếu người dùng hủy
+ */
+export function showFormDialog({ title, message = '', fields = [], confirmText = 'Gửi', cancelText = 'Hủy', tone = 'info' }) {
+  return new Promise(resolve => {
+    const previousFocus = document.activeElement;
+    const overlay = document.createElement('div');
+    overlay.className = 'pcb-dialog';
+    const uid = `pcb-form-dialog-${Date.now()}`;
+    overlay.innerHTML = `
+      <form class="pcb-dialog__card pcb-dialog__card--form pcb-dialog__card--${tone}" role="dialog" aria-modal="true"
+        aria-labelledby="${uid}-title" novalidate>
+        <h3 class="pcb-dialog__title" id="${uid}-title"></h3>
+        <p class="pcb-dialog__message pcb-dialog__message--form" hidden></p>
+        <div class="pcb-dialog__fields"></div>
+        <p class="pcb-dialog__error" role="alert" hidden></p>
+        <div class="pcb-dialog__actions">
+          <button type="button" class="pcb-dialog__btn pcb-dialog__btn--ghost" data-dialog="cancel"></button>
+          <button type="submit" class="pcb-dialog__btn pcb-dialog__btn--primary"></button>
+        </div>
+      </form>
+    `;
+    const form = overlay.querySelector('form');
+    form.querySelector('.pcb-dialog__title').textContent = title;
+    const messageEl = form.querySelector('.pcb-dialog__message');
+    if (message) {
+      messageEl.textContent = message;
+      messageEl.hidden = false;
+    }
+    form.querySelector('[data-dialog="cancel"]').textContent = cancelText;
+    form.querySelector('[type="submit"]').textContent = confirmText;
+
+    // Dựng từng trường bằng DOM để nội dung (lý do, gợi ý) không bị hiểu là HTML
+    const fieldsWrap = form.querySelector('.pcb-dialog__fields');
+    fields.forEach((field, fi) => {
+      const group = document.createElement(field.type === 'radio' ? 'fieldset' : 'div');
+      group.className = 'pcb-dialog__field';
+      const fieldId = `${uid}-${field.name}`;
+      if (field.type === 'radio') {
+        const legend = document.createElement('legend');
+        legend.className = 'pcb-dialog__label';
+        legend.textContent = field.label;
+        group.appendChild(legend);
+        field.options.forEach((opt, oi) => {
+          const label = document.createElement('label');
+          label.className = 'pcb-dialog__choice';
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = field.name;
+          input.value = opt;
+          input.id = `${fieldId}-${oi}`;
+          const text = document.createElement('span');
+          text.textContent = opt;
+          label.append(input, text);
+          group.appendChild(label);
+        });
+      } else {
+        const label = document.createElement('label');
+        label.className = 'pcb-dialog__label';
+        label.htmlFor = fieldId;
+        label.textContent = field.label;
+        const area = document.createElement('textarea');
+        area.className = 'pcb-dialog__textarea';
+        area.id = fieldId;
+        area.name = field.name;
+        area.rows = field.rows || 3;
+        if (field.placeholder) area.placeholder = field.placeholder;
+        if (field.maxlength) area.maxLength = field.maxlength;
+        group.append(label, area);
+      }
+      group.dataset.fieldIndex = String(fi);
+      fieldsWrap.appendChild(group);
+    });
+    document.body.appendChild(overlay);
+    (form.querySelector('input, textarea') || form.querySelector('[type="submit"]')).focus();
+
+    const errorEl = form.querySelector('.pcb-dialog__error');
+    const close = result => {
+      document.removeEventListener('keydown', onKey, true);
+      overlay.remove();
+      if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+      resolve(result);
+    };
+    const onKey = e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close(null);
+      } else if (e.key === 'Tab') {
+        // Giữ focus trong hộp thoại
+        const focusables = [...form.querySelectorAll('input, textarea, button')].filter(el => !el.disabled);
+        const index = focusables.indexOf(document.activeElement);
+        if (e.shiftKey && index <= 0) { e.preventDefault(); focusables[focusables.length - 1].focus(); }
+        else if (!e.shiftKey && index === focusables.length - 1) { e.preventDefault(); focusables[0].focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+
+    overlay.addEventListener('click', e => {
+      if (e.target.closest('[data-dialog="cancel"]') || e.target === overlay) close(null);
+    });
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const values = {};
+      for (const field of fields) {
+        let value = '';
+        if (field.type === 'radio') value = form.querySelector(`input[name="${field.name}"]:checked`)?.value || '';
+        else value = (form.elements[field.name]?.value || '').trim();
+        // Kiểm tra trường bắt buộc / độ dài tối thiểu, báo lỗi ngay trong hộp thoại
+        if (field.required && !value) {
+          errorEl.textContent = field.type === 'radio' ? `Vui lòng chọn ${field.label.toLowerCase()}.` : `Vui lòng nhập ${field.label.toLowerCase()}.`;
+          errorEl.hidden = false;
+          (form.querySelector(`[name="${field.name}"]`))?.focus();
+          return;
+        }
+        if (field.minlength && value && value.length < field.minlength) {
+          errorEl.textContent = `${field.label} cần ít nhất ${field.minlength} ký tự.`;
+          errorEl.hidden = false;
+          form.elements[field.name]?.focus();
+          return;
+        }
+        values[field.name] = value;
+      }
+      close(values);
+    });
+  });
+}

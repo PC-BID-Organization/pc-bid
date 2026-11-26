@@ -3,8 +3,10 @@
    ==========================================================================
    Mọi linh kiện phải qua PCBid Lab kiểm định trước khi mở đặt giá:
    - Phiên có sẵn trên sàn (danh mục mẫu) coi như đã kiểm định đạt.
-   - Phiên người dùng tự đăng bán: lưu inspection.requestedAt, ở trạng thái
-     "Chờ kiểm định" trong INSPECTION_MS (mô phỏng 1 phút), chưa ai đặt giá được.
+   - Phiên người dùng tự đăng bán: chỉ được gửi kiểm định khi Kiểm định viên
+     duyệt bài (xem moderation.js). Lúc đó lưu inspection.requestedAt, phiên ở
+     trạng thái "Chờ kiểm định" trong INSPECTION_MS (mô phỏng 1 phút), chưa ai
+     đặt giá được.
    - Hết thời gian chờ: kết quả "Đạt" kèm các chỉ số theo loại linh kiện,
      phiên được gắn tem PCBid Verified và mở đặt giá.
    Người bán không còn tự chọn chứng nhận như trước để tránh tự kê khai sai.
@@ -213,7 +215,10 @@ export function getInspectionCertificate(product) {
   return {
     code: `#UIT-QC-${year}-${String(id % 10000).padStart(4, '0')}`,
     grade: stableNumber(product, 0, 3) === 0 ? 'A' : 'A+',
-    inspector: `${INSPECTORS[id % INSPECTORS.length]} (UIT Hardware Lab)`,
+    // Bài do Kiểm định viên duyệt: phiếu ghi đúng tên người duyệt
+    inspector: product?.reviewedBy?.role === 'inspector'
+      ? `${product.reviewedBy.name} (PCBid Lab)`
+      : `${INSPECTORS[id % INSPECTORS.length]} (UIT Hardware Lab)`,
     date: formatDate(issuedAt),
     rows: [
       { label: 'Thiết bị kiểm định', value: product?.name || '---' },

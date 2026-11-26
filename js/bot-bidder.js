@@ -16,6 +16,8 @@
 import { isAuctionClosed } from './auction-time.js';
 // Bot không đặt giá vào phiên đang chờ kiểm định
 import { isAwaitingInspection } from './inspection.js';
+// Không đặt giá vào bài chưa duyệt hoặc đang bị ẩn / gỡ
+import { isAwaitingReview, isListingVisible } from './moderation.js';
 import { MOCK_BIDDERS } from './accounts.js';
 import { loadAllAuctions, buildBidHistory, readAllBids } from './bid-history.js';
 import { readLoggedInUser } from './user-data.js';
@@ -146,6 +148,9 @@ export async function placeBotBid({ timestamp = Date.now(), excludeIds = new Set
     !isAuctionClosed(p) &&
     !p.closedEarly &&
     !isAwaitingInspection(p, now) &&
+    !isAwaitingReview(p) &&
+    p.status !== 'rejected' &&
+    isListingVisible(p) &&
     !excludeIds.has(p.id) &&
     p.endTimestamp - now > 60 * 1000 &&
     Number(p.currentBid) + (Number(p.bidStep) || 100000) <= getPriceCap(p)

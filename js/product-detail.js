@@ -29,6 +29,9 @@ import { showConfirm, showAlert } from './dialog.js';
 import { isAwaitingInspection, getInspectionSecondsLeft, getInspectionCertificate, skipInspectionForDemo, getCountdownStart, getRemainingMs } from './inspection.js';
 // Danh sách theo dõi lưu theo tài khoản (dùng chung)
 import { isWatched, toggleWatch } from './watchlist.js';
+// Kiểm duyệt bài đăng, quản lý phiên và báo cáo vi phạm
+import { isStaff, isAdmin, isAwaitingReview, needsMoreInfo, isRejected, getLastStaffNote, getModerationState, getStoredProduct } from './moderation.js';
+import { confirmApprove, promptRequestInfo, promptReject, promptSellerReply, promptHide, confirmUnhide, promptRemove, openReportDialog } from './review-actions.js';
 
 // Lượt đặt giá cao nhất đang hiển thị (dùng cho bảng quản lý của người bán)
 let luotDanDauHienTai = null;
@@ -487,6 +490,8 @@ function hienThiSanPham(sanPham) {
 
   // Quy trình thẩm định & phê duyệt Admin (khóa đặt giá khi phiên chờ Admin duyệt)
   capNhatTrangThaiDuyetAdmin();
+  capNhatThanhQuanLy();
+  capNhatNutBaoCao();
 
   // Đơn hàng sau đấu giá và nút demo kết thúc phiên
   renderKhungDonHang();
@@ -613,56 +618,147 @@ function capNhatGia(sanPham) {
   }
 }
 
+// Nhãn hành động trong nhật ký kiểm duyệt
+const REVIEW_LOG_LABELS = {
+  approve: 'Đã duyệt',
+  request_info: 'Yêu cầu bổ sung',
+  reply: 'Người bán bổ sung',
+  reject: 'Từ chối'
+};
+
 /**
- * Cập nhật hiển thị Bảng Thẩm định & Duyệt phiên của Quản trị viên (Admin)
- * Khóa đặt giá khi phiên chưa được duyệt, cho phép Admin duyệt/từ chối ngay trên trang
+ * HTML nhật ký trao đổi giữa Kiểm định viên và người bán
+ * @param {Object} sp
+ * @returns {string}
+ */
+function renderNhatKyKiemDuyet(sp) {
+  const log = (Array.isArray(sp.reviewLog) ? sp.reviewLog : []).filter(e => e.note || e.action === 'approve');
+  return log.map(e => `
+    <li class="pcb-pd__review-item pcb-pd__review-item--${e.action}">
+      <span class="pcb-pd__review-meta">
+        <strong>${REVIEW_LOG_LABELS[e.action] || 'Cập nhật'}</strong> · ${maHoaHtml(e.by?.name || '')} · ${new Date(e.at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+      </span>
+      ${e.note ? `<span class="pcb-pd__review-note">${maHoaHtml(e.note)}</span>` : ''}
+    </li>`).join('');
+}
+
+/**
+ * Cập nhật bảng kiểm duyệt bài đăng (Kiểm định viên / Quản trị viên) và banner trạng thái cho người khác.
+ * Bài chưa duyệt: khóa đặt giá, ẩn đồng hồ (đồng hồ chỉ chạy sau khi duyệt và kiểm định xong).
  */
 function capNhatTrangThaiDuyetAdmin() {
   const adminPanel = document.getElementById('pcb-pd-admin-panel');
-  const pendingBanner = document.getElementById('pcb-pd-pending-banner');
+  const banner = document.getElementById('pcb-pd-pending-banner');
   const hopDatGia = document.getElementById('pcb-pd-bidbox');
   const demNguoc = document.getElementById('pcb-pd-countdown');
-  if (!sanPhamHienTai) return;
+  const sp = sanPhamHienTai;
+  if (!sp) return;
 
   const nguoiDung = readLoggedInUser();
-  const isAdmin = nguoiDung && (nguoiDung.role === 'admin' || nguoiDung.username === 'admin');
-  const isPending = sanPhamHienTai.status === 'pending_approval' || sanPhamHienTai.approvalStatus === 'pending';
-  const isRejected = sanPhamHienTai.status === 'rejected';
+  const laNhanVien = isStaff(nguoiDung);
+  const laChuPhien = laNguoiBanHienTai();
+  const choDuyet = isAwaitingReview(sp);
+  const biTuChoi = isRejected(sp);
 
-  // Tham số ?admin_preview=1 để xem ngay với quyền admin khi vừa đăng bán
-  const params = new URLSearchParams(window.location.search);
-  const forceAdmin = params.get('admin_preview') === '1';
+  if (adminPanel) adminPanel.hidden = !(choDuyet && laNhanVien);
+  if (banner) banner.hidden = true;
 
-  if (isPending) {
+  if (choDuyet || biTuChoi) {
     if (hopDatGia) hopDatGia.hidden = true;
     if (demNguoc) demNguoc.hidden = true;
-
-    if (isAdmin || forceAdmin) {
-      if (adminPanel) adminPanel.hidden = false;
-      if (pendingBanner) pendingBanner.hidden = true;
-    } else {
-      if (adminPanel) adminPanel.hidden = true;
-      if (pendingBanner) pendingBanner.hidden = false;
-    }
-  } else if (isRejected) {
-    if (hopDatGia) hopDatGia.hidden = true;
-    if (demNguoc) demNguoc.hidden = true;
-    if (adminPanel) adminPanel.hidden = true;
-    if (pendingBanner) {
-      pendingBanner.hidden = false;
-      pendingBanner.innerHTML = `
-        <div class="pcb-pd__pending-icon pcb-pd__pending-icon--rejected">${icon('shield-x', { size: 24 })}</div>
-        <div class="pcb-pd__pending-text">
-          <strong class="pcb-pd__pending-title--rejected">Phiên đấu giá đã bị Quản trị viên từ chối phê duyệt</strong>
-          <p>Lý do: Chưa đủ cơ sở thẩm định nguồn gốc linh kiện hoặc mô tả chưa trung thực.</p>
-        </div>
-      `;
-    }
-  } else {
-    // Đã duyệt (status === 'active' hoặc 'sold' / 'ended')
-    if (adminPanel) adminPanel.hidden = true;
-    if (pendingBanner) pendingBanner.hidden = true;
   }
+
+  if (choDuyet && laNhanVien && adminPanel) {
+    const tag = document.getElementById('pcb-pd-admin-status-tag');
+    if (tag) tag.textContent = needsMoreInfo(sp) ? 'Chờ người bán bổ sung' : 'Chờ kiểm duyệt';
+    const logEl = document.getElementById('pcb-pd-review-log');
+    if (logEl) {
+      const html = renderNhatKyKiemDuyet(sp);
+      logEl.innerHTML = html;
+      logEl.hidden = !html;
+    }
+    return;
+  }
+
+  if (!banner || (!choDuyet && !biTuChoi)) return;
+  const ghiChu = getLastStaffNote(sp);
+  let noiDung = '';
+  if (biTuChoi) {
+    noiDung = `
+      <div class="pcb-pd__pending-icon pcb-pd__pending-icon--rejected">${icon('shield-x', { size: 24 })}</div>
+      <div class="pcb-pd__pending-text">
+        <strong class="pcb-pd__pending-title--rejected">Bài đăng không được duyệt</strong>
+        <p>${ghiChu?.note ? `Lý do: ${maHoaHtml(ghiChu.note)}` : 'Bài đăng chưa đáp ứng tiêu chuẩn của PCBid.'}</p>
+        ${laChuPhien ? `<a class="pcb-pd__demo-admin-switch" href="sell.html?relist=${sp.id}">${icon('tag', { size: 14 })} Chỉnh sửa &amp; đăng lại</a>` : ''}
+      </div>`;
+  } else if (needsMoreInfo(sp) && laChuPhien) {
+    noiDung = `
+      <div class="pcb-pd__pending-icon pcb-pd__pending-icon--info">${icon('message-square', { size: 24 })}</div>
+      <div class="pcb-pd__pending-text">
+        <strong>Kiểm định viên cần bạn bổ sung thông tin</strong>
+        <p>${maHoaHtml(ghiChu?.note || '')}</p>
+        <button type="button" class="pcb-pd__demo-admin-switch" id="btn-seller-reply">${icon('message-square', { size: 14 })} Gửi bổ sung</button>
+      </div>`;
+  } else {
+    noiDung = `
+      <div class="pcb-pd__pending-icon">${icon('shield-check', { size: 24 })}</div>
+      <div class="pcb-pd__pending-text">
+        <strong>${needsMoreInfo(sp) ? 'Bài đăng đang chờ người bán bổ sung thông tin' : 'Bài đăng đang chờ Kiểm định viên PCBid duyệt'}</strong>
+        <p>${laChuPhien
+          ? 'Sau khi được duyệt, linh kiện sẽ được PCBid Lab kiểm định. Kiểm định đạt thì phiên mở đặt giá và thời hạn đấu giá bắt đầu tính từ lúc đó.'
+          : 'PCBid đang đối chiếu thông tin và bằng chứng có hàng của người bán trước khi mở đấu giá công khai.'}</p>
+        <button type="button" class="pcb-pd__demo-admin-switch" id="btn-demo-switch-inspector">${icon('log-in', { size: 14 })} Chuyển sang tài khoản Kiểm định viên để duyệt (demo)</button>
+      </div>`;
+  }
+  banner.innerHTML = noiDung;
+  banner.hidden = false;
+}
+
+/**
+ * Thanh quản lý phiên của Quản trị viên (ẩn / hiện lại / gỡ) và thông báo bài đang bị ẩn
+ */
+function capNhatThanhQuanLy() {
+  const bar = document.getElementById('pcb-pd-staff-bar');
+  const sp = sanPhamHienTai;
+  if (!bar || !sp) return;
+  const nguoiDung = readLoggedInUser();
+  const trangThai = getModerationState(sp.id);
+  const hienThanh = isAdmin(nguoiDung) && !isAwaitingReview(sp) && !trangThai.removed;
+  bar.hidden = !hienThanh;
+  if (!hienThanh) return;
+  const text = document.getElementById('pcb-pd-staff-bar-text');
+  if (text) {
+    text.innerHTML = trangThai.hidden
+      ? `${icon('eye-off', { size: 14 })} <span>Bài đăng đang bị ẩn khỏi sàn. Lý do: ${maHoaHtml(trangThai.hidden.reason || '---')}</span>`
+      : `${icon('shield-check', { size: 14 })} <span>Quản lý phiên (Quản trị viên)</span>`;
+  }
+  bar.classList.toggle('pcb-pd__staff-bar--hidden', Boolean(trangThai.hidden));
+  const nhanAn = document.getElementById('btn-staff-hide-label');
+  if (nhanAn) nhanAn.textContent = trangThai.hidden ? 'Hiện lại bài đăng' : 'Ẩn bài đăng';
+  const iconAn = document.querySelector('#btn-staff-hide .pcb-icon');
+  if (iconAn) {
+    iconAn.classList.toggle('pcb-icon--eye', Boolean(trangThai.hidden));
+    iconAn.classList.toggle('pcb-icon--eye-off', !trangThai.hidden);
+  }
+}
+
+/**
+ * Nút báo cáo: ẩn với chính người bán và nhân viên PCBid (họ xử lý báo cáo, không gửi báo cáo)
+ */
+function capNhatNutBaoCao() {
+  const khung = document.getElementById('pcb-pd-report');
+  if (!khung || !sanPhamHienTai) return;
+  const nguoiDung = readLoggedInUser();
+  khung.hidden = laNguoiBanHienTai() || isStaff(nguoiDung);
+}
+
+/**
+ * Đọc lại phiên từ pcbid_products sau khi kiểm duyệt rồi vẽ lại trang
+ */
+function taiLaiSauKiemDuyet() {
+  const banMoi = sanPhamHienTai ? getStoredProduct(sanPhamHienTai.id) : null;
+  if (banMoi) Object.assign(sanPhamHienTai, banMoi);
+  window.location.reload();
 }
 
 /**
@@ -930,13 +1026,16 @@ function capNhatCheDoNguoiBan() {
   const sp = sanPhamHienTai;
   const daKetThuc = isAuctionClosed(sp) || getAuctionEndTimestamp(sp) <= Date.now();
   const soLuot = Number(sp.bidCount || 0);
-  const choKiemDinh = !daKetThuc && isAwaitingInspection(sp);
-  const trangThai = sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : choKiemDinh ? 'Chờ kiểm định' : 'Đang diễn ra';
+  const choDuyet = isAwaitingReview(sp);
+  const choKiemDinh = !choDuyet && !daKetThuc && isAwaitingInspection(sp);
+  const trangThai = isRejected(sp) ? 'Không được duyệt'
+    : choDuyet ? (needsMoreInfo(sp) ? 'Cần bổ sung thông tin' : 'Chờ kiểm duyệt')
+      : sp.status === 'sold' ? 'Đã bán' : daKetThuc ? 'Đã kết thúc' : choKiemDinh ? 'Chờ kiểm định' : 'Đang diễn ra';
 
   const oTrangThai = document.getElementById('pcb-pd-owner-status');
   if (oTrangThai) {
     oTrangThai.textContent = trangThai;
-    oTrangThai.dataset.state = sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : choKiemDinh ? 'pending' : 'active';
+    oTrangThai.dataset.state = isRejected(sp) ? 'ended' : choDuyet ? 'pending' : sp.status === 'sold' ? 'sold' : daKetThuc ? 'ended' : choKiemDinh ? 'pending' : 'active';
   }
   const ganChu = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   ganChu('pcb-pd-owner-price', dinhDangVnd(sp.currentBid || sp.startingPrice));
@@ -962,7 +1061,7 @@ function capNhatCheDoNguoiBan() {
   // Phiên còn đang diễn ra: người bán có thể đóng phiên ngay
   const nutDong = document.getElementById('pcb-pd-owner-close');
   if (nutDong) {
-    nutDong.hidden = daKetThuc;
+    nutDong.hidden = daKetThuc || choDuyet || isRejected(sp);
     if (!nutDong.dataset.bound) {
       nutDong.dataset.bound = '1';
       nutDong.addEventListener('click', dongPhienNgay);
@@ -971,7 +1070,8 @@ function capNhatCheDoNguoiBan() {
   // Phiên còn đang diễn ra: người bán có thể sửa tiêu đề, mô tả, thông số
   const nutSua = document.getElementById('pcb-pd-owner-edit');
   if (nutSua) {
-    nutSua.hidden = daKetThuc;
+    // Bài đang chờ duyệt vẫn sửa được để người bán bổ sung theo yêu cầu của Kiểm định viên
+    nutSua.hidden = (daKetThuc && !choDuyet) || isRejected(sp);
     if (!nutSua.dataset.bound) {
       nutSua.dataset.bound = '1';
       nutSua.addEventListener('click', moChinhSuaPhien);
@@ -1353,23 +1453,29 @@ function hienThiPhienKetThuc() {
 function capNhatKiemDinh() {
   const sp = sanPhamHienTai;
   if (!sp) return;
-  const dangCho = isAwaitingInspection(sp);
+  // Bài chưa được duyệt / bị từ chối: chưa gửi sang PCBid Lab kiểm định
+  const chuaDuyet = isAwaitingReview(sp) || isRejected(sp);
+  const dangCho = !chuaDuyet && isAwaitingInspection(sp);
   const giay = getInspectionSecondsLeft(sp);
 
   const khung = document.getElementById('pcb-pd-inspection');
   const oTrangThai = document.getElementById('pcb-pd-inspection-status');
-  if (khung) khung.classList.toggle('pcb-pd__inspection--pending', dangCho);
+  if (khung) khung.classList.toggle('pcb-pd__inspection--pending', dangCho || chuaDuyet);
   if (oTrangThai) {
-    const noiDung = dangCho
-      ? `Đang kiểm định, còn khoảng ${giay} giây. Phiên chưa mở đặt giá.`
-      : 'Đạt chuẩn - PCBid Verified';
+    const noiDung = isRejected(sp)
+      ? 'Không kiểm định vì bài đăng không được duyệt.'
+      : chuaDuyet
+        ? 'Chưa kiểm định. Linh kiện được gửi kiểm định ngay sau khi bài đăng được duyệt.'
+        : dangCho
+          ? `Đang kiểm định, còn khoảng ${giay} giây. Phiên chưa mở đặt giá.`
+          : 'Đạt chuẩn - PCBid Verified';
     if (oTrangThai.textContent !== noiDung) oTrangThai.textContent = noiDung;
   }
 
   // Nút xem phiếu kiểm định: chỉ có khi phiên đã đạt
   const nutPhieu = document.getElementById('pcb-pd-open-cert');
   if (nutPhieu) {
-    nutPhieu.hidden = dangCho;
+    nutPhieu.hidden = dangCho || chuaDuyet;
     if (!nutPhieu.dataset.bound) {
       nutPhieu.dataset.bound = '1';
       nutPhieu.addEventListener('click', moPhieuKiemDinh);
@@ -1619,15 +1725,19 @@ function xuLyDatGia() {
   if (oLoi) { oLoi.hidden = true; oLoi.textContent = ''; }
   oNhapGia.classList.remove('pcb-pd__input--error');
 
-  // Phiên chưa qua kiểm định PCBid Lab: chưa nhận lượt đặt giá
-  if (isAwaitingInspection(sanPhamHienTai)) {
-    hienThiLoi(oLoi, oNhapGia, 'Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.');
+  // Bài đăng chưa được Kiểm định viên duyệt, bị từ chối hoặc đang bị ẩn: chưa nhận lượt đặt giá
+  if (isAwaitingReview(sanPhamHienTai) || isRejected(sanPhamHienTai)) {
+    hienThiLoi(oLoi, oNhapGia, 'Bài đăng đang chờ Kiểm định viên PCBid duyệt, chưa mở nhận giá.');
+    return;
+  }
+  if (getModerationState(sanPhamHienTai.id).hidden) {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đang tạm ẩn để PCBid xác minh, chưa nhận thêm lượt đặt giá.');
     return;
   }
 
-  // Phiên chưa qua phê duyệt của Quản trị viên (Admin): chưa nhận lượt đặt giá
-  if (sanPhamHienTai.status === 'pending_approval' || sanPhamHienTai.approvalStatus === 'pending') {
-    hienThiLoi(oLoi, oNhapGia, 'Phiên đấu giá đang chờ Quản trị viên thẩm định & phê duyệt, chưa mở nhận giá.');
+  // Phiên chưa qua kiểm định PCBid Lab: chưa nhận lượt đặt giá
+  if (isAwaitingInspection(sanPhamHienTai)) {
+    hienThiLoi(oLoi, oNhapGia, 'Phiên đang chờ PCBid Lab kiểm định, chưa mở đặt giá.');
     return;
   }
 
@@ -2056,54 +2166,52 @@ function ganSuKien() {
     });
   }
 
-  // Thao tác Quản trị viên (Admin Approval Actions)
-  const btnAdminApprove = document.getElementById('btn-admin-approve');
-  if (btnAdminApprove) {
-    btnAdminApprove.addEventListener('click', async () => {
-      if (!sanPhamHienTai) return;
-      sanPhamHienTai.status = 'active';
-      sanPhamHienTai.approvalStatus = 'approved';
-      sanPhamHienTai.approvedAt = new Date().toISOString();
-      // Trang Hồ sơ của người bán đọc trạng thái duyệt từ pcbid_products nên chỉ cần cập nhật tại đây
-      capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
-
-      await showAlert({
-        title: 'Phê duyệt thành công!',
-        message: 'Phiên đấu giá đã được Quản trị viên thẩm định & phê duyệt mở chính thức trên toàn sàn PCBid.',
-        tone: 'success'
-      });
-      window.location.reload();
+  // Thao tác kiểm duyệt của Kiểm định viên / Quản trị viên
+  const ganNutNhanVien = (id, handler) => {
+    document.getElementById(id)?.addEventListener('click', async () => {
+      const nguoiDung = readLoggedInUser();
+      if (!sanPhamHienTai || !isStaff(nguoiDung)) return;
+      if (await handler(sanPhamHienTai, nguoiDung)) taiLaiSauKiemDuyet();
     });
-  }
+  };
+  ganNutNhanVien('btn-admin-approve', confirmApprove);
+  ganNutNhanVien('btn-admin-request-info', promptRequestInfo);
+  ganNutNhanVien('btn-admin-reject', promptReject);
+  ganNutNhanVien('btn-staff-remove', promptRemove);
+  ganNutNhanVien('btn-staff-hide', (sp, nguoiDung) => (getModerationState(sp.id).hidden ? confirmUnhide(sp) : promptHide(sp, nguoiDung)));
 
-  const btnAdminReject = document.getElementById('btn-admin-reject');
-  if (btnAdminReject) {
-    btnAdminReject.addEventListener('click', async () => {
-      if (!sanPhamHienTai) return;
-      sanPhamHienTai.status = 'rejected';
-      sanPhamHienTai.approvalStatus = 'rejected';
-      sanPhamHienTai.rejectedAt = new Date().toISOString();
-      capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
-
-      await showAlert({
-        title: 'Đã từ chối phiên',
-        message: 'Phiên đấu giá đã bị từ chối do không đủ cơ sở xác thực có hàng.',
-        tone: 'danger'
-      });
-      window.location.reload();
-    });
-  }
-
-  const btnSwitchAdmin = document.getElementById('btn-demo-switch-admin');
-  if (btnSwitchAdmin) {
-    btnSwitchAdmin.addEventListener('click', () => {
-      const adminAcc = findAccount({ username: 'admin' });
-      if (adminAcc) {
-        localStorage.setItem('pcbid_currentUser', JSON.stringify(adminAcc));
+  // Banner trạng thái (nội dung vẽ lại theo trạng thái): người bán gửi bổ sung, chuyển tài khoản demo
+  document.getElementById('pcb-pd-pending-banner')?.addEventListener('click', async e => {
+    if (e.target.closest('#btn-seller-reply')) {
+      const nguoiDung = readLoggedInUser();
+      if (sanPhamHienTai && nguoiDung && await promptSellerReply(sanPhamHienTai, nguoiDung)) taiLaiSauKiemDuyet();
+    } else if (e.target.closest('#btn-demo-switch-inspector')) {
+      const inspector = findAccount({ username: 'inspector' });
+      if (inspector) {
+        localStorage.removeItem('pcbid_logged_out');
+        localStorage.setItem('pcbid_currentUser', JSON.stringify({ ...inspector, isLoggedIn: true }));
+        localStorage.setItem('pcbid_user', JSON.stringify({ ...inspector, isLoggedIn: true }));
         window.location.reload();
       }
-    });
-  }
+    }
+  });
+
+  // Báo cáo bài đăng / người bán
+  document.getElementById('pcb-pd-report-listing')?.addEventListener('click', () => {
+    if (!sanPhamHienTai) return;
+    openReportDialog({
+      type: 'listing',
+      targetId: sanPhamHienTai.id,
+      targetName: sanPhamHienTai.name,
+      sellerUsername: sanPhamHienTai.seller || ''
+    }, readLoggedInUser());
+  });
+  document.getElementById('pcb-pd-report-seller')?.addEventListener('click', () => {
+    if (!sanPhamHienTai) return;
+    const username = sanPhamHienTai.seller || 'pcbid_seller';
+    const account = findAccount({ username });
+    openReportDialog({ type: 'user', targetId: username, targetName: account?.fullname || username }, readLoggedInUser());
+  });
 }
 
 /* ==========================================================================
@@ -2141,8 +2249,27 @@ async function khoiDong() {
   // Ẩn loading sau khi có kết quả
   if (vungLoading) vungLoading.hidden = true;
 
-  if (!sanPham) {
-    if (vungLoi) vungLoi.hidden = false;
+  // Bài bị gỡ hoặc đang ẩn: chỉ nhân viên PCBid và chính người bán còn xem được trang này
+  const trangThaiQuanLy = sanPham ? getModerationState(sanPham.id) : {};
+  const nguoiXem = readLoggedInUser();
+  const duocXem = isStaff(nguoiXem) || (nguoiXem && sanPham && nguoiXem.username === sanPham.seller);
+  const chuaDuyetCongKhai = sanPham && isAwaitingReview(sanPham) && !duocXem;
+  if (!sanPham || ((trangThaiQuanLy.removed || trangThaiQuanLy.hidden || chuaDuyetCongKhai) && !duocXem)) {
+    if (vungLoi) {
+      const tieuDe = vungLoi.querySelector('.pcb-pd__error-title');
+      const moTa = vungLoi.querySelector('.pcb-pd__error-desc');
+      if (sanPham && trangThaiQuanLy.removed) {
+        if (tieuDe) tieuDe.textContent = 'Bài đăng đã bị gỡ';
+        if (moTa) moTa.textContent = 'Phiên đấu giá này đã bị Quản trị viên PCBid gỡ khỏi sàn do vi phạm quy định.';
+      } else if (sanPham && trangThaiQuanLy.hidden) {
+        if (tieuDe) tieuDe.textContent = 'Bài đăng đang tạm ẩn';
+        if (moTa) moTa.textContent = 'PCBid đang xác minh thông tin của phiên đấu giá này. Vui lòng quay lại sau.';
+      } else if (chuaDuyetCongKhai) {
+        if (tieuDe) tieuDe.textContent = 'Bài đăng chưa được duyệt';
+        if (moTa) moTa.textContent = 'Phiên đấu giá này đang chờ Kiểm định viên PCBid duyệt nên chưa hiển thị công khai.';
+      }
+      vungLoi.hidden = false;
+    }
     return;
   }
 
