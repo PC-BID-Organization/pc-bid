@@ -48,8 +48,16 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - **Băng chuyền "Trực tiếp sàn đấu giá"** ở trang chủ hiện các lượt đặt mới nhất; bấm tên người để mở hồ sơ, bấm tên linh kiện để mở phiên.
 - Trang chi tiết tự cập nhật giá, số lượt, lịch sử và báo ngay khi bạn **bị vượt giá**.
 
+### Kiểm duyệt bài đăng, quản lý phiên & báo cáo vi phạm
+- **Luồng một bài đăng mới:** *Chờ kiểm duyệt* → Kiểm định viên **Duyệt** (hoặc **Yêu cầu bổ sung** ⇄ người bán **Gửi bổ sung**, hoặc **Từ chối** kèm lý do) → PCBid Lab kiểm định → mở đặt giá.
+- **Đồng hồ đấu giá chỉ chạy sau khi được duyệt và kiểm định xong:** thời hạn người bán chọn được tính từ lúc đó, nên bài chờ duyệt lâu không bị mất thời gian đấu giá. Bài chưa duyệt không hiện công khai, chỉ người bán và đội ngũ PCBid xem được.
+- **Kiểm định viên** (`inspector`): xét duyệt bài đăng, yêu cầu người bán bổ sung thông tin, xử lý báo cáo. Mỗi thao tác tự gửi tin nhắn kèm thẻ bài đăng cho người bán qua chat.
+- **Quản trị viên** (`admin`): có đủ quyền của Kiểm định viên, thêm tab **Quản lý phiên** để **ẩn / hiện lại / gỡ** bất kỳ phiên nào trên sàn (kể cả phiên có sẵn). Phiên bị ẩn / gỡ biến mất khỏi Trang chủ, Sàn đấu giá, hồ sơ công khai và không nhận đặt giá.
+- **Báo cáo vi phạm:** nút "Báo cáo bài đăng", "Báo cáo người bán" ở trang chi tiết và "Báo cáo" ở hồ sơ công khai; chọn lý do + mô tả. Báo cáo vào tab **Báo cáo** chung của Quản trị viên và Kiểm định viên (đánh dấu Đã xử lý / Không vi phạm, Quản trị viên ẩn bài ngay từ báo cáo).
+- **Thẻ vai trò nổi bật:** khi nhắn tin với Quản trị viên / Kiểm định viên, chat hiện thẻ vai trò màu (tím / xanh lục) ở danh sách hội thoại, đầu khung chat và dải nhắc "nhân viên chính thức của PCBid"; hồ sơ công khai cũng có thẻ vai trò cạnh tên.
+
 ### Kiểm định phần cứng PCBid Lab
-- Mỗi phiên vừa đăng phải qua **kiểm định 1 phút** (mô phỏng gửi linh kiện tới PCBid Lab) trước khi mở đấu giá. Người bán không tự chọn chứng nhận.
+- Mỗi phiên **sau khi được duyệt** phải qua **kiểm định 1 phút** (mô phỏng gửi linh kiện tới PCBid Lab) trước khi mở đấu giá. Người bán không tự chọn chứng nhận.
 - Trong lúc chờ: thẻ sản phẩm có tem **"Chờ kiểm định"**, nút đặt giá bị khóa, bot không đặt giá vào phiên và **đồng hồ đếm ngược đứng yên**, chỉ chạy khi kiểm định xong.
 - Nút **"Bỏ qua chờ kiểm định (demo)"** trên trang chi tiết giúp trình diễn ngay không phải đợi.
 - Kiểm định xong, phiên hiện trạng thái **"Đạt chuẩn - PCBid Verified"** kèm nút mở **phiếu kiểm định riêng của từng sản phẩm**: mã chứng chỉ `#UIT-QC-<năm>-<mã phiên>`, xếp hạng, kiểm định viên, ngày cấp và kết quả đo theo loại linh kiện (Furmark, MemTest86, CrystalDiskInfo…).
@@ -132,9 +140,9 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 | 2 | `products.html` | Bộ lọc danh mục / khoảng giá / tình trạng / kiểm định, sắp xếp, tìm kiếm, phân trang có ô nhảy tới trang, nhãn "Bạn vừa đăng" |
 | 3 | `product-detail.html` | Gallery + zoom + chuyển ảnh, khung và phiếu kiểm định, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá, lịch sử đặt giá, bảng quản lý của người bán, đơn hàng sau đấu giá, liên hệ người bán |
 | 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình, gửi kiểm định |
-| 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo |
+| 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo + Kiểm định viên + Quản trị viên |
 | 6 | `register.html` | Đăng ký, kiểm tra trùng email / số điện thoại, khởi tạo ví ảo |
-| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` |
+| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng; Duyệt bài · Quản lý phiên · Báo cáo cho đội ngũ PCBid), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` có thẻ vai trò và nút Báo cáo |
 | 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
 
 > Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html` (ví dụ `profile.html#participating`, `profile.html?user=<tên đăng nhập>`).
@@ -160,6 +168,8 @@ pc-bid/
 │   ├── main.js                 # Nạp Header / Footer, khởi động bot, xử lý sau đấu giá, chat, đa ngôn ngữ
 │   ├── index.js · products.js · product-detail.js · sell.js · auth.js · profile.js   # Logic từng trang
 │   ├── inspection.js           # Quy trình kiểm định PCBid Lab, phiếu kiểm định từng sản phẩm
+│   ├── moderation.js           # Vai trò Kiểm định viên / Quản trị viên, duyệt bài, ẩn / gỡ phiên, báo cáo
+│   ├── review-actions.js       # Hộp thoại + tin nhắn tự động cho các thao tác kiểm duyệt và báo cáo
 │   ├── accounts.js             # Tài khoản demo / mẫu, UID, avatar, mật khẩu, kiểm tra trùng
 │   ├── user-data.js            # Danh sách riêng theo từng tài khoản (watchlist, đang bán, đã đọc...)
 │   ├── watchlist.js            # Thêm / bỏ theo dõi phiên, đồng bộ nút và số đếm trên header
@@ -171,7 +181,7 @@ pc-bid/
 │   ├── order-view.js           # Thẻ đơn hàng dùng chung
 │   ├── address-book.js         # Sổ địa chỉ nhận hàng
 │   ├── chat.js                 # Hộp chat người mua - người bán
-│   ├── dialog.js               # Hộp thoại xác nhận / thông báo / ba lựa chọn
+│   ├── dialog.js               # Hộp thoại xác nhận / thông báo / ba lựa chọn / biểu mẫu nhỏ
 │   ├── custom-select.js        # Ô chọn xổ xuống tùy biến thay cho <select> của trình duyệt
 │   ├── contact-float.js        # Cụm nút liên hệ nổi Facebook / Zalo / Gọi điện
 │   ├── avatar-cropper.js       # Cắt ảnh đại diện bằng Canvas
@@ -196,7 +206,9 @@ pc-bid/
 | `pcbid_registered_users` | Tài khoản đã đăng ký / tài khoản demo đã chỉnh sửa |
 | `pcbid_orders` | Đơn hàng sau đấu giá |
 | `pcbid_wallet_ledger` | Sổ giao dịch ví (thanh toán, nhận tiền bán, mất / nhận cọc) |
-| `pcbid_chats` | Cuộc trò chuyện người mua - người bán |
+| `pcbid_chats` | Cuộc trò chuyện người mua - người bán (và với đội ngũ PCBid) |
+| `pcbid_moderation` | Phiên bị Quản trị viên ẩn / gỡ kèm lý do |
+| `pcbid_reports` | Báo cáo vi phạm bài đăng / tài khoản và kết quả xử lý |
 | `pcbid_lang` | Ngôn ngữ giao diện đã chọn |
 | `pcbid_bot_state` · `pcbid_bot_seeded` | Nhịp và khóa chạy bot giữa các tab |
 | `pcbid_settled` · `pcbid_settlement_since` | Các phiên đã xử lý kết quả |
@@ -225,7 +237,7 @@ Muốn làm mới toàn bộ dữ liệu mô phỏng: DevTools → **Application
 
 ## 8. Tài khoản demo & kịch bản trình diễn
 
-Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nhanh ở `login.html`. Mật khẩu chung: `123456` (đổi được trong mục Bảo mật).
+Bốn tài khoản demo mang tên thành viên nhóm cùng hai tài khoản đội ngũ PCBid, đều có nút đăng nhập nhanh ở `login.html`. Mật khẩu chung: `123456` (đổi được trong mục Bảo mật).
 
 | Email | Họ tên | Số dư ví ban đầu |
 | :--- | :--- | :--- |
@@ -233,6 +245,8 @@ Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nha
 | `bidder2@pcbid.vn` | Nguyễn Nhật Huy | 60.000.000 đ |
 | `bidder3@pcbid.vn` | Huỳnh Nhật Minh | 55.000.000 đ |
 | `seller@pcbid.vn` | Nguyễn Gia Huy (có sẵn phiên đăng bán) | 80.000.000 đ |
+| `inspector@pcbid.vn` | Trần Bảo Ngọc – **Kiểm định viên** (duyệt bài, xử lý báo cáo) | 0 đ |
+| `admin@pcbid.vn` | **Quản trị viên** (duyệt bài, ẩn / gỡ phiên, xử lý báo cáo) | 100.000.000 đ |
 
 **Kịch bản gợi ý (khoảng 5 phút):**
 1. Trang chủ: xem băng chuyền "Trực tiếp sàn đấu giá" cập nhật khi bot đặt giá.
@@ -240,9 +254,11 @@ Bốn tài khoản demo mang tên thành viên nhóm, có nút đăng nhập nha
 3. Bấm **"Kết thúc phiên ngay (demo)"** → đơn "Chờ thanh toán" xuất hiện kèm đồng hồ 1 phút.
 4. Chọn địa chỉ nhận hàng, thanh toán → người bán mẫu tự giao hàng sau vài giây → bấm "Đã nhận được hàng" → hoàn tất.
 5. Bấm **"Liên hệ người bán"**, gửi câu hỏi / ảnh / thẻ sản phẩm, xem người bán tự trả lời.
-6. Đăng nhập `seller`, đăng bán một linh kiện → đồng hồ 10 giây → phiên đứng đầu Sàn đấu giá với nhãn "Bạn vừa đăng" và tem "Chờ kiểm định" (đồng hồ phiên đứng yên).
-7. Mở phiên vừa đăng, bấm **"Bỏ qua chờ kiểm định (demo)"** → phiên chuyển "Đạt chuẩn - PCBid Verified", bấm xem phiếu kiểm định của sản phẩm.
-8. Chuyển ngôn ngữ sang **English / 日本語** bằng nút quả địa cầu.
+6. Đăng nhập `seller`, đăng bán một linh kiện → bài ở trạng thái **"Chờ kiểm duyệt"**, đồng hồ chưa chạy. Bấm "Chuyển sang tài khoản Kiểm định viên" trên banner.
+7. Kiểm định viên bấm **"Yêu cầu bổ sung"** → đăng nhập lại `seller`, vào Quản lý đấu giá → Bán hàng, bấm **"Gửi bổ sung"** (tin nhắn hai bên hiện trong chat kèm thẻ vai trò "Kiểm định viên").
+8. Kiểm định viên **Duyệt** → phiên chuyển "Chờ kiểm định"; bấm **"Bỏ qua chờ kiểm định (demo)"** → phiên mở đặt giá, đồng hồ bắt đầu chạy đủ thời hạn.
+9. Đăng nhập `bidder1`, bấm **"Báo cáo bài đăng"** → đăng nhập `admin`, tab **Báo cáo** → **Ẩn bài** → phiên biến mất khỏi sàn; tab **Quản lý phiên** để hiện lại.
+10. Chuyển ngôn ngữ sang **English / 日本語** bằng nút quả địa cầu.
 
 ---
 

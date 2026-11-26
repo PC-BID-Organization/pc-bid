@@ -961,6 +961,99 @@
 }
 
 /* --------------------------------------------------------------------------
+   THẺ DUYỆT MỞ PHIÊN CỦA QUẢN TRỊ VIÊN (ADMIN)
+   -------------------------------------------------------------------------- */
+.pcb-auction-card--admin-review {
+  border: 1.5px solid #c7d2fe;
+  background-color: #ffffff;
+}
+
+.pcb-auction-card__category-badge--admin {
+  background-color: #4f46e5;
+}
+
+.pcb-admin-review__seller {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.pcb-admin-review__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pcb-admin-review__ceiling {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.pcb-admin-review__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.pcb-admin-review__note .pcb-icon {
+  margin-top: 1px;
+  color: #4f46e5;
+}
+
+/* Nút Duyệt / Từ chối trên thẻ duyệt phiên */
+.pcb-admin-review__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pcb-admin-review__btn--approve {
+  color: #ffffff;
+  background-color: #16a34a;
+  border: 1px solid #16a34a;
+}
+
+.pcb-admin-review__btn--approve:hover,
+.pcb-admin-review__btn--approve:focus-visible {
+  background-color: #15803d;
+  border-color: #15803d;
+}
+
+.pcb-admin-review__btn--reject {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.pcb-admin-review__btn--reject:hover,
+.pcb-admin-review__btn--reject:focus-visible {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+@media (max-width: 480px) {
+  .pcb-admin-review__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
    7. TRẠNG THÁI TRỐNG (EMPTY STATE)
    -------------------------------------------------------------------------- */
 
@@ -2910,14 +3003,58 @@
 
 .pcb-username-wrap__lock {
   position: absolute;
-  right: 14px;
+  right: 50px;
   display: inline-flex;
   color: #64748b;
 }
 
+/* Chừa chỗ bên phải ô cho biểu tượng khóa và nút sao chép */
+.pcb-username-wrap .pcb-input {
+  padding-right: 76px;
+}
+
+/* Nút sao chép tên đăng nhập: ô vuông nhỏ nằm sát mép phải trong ô nhập */
+.pcb-username-wrap__copy {
+  position: absolute;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #64748b;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pcb-username-wrap__copy:hover,
+.pcb-username-wrap__copy:focus-visible {
+  color: var(--pcb-primary, #c9450a);
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+}
+
+/* Đã sao chép: đổi sang màu xanh trong chốc lát */
+.pcb-username-wrap__copy--done,
+.pcb-username-wrap__copy--done:hover {
+  color: #047857;
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+/* Ô chỉ đọc: không hiện con trỏ nhấp nháy vì không sửa được */
+.pcb-input--readonly,
+.pcb-input[readonly] {
+  caret-color: transparent;
+}
+
 .pcb-input--readonly {
   color: #475569;
-  cursor: not-allowed;
+  cursor: default;
   background-color: #f1f5f9;
 }
 
@@ -3053,5 +3190,319 @@
 @media (prefers-reduced-motion: reduce) {
   .pcb-savebar {
     transition: none;
+  }
+}
+
+/* ==========================================================================
+   ĐỘI NGŨ PCBID: DUYỆT BÀI, QUẢN LÝ PHIÊN, BÁO CÁO VI PHẠM
+   ========================================================================== */
+/* Nút "Yêu cầu bổ sung" trên thẻ duyệt bài */
+.pcb-admin-review__btn--info {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.pcb-admin-review__btn--info:hover,
+.pcb-admin-review__btn--info:focus-visible {
+  background-color: #dbeafe;
+}
+
+.pcb-admin-review__seller a {
+  color: inherit;
+}
+
+/* Ghi chú kiểm duyệt trên thẻ đăng bán của người bán */
+.pcb-auction-card__review-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #1e3a8a;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+}
+
+.pcb-auction-card__review-note .pcb-icon {
+  margin-top: 2px;
+}
+
+.pcb-auction-card__review-note--warn {
+  color: #92400e;
+  background-color: #fffbeb;
+  border-color: #fde68a;
+}
+
+/* Danh sách dạng dòng cho tab Quản lý phiên và Báo cáo */
+.pcb-staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcb-staff-list[hidden] {
+  display: none;
+}
+
+.pcb-staff-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.pcb-staff-row--hidden {
+  border-color: #fde68a;
+  background-color: #fffdf5;
+}
+
+.pcb-staff-row--removed,
+.pcb-staff-row--closed {
+  opacity: 0.75;
+}
+
+.pcb-staff-row__img {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.pcb-staff-row__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pcb-staff-row__title {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-main, #0b1c30);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pcb-staff-row__title:hover,
+.pcb-staff-row__title:focus-visible {
+  color: var(--color-primary, #c9450a);
+  text-decoration: underline;
+}
+
+.pcb-staff-row__meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.pcb-staff-row__state {
+  font-weight: 700;
+}
+
+.pcb-staff-row__state--visible {
+  color: #047857;
+}
+
+.pcb-staff-row__state--hidden {
+  color: #b45309;
+}
+
+.pcb-staff-row__state--removed {
+  color: #b91c1c;
+}
+
+.pcb-staff-row__flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  padding: 0 6px;
+  font-weight: 700;
+  color: #b91c1c;
+  background-color: #fee2e2;
+  border-radius: 999px;
+}
+
+.pcb-staff-row__reason,
+.pcb-staff-row__detail {
+  font-size: 12px;
+  color: #475569;
+}
+
+.pcb-staff-row__detail {
+  font-style: italic;
+}
+
+.pcb-staff-row__reason-main {
+  font-size: 13px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+/* Nhãn loại báo cáo: bài đăng / tài khoản */
+.pcb-staff-row__type {
+  display: inline-flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+  padding: 8px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.pcb-staff-row__type--listing {
+  color: #9a3412;
+  background-color: #fff7ed;
+}
+
+.pcb-staff-row__type--user {
+  color: #3730a3;
+  background-color: #eef2ff;
+}
+
+.pcb-staff-row__actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 280px;
+}
+
+.pcb-staff-row__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  text-decoration: none;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-staff-row__btn:hover,
+.pcb-staff-row__btn:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-staff-row__btn--danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.pcb-staff-row__btn--danger:hover,
+.pcb-staff-row__btn--danger:focus-visible {
+  background-color: #fee2e2;
+}
+
+.pcb-staff-row__btn--ok {
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.pcb-staff-row__btn--ok:hover,
+.pcb-staff-row__btn--ok:focus-visible {
+  background-color: #ecfdf5;
+}
+
+@media (max-width: 640px) {
+  .pcb-staff-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .pcb-staff-row__actions {
+    justify-content: flex-start;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* Thẻ vai trò cạnh tên trên hồ sơ công khai */
+.pcb-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: #ffffff;
+  border-radius: 999px;
+}
+
+.pcb-role-badge--admin {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.pcb-role-badge--inspector {
+  background: linear-gradient(135deg, #047857, #0d9488);
+}
+
+/* Nhóm nút Nhắn tin + Báo cáo trên hồ sơ công khai */
+.pcb-public__actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.pcb-public__actions .pcb-public__chat-btn {
+  margin-left: 0;
+}
+
+.pcb-public__report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pcb-public__report-btn:hover,
+.pcb-public__report-btn:focus-visible {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .pcb-public__actions {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 0;
   }
 }

@@ -165,7 +165,7 @@
             </div>
             <div class="pcb-pd__price-divider pcb-pd__price-divider--ceiling" id="pcb-pd-ceiling-divider" aria-hidden="true" hidden></div>
             <div class="pcb-pd__price-block pcb-pd__price-block--ceiling" id="pcb-pd-ceiling-block" hidden>
-              <span class="pcb-pd__price-label" style="color: #d97706; font-weight: 700;">⚡ Giá trần (kết thúc ngay)</span>
+              <span class="pcb-pd__price-label" style="color: #d97706; font-weight: 700;"><span class="lucide pcb-icon pcb-icon--zap pcb-icon--s13" aria-hidden="true"></span> Giá trần (kết thúc ngay)</span>
               <span class="pcb-pd__price-value pcb-pd__price-value--ceiling" id="pcb-pd-ceiling-price" style="color: #b45309; font-weight: 800;">---</span>
             </div>
           </div>
@@ -177,18 +177,20 @@
             <strong id="pcb-pd-bid-step">---</strong>
           </p>
 
-          <!-- ===== BẢNG QUẢN TRỊ VIÊN THẨM ĐỊNH & PHÊ DUYỆT (ADMIN APPROVAL PANEL) ===== -->
+          <!-- ===== BẢNG KIỂM DUYỆT BÀI ĐĂNG (KIỂM ĐỊNH VIÊN / QUẢN TRỊ VIÊN) ===== -->
           <section class="pcb-pd__admin-panel" id="pcb-pd-admin-panel" aria-labelledby="pcb-pd-admin-title" hidden>
             <div class="pcb-pd__admin-head">
               <div class="pcb-pd__admin-badge">
                 <span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s16" aria-hidden="true"></span>
-                <strong id="pcb-pd-admin-title">BẢNG THẨM ĐỊNH &amp; DUYỆT PHIÊN (ADMIN)</strong>
+                <strong id="pcb-pd-admin-title">KIỂM DUYỆT BÀI ĐĂNG</strong>
               </div>
-              <span class="pcb-pd__admin-status" id="pcb-pd-admin-status-tag">Chờ phê duyệt</span>
+              <span class="pcb-pd__admin-status" id="pcb-pd-admin-status-tag">Chờ kiểm duyệt</span>
             </div>
             <p class="pcb-pd__admin-desc">
-              Kiểm tra tính xác thực nguồn gốc và bằng chứng có hàng của người bán trước khi mở phiên đấu giá công khai.
+              Đối chiếu ảnh thật, thông số và bằng chứng có hàng. Duyệt xong linh kiện được PCBid Lab kiểm định, đạt thì phiên mở đặt giá và đồng hồ bắt đầu chạy.
             </p>
+            <!-- Nhật ký trao đổi: yêu cầu bổ sung của Kiểm định viên và phản hồi của người bán -->
+            <ol class="pcb-pd__review-log" id="pcb-pd-review-log" hidden></ol>
             <div class="pcb-pd__admin-checklist">
               <label class="pcb-pd__admin-check"><input type="checkbox" id="chk-admin-item-1" checked> <span>Ảnh chụp linh kiện rõ ràng, có thông số serial &amp; tem void</span></label>
               <label class="pcb-pd__admin-check"><input type="checkbox" id="chk-admin-item-2" checked> <span>Mô tả tình trạng và phụ kiện đầy đủ, có cơ sở có hàng</span></label>
@@ -196,25 +198,32 @@
             </div>
             <div class="pcb-pd__admin-actions">
               <button type="button" class="pcb-pd__admin-btn pcb-pd__admin-btn--approve" id="btn-admin-approve">
-                <span class="lucide pcb-icon pcb-icon--check pcb-icon--s16" aria-hidden="true"></span> Phê Duyệt &amp; Mở Phiên Ngay
+                <span class="lucide pcb-icon pcb-icon--check pcb-icon--s16" aria-hidden="true"></span> Duyệt &amp; gửi kiểm định
+              </button>
+              <button type="button" class="pcb-pd__admin-btn pcb-pd__admin-btn--info" id="btn-admin-request-info">
+                <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span> Yêu cầu bổ sung
               </button>
               <button type="button" class="pcb-pd__admin-btn pcb-pd__admin-btn--reject" id="btn-admin-reject">
-                <span class="lucide pcb-icon pcb-icon--x pcb-icon--s16" aria-hidden="true"></span> Từ Chối Phiên
+                <span class="lucide pcb-icon pcb-icon--x pcb-icon--s16" aria-hidden="true"></span> Từ chối
               </button>
             </div>
           </section>
 
-          <!-- Bảng thông báo chờ duyệt cho người mua / khách vãng lai -->
-          <div class="pcb-pd__pending-approval-banner" id="pcb-pd-pending-banner" hidden>
-            <div class="pcb-pd__pending-icon">🛡️</div>
-            <div class="pcb-pd__pending-text">
-              <strong>Phiên đấu giá đang chờ Quản trị viên (Admin) thẩm định &amp; phê duyệt</strong>
-              <p>PCBid đang kiểm tra xác thực thông tin và cơ sở người bán có hàng thật trước khi mở đấu giá công khai.</p>
-              <button type="button" class="pcb-pd__demo-admin-switch" id="btn-demo-switch-admin">
-                🔑 Chuyển sang tài khoản Admin để duyệt demo ngay
+          <!-- Bảng trạng thái kiểm duyệt cho người bán / người xem (nội dung do JS điền theo trạng thái) -->
+          <div class="pcb-pd__pending-approval-banner" id="pcb-pd-pending-banner" hidden></div>
+
+          <!-- Thanh quản lý phiên của Quản trị viên: ẩn / hiện lại / gỡ bài đăng -->
+          <section class="pcb-pd__staff-bar" id="pcb-pd-staff-bar" aria-label="Quản lý phiên (Quản trị viên)" hidden>
+            <p class="pcb-pd__staff-bar-text" id="pcb-pd-staff-bar-text"></p>
+            <div class="pcb-pd__staff-bar-actions">
+              <button type="button" class="pcb-pd__staff-btn" id="btn-staff-hide">
+                <span class="lucide pcb-icon pcb-icon--eye-off pcb-icon--s14" aria-hidden="true"></span> <span id="btn-staff-hide-label">Ẩn bài đăng</span>
+              </button>
+              <button type="button" class="pcb-pd__staff-btn pcb-pd__staff-btn--danger" id="btn-staff-remove">
+                <span class="lucide pcb-icon pcb-icon--trash-2 pcb-icon--s14" aria-hidden="true"></span> Gỡ bài đăng
               </button>
             </div>
-          </div>
+          </section>
 
           <!-- ===== HỘP ĐẶT GIÁ (BIDDING BOX) ===== -->
           <!-- Bảng quản lý dành cho người bán khi xem phiên của chính mình (thay cho khung đặt giá) -->
@@ -264,7 +273,7 @@
             <!-- Thanh thông báo & điền nhanh Giá trần -->
             <div class="pcb-pd__ceiling-notice" id="pcb-pd-ceiling-notice" hidden>
               <span class="pcb-pd__ceiling-notice-text">
-                ⚡ Giá trần chốt ngay: <strong id="pcb-pd-ceiling-notice-price">---</strong>
+                <span class="lucide pcb-icon pcb-icon--zap pcb-icon--s14" aria-hidden="true"></span> Giá trần chốt ngay: <strong id="pcb-pd-ceiling-notice-price">---</strong>
               </span>
               <button type="button" class="pcb-pd__ceiling-quick-btn" id="pcb-pd-ceiling-quick-btn">
                 Đặt giá trần để thắng ngay
@@ -337,6 +346,16 @@
             <button type="button" class="pcb-pd__contact-btn" id="pcb-pd-contact-seller">
               <span class="lucide pcb-icon pcb-icon--message-square pcb-icon--s16" aria-hidden="true"></span>
               Liên hệ người bán
+            </button>
+          </div>
+
+          <!-- Báo cáo bài đăng / người bán vi phạm: gửi tới Quản trị viên và Kiểm định viên -->
+          <div class="pcb-pd__report" id="pcb-pd-report">
+            <button type="button" class="pcb-pd__report-btn" id="pcb-pd-report-listing">
+              <span class="lucide pcb-icon pcb-icon--flag pcb-icon--s14" aria-hidden="true"></span> Báo cáo bài đăng
+            </button>
+            <button type="button" class="pcb-pd__report-btn" id="pcb-pd-report-seller">
+              <span class="lucide pcb-icon pcb-icon--user-x pcb-icon--s14" aria-hidden="true"></span> Báo cáo người bán
             </button>
           </div>
 

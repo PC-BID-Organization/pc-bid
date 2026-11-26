@@ -13,6 +13,8 @@ import { readLoggedInUser } from './user-data.js';
 import { getAuctionEndTimestamp, isAuctionClosed, mergeLocalProduct } from './auction-time.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
 import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
+// Bỏ các bài đăng bị Quản trị viên ẩn / gỡ khỏi sàn
+import { filterVisibleListings } from './moderation.js';
 // Danh sách theo dõi lưu theo tài khoản (dùng chung với Trang chủ, trang chi tiết, Header)
 import { isWatched, toggleWatch, setWatchButtonState } from './watchlist.js';
 // Hộp thoại xác nhận dùng chung
@@ -293,10 +295,10 @@ async function loadAllProducts() {
     });
 
     // Chỉ hiển thị các phiên còn mở trên sàn đã được duyệt; phiên đã bán / đã kết thúc vẫn xem được qua link chi tiết
-    rawProducts = [...customUserItems, ...mergedList].filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
+    rawProducts = filterVisibleListings([...customUserItems, ...mergedList]).filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
   } catch (e) {
     console.warn('[PCBid] Lỗi đồng bộ giá products:', e);
-    if (fetchedItems.length > 0) rawProducts = fetchedItems.filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
+    if (fetchedItems.length > 0) rawProducts = filterVisibleListings(fetchedItems).filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
   }
 
   // Cập nhật số lượng đếm trên tiêu đề và sidebar
@@ -987,7 +989,7 @@ function updateLiveCountdowns() {
 
     // Phiên đấu giá chỉ kết thúc khi chạm giá trần (vô hạn giờ)
     if (el.getAttribute('data-end-mode') === 'ceiling_only') {
-      textSpan.textContent = '⚡ Chờ giá trần';
+      textSpan.textContent = 'Chờ giá trần';
       el.classList.remove('pcb-card__countdown--urgent');
       return;
     }

@@ -25,6 +25,8 @@ import { ORDER_STATUS_LABELS } from './settlement.js';
 import { showAlert, showConfirm } from './dialog.js';
 // Bộ icon Lucide dùng chung
 import { icon } from './icons.js';
+// Vai trò Quản trị viên / Kiểm định viên để hiện thẻ vai trò nổi bật
+import { getStaffRole, ROLE_LABELS } from './moderation.js';
 
 const CHATS_KEY = 'pcbid_chats';
 // Thời gian phía bên kia "đang soạn tin" trước khi tự trả lời
@@ -178,12 +180,28 @@ function roleOf(chat, user) {
  * @returns {{name:string, account:Object|null, username:string, label:string}}
  */
 function counterpartOf(chat, role) {
+  const account = role === 'buyer'
+    ? findAccount({ username: chat.sellerUsername })
+    : findAccount({ id: chat.buyerId, username: chat.buyerUsername });
+  // Tài khoản Quản trị viên / Kiểm định viên: nhãn vai trò thay cho Người bán / Người mua
+  const staffRole = getStaffRole(account);
+  const tradeLabel = role === 'buyer' ? 'Người bán' : 'Người mua';
+  const label = staffRole ? `${ROLE_LABELS[staffRole]} PCBid` : (hasTradeContext(chat) ? tradeLabel : 'Thành viên PCBid');
   if (role === 'buyer') {
-    const account = findAccount({ username: chat.sellerUsername });
-    return { name: account?.fullname || chat.sellerName, account, username: chat.sellerUsername, label: hasTradeContext(chat) ? 'Người bán' : 'Thành viên PCBid' };
+    return { name: account?.fullname || chat.sellerName, account, username: chat.sellerUsername, label, staffRole };
   }
-  const account = findAccount({ id: chat.buyerId, username: chat.buyerUsername });
-  return { name: account?.fullname || chat.buyerName, account, username: chat.buyerUsername, label: hasTradeContext(chat) ? 'Người mua' : 'Thành viên PCBid' };
+  return { name: account?.fullname || chat.buyerName, account, username: chat.buyerUsername, label, staffRole };
+}
+
+/**
+ * Thẻ vai trò nổi bật cho tài khoản Quản trị viên / Kiểm định viên
+ * @param {'admin'|'inspector'|null} staffRole
+ * @param {boolean} [compact] - Bản nhỏ (danh sách hội thoại)
+ * @returns {string}
+ */
+function roleBadgeHtml(staffRole, compact = false) {
+  if (!staffRole) return '';
+  return `<span class="pcb-chat__role-badge pcb-chat__role-badge--${staffRole}${compact ? ' pcb-chat__role-badge--compact' : ''}">${icon('shield-check', { size: compact ? 11 : 12 })}${ROLE_LABELS[staffRole]}</span>`;
 }
 
 /**
@@ -845,7 +863,7 @@ function renderList() {
               <span class="pcb-chat__item-name">${pinned ? `<span class="pcb-chat__pin" title="Đã ghim">${icon('pin', { size: 12 })}<span class="pcb-chat__sr">Đã ghim</span></span>` : ''}${escapeHtml(peer.name)}</span>
               <span class="pcb-chat__item-time">${last ? formatTime(last.timestamp) : ''}</span>
             </span>
-            <span class="pcb-chat__item-role">${peer.label}</span>
+            <span class="pcb-chat__item-role">${peer.staffRole ? roleBadgeHtml(peer.staffRole, true) : peer.label}</span>
             <span class="pcb-chat__item-last">${last ? escapeHtml((last.from === role ? 'Bạn: ' : '') + previewText(last)) : 'Chưa có tin nhắn'}</span>
           </span>
           ${unread ? `<span class="pcb-chat__item-badge">${unread}</span>` : ''}
@@ -881,7 +899,9 @@ function renderMessageContent(m, role) {
   }
   if (m.type === 'product') {
     const p = m.product || {};
-    const label = role === 'buyer' ? 'Bạn đang trao đổi với Người bán về sản phẩm này' : 'Người mua đang trao đổi với bạn về sản phẩm này';
+    const label = m.context === 'review'
+      ? 'Bài đăng đang được đội ngũ PCBid kiểm duyệt'
+      : (role === 'buyer' ? 'Bạn đang trao đổi với Người bán về sản phẩm này' : 'Người mua đang trao đổi với bạn về sản phẩm này');
     return `
       <div class="pcb-chat__card">
         <span class="pcb-chat__card-label">${label}</span>
@@ -958,13 +978,18 @@ function renderThread() {
     ${avatarHtml(peer, 'pcb-chat__avatar--sm')}
     <span class="pcb-chat__peer-info">
       <a class="pcb-chat__peer-name" href="profile.html?user=${encodeURIComponent(peer.username)}">${escapeHtml(peer.name)}</a>
-      <span class="pcb-chat__peer-role">${peer.label}</span>
+      <span class="pcb-chat__peer-role">${peer.staffRole ? roleBadgeHtml(peer.staffRole) : peer.label}</span>
     </span>
   `;
 
   const messages = visibleMessages(chat, user);
   const hasMine = messages.some(m => m.from === role && m.type === 'text');
   thread.innerHTML = `
+    ${peer.staffRole ? `
+      <p class="pcb-chat__staff-note pcb-chat__staff-note--${peer.staffRole}">
+        ${icon('shield-check', { size: 14 })}
+        <span>${escapeHtml(peer.name)} là <strong>${ROLE_LABELS[peer.staffRole]}</strong> chính thức của PCBid. Nhân viên PCBid không bao giờ yêu cầu bạn chuyển tiền ngoài sàn.</span>
+      </p>` : ''}
     <div class="pcb-chat__messages">
       ${messages.length ? '' : `<p class="pcb-chat__hint">Hãy hỏi ${role === 'buyer' ? 'người bán' : 'người mua'} về tình trạng linh kiện, bảo hành hoặc giao hàng.</p>`}
       ${messages.map((m, i) => {
@@ -1155,6 +1180,48 @@ export function openChatWithUser(username) {
   renderChat();
   document.getElementById('pcb-chat-input')?.focus();
   return true;
+}
+
+/**
+ * Gửi tin nhắn thay mặt một tài khoản tới tài khoản khác mà không cần mở hộp chat
+ * (dùng khi Kiểm định viên yêu cầu bổ sung / từ chối bài đăng, người bán gửi phần bổ sung).
+ * Dùng lại cuộc trò chuyện sẵn có giữa hai bên nếu có, nếu chưa thì tạo mới.
+ * @param {Object} fromUser - Người gửi (đang đăng nhập)
+ * @param {string} toUsername - Tên đăng nhập người nhận
+ * @param {Object} payload
+ * @param {string} payload.text - Nội dung tin nhắn
+ * @param {Object} [payload.product] - Thẻ bài đăng gửi kèm { id, name, image, price }
+ * @returns {boolean}
+ */
+export function sendDirectMessage(fromUser, toUsername, { text, product } = {}) {
+  if (!fromUser?.username || !toUsername || fromUser.username === toUsername || !text) return false;
+  const target = findAccount({ username: toUsername });
+  let chat = readChats().find(c => roleOf(c, fromUser) && (
+    c.sellerUsername === toUsername
+    || isSameUser({ id: target?.id, username: toUsername }, c.buyerId, c.buyerUsername)
+  ));
+  if (!chat) {
+    chat = ensureChat({ sellerUsername: fromUser.username, buyer: target || { username: toUsername, fullname: toUsername } });
+  }
+  if (!chat) return false;
+  const ok = updateChat(chat.id, c => {
+    const role = roleOf(c, fromUser);
+    if (!role) return c;
+    const now = Date.now();
+    const extra = [];
+    // Thẻ bài đăng chỉ gửi khi khác bài gần nhất trong cuộc trò chuyện
+    const lastProduct = [...c.messages].reverse().find(m => m.type === 'product');
+    if (product && Number(lastProduct?.product?.id) !== Number(product.id)) {
+      extra.push({ id: `msg_${now}_p`, type: 'product', from: role, auto: true, context: 'review', timestamp: new Date(now).toISOString(), product });
+    }
+    extra.push({ id: `msg_${now}_t`, type: 'text', from: role, text, timestamp: new Date(now + 1).toISOString() });
+    c.messages = [...c.messages, ...extra];
+    c.lastRead = { ...c.lastRead, [userKey(fromUser)]: new Date(now + 1).toISOString() };
+    c.updatedAt = new Date(now + 1).toISOString();
+    return c;
+  });
+  if (document.getElementById('pcb-chat')) renderChat();
+  return ok;
 }
 
 /**

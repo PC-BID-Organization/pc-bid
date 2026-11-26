@@ -792,3 +792,31 @@ select.pcb-auth-form__input {
 .pcb-auth-form__toggle-pwd--shown .pcb-icon-eye-off {
   display: block;
 }
+
+/* Nút tài khoản demo đội ngũ PCBid: Quản trị viên (tím) và Kiểm định viên (xanh lục) */
+.pcb-demo-btn--admin {
+  background-color: #f8fafc;
+  border-color: #6366f1;
+}
+
+.pcb-demo-btn--admin .pcb-auth-demo__title,
+.pcb-demo-btn--admin .pcb-demo-btn__role {
+  color: #4338ca;
+}
+
+.pcb-demo-btn--inspector {
+  background-color: #f8fafc;
+  border-color: #10b981;
+}
+
+.pcb-demo-btn--inspector .pcb-auth-demo__title,
+.pcb-demo-btn--inspector .pcb-demo-btn__role {
+  color: #047857;
+}
+
+.pcb-demo-btn__role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}

@@ -12,6 +12,16 @@ import { getOrdersForUser, orderNeedsAction } from './settlement.js';
 import { icon, NOTIFY_ICON_NAMES } from './icons.js';
 // Mở hội thoại với tài khoản đang xem hồ sơ
 import { openChatWithUser } from './chat.js';
+// Kiểm duyệt bài đăng, quản lý phiên, báo cáo vi phạm (Kiểm định viên / Quản trị viên)
+import {
+  isStaff, isAdmin, getStaffRole, getRoleLabel, ROLE_LABELS, isAwaitingReview, needsMoreInfo, isRejected,
+  getLastStaffNote, getReviewQueue, getModerationState, isListingVisible, getReports, getOpenReportCount, getHiddenListingCount,
+  REPORT_STATUS_LABELS
+} from './moderation.js';
+import {
+  confirmApprove, promptRequestInfo, promptReject, promptSellerReply, promptHide, confirmUnhide, promptRemove,
+  openReportDialog, promptResolveReport
+} from './review-actions.js';
 // Sổ địa chỉ nhận hàng
 import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo, getVerificationStatus } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -192,6 +202,30 @@ function formatTimeRemaining(endTimestamp, start = 0) {
 }
 
 /**
+ * Sao chép chuỗi vào bộ nhớ tạm (clipboard); trình duyệt cũ dùng cách chọn chữ rồi execCommand
+ * @param {string} text
+ * @returns {Promise<boolean>} true nếu sao chép thành công
+ */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const temp = document.createElement('textarea');
+    temp.value = text;
+    temp.setAttribute('readonly', '');
+    temp.style.position = 'fixed';
+    temp.style.opacity = '0';
+    document.body.appendChild(temp);
+    temp.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    temp.remove();
+    return ok;
+  }
+}
+
+/**
  * Hiển thị thanh thông báo Toast nhanh góc dưới màn hình
  */
 function showToast(message, isSuccess = true, action = null) {
@@ -313,6 +347,21 @@ function getSellingItems() {
     // Phiên mẫu chưa đăng lại: luôn lấy thông tin chuẩn mới nhất (sửa dữ liệu cũ lưu sai ảnh / tên / trạng thái)
     const sample = DEFAULT_SELLING.find(d => d.id === Number(saved.id));
     const item = sample && !(saved.relisted || saved.closedEarly) ? { ...saved, ...sample } : { ...saved };
+
+    // Trạng thái duyệt lấy từ pcbid_products (nơi Admin duyệt / từ chối): bản lưu trong danh sách
+    // đăng bán chỉ là bản sao lúc đăng nên có thể vẫn ghi "chờ duyệt" dù Admin đã xử lý xong
+    const approvalSource = productMap.get(Number(item.id));
+    if (approvalSource?.approvalStatus) {
+      item.approvalStatus = approvalSource.approvalStatus;
+      if (['active', 'rejected', 'pending_approval'].includes(approvalSource.status) && ['active', 'rejected', 'pending_approval'].includes(item.status)) {
+        item.status = approvalSource.status;
+      }
+      // Nhật ký kiểm duyệt, mốc kiểm định và giờ kết thúc được tính lại lúc duyệt
+      ['reviewLog', 'inspection', 'endTime', 'durationMs', 'reviewedBy'].forEach(field => {
+        if (field in approvalSource) item[field] = approvalSource[field];
+      });
+      if (approvalSource.endTime) item.endTimestamp = new Date(approvalSource.endTime).getTime();
+    }
 
     if (item.status === 'active') {
       const product = productMap.get(Number(item.id));
@@ -507,19 +556,34 @@ function renderSellingCard(item) {
   let modifierClass = '';
   let actionButtonsHtml = '';
 
-  if (item.status === 'pending_approval' || item.approvalStatus === 'pending') {
-    modifierClass = 'pcb-auction-card--selling-active';
-    badgeHtml = `<span class="pcb-status-badge" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">
-      ⏳ Chờ Admin duyệt
-    </span>`;
-    actionButtonsHtml = `
-      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết &amp; Thẩm định</a>
-    `;
-  } else if (item.status === 'rejected') {
+  const moderation = getModerationState(item.id);
+  const staffNote = getLastStaffNote(item);
+  // Dòng ghi chú dưới tiêu đề: yêu cầu bổ sung / lý do từ chối / lý do ẩn, gỡ
+  let noteHtml = '';
+
+  if (moderation.removed) {
     modifierClass = 'pcb-auction-card--selling-ended';
-    badgeHtml = `<span class="pcb-status-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;">
-      ❌ Bị từ chối
-    </span>`;
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--outbid">Đã bị gỡ khỏi sàn</span>';
+    noteHtml = `Lý do gỡ: ${escapeHtml(moderation.removed.reason || '---')}`;
+    actionButtonsHtml = `<a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>`;
+  } else if (needsMoreInfo(item)) {
+    modifierClass = 'pcb-auction-card--selling-active';
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--active">Cần bổ sung thông tin</span>';
+    noteHtml = `<strong>${escapeHtml(staffNote?.by?.name || 'Kiểm định viên')}:</strong> ${escapeHtml(staffNote?.note || '')}`;
+    actionButtonsHtml = `
+      <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-seller-reply="${item.id}">Gửi bổ sung</button>
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
+    `;
+  } else if (isAwaitingReview(item)) {
+    modifierClass = 'pcb-auction-card--selling-active';
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--pending">Chờ kiểm duyệt</span>';
+    actionButtonsHtml = `
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
+    `;
+  } else if (isRejected(item)) {
+    modifierClass = 'pcb-auction-card--selling-ended';
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--outbid">Không được duyệt</span>';
+    if (staffNote?.note) noteHtml = `Lý do: ${escapeHtml(staffNote.note)}`;
     actionButtonsHtml = `
       <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid pcb-btn-rebid--muted">Chỉnh sửa &amp; Nộp lại</a>
       <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
@@ -582,6 +646,8 @@ function renderSellingCard(item) {
         <a href="${detailUrl}" class="pcb-auction-card__title" title="${escapeHtml(item.name)}">
           ${escapeHtml(item.name)}
         </a>
+        ${moderation.hidden && !moderation.removed ? `<p class="pcb-auction-card__review-note pcb-auction-card__review-note--warn">${icon('eye-off', { size: 13 })}<span>Đang tạm ẩn khỏi sàn: ${escapeHtml(moderation.hidden.reason || '')}</span></p>` : ''}
+        ${noteHtml ? `<p class="pcb-auction-card__review-note">${icon('message-square', { size: 13 })}<span>${noteHtml}</span></p>` : ''}
 
         <div class="pcb-auction-card__stats">
           <div class="pcb-stat-col">
@@ -594,7 +660,12 @@ function renderSellingCard(item) {
             <span class="pcb-stat-col__val">${formatVnd(item.startingPrice)}</span>
           </div>
 
-          ${item.status === 'active' ? `
+          ${isAwaitingReview(item) ? `
+            <div class="pcb-stat-col">
+              <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
+              <span class="pcb-stat-col__val pcb-stat-col__val--muted">Bắt đầu sau khi duyệt</span>
+            </div>
+          ` : item.status === 'active' ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
               <span class="pcb-stat-col__countdown" data-timestamp="${getAuctionEndTimestamp(item)}" data-start="${getCountdownStart(item)}">
@@ -624,21 +695,34 @@ function renderSellingCard(item) {
 }
 
 /**
- * Lấy danh sách toàn bộ các phiên đang chờ Quản trị viên thẩm định & phê duyệt
- * @returns {Array}
+ * Thời gian tương đối ngắn gọn (VD: "5 phút trước")
+ * @param {string} iso
+ * @returns {string}
  */
-function getPendingApprovals() {
-  try {
-    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-    return products.filter(p => p.status === 'pending_approval' || p.approvalStatus === 'pending');
-  } catch {
-    return [];
-  }
+function timeAgo(iso) {
+  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Vừa xong';
+  if (minutes < 60) return `${minutes} phút trước`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+  return `${Math.floor(hours / 24)} ngày trước`;
 }
 
 /**
- * Render thẻ phiên đấu giá đang chờ Quản trị viên thẩm định & phê duyệt
- * @param {Object} item - Thông tin phiên đấu giá
+ * Thời hạn người bán chọn, dạng chữ
+ * @param {Object} item
+ * @returns {string}
+ */
+function describeDuration(item) {
+  if (item.endMode === 'ceiling_only') return 'Tới khi chạm giá trần';
+  const days = Math.round((Number(item.durationMs) || 0) / 86400000);
+  return days > 0 ? `${days} ngày (tính từ lúc kiểm định xong)` : 'Theo lựa chọn của người bán';
+}
+
+/**
+ * Render thẻ bài đăng chờ Kiểm định viên / Quản trị viên duyệt
+ * @param {Object} item - Bài đăng
  * @returns {string} HTML thẻ
  */
 function renderAdminApprovalCard(item) {
@@ -647,30 +731,39 @@ function renderAdminApprovalCard(item) {
   const startPrice = formatVnd(item.startingPrice || 0);
   const ceilingPrice = item.ceilingPrice ? formatVnd(item.ceilingPrice) : 'Không đặt';
   const bidStep = formatVnd(item.bidStep || 50000);
-  const seller = item.seller || 'Người bán';
+  const sellerAcc = findAccount({ username: item.seller });
+  const sellerName = sellerAcc?.fullname || item.seller || 'Người bán';
+  const waitingInfo = needsMoreInfo(item);
+  // Phản hồi gần nhất của người bán (nếu đã bổ sung) và yêu cầu gần nhất của Kiểm định viên
+  const log = Array.isArray(item.reviewLog) ? item.reviewLog : [];
+  const lastReply = [...log].reverse().find(e => e.action === 'reply');
+  const lastRequest = getLastStaffNote(item);
+
+  let noteHtml = `${icon('clipboard-check', { size: 14 })}<span>Đối chiếu ảnh thật, thông số và mô tả trước khi gửi PCBid Lab kiểm định. Thời hạn: ${escapeHtml(describeDuration(item))}.</span>`;
+  if (waitingInfo && lastRequest) {
+    noteHtml = `${icon('message-square', { size: 14 })}<span><strong>Đã yêu cầu bổ sung</strong> (${escapeHtml(lastRequest.by?.name || '')}, ${timeAgo(lastRequest.at)}): ${escapeHtml(lastRequest.note)}</span>`;
+  } else if (lastReply) {
+    noteHtml = `${icon('message-square', { size: 14 })}<span><strong>Người bán đã bổ sung</strong> (${timeAgo(lastReply.at)}): ${escapeHtml(lastReply.note)}</span>`;
+  }
 
   return `
-    <article class="pcb-auction-card pcb-auction-card--admin-review" data-id="${item.id}" style="border: 1.5px solid #c7d2fe; background: #ffffff;">
+    <article class="pcb-auction-card pcb-auction-card--admin-review" data-id="${item.id}">
       <a href="${detailUrl}" class="pcb-auction-card__media-link" aria-label="Xem chi tiết ${escapeHtml(item.name)}">
-        <span class="pcb-auction-card__category-badge" style="background: #4f46e5;">${escapeHtml(item.category || 'PC')}</span>
+        <span class="pcb-auction-card__category-badge pcb-auction-card__category-badge--admin">${escapeHtml(item.category || 'PC')}</span>
         <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
       </a>
 
       <div class="pcb-auction-card__body">
         <div class="pcb-auction-card__top-row">
-          <span class="pcb-status-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
-            ⏳ Chờ Admin duyệt
-          </span>
-          <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
-            Người bán: <strong>${escapeHtml(seller)}</strong>
-          </span>
+          <span class="pcb-status-badge ${waitingInfo ? 'pcb-status-badge--active' : 'pcb-status-badge--pending'}">${waitingInfo ? 'Chờ người bán bổ sung' : 'Chờ duyệt'}</span>
+          <span class="pcb-admin-review__seller">Người bán: <a href="profile.html?user=${encodeURIComponent(item.seller || '')}"><strong>${escapeHtml(sellerName)}</strong></a> · Gửi ${timeAgo(item.submittedAt || new Date().toISOString())}</span>
         </div>
 
         <a href="${detailUrl}" class="pcb-auction-card__title" title="${escapeHtml(item.name)}">
           ${escapeHtml(item.name)}
         </a>
 
-        <div class="pcb-auction-card__stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;">
+        <div class="pcb-auction-card__stats pcb-admin-review__stats">
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá khởi điểm</span>
             <span class="pcb-stat-col__val">${startPrice}</span>
@@ -681,24 +774,25 @@ function renderAdminApprovalCard(item) {
           </div>
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá trần chốt ngay</span>
-            <span class="pcb-stat-col__val" style="color: #b45309; font-weight: 700;">${ceilingPrice}</span>
+            <span class="pcb-stat-col__val pcb-admin-review__ceiling">${ceilingPrice}</span>
           </div>
         </div>
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; margin-top: 4px; font-size: 0.75rem; color: #475569;">
-          <span>📋 Thẩm định: Đã có ảnh thật, thông số kỹ thuật &amp; mô tả. Sẵn sàng duyệt mở phiên.</span>
-        </div>
+        <p class="pcb-admin-review__note">${noteHtml}</p>
       </div>
 
-      <div class="pcb-auction-card__actions" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 140px;">
-        <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-admin-quick-approve="${item.id}" style="background: #16a34a; border-color: #16a34a; justify-content: center;">
-          ✓ Duyệt mở phiên
+      <div class="pcb-auction-card__actions">
+        <button type="button" class="pcb-admin-review__btn pcb-admin-review__btn--approve" data-review-action="approve" data-review-id="${item.id}">
+          ${icon('circle-check', { size: 15 })} Duyệt
         </button>
-        <button type="button" class="pcb-btn-rebid" data-admin-quick-reject="${item.id}" style="color: #dc2626; border-color: #fecaca; background: #fee2e2; justify-content: center;">
-          ✕ Từ chối
+        <button type="button" class="pcb-admin-review__btn pcb-admin-review__btn--info" data-review-action="info" data-review-id="${item.id}">
+          ${icon('message-square', { size: 15 })} Yêu cầu bổ sung
         </button>
-        <a href="${detailUrl}" class="pcb-btn-detail" style="text-align: center; justify-content: center;">
-          🔍 Xem chi tiết
+        <button type="button" class="pcb-admin-review__btn pcb-admin-review__btn--reject" data-review-action="reject" data-review-id="${item.id}">
+          ${icon('circle-x', { size: 15 })} Từ chối
+        </button>
+        <a href="${detailUrl}" class="pcb-btn-detail">
+          ${icon('search', { size: 14 })} Xem chi tiết
         </a>
       </div>
     </article>
@@ -706,91 +800,87 @@ function renderAdminApprovalCard(item) {
 }
 
 /**
- * Phê duyệt phiên đấu giá theo ID (dành cho Admin)
- * @param {number} id
+ * Trạng thái quản lý của một phiên trên sàn (dùng cho tab Quản lý phiên)
+ * @param {Object} item
+ * @returns {{key: 'visible'|'hidden'|'removed', label: string, info: Object|null}}
  */
-async function approveProductById(id) {
-  try {
-    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-    const idx = products.findIndex(p => Number(p.id) === Number(id));
-    if (idx !== -1) {
-      products[idx].status = 'active';
-      products[idx].approvalStatus = 'approved';
-      products[idx].approvedAt = new Date().toISOString();
-      localStorage.setItem('pcbid_products', JSON.stringify(products));
-    }
-    // Cập nhật tất cả danh sách bán của người dùng trong localStorage
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('pcbid_my_auctions_selling')) {
-        try {
-          const list = JSON.parse(localStorage.getItem(k) || '[]');
-          let changed = false;
-          list.forEach(p => {
-            if (Number(p.id) === Number(id)) {
-              p.status = 'active';
-              p.approvalStatus = 'approved';
-              changed = true;
-            }
-          });
-          if (changed) localStorage.setItem(k, JSON.stringify(list));
-        } catch {}
-      }
-    }
-  } catch (e) {
-    console.warn(e);
-  }
-  await showAlert({
-    title: 'Phê duyệt thành công!',
-    message: 'Phiên đấu giá đã được phê duyệt và chính thức mở công khai trên sàn PCBid.',
-    tone: 'success'
-  });
-  renderCurrentAuctionTab();
-  updateCounters();
+function getManageState(item) {
+  const state = getModerationState(item.id);
+  if (state.removed) return { key: 'removed', label: 'Đã gỡ', info: state.removed };
+  if (state.hidden) return { key: 'hidden', label: 'Đang ẩn', info: state.hidden };
+  return { key: 'visible', label: isAuctionClosed(item) || getAuctionEndTimestamp(item) <= Date.now() ? 'Đã kết thúc' : 'Đang hiển thị', info: null };
 }
 
 /**
- * Từ chối phiên đấu giá theo ID (dành cho Admin)
- * @param {number} id
+ * Một dòng trong tab Quản lý phiên của Quản trị viên
+ * @param {Object} item - Phiên đấu giá
+ * @returns {string}
  */
-async function rejectProductById(id) {
-  try {
-    const products = JSON.parse(localStorage.getItem('pcbid_products') || '[]');
-    const idx = products.findIndex(p => Number(p.id) === Number(id));
-    if (idx !== -1) {
-      products[idx].status = 'rejected';
-      products[idx].approvalStatus = 'rejected';
-      products[idx].rejectedAt = new Date().toISOString();
-      localStorage.setItem('pcbid_products', JSON.stringify(products));
-    }
-    // Cập nhật tất cả danh sách bán của người dùng trong localStorage
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('pcbid_my_auctions_selling')) {
-        try {
-          const list = JSON.parse(localStorage.getItem(k) || '[]');
-          let changed = false;
-          list.forEach(p => {
-            if (Number(p.id) === Number(id)) {
-              p.status = 'rejected';
-              p.approvalStatus = 'rejected';
-              changed = true;
-            }
-          });
-          if (changed) localStorage.setItem(k, JSON.stringify(list));
-        } catch {}
-      }
-    }
-  } catch (e) {
-    console.warn(e);
-  }
-  await showAlert({
-    title: 'Đã từ chối',
-    message: 'Phiên đấu giá đã bị từ chối phê duyệt do không đủ cơ sở xác thực có hàng.',
-    tone: 'danger'
-  });
-  renderCurrentAuctionTab();
-  updateCounters();
+function renderManageRow(item) {
+  const state = getManageState(item);
+  const sellerAcc = findAccount({ username: item.seller });
+  const imageSrc = item.images?.[0] || item.image || 'images/placeholder-product.svg';
+  const reportCount = getReports().filter(r => r.status === 'open' && r.type === 'listing' && String(r.targetId) === String(item.id)).length;
+  return `
+    <li class="pcb-staff-row pcb-staff-row--${state.key}" data-id="${item.id}">
+      <img class="pcb-staff-row__img" src="${escapeHtml(imageSrc)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+      <div class="pcb-staff-row__body">
+        <a class="pcb-staff-row__title" href="product-detail.html?id=${item.id}">${escapeHtml(item.name)}</a>
+        <span class="pcb-staff-row__meta">
+          <span class="pcb-staff-row__state pcb-staff-row__state--${state.key}">${state.label}</span>
+          · ${escapeHtml(item.category || '')} · Người bán: ${escapeHtml(sellerAcc?.fullname || item.seller || '---')}
+          · ${formatVnd(item.currentBid || item.startingPrice || 0)}
+          ${reportCount ? `<span class="pcb-staff-row__flag">${icon('flag', { size: 12 })} ${reportCount} báo cáo</span>` : ''}
+        </span>
+        ${state.info?.reason ? `<span class="pcb-staff-row__reason">Lý do: ${escapeHtml(state.info.reason)} (${escapeHtml(state.info.by?.name || '')})</span>` : ''}
+      </div>
+      <div class="pcb-staff-row__actions">
+        ${state.key === 'removed' ? '' : `
+          <button type="button" class="pcb-staff-row__btn" data-manage-action="${state.key === 'hidden' ? 'unhide' : 'hide'}" data-manage-id="${item.id}">
+            ${icon(state.key === 'hidden' ? 'eye' : 'eye-off', { size: 14 })} ${state.key === 'hidden' ? 'Hiện lại' : 'Ẩn'}
+          </button>
+          <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--danger" data-manage-action="remove" data-manage-id="${item.id}">
+            ${icon('trash-2', { size: 14 })} Gỡ
+          </button>`}
+      </div>
+    </li>
+  `;
+}
+
+/**
+ * Một báo cáo vi phạm trong tab Báo cáo
+ * @param {Object} report
+ * @returns {string}
+ */
+function renderReportRow(report) {
+  const isListing = report.type === 'listing';
+  const targetUrl = isListing ? `product-detail.html?id=${encodeURIComponent(report.targetId)}` : `profile.html?user=${encodeURIComponent(report.targetId)}`;
+  const open = report.status === 'open';
+  const listingState = isListing ? getModerationState(report.targetId) : null;
+  return `
+    <li class="pcb-staff-row pcb-staff-row--report${open ? '' : ' pcb-staff-row--closed'}" data-report-id="${report.id}">
+      <span class="pcb-staff-row__type pcb-staff-row__type--${report.type}">${icon(isListing ? 'tag' : 'user', { size: 14 })}${isListing ? 'Bài đăng' : 'Tài khoản'}</span>
+      <div class="pcb-staff-row__body">
+        <a class="pcb-staff-row__title" href="${targetUrl}">${escapeHtml(report.targetName)}</a>
+        <span class="pcb-staff-row__reason-main">${escapeHtml(report.reason)}</span>
+        ${report.detail ? `<span class="pcb-staff-row__detail">"${escapeHtml(report.detail)}"</span>` : ''}
+        <span class="pcb-staff-row__meta">
+          <span class="pcb-staff-row__state pcb-staff-row__state--${open ? 'hidden' : 'visible'}">${REPORT_STATUS_LABELS[report.status] || report.status}</span>
+          · Gửi bởi ${escapeHtml(report.reporter?.name || '')} · ${timeAgo(report.createdAt)}
+          ${listingState?.hidden ? ' · Bài đang bị ẩn' : ''}${listingState?.removed ? ' · Bài đã bị gỡ' : ''}
+        </span>
+        ${!open && report.handledBy ? `<span class="pcb-staff-row__reason">${escapeHtml(ROLE_LABELS[report.handledBy.role] || '')} ${escapeHtml(report.handledBy.name)}${report.note ? `: ${escapeHtml(report.note)}` : ''}</span>` : ''}
+      </div>
+      <div class="pcb-staff-row__actions">
+        <a class="pcb-staff-row__btn" href="${targetUrl}">${icon('search', { size: 14 })} Xem</a>
+        ${open ? `
+          ${isListing && isAdmin(getCurrentUser()) && !listingState?.hidden && !listingState?.removed ? `<button type="button" class="pcb-staff-row__btn" data-report-action="hide" data-report-id="${report.id}">${icon('eye-off', { size: 14 })} Ẩn bài</button>` : ''}
+          <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--ok" data-report-action="resolved" data-report-id="${report.id}">${icon('circle-check', { size: 14 })} Đã xử lý</button>
+          <button type="button" class="pcb-staff-row__btn" data-report-action="dismissed" data-report-id="${report.id}">${icon('circle-x', { size: 14 })} Không vi phạm</button>
+        ` : ''}
+      </div>
+    </li>
+  `;
 }
 
 /**
@@ -875,7 +965,9 @@ const TAB_GROUP = {
   watchlist: 'buy',
   selling: 'sell',
   'sell-orders': 'sell',
-  'admin-approvals': 'admin'
+  'admin-approvals': 'admin',
+  'admin-manage': 'admin',
+  'admin-reports': 'admin'
 };
 let currentActiveTab = 'participating';
 let currentSearchKeyword = '';
@@ -1317,11 +1409,18 @@ function syncUserInfoUI(options = {}) {
   if (holdEl) holdEl.textContent = formatVnd(getDepositHold(user));
   renderVerificationStatus(user);
 
-  // Hiển thị nút Thẩm định & Duyệt (Admin) trên công tắc giao dịch nếu là tài khoản Admin
+  // Nút luồng làm việc của đội ngũ PCBid trên công tắc giao dịch: Kiểm định viên / Quản trị viên
   const adminTradeBtn = document.getElementById('trade-btn-admin');
-  const isAdmin = user && (user.role === 'admin' || user.username === 'admin');
   if (adminTradeBtn) {
-    adminTradeBtn.hidden = !isAdmin;
+    const staffRole = getStaffRole(user);
+    adminTradeBtn.hidden = !staffRole;
+    const label = document.getElementById('trade-btn-admin-label');
+    if (label) label.textContent = staffRole === 'admin' ? 'Quản trị (Admin)' : 'Kiểm duyệt';
+    const iconEl = document.getElementById('trade-btn-admin-icon');
+    if (iconEl) {
+      iconEl.classList.toggle('pcb-icon--shield-check', staffRole === 'admin');
+      iconEl.classList.toggle('pcb-icon--microscope', staffRole !== 'admin');
+    }
   }
 
   // Form tài khoản: chỉ đổ lại dữ liệu khi người dùng chưa sửa dở (tránh bot đặt giá / cập nhật ví
@@ -1454,14 +1553,19 @@ function updateCounters() {
   });
   if (navCountEl) navCountEl.textContent = `${participating.length} phiên`;
 
-  // Bộ đếm phiên chờ Quản trị viên duyệt
-  const pendingApprovals = getPendingApprovals();
+  // Bộ đếm của đội ngũ PCBid: bài chờ duyệt (không tính bài đang chờ người bán bổ sung) và báo cáo chờ xử lý
+  const reviewWaiting = getReviewQueue().filter(p => !needsMoreInfo(p)).length;
+  const openReports = getOpenReportCount();
   const countAdminEl = document.getElementById('count-admin-approvals');
+  const countReportsEl = document.getElementById('count-admin-reports');
   const badgeAdminEl = document.getElementById('trade-badge-admin');
-  if (countAdminEl) countAdminEl.textContent = pendingApprovals.length;
+  if (countAdminEl) countAdminEl.textContent = reviewWaiting;
+  if (countReportsEl) countReportsEl.textContent = openReports;
+  const countManageEl = document.getElementById('count-admin-manage');
+  if (countManageEl) countManageEl.textContent = getHiddenListingCount();
   if (badgeAdminEl) {
-    badgeAdminEl.textContent = pendingApprovals.length;
-    badgeAdminEl.hidden = pendingApprovals.length === 0;
+    badgeAdminEl.textContent = reviewWaiting + openReports;
+    badgeAdminEl.hidden = reviewWaiting + openReports === 0;
   }
 
   // Số thông báo chưa đọc
@@ -1490,9 +1594,29 @@ function renderFilterChips() {
   } else if (currentActiveTab === 'selling') {
     chips = [
       { id: 'all', label: 'Tất cả' },
+      { id: 'review', icon: 'shield-check', label: 'Chờ duyệt' },
       { id: 'active', icon: 'clock', label: 'Đang diễn ra' },
       { id: 'sold', icon: 'circle-check', label: 'Đã bán thành công' },
       { id: 'ended', icon: 'circle-x', label: 'Đã kết thúc' }
+    ];
+  } else if (currentActiveTab === 'admin-approvals') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'pending', icon: 'clipboard-check', label: 'Chờ duyệt' },
+      { id: 'info', icon: 'message-square', label: 'Chờ người bán bổ sung' }
+    ];
+  } else if (currentActiveTab === 'admin-manage') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'visible', icon: 'eye', label: 'Đang hiển thị' },
+      { id: 'hidden', icon: 'eye-off', label: 'Đang ẩn' },
+      { id: 'removed', icon: 'trash-2', label: 'Đã gỡ' }
+    ];
+  } else if (currentActiveTab === 'admin-reports') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'open', icon: 'bell', label: 'Chờ xử lý' },
+      { id: 'closed', icon: 'circle-check', label: 'Đã đóng' }
     ];
   } else if (currentActiveTab === 'buy-orders' || currentActiveTab === 'sell-orders') {
     chips = [
@@ -1558,7 +1682,8 @@ function renderCurrentAuctionTab() {
     const list = getSellingItems();
     const filtered = list.filter(item => {
       const matchKw = !kw || item.name.toLowerCase().includes(kw) || item.category.toLowerCase().includes(kw);
-      const matchChip = currentFilterChip === 'all' || item.status === currentFilterChip;
+      const matchChip = currentFilterChip === 'all'
+        || (currentFilterChip === 'review' ? isAwaitingReview(item) : item.status === currentFilterChip);
       return matchKw && matchChip;
     });
 
@@ -1621,43 +1746,135 @@ function renderCurrentAuctionTab() {
       });
     }
   } else if (currentActiveTab === 'admin-approvals') {
-    const list = getPendingApprovals();
-    const filtered = list.filter(item => {
-      return !kw || item.name.toLowerCase().includes(kw) || (item.category && item.category.toLowerCase().includes(kw));
+    const filtered = getReviewQueue().filter(item => {
+      const matchKw = !kw || item.name.toLowerCase().includes(kw) || (item.category && item.category.toLowerCase().includes(kw))
+        || String(item.seller || '').toLowerCase().includes(kw);
+      const matchChip = currentFilterChip === 'all'
+        || (currentFilterChip === 'info' ? needsMoreInfo(item) : !needsMoreInfo(item));
+      return matchKw && matchChip;
     });
-
     const grid = document.getElementById('grid-admin-approvals');
     const empty = document.getElementById('empty-admin-approvals');
     if (grid && empty) {
-      if (filtered.length > 0) {
-        grid.innerHTML = filtered.map(renderAdminApprovalCard).join('');
-        grid.hidden = false;
-        empty.hidden = true;
-
-        // Gắn sự kiện duyệt nhanh / từ chối nhanh
-        grid.querySelectorAll('[data-admin-quick-approve]').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const id = Number(btn.dataset.adminQuickApprove);
-            approveProductById(id);
-          });
-        });
-        grid.querySelectorAll('[data-admin-quick-reject]').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const id = Number(btn.dataset.adminQuickReject);
-            rejectProductById(id);
-          });
-        });
-      } else {
-        grid.innerHTML = '';
-        grid.hidden = true;
-        empty.hidden = false;
-      }
+      grid.innerHTML = filtered.map(renderAdminApprovalCard).join('');
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
+    }
+  } else if (currentActiveTab === 'admin-manage') {
+    renderManageTab(kw);
+  } else if (currentActiveTab === 'admin-reports') {
+    const filtered = getReports().filter(r => {
+      const matchKw = !kw || `${r.targetName} ${r.reason} ${r.detail} ${r.reporter?.name || ''}`.toLowerCase().includes(kw);
+      const matchChip = currentFilterChip === 'all'
+        || (currentFilterChip === 'open' ? r.status === 'open' : r.status !== 'open');
+      return matchKw && matchChip;
+    });
+    const grid = document.getElementById('grid-admin-reports');
+    const empty = document.getElementById('empty-admin-reports');
+    if (grid && empty) {
+      grid.innerHTML = filtered.map(renderReportRow).join('');
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
     }
   }
 
   updateCounters();
 }
 
+
+/**
+ * Vẽ tab Quản lý phiên: mọi phiên đã lên sàn (danh mục có sẵn + người dùng tự đăng), kể cả phiên đã ẩn / gỡ
+ * @param {string} kw - Từ khóa tìm kiếm (chữ thường)
+ */
+async function renderManageTab(kw) {
+  const grid = document.getElementById('grid-admin-manage');
+  const empty = document.getElementById('empty-admin-manage');
+  if (!grid || !empty) return;
+  const products = await loadAllAuctions();
+  // Người dùng đã chuyển sang tab khác trong lúc chờ tải dữ liệu
+  if (currentActiveTab !== 'admin-manage') return;
+  const rows = products
+    .filter(p => !isAwaitingReview(p) && !isRejected(p))
+    .filter(p => !kw || `${p.name} ${p.category} ${p.seller}`.toLowerCase().includes(kw))
+    .filter(p => currentFilterChip === 'all' || getManageState(p).key === currentFilterChip)
+    // Phiên bị ẩn / gỡ và phiên có báo cáo lên đầu để Quản trị viên xử lý trước
+    .sort((a, b) => {
+      const rank = p => {
+        const key = getManageState(p).key;
+        return key === 'hidden' ? 0 : key === 'removed' ? 2 : 1;
+      };
+      return rank(a) - rank(b);
+    });
+  grid.innerHTML = rows.slice(0, 60).map(renderManageRow).join('');
+  grid.hidden = !rows.length;
+  empty.hidden = Boolean(rows.length);
+}
+
+/**
+ * Gắn xử lý cho các nút trong tab Duyệt bài, Quản lý phiên, Báo cáo và nút "Gửi bổ sung" của người bán
+ * (dùng event delegation vì danh sách được vẽ lại liên tục)
+ */
+function initStaffActions() {
+  const refresh = () => {
+    renderCurrentAuctionTab();
+    updateCounters();
+  };
+  const findProduct = id => {
+    try {
+      return JSON.parse(localStorage.getItem('pcbid_products') || '[]').find(p => Number(p.id) === Number(id)) || liveProductMap.get(Number(id)) || null;
+    } catch {
+      return liveProductMap.get(Number(id)) || null;
+    }
+  };
+
+  document.getElementById('grid-admin-approvals')?.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-review-action]');
+    const staff = getCurrentUser();
+    if (!btn || !isStaff(staff)) return;
+    const product = findProduct(btn.dataset.reviewId);
+    if (!product) return;
+    const actions = { approve: confirmApprove, info: promptRequestInfo, reject: promptReject };
+    if (await actions[btn.dataset.reviewAction]?.(product, staff)) refresh();
+  });
+
+  document.getElementById('grid-admin-manage')?.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-manage-action]');
+    const staff = getCurrentUser();
+    if (!btn || !isAdmin(staff)) return;
+    const products = await loadAllAuctions();
+    const product = products.find(p => Number(p.id) === Number(btn.dataset.manageId));
+    if (!product) return;
+    const action = btn.dataset.manageAction;
+    const done = action === 'hide' ? await promptHide(product, staff)
+      : action === 'unhide' ? await confirmUnhide(product)
+        : await promptRemove(product, staff);
+    if (done) refresh();
+  });
+
+  document.getElementById('grid-admin-reports')?.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-report-action]');
+    const staff = getCurrentUser();
+    if (!btn || !isStaff(staff)) return;
+    const report = getReports().find(r => r.id === btn.dataset.reportId);
+    if (!report) return;
+    const action = btn.dataset.reportAction;
+    if (action === 'hide') {
+      const products = await loadAllAuctions();
+      const product = products.find(p => String(p.id) === String(report.targetId));
+      if (product && await promptHide(product, staff)) refresh();
+      return;
+    }
+    if (await promptResolveReport(report, action, staff)) refresh();
+  });
+
+  // Người bán gửi phần bổ sung theo yêu cầu của Kiểm định viên
+  document.getElementById('grid-selling')?.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-seller-reply]');
+    if (!btn) return;
+    const product = findProduct(btn.dataset.sellerReply);
+    if (product && await promptSellerReply(product, getCurrentUser())) refresh();
+  });
+}
 
 /**
  * Chuyển đổi giữa các Section chính (Quản lý đấu giá, Thông tin tài khoản, Bảo mật)
@@ -1730,9 +1947,15 @@ function applyHashRoute() {
   } else if (hash === '#selling') {
     switchSection('section-auctions');
     switchAuctionTab('selling');
-  } else if (hash === '#admin-approvals' || hash === '#admin') {
+  } else if (hash === '#admin-approvals' || hash === '#admin' || hash === '#review') {
     switchSection('section-auctions');
     switchAuctionTab('admin-approvals');
+  } else if (hash === '#admin-manage') {
+    switchSection('section-auctions');
+    switchAuctionTab('admin-manage');
+  } else if (hash === '#admin-reports' || hash === '#reports') {
+    switchSection('section-auctions');
+    switchAuctionTab('admin-reports');
   } else if (hash === '#buy-orders' || hash === '#orders') {
     switchSection('section-auctions');
     switchAuctionTab('buy-orders');
@@ -2057,6 +2280,21 @@ async function renderPublicProfile(username) {
   const isSelf = Boolean(viewer && viewer.isLoggedIn !== false && viewer.username === username);
   if (selfNote) selfNote.hidden = !isSelf;
 
+  // Thẻ vai trò nổi bật cạnh tên với tài khoản Quản trị viên / Kiểm định viên
+  const staffRole = getStaffRole(account);
+  if (nameEl && staffRole) {
+    nameEl.insertAdjacentHTML('beforeend', ` <span class="pcb-role-badge pcb-role-badge--${staffRole}">${icon('shield-check', { size: 12 })}${ROLE_LABELS[staffRole]}</span>`);
+  }
+
+  // Nút báo cáo tài khoản: ẩn với chính mình và với tài khoản của đội ngũ PCBid
+  const reportBtn = document.getElementById('public-report-btn');
+  if (reportBtn) {
+    reportBtn.hidden = isSelf || Boolean(staffRole) || isStaff(viewer);
+    reportBtn.addEventListener('click', () => {
+      openReportDialog({ type: 'user', targetId: username, targetName: account.fullname || username }, viewer && viewer.isLoggedIn !== false ? viewer : null);
+    });
+  }
+
   // Nút nhắn tin: ẩn khi xem hồ sơ của chính mình; chưa đăng nhập thì mời đăng nhập
   const chatBtn = document.getElementById('public-chat-btn');
   if (chatBtn) {
@@ -2099,7 +2337,8 @@ async function renderPublicProfile(username) {
   // Linh kiện đã đăng bán: mọi phiên có người bán là tài khoản này
   const products = await loadAllAuctions();
   const now = Date.now();
-  const selling = products.filter(p => p.seller === username);
+  // Chỉ hiện phiên đã được duyệt và không bị Quản trị viên ẩn / gỡ
+  const selling = products.filter(p => p.seller === username && !isAwaitingReview(p) && !isRejected(p) && isListingVisible(p));
   fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
     const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
     const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
@@ -2156,13 +2395,16 @@ async function renderPublicProfile(username) {
  */
 function switchAuctionTab(tabName) {
   if (!TAB_GROUP[tabName]) tabName = 'participating';
+  const viewer = getCurrentUser();
+  if (TAB_GROUP[tabName] === 'admin' && !isStaff(viewer)) tabName = 'participating';
+  if (tabName === 'admin-manage' && !isAdmin(viewer)) tabName = 'admin-approvals';
   currentActiveTab = tabName;
   currentFilterChip = 'all';
 
   // Chỉ hiện các tab thuộc luồng đang chọn (Mua hàng hoặc Bán hàng)
   const group = TAB_GROUP[tabName];
   document.querySelectorAll('.pcb-tab[data-group]').forEach(tab => {
-    tab.hidden = tab.dataset.group !== group;
+    tab.hidden = tab.dataset.group !== group || (tab.hasAttribute('data-admin-only') && !isAdmin(viewer));
   });
   document.querySelectorAll('.pcb-trade-switch__btn').forEach(btn => {
     const active = btn.dataset.tradeMode === group;
@@ -2173,14 +2415,16 @@ function switchAuctionTab(tabName) {
   const subtitleEl = document.getElementById('trade-subtitle');
   if (titleEl) {
     titleEl.textContent = group === 'admin'
-      ? 'Quản lý đấu giá · Quản trị viên (Admin)'
+      ? `Quản lý đấu giá · ${getRoleLabel(viewer) || 'Đội ngũ PCBid'}`
       : group === 'sell'
         ? 'Quản lý đấu giá · Bán hàng'
         : 'Quản lý đấu giá · Mua hàng';
   }
   if (subtitleEl) {
     subtitleEl.textContent = group === 'admin'
-      ? 'Thẩm định hồ sơ phiên đấu giá, kiểm tra cơ sở có hàng và phê duyệt mở phiên công khai trên sàn.'
+      ? (isAdmin(viewer)
+        ? 'Duyệt bài đăng, quản lý các phiên trên sàn (ẩn, gỡ bài vi phạm) và xử lý báo cáo của người dùng.'
+        : 'Xét duyệt bài đăng mới, yêu cầu người bán bổ sung thông tin và xử lý báo cáo của người dùng.')
       : group === 'sell'
         ? 'Quản lý các phiên bạn đăng bán, theo dõi người mua thanh toán và xác nhận giao hàng.'
         : 'Theo dõi các phiên bạn đang trả giá, thanh toán đơn đã thắng và danh sách linh kiện quan tâm.';
@@ -2430,6 +2674,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mục Địa chỉ nhận hàng
   setupAddressSection();
+
+  // Thao tác của đội ngũ PCBid (duyệt bài, quản lý phiên, báo cáo) và người bán gửi bổ sung
+  initStaffActions();
 
   // Công tắc Mua hàng / Bán hàng / Admin: mở tab đầu tiên của luồng tương ứng
   document.querySelectorAll('.pcb-trade-switch__btn').forEach(btn => {
@@ -2778,6 +3025,28 @@ document.addEventListener('DOMContentLoaded', () => {
     usernameField.addEventListener('blur', () => {
       clearTimeout(usernameTimer);
       if (!usernameField.readOnly) showUsernameError();
+    });
+  }
+
+  // Nút sao chép nhanh tên đăng nhập (dùng được cả với tài khoản demo đang khóa tên)
+  const copyUsernameBtn = document.getElementById('btn-copy-username');
+  if (copyUsernameBtn && usernameField) {
+    let copyTimer = 0;
+    copyUsernameBtn.addEventListener('click', async () => {
+      const value = usernameField.value.trim();
+      if (!value) return;
+      const ok = await copyText(value);
+      showToast(ok ? `Đã sao chép tên đăng nhập @${value}` : 'Không sao chép được, hãy chọn và sao chép thủ công.', ok);
+      if (!ok) return;
+      // Đổi icon sang dấu tick trong 1,5 giây để báo đã sao chép
+      const iconEl = copyUsernameBtn.querySelector('.pcb-icon');
+      copyUsernameBtn.classList.add('pcb-username-wrap__copy--done');
+      iconEl?.classList.replace('pcb-icon--copy', 'pcb-icon--check');
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => {
+        copyUsernameBtn.classList.remove('pcb-username-wrap__copy--done');
+        iconEl?.classList.replace('pcb-icon--check', 'pcb-icon--copy');
+      }, 1500);
     });
   }
 
