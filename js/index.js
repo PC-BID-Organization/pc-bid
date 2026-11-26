@@ -325,6 +325,10 @@ function syncProductsWithStorage(rawList) {
   localProducts.forEach(lp => {
     const idNum = Number(lp.id);
     if (!existingIds.has(idNum)) {
+      // Bỏ qua các phiên chưa được Admin phê duyệt hoặc bị từ chối
+      if (lp.status === 'pending_approval' || lp.status === 'rejected' || lp.approvalStatus === 'pending' || lp.approvalStatus === 'rejected') {
+        return;
+      }
       const bInfo = bidSummary.get(idNum);
       let curBid = Number(lp.currentBid || lp.startingPrice || 0);
       let bCount = Number(lp.bidCount || 0);
@@ -345,8 +349,8 @@ function syncProductsWithStorage(rawList) {
     }
   });
 
-  // Trang chủ chỉ hiển thị các phiên còn mở
-  return [...customUserProducts, ...merged].filter(p => !isAuctionClosed(p));
+  // Trang chủ chỉ hiển thị các phiên còn mở và đã được phê duyệt
+  return [...customUserProducts, ...merged].filter(p => !isAuctionClosed(p) && p.status !== 'pending_approval' && p.status !== 'rejected');
 }
 
 async function loadProducts() {
@@ -424,7 +428,7 @@ function renderProductCard(product, options = {}) {
   let countdownMarkup = '';
   if (options.showCountdown) {
     countdownMarkup = `
-      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}">
+      <div class="pcb-card__countdown" data-timestamp="${product.endTimestamp}" data-start="${getCountdownStart(product)}" data-end-mode="${product.endMode || ''}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="9"></circle>
           <polyline points="12 7 12 12 15 15"></polyline>
@@ -689,12 +693,19 @@ function updateAllCountdowns() {
   const elements = document.querySelectorAll('[data-timestamp]');
 
   elements.forEach(el => {
+    const textEl = el.querySelector('.pcb-countdown-text');
+    if (!textEl) return;
+
+    // Phiên đấu giá chỉ kết thúc khi chạm giá trần (vô hạn giờ)
+    if (el.getAttribute('data-end-mode') === 'ceiling_only') {
+      textEl.textContent = '⚡ Chờ giá trần';
+      el.classList.remove('pcb-card__countdown--urgent');
+      return;
+    }
+
     const end = parseInt(el.getAttribute('data-timestamp'), 10);
     // Phiên đang chờ kiểm định: đồng hồ đứng yên tới lúc có kết quả (data-start)
     const diff = getRemainingMs(end, el.getAttribute('data-start'), now);
-
-    const textEl = el.querySelector('.pcb-countdown-text');
-    if (!textEl) return;
 
     if (diff <= 0) {
       textEl.textContent = 'Đã kết thúc';
