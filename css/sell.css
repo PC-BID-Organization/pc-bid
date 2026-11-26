@@ -202,6 +202,54 @@
   margin-top: 4px;
 }
 
+/* Trạng thái khóa / vô hiệu hóa nhóm nhập liệu (khi chế độ kết thúc phiên không áp dụng) */
+.pcb-form-group--disabled {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.pcb-form-group--disabled .pcb-form-label {
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.pcb-form-group--disabled .pcb-form-input,
+.pcb-form-group--disabled .pcb-form-select,
+.pcb-form-group--disabled .pcb-select,
+.pcb-form-group--disabled .pcb-select__trigger {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+}
+
+.pcb-form-group--disabled .pcb-form-hint {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Huy hiệu trạng thái trên nhãn trường nhập */
+.pcb-form-badge {
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.pcb-form-badge--disabled {
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 2px 7px;
+}
+
+.pcb-form-badge--required {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 2px 7px;
+}
+
 /* --------------------------------------------------------------------------
    3. KHỐI XEM TRƯỚC THÔNG SỐ KỸ THUẬT TỰ ĐỘNG (SPECIFICATIONS PREVIEW)
    -------------------------------------------------------------------------- */

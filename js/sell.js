@@ -459,6 +459,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ô chọn dùng giao diện riêng của PCBid thay cho bảng chọn mặc định của trình duyệt (nhất là trên điện thoại)
   enhanceSelects('#sell-auction-form .pcb-form-select');
 
+  // Đồng bộ trạng thái khóa / mở của Thời hạn và Giá trần theo Quy tắc kết thúc phiên
+  dongBoQuyTacKetThucPhien();
+
   initCatalogueEvents();
   initFormInputsSync();
   initFormSubmitHandler();
@@ -577,10 +580,27 @@ const visitedSteps = new Set([1]);
  */
 function getStepCompletion() {
   const value = id => document.getElementById(id)?.value || '';
+  const endModeVal = value('sell-end-mode') || 'time_or_ceiling';
+  const startPriceNum = Number(value('sell-start-price'));
+  const bidStepNum = Boolean(value('sell-bid-step'));
+  const ceilingPriceNum = Number(value('sell-ceiling-price'));
+
+  let step3Valid = false;
+  if (endModeVal === 'ceiling_only') {
+    // Chỉ kết thúc khi chạm giá trần: cần giá khởi điểm, bước giá và giá trần > giá khởi điểm (thời hạn đã khóa)
+    step3Valid = startPriceNum >= 10000 && bidStepNum && ceilingPriceNum > startPriceNum;
+  } else if (endModeVal === 'time_only') {
+    // Chỉ kết thúc theo thời hạn: cần giá khởi điểm, bước giá và thời hạn (giá trần đã khóa)
+    step3Valid = startPriceNum >= 10000 && bidStepNum && Boolean(value('sell-duration'));
+  } else {
+    // Theo thời hạn HOẶC chạm giá trần: cần cả thời hạn và giá trần hợp lệ
+    step3Valid = startPriceNum >= 10000 && bidStepNum && Boolean(value('sell-duration')) && ceilingPriceNum > startPriceNum;
+  }
+
   const valid = {
     1: Boolean(currentCategory && currentSelectedModel && selectedImages.length > 0),
     2: Boolean(value('sell-condition') && value('sell-description').trim().length >= 10),
-    3: Number(value('sell-start-price')) >= 10000 && Boolean(value('sell-bid-step')) && Boolean(value('sell-duration'))
+    3: step3Valid
   };
   // Hoàn thành theo thứ tự: một bước chỉ được tính xong khi đủ thông tin, đã ghé qua
   // và mọi bước trước nó cũng đã xong (tránh bước 3 "xong" khi bước 2 còn dở)
@@ -1344,13 +1364,135 @@ function initPhotoPicker() {
 /* ==========================================================================
    4. ĐỒNG BỘ CẬP NHẬT THẺ XEM TRƯỚC THỜI GIAN THỰC (LIVE PREVIEW SYNC)
    ========================================================================== */
+
+/**
+ * Đồng bộ khóa / mở và nhãn bắt buộc giữa Thời hạn và Giá trần theo Quy tắc kết thúc phiên
+ */
+function dongBoQuyTacKetThucPhien() {
+  const endModeSelect = document.getElementById('sell-end-mode');
+  const durationSelect = document.getElementById('sell-duration');
+  const ceilingInput = document.getElementById('sell-ceiling-price');
+  const groupDuration = document.getElementById('group-sell-duration');
+  const groupCeiling = document.getElementById('group-sell-ceiling');
+  const labelDuration = document.getElementById('label-sell-duration');
+  const labelCeiling = document.getElementById('label-sell-ceiling');
+  const badgeDuration = document.getElementById('badge-sell-duration');
+  const badgeCeiling = document.getElementById('badge-sell-ceiling');
+  const hintDuration = document.getElementById('sell-duration-hint');
+  const hintCeiling = document.getElementById('sell-ceiling-hint');
+  const hintEndMode = document.getElementById('sell-end-mode-hint');
+
+  if (!endModeSelect) return;
+  const mode = endModeSelect.value;
+
+  if (mode === 'ceiling_only') {
+    // 1. Chỉ kết thúc khi chạm Giá trần (Không giới hạn thời gian)
+    // -> Khóa ô chọn Thời hạn (không áp dụng)
+    if (durationSelect) durationSelect.disabled = true;
+    if (groupDuration) groupDuration.classList.add('pcb-form-group--disabled');
+    if (labelDuration) labelDuration.classList.remove('pcb-form-label--required');
+    if (badgeDuration) {
+      badgeDuration.textContent = '(Không áp dụng - Đã khóa)';
+      badgeDuration.className = 'pcb-form-badge pcb-form-badge--disabled';
+    }
+    if (hintDuration) {
+      hintDuration.textContent = 'Đã khóa: Chế độ này không giới hạn thời gian. Phiên mở liên tục đến khi có người bid chạm mức Giá trần.';
+    }
+
+    // -> Bắt buộc nhập Giá trần
+    if (ceilingInput) {
+      ceilingInput.disabled = false;
+      ceilingInput.setAttribute('required', 'true');
+      ceilingInput.placeholder = 'Bắt buộc nhập Giá trần, ví dụ: 5000000';
+    }
+    if (groupCeiling) groupCeiling.classList.remove('pcb-form-group--disabled');
+    if (labelCeiling) labelCeiling.classList.add('pcb-form-label--required');
+    if (badgeCeiling) {
+      badgeCeiling.textContent = '(Bắt buộc)';
+      badgeCeiling.className = 'pcb-form-badge pcb-form-badge--required';
+    }
+    if (hintCeiling) {
+      hintCeiling.textContent = 'Bắt buộc: Khi có người đặt giá bằng hoặc cao hơn mức này, phiên lập tức kết thúc và chốt bán ngay.';
+    }
+    if (hintEndMode) {
+      hintEndMode.textContent = '⚡ Phiên mở không giới hạn thời gian cho đến khi đạt mức Giá trần quy định.';
+    }
+  } else if (mode === 'time_only') {
+    // 2. Chỉ kết thúc theo thời hạn đấu giá
+    // -> Mở lựa chọn thời hạn (bắt buộc)
+    if (durationSelect) durationSelect.disabled = false;
+    if (groupDuration) groupDuration.classList.remove('pcb-form-group--disabled');
+    if (labelDuration) labelDuration.classList.add('pcb-form-label--required');
+    if (badgeDuration) {
+      badgeDuration.textContent = '';
+      badgeDuration.className = 'pcb-form-badge';
+    }
+    if (hintDuration) {
+      hintDuration.textContent = 'Sau thời gian này, người đặt giá cao nhất sẽ giành chiến thắng.';
+    }
+
+    // -> Khóa ô Giá trần (xóa trắng và không cho nhập)
+    if (ceilingInput) {
+      ceilingInput.value = '';
+      ceilingInput.disabled = true;
+      ceilingInput.removeAttribute('required');
+      ceilingInput.placeholder = 'Đã khóa ở chế độ đấu giá theo thời gian';
+    }
+    if (groupCeiling) groupCeiling.classList.add('pcb-form-group--disabled');
+    if (labelCeiling) labelCeiling.classList.remove('pcb-form-label--required');
+    if (badgeCeiling) {
+      badgeCeiling.textContent = '(Không áp dụng - Đã khóa)';
+      badgeCeiling.className = 'pcb-form-badge pcb-form-badge--disabled';
+    }
+    if (hintCeiling) {
+      hintCeiling.textContent = 'Đã khóa: Chế độ đấu giá thuần theo thời gian không áp dụng mức giá trần chốt ngay.';
+    }
+    if (hintEndMode) {
+      hintEndMode.textContent = '⏱️ Đấu giá truyền thống: Chốt người trả giá cao nhất khi hết thời gian mở phiên.';
+    }
+  } else {
+    // 3. Theo thời hạn HOẶC chạm Giá trần (Khuyên dùng)
+    // -> Cả 2 đều mở và đều bắt buộc
+    if (durationSelect) durationSelect.disabled = false;
+    if (groupDuration) groupDuration.classList.remove('pcb-form-group--disabled');
+    if (labelDuration) labelDuration.classList.add('pcb-form-label--required');
+    if (badgeDuration) {
+      badgeDuration.textContent = '';
+      badgeDuration.className = 'pcb-form-badge';
+    }
+    if (hintDuration) {
+      hintDuration.textContent = 'Sau thời gian này hoặc khi có người bid chạm giá trần sẽ kết thúc phiên.';
+    }
+
+    if (ceilingInput) {
+      ceilingInput.disabled = false;
+      ceilingInput.setAttribute('required', 'true');
+      ceilingInput.placeholder = 'Ví dụ: 5000000';
+    }
+    if (groupCeiling) groupCeiling.classList.remove('pcb-form-group--disabled');
+    if (labelCeiling) labelCeiling.classList.add('pcb-form-label--required');
+    if (badgeCeiling) {
+      badgeCeiling.textContent = '(Bắt buộc)';
+      badgeCeiling.className = 'pcb-form-badge pcb-form-badge--required';
+    }
+    if (hintCeiling) {
+      hintCeiling.textContent = 'Nếu có người đặt giá bằng hoặc cao hơn mức này trước khi hết giờ, phiên lập tức kết thúc và chốt bán ngay.';
+    }
+    if (hintEndMode) {
+      hintEndMode.textContent = '🎯 Kết hợp linh hoạt: Ai chạm giá trần trước thì chốt ngay, hoặc hết giờ thì chốt người cao nhất.';
+    }
+  }
+}
+
 function initFormInputsSync() {
   const inputs = [
     'sell-condition',
     'sell-start-price',
     'sell-bid-step',
     'sell-duration',
-    'sell-market-price'
+    'sell-market-price',
+    'sell-ceiling-price',
+    'sell-end-mode'
   ];
 
   inputs.forEach(id => {
@@ -1360,6 +1502,21 @@ function initFormInputsSync() {
       el.addEventListener('change', updateLivePreview);
     }
   });
+
+  // Lắng nghe thay đổi quy tắc kết thúc phiên để cập nhật khóa / mở trường nhập
+  const endModeEl = document.getElementById('sell-end-mode');
+  if (endModeEl) {
+    endModeEl.addEventListener('change', () => {
+      dongBoQuyTacKetThucPhien();
+      updateProgress();
+      updateLivePreview();
+    });
+    endModeEl.addEventListener('input', () => {
+      dongBoQuyTacKetThucPhien();
+      updateProgress();
+      updateLivePreview();
+    });
+  }
 }
 
 /**
@@ -1426,14 +1583,20 @@ function updateLivePreview() {
     previewStep.textContent = formatVnd(stepVal);
   }
 
-  // Đếm ngược thời hạn
+  // Đếm ngược thời hạn hoặc chờ giá trần
   const durationSelect = document.getElementById('sell-duration');
+  const endModeSelect = document.getElementById('sell-end-mode');
   const previewCountdown = document.getElementById('preview-countdown');
-  if (durationSelect && previewCountdown) {
-    const days = parseInt(durationSelect.value, 10) || 3;
-    const hours = days * 24;
+  if (previewCountdown) {
+    const endMode = endModeSelect?.value || 'time_or_ceiling';
     const textSpan = previewCountdown.querySelector('.pcb-countdown-text');
-    if (textSpan) textSpan.textContent = `${hours}:00:00`;
+    if (endMode === 'ceiling_only') {
+      if (textSpan) textSpan.textContent = '⚡ Chờ giá trần';
+    } else if (durationSelect) {
+      const days = parseInt(durationSelect.value, 10) || 3;
+      const hours = days * 24;
+      if (textSpan) textSpan.textContent = `${hours}:00:00`;
+    }
   }
 }
 
@@ -1500,7 +1663,76 @@ function initFormSubmitHandler() {
     // 2. Thu thập dữ liệu phiên đấu giá
     const condition = document.getElementById('sell-condition')?.value || 'Like New 99%';
     const bidStep = parseInt(document.getElementById('sell-bid-step')?.value, 10) || 50000;
-    const durationDays = parseInt(document.getElementById('sell-duration')?.value, 10) || 3;
+    const endMode = document.getElementById('sell-end-mode')?.value || 'time_or_ceiling';
+    const durationSelect = document.getElementById('sell-duration');
+    const durationDays = (!durationSelect || durationSelect.disabled) ? 0 : (parseInt(durationSelect.value, 10) || 3);
+    const ceilingPriceInput = document.getElementById('sell-ceiling-price');
+    const ceilingPrice = (ceilingPriceInput && !ceilingPriceInput.disabled && ceilingPriceInput.value)
+      ? parseInt(ceilingPriceInput.value, 10) : 0;
+
+    // Kiểm tra tính hợp lệ chặt chẽ theo từng quy tắc kết thúc phiên
+    if (endMode === 'ceiling_only') {
+      // 1. Chỉ kết thúc khi chạm giá trần: BẮT BUỘC có giá trần hợp lệ
+      if (!ceilingPrice || ceilingPrice <= 0) {
+        await showAlert({
+          title: 'Thiếu mức Giá trần',
+          message: 'Khi chọn quy tắc "Chỉ kết thúc khi chạm Giá trần", bạn bắt buộc phải nhập mức Giá trần để làm mốc đóng phiên.',
+          tone: 'warning'
+        });
+        ceilingPriceInput?.focus();
+        return;
+      }
+      if (ceilingPrice <= startPrice) {
+        await showAlert({
+          title: 'Giá trần không hợp lệ',
+          message: `Giá trần (${formatVnd(ceilingPrice)}) phải cao hơn Giá khởi điểm (${formatVnd(startPrice)}) ít nhất 1 bước giá (${formatVnd(bidStep)}).`,
+          tone: 'warning'
+        });
+        ceilingPriceInput?.focus();
+        return;
+      }
+    } else if (endMode === 'time_only') {
+      // 2. Chỉ kết thúc theo thời hạn: BẮT BUỘC có thời hạn mở phiên
+      if (durationDays <= 0) {
+        await showAlert({
+          title: 'Thiếu thời hạn đấu giá',
+          message: 'Vui lòng chọn thời hạn mở phiên đấu giá.',
+          tone: 'warning'
+        });
+        durationSelect?.focus();
+        return;
+      }
+    } else {
+      // 3. time_or_ceiling: BẮT BUỘC cả thời hạn và giá trần
+      if (durationDays <= 0) {
+        await showAlert({
+          title: 'Thiếu thời hạn đấu giá',
+          message: 'Vui lòng chọn thời hạn mở phiên đấu giá.',
+          tone: 'warning'
+        });
+        durationSelect?.focus();
+        return;
+      }
+      if (!ceilingPrice || ceilingPrice <= 0) {
+        await showAlert({
+          title: 'Thiếu mức Giá trần',
+          message: 'Khi chọn quy tắc kết thúc theo thời hạn HOẶC Giá trần, bạn bắt buộc phải nhập mức Giá trần để kích hoạt cơ chế chốt phiên sớm.',
+          tone: 'warning'
+        });
+        ceilingPriceInput?.focus();
+        return;
+      }
+      if (ceilingPrice <= startPrice) {
+        await showAlert({
+          title: 'Giá trần không hợp lệ',
+          message: `Giá trần (${formatVnd(ceilingPrice)}) phải cao hơn Giá khởi điểm (${formatVnd(startPrice)}) ít nhất 1 bước giá (${formatVnd(bidStep)}).`,
+          tone: 'warning'
+        });
+        ceilingPriceInput?.focus();
+        return;
+      }
+    }
+
     // Giá thị trường tham khảo: người bán nhập; sản phẩm tự nhập chưa có thì ước tính 1,5 lần giá khởi điểm
     const marketPrice = parseInt(document.getElementById('sell-market-price')?.value, 10)
       || currentSelectedModel.marketPriceNew || Math.round(startPrice * 1.5);
@@ -1516,6 +1748,11 @@ function initFormSubmitHandler() {
       // Bỏ qua lỗi parse
     }
 
+    // Thời hạn phiên: nếu ceiling_only thì không giới hạn thời gian (null)
+    const auctionEndTime = (endMode === 'ceiling_only')
+      ? null
+      : new Date(Date.now() + INSPECTION_MS + durationDays * 24 * 3600 * 1000).toISOString();
+
     const newAuctionProduct = {
       // Đăng bán lại: giữ nguyên ID phiên cũ; tạo mới: ID độc nhất theo timestamp
       id: relistTarget ? relistTarget.id : Date.now(),
@@ -1528,8 +1765,15 @@ function initFormSubmitHandler() {
       bidStep: bidStep,
       bidCount: 0,
       marketPriceNew: marketPrice,
+      ceilingPrice: endMode === 'time_only' ? 0 : ceilingPrice,
+      endMode: endMode,
+      // Quy trình thẩm định & phê duyệt theo yêu cầu Thầy:
+      // Mọi phiên mới tạo phải qua Quản trị viên (Admin) thẩm định & duyệt trước khi lên sàn
+      status: relistTarget ? 'active' : 'pending_approval',
+      approvalStatus: relistTarget ? 'approved' : 'pending',
+      submittedAt: new Date().toISOString(),
       // Thời hạn tính từ lúc kiểm định xong (cộng thêm thời gian chờ kiểm định)
-      endTime: new Date(Date.now() + INSPECTION_MS + durationDays * 24 * 3600 * 1000).toISOString(),
+      endTime: auctionEndTime,
       seller: sellerName,
       images: [...selectedImages],
       description: description,
@@ -1544,6 +1788,7 @@ function initFormSubmitHandler() {
       newAuctionProduct.relisted = true;
       newAuctionProduct.relistedAt = new Date().toISOString();
       newAuctionProduct.status = 'active';
+      newAuctionProduct.approvalStatus = 'approved';
       newAuctionProduct.condition = condition;
       newAuctionProduct.category = relistTarget.product.category || newAuctionProduct.category;
     }
@@ -1576,10 +1821,13 @@ function initFormSubmitHandler() {
         startingPrice: newAuctionProduct.startingPrice,
         currentBid: newAuctionProduct.startingPrice,
         bidCount: 0,
-        status: 'active',
+        status: newAuctionProduct.status,
+        approvalStatus: newAuctionProduct.approvalStatus,
+        ceilingPrice: newAuctionProduct.ceilingPrice,
+        endMode: newAuctionProduct.endMode,
         relisted: Boolean(relistTarget),
         endTime: newAuctionProduct.endTime,
-        endTimestamp: new Date(newAuctionProduct.endTime).getTime(),
+        endTimestamp: newAuctionProduct.endTime ? new Date(newAuctionProduct.endTime).getTime() : (Date.now() + 365 * 24 * 3600 * 1000),
         images: newAuctionProduct.images,
         specs: specsList,
         inspection: newAuctionProduct.inspection
@@ -1600,12 +1848,17 @@ function initFormSubmitHandler() {
     if (successModal) {
       successModal.classList.add('pcb-modal-overlay--open');
 
-      // Sang trang Sàn đấu giá, sắp xếp "Phiên mới lên sàn" và làm nổi bật phiên vừa đăng
-      const nextUrl = `products.html?sort=newest&highlight=${encodeURIComponent(newAuctionProduct.id)}`;
+      // Chuyển sang trang Chi tiết sản phẩm để người bán và quản trị viên xem phiên
+      const nextUrl = `product-detail.html?id=${encodeURIComponent(newAuctionProduct.id)}`;
       const goBtn = document.getElementById('sell-success-go');
       if (goBtn) {
         goBtn.href = nextUrl;
         goBtn.focus();
+      }
+
+      const adminBtn = document.getElementById('sell-success-admin');
+      if (adminBtn) {
+        adminBtn.href = nextUrl + '&admin_preview=1';
       }
 
       // Đếm ngược 10 giây rồi tự chuyển trang

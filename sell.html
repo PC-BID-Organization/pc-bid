@@ -315,22 +315,48 @@
               </div>
             </div>
 
+            <!-- Hàng 2: Quy tắc kết thúc phiên & Giá thị trường mới tham khảo -->
             <div class="pcb-form-row">
-              <div class="pcb-form-group">
-                <label for="sell-duration" class="pcb-form-label pcb-form-label--required">Thời hạn mở phiên đấu giá</label>
+              <div class="pcb-form-group" id="group-sell-end-mode">
+                <label for="sell-end-mode" class="pcb-form-label pcb-form-label--required">Quy tắc kết thúc phiên</label>
+                <select id="sell-end-mode" name="endMode" class="pcb-form-select">
+                  <option value="time_or_ceiling" selected>Theo thời hạn HOẶC chạm Giá trần (Khuyên dùng)</option>
+                  <option value="ceiling_only">Chỉ kết thúc khi chạm Giá trần (Không giới hạn thời gian)</option>
+                  <option value="time_only">Chỉ kết thúc theo thời hạn đấu giá</option>
+                </select>
+                <span class="pcb-form-hint" id="sell-end-mode-hint">Chọn cơ chế chốt phiên phù hợp với linh kiện</span>
+              </div>
+
+              <div class="pcb-form-group" id="group-sell-market-price">
+                <label for="sell-market-price" class="pcb-form-label">Giá thị trường mới tham khảo (VNĐ)</label>
+                <input type="number" id="sell-market-price" name="marketPriceNew" class="pcb-form-input" placeholder="Tự động điền theo catalogue" min="0" step="100000">
+                <span class="pcb-form-hint">Dùng để hiển thị tỷ lệ giá hời cho người mua</span>
+              </div>
+            </div>
+
+            <!-- Hàng 3: Thời hạn mở phiên & Giá trần chốt phiên ngay (khóa mở linh hoạt theo Quy tắc kết thúc) -->
+            <div class="pcb-form-row">
+              <div class="pcb-form-group" id="group-sell-duration">
+                <label for="sell-duration" id="label-sell-duration" class="pcb-form-label pcb-form-label--required">
+                  <span>Thời hạn mở phiên đấu giá</span>
+                  <span id="badge-sell-duration" class="pcb-form-badge"></span>
+                </label>
                 <select id="sell-duration" name="duration" class="pcb-form-select">
                   <option value="1">1 ngày (24 giờ - Phiên nhanh)</option>
                   <option value="3" selected>3 ngày (72 giờ - Khuyên dùng)</option>
                   <option value="5">5 ngày (120 giờ)</option>
                   <option value="7">7 ngày (1 tuần)</option>
                 </select>
-                <span class="pcb-form-hint">Sau thời gian này, người đặt giá cao nhất sẽ giành chiến thắng</span>
+                <span class="pcb-form-hint" id="sell-duration-hint">Sau thời gian này hoặc khi chạm giá trần sẽ kết thúc phiên</span>
               </div>
 
-              <div class="pcb-form-group">
-                <label for="sell-market-price" class="pcb-form-label">Giá thị trường mới tham khảo (VNĐ)</label>
-                <input type="number" id="sell-market-price" name="marketPriceNew" class="pcb-form-input" placeholder="Tự động điền theo catalogue" min="0" step="100000">
-                <span class="pcb-form-hint">Dùng để hiển thị tỷ lệ giá hời cho người mua</span>
+              <div class="pcb-form-group" id="group-sell-ceiling">
+                <label for="sell-ceiling-price" id="label-sell-ceiling" class="pcb-form-label pcb-form-label--required">
+                  <span>Giá trần chốt phiên ngay (VNĐ)</span>
+                  <span id="badge-sell-ceiling" class="pcb-form-badge pcb-form-badge--required">(Bắt buộc)</span>
+                </label>
+                <input type="number" id="sell-ceiling-price" name="ceilingPrice" class="pcb-form-input" placeholder="Ví dụ: 5000000" min="0" step="50000" required>
+                <span class="pcb-form-hint" id="sell-ceiling-hint">Nếu có người đặt giá bằng hoặc cao hơn mức này, phiên lập tức kết thúc và chốt bán ngay</span>
               </div>
             </div>
           </div>
@@ -441,23 +467,28 @@
   <!-- ==================== HỘP THOẠI THÔNG BÁO TẠO PHIÊN THÀNH CÔNG ==================== -->
   <div class="pcb-modal-overlay" id="sell-success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
     <div class="pcb-modal-box">
-      <div class="pcb-modal-icon">✓</div>
+      <div class="pcb-modal-icon" style="background: #eef2ff; color: #4f46e5; border: 2px solid #c7d2fe;">🛡️</div>
       <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
       <p class="pcb-modal-desc" id="modal-success-desc">
-        Phiên đã được tạo và chuyển cho PCBid Lab kiểm định. Đạt chuẩn là phiên tự mở đặt giá (khoảng 1 phút).
+        Phiên đã được tạo và gửi tới <strong>Quản trị viên (Admin) thẩm định &amp; phê duyệt</strong> (kiểm tra tính xác thực linh kiện &amp; cơ sở có hàng). Sau khi Admin duyệt, phiên sẽ chính thức mở trên sàn.
       </p>
-      <!-- Đồng hồ đếm ngược tự chuyển sang trang Sàn đấu giá -->
+      <!-- Đồng hồ đếm ngược tự chuyển sang trang Chi tiết phiên -->
       <div class="pcb-modal-countdown" aria-live="polite">
         <svg class="pcb-modal-countdown__ring" viewBox="0 0 44 44" aria-hidden="true">
           <circle class="pcb-modal-countdown__track" cx="22" cy="22" r="19"></circle>
           <circle class="pcb-modal-countdown__bar" id="sell-countdown-bar" cx="22" cy="22" r="19"></circle>
         </svg>
         <span class="pcb-modal-countdown__num" id="sell-countdown-num">10</span>
-        <span class="pcb-modal-countdown__text">Tự động chuyển tới trang Sàn đấu giá sau <strong id="sell-countdown-text">10</strong> giây</span>
+        <span class="pcb-modal-countdown__text">Tự động chuyển tới trang chi tiết sau <strong id="sell-countdown-text">10</strong> giây</span>
       </div>
-      <a href="products.html" class="pcb-btn pcb-btn--primary pcb-btn--block" id="sell-success-go">
-        Chuyển đến trang Đấu giá ngay
-      </a>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+        <a href="products.html" class="pcb-btn pcb-btn--primary pcb-btn--block" id="sell-success-go">
+          Xem chi tiết phiên (Chờ duyệt)
+        </a>
+        <a href="login.html" class="pcb-btn pcb-btn--secondary pcb-btn--block" id="sell-success-admin" style="color: #4f46e5; border-color: #a5b4fc; background: #f5f3ff;">
+          🔑 Đăng nhập Admin để duyệt ngay (Demo)
+        </a>
+      </div>
     </div>
   </div>
 

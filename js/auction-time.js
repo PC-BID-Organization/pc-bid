@@ -64,6 +64,11 @@ export function getAuctionEndTimestamp(product, now = Date.now()) {
     return savedEnd;
   }
 
+  // Phiên chỉ kết thúc khi chạm Giá trần (không giới hạn thời gian):
+  if (product.endMode === 'ceiling_only' && !isAuctionClosed(product)) {
+    return now + 365 * 24 * 60 * 60 * 1000;
+  }
+
   if (isCatalogProduct(idNum)) {
     const base = AUCTION_EPOCH_MS + getCatalogOffset(idNum);
     const cyclesPassed = Math.floor((now - base) / AUCTION_CYCLE_MS) + 1;
