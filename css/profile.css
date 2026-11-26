@@ -2814,6 +2814,11 @@
   color: #dc2626;
 }
 
+/* Đang gõ dở, chưa đủ để kết luận đúng / sai: tạm ẩn dấu tick */
+.pcb-verified-check--pending {
+  visibility: hidden;
+}
+
 /* Ngày sinh đã đổi 1 lần: nhãn khóa thay cho nút Thay đổi */
 .pcb-birthdate__lock {
   display: inline-flex;

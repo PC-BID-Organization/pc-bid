@@ -26,7 +26,8 @@ import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } f
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
   renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
-  hashPassword, verifyPassword, accountHasPassword, isDemoAccount, validateUsername, migrateUsername } from './accounts.js';
+  hashPassword, verifyPassword, accountHasPassword, isDemoAccount, validateUsername, migrateUsername,
+  validatePhoneNumber, validateEmailAddress } from './accounts.js';
 // Công cụ cắt ảnh đại diện
 import { openAvatarCropper } from './avatar-cropper.js';
 // Hộp thoại thông báo / xác nhận thay cho alert / confirm của trình duyệt
@@ -909,17 +910,20 @@ function renderVerificationStatus(user) {
 
 /**
  * Hiện / xóa lỗi của ô tên đăng nhập
+ * @param {boolean} [partial] - Đang gõ dở: chưa báo lỗi thiếu ký tự / kết thúc bằng dấu
  * @returns {boolean} true nếu tên hợp lệ (hoặc không đổi)
  */
-function showUsernameError() {
+function showUsernameError(partial = false) {
   const input = document.getElementById('input-username');
   const errEl = document.getElementById('err-input-username');
   if (!input) return true;
   const user = getCurrentUser();
   const value = input.value.trim().toLowerCase();
-  const message = value === user?.username ? '' : validateUsername(value, user);
+  const message = value === user?.username ? '' : validateUsername(value, user, { partial });
   if (errEl) errEl.textContent = message;
   input.classList.toggle('pcb-input--error', Boolean(message));
+  input.setAttribute('aria-invalid', String(Boolean(message)));
+  input.setAttribute('aria-describedby', message ? 'err-input-username' : 'hint-input-username');
   return !message;
 }
 
@@ -1795,20 +1799,23 @@ function renderNotifications() {
  * Kiểm tra một trường liên hệ (email / số điện thoại): đúng định dạng và chưa bị tài khoản khác dùng
  * @param {'email'|'phone'} field
  * @param {string} value
+ * @param {boolean} [partial] - Đang gõ dở: chưa báo các lỗi kiểu "còn thiếu"
  * @returns {string} Thông báo lỗi, rỗng nếu hợp lệ
  */
-function validateContactField(field, value) {
+function validateContactField(field, value, partial = false) {
   const user = getCurrentUser();
   if (field === 'email') {
-    if (!value) return 'Vui lòng nhập địa chỉ email.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return 'Email không đúng định dạng (ví dụ: ten@example.com).';
+    const formatError = validateEmailAddress(value, { partial });
+    if (formatError) return formatError;
+    // Chỉ kiểm tra trùng khi email đã đúng định dạng đầy đủ
+    if (validateEmailAddress(value)) return '';
     if (findAccountConflict({ email: value, exclude: user })) return 'Địa chỉ email này đã được sử dụng bởi tài khoản khác.';
     return '';
   }
-  const phone = normalizePhone(value);
-  if (!phone) return 'Vui lòng nhập số điện thoại.';
-  if (!/^0(3|5|7|8|9)\d{8}$/.test(phone)) return 'Số điện thoại không hợp lệ (10 chữ số, ví dụ: 0901234567).';
-  if (findAccountConflict({ phone, exclude: user })) return 'Số điện thoại này đã được sử dụng bởi tài khoản khác.';
+  const formatError = validatePhoneNumber(value, { partial });
+  if (formatError) return formatError;
+  if (validatePhoneNumber(value)) return '';
+  if (findAccountConflict({ phone: normalizePhone(value), exclude: user })) return 'Số điện thoại này đã được sử dụng bởi tài khoản khác.';
   return '';
 }
 
@@ -1817,16 +1824,20 @@ function validateContactField(field, value) {
  * @param {'email'|'phone'} field
  * @returns {boolean} true nếu hợp lệ
  */
-function showContactFieldError(field) {
+function showContactFieldError(field, partial = false) {
   const input = document.getElementById(`input-${field}`);
   const errEl = document.getElementById(`err-input-${field}`);
   if (!input) return true;
-  const message = validateContactField(field, input.value.trim());
+  const value = input.value.trim();
+  const message = validateContactField(field, value, partial);
   if (errEl) errEl.textContent = message;
-  setContactCheck(field, !message);
+  // Đang gõ dở mà chưa đủ để kết luận thì ẩn dấu tick / X bên phải ô
+  const complete = !partial || !validateContactField(field, value);
+  setContactCheck(field, !message, Boolean(message) || complete);
   input.classList.toggle('pcb-input--error', Boolean(message));
   input.setAttribute('aria-invalid', String(Boolean(message)));
   if (message) input.setAttribute('aria-describedby', `err-input-${field}`);
+  else input.removeAttribute('aria-describedby');
   return !message;
 }
 
@@ -1834,10 +1845,12 @@ function showContactFieldError(field) {
  * Đổi dấu bên phải ô: tick xanh khi hợp lệ, X đỏ khi không hợp lệ / đã bị dùng
  * @param {'email'|'phone'} field
  * @param {boolean} valid
+ * @param {boolean} [visible=true] - false khi đang gõ dở, chưa kết luận được
  */
-function setContactCheck(field, valid) {
+function setContactCheck(field, valid, visible = true) {
   const check = document.getElementById(`check-input-${field}`);
   if (!check) return;
+  check.classList.toggle('pcb-verified-check--pending', !visible);
   check.classList.toggle('pcb-verified-check--error', !valid);
   check.title = valid
     ? (field === 'email' ? 'Email hợp lệ' : 'Số điện thoại hợp lệ')
@@ -1852,6 +1865,9 @@ function setContactCheck(field, valid) {
 /**
  * Gắn kiểm tra khi rời ô (blur) và xóa lỗi khi người dùng gõ lại
  */
+// Thời gian chờ sau lần gõ phím cuối trước khi kiểm tra trực tiếp (ms)
+const LIVE_VALIDATE_DELAY = 250;
+
 function setupContactFieldValidation() {
   // Gõ lại họ đệm / tên thì xóa dòng lỗi tương ứng
   ['lastname', 'givenname'].forEach(key => {
@@ -1861,18 +1877,19 @@ function setupContactFieldValidation() {
       e.target.classList.remove('pcb-input--error');
     });
   });
+  // Email / số điện thoại: kiểm tra trực tiếp trong lúc gõ (báo ngay sai đầu số, ký tự lạ...),
+  // rời khỏi ô thì kiểm tra đầy đủ (kể cả thiếu số, thiếu tên miền)
   ['email', 'phone'].forEach(field => {
     const input = document.getElementById(`input-${field}`);
     if (!input) return;
-    input.addEventListener('blur', () => showContactFieldError(field));
+    let timer = 0;
+    input.addEventListener('blur', () => {
+      clearTimeout(timer);
+      showContactFieldError(field);
+    });
     input.addEventListener('input', () => {
-      const errEl = document.getElementById(`err-input-${field}`);
-      if (errEl && errEl.textContent) {
-        errEl.textContent = '';
-        input.classList.remove('pcb-input--error');
-        input.setAttribute('aria-invalid', 'false');
-        setContactCheck(field, true);
-      }
+      clearTimeout(timer);
+      timer = setTimeout(() => showContactFieldError(field, true), LIVE_VALIDATE_DELAY);
     });
   });
 }
@@ -2748,14 +2765,20 @@ document.addEventListener('DOMContentLoaded', () => {
   setupContactFieldValidation();
   // Thanh lưu nổi khi có thay đổi chưa lưu mà nút lưu đang khuất
   initAccountSavebar();
-  // Tên đăng nhập: tự chuyển chữ thường, kiểm tra khi rời khỏi ô
+  // Tên đăng nhập: tự chuyển chữ thường, kiểm tra trực tiếp khi gõ và kiểm tra đầy đủ khi rời khỏi ô
   const usernameField = document.getElementById('input-username');
   if (usernameField) {
+    let usernameTimer = 0;
     usernameField.addEventListener('input', () => {
       const lower = usernameField.value.toLowerCase().replace(/\s+/g, '');
       if (lower !== usernameField.value) usernameField.value = lower;
+      clearTimeout(usernameTimer);
+      if (!usernameField.readOnly) usernameTimer = setTimeout(() => showUsernameError(true), LIVE_VALIDATE_DELAY);
     });
-    usernameField.addEventListener('blur', () => { if (!usernameField.readOnly) showUsernameError(); });
+    usernameField.addEventListener('blur', () => {
+      clearTimeout(usernameTimer);
+      if (!usernameField.readOnly) showUsernameError();
+    });
   }
 
   // 12b. Ảnh đại diện: chọn tệp → cắt ảnh → lưu; hoặc xóa để dùng lại chữ cái
