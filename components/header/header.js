@@ -582,9 +582,9 @@ function initHeaderUserStatus() {
       <ul class="header__dropdown-list">
         ${user.role === 'admin' ? `
         <li>
-          <a href="profile.html#admin-approvals" class="header__dropdown-item" style="color: #4f46e5; font-weight: 700; background: #eef2ff;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>🛡️ Quản lý &amp; Duyệt phiên (Admin)</span>
+          <a href="profile.html#admin-approvals" class="header__dropdown-item header__dropdown-item--admin">
+            ${icon('shield-check', { size: 15 })}
+            <span>Quản lý &amp; Duyệt phiên (Admin)</span>
           </a>
         </li>
         ` : ''}
@@ -711,8 +711,8 @@ function initHeaderUserStatus() {
         <div class="header__dropdown-quick-list">
           ${SAMPLE_ACCOUNTS.map(acc => `
           <button type="button" class="header__dropdown-quick-acc" data-quick-user="${acc.username}">
-            <span class="header__dropdown-quick-name">${icon('user', { size: 13 })} ${escapeHeaderHtml(acc.fullname)}</span>
-            <span class="header__dropdown-quick-role">(${acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá'})</span>
+            <span class="header__dropdown-quick-name">${icon(acc.role === 'admin' ? 'shield-check' : 'user', { size: 13 })} ${escapeHeaderHtml(acc.role === 'admin' ? 'Quản trị viên' : acc.fullname)}</span>
+            <span class="header__dropdown-quick-role">(${acc.role === 'admin' ? 'Admin' : (acc.username === 'seller' ? 'Có phiên đăng bán' : 'Đấu giá')})</span>
           </button>`).join('')}
         </div>
       </div>

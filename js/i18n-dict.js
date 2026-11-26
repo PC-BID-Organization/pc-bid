@@ -611,6 +611,15 @@ export const PHRASES = [
   ['Tên đăng nhập dài từ 3 đến 20 ký tự.', 'Username must be 3 to 20 characters.', 'ユーザー名は3〜20文字です。'],
   ['Chỉ dùng chữ thường không dấu, số, dấu chấm hoặc gạch dưới; không bắt đầu / kết thúc bằng dấu.', 'Use only lowercase letters, numbers, dots or underscores, without a dot or underscore at the start or end.', '英小文字・数字・ドット・アンダースコアのみ使用でき、先頭と末尾に記号は使えません。'],
   ['Tên đăng nhập không được chứa ký tự @.', 'Username cannot contain @.', 'ユーザー名に @ は使えません。'],
+  /* ---------- Sao chép tên đăng nhập, duyệt phiên của Quản trị viên ---------- */
+  ['Sao chép tên đăng nhập', 'Copy username', 'ユーザー名をコピー'],
+  ['Không sao chép được, hãy chọn và sao chép thủ công.', 'Could not copy. Please select and copy it manually.', 'コピーできませんでした。手動で選択してコピーしてください。'],
+  ['Quản trị viên', 'Administrator', '管理者'],
+  ['Chờ Admin duyệt', 'Awaiting admin approval', '管理者の承認待ち'],
+  ['Bị Admin từ chối', 'Rejected by admin', '管理者により却下'],
+  ['Duyệt mở phiên', 'Approve auction', 'オークションを承認'],
+  ['Hồ sơ đã có ảnh thật, thông số kỹ thuật và mô tả. Sẵn sàng duyệt mở phiên.', 'The listing has real photos, specifications and a description. Ready for approval.', '実物写真・仕様・説明がそろっています。承認できます。'],
+  ['Chờ giá trần', 'Awaiting ceiling price', '即決価格待ち'],
   /* ---------- Kiểm tra trực tiếp số điện thoại / email / tên đăng nhập ---------- */
   ['Vui lòng nhập số điện thoại.', 'Please enter your phone number.', '電話番号を入力してください。'],
   ['Vui lòng nhập địa chỉ email.', 'Please enter your email address.', 'メールアドレスを入力してください。'],
@@ -1033,6 +1042,7 @@ export const PHRASES = [
  * ($1, $2... là các nhóm bắt được trong câu gốc)
  */
 export const PATTERNS = [
+  [/^Đã sao chép tên đăng nhập @(.+)$/, 'Copied username @$1', 'ユーザー名 @$1 をコピーしました'],
   /* ---------- Kiểm tra trực tiếp số điện thoại / email / tên đăng nhập ---------- */
   [/^Số điện thoại chỉ được chứa chữ số, không dùng ký tự "(.+)"\.$/, 'Phone number can only contain digits, not "$1".', '電話番号は数字のみです。「$1」は使えません。'],
   [/^Đầu số "(0\d)" không phải đầu số di động Việt Nam \(hợp lệ: 03, 05, 07, 08, 09\)\.$/, '"$1" is not a Vietnamese mobile prefix (valid: 03, 05, 07, 08, 09).', '「$1」はベトナムの携帯番号ではありません（有効：03, 05, 07, 08, 09）。'],

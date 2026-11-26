@@ -2407,8 +2407,15 @@ a.pcb-pd__seller-avatar {
 }
 
 .pcb-pd__pending-icon {
-  font-size: 1.75rem;
-  line-height: 1;
+  display: inline-flex;
+  flex-shrink: 0;
+  color: #4f46e5;
+}
+
+/* Phiên bị Admin từ chối: icon và tiêu đề màu đỏ */
+.pcb-pd__pending-icon--rejected,
+.pcb-pd__pending-title--rejected {
+  color: #dc2626;
 }
 
 .pcb-pd__pending-text {

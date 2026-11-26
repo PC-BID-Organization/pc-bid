@@ -792,3 +792,20 @@ select.pcb-auth-form__input {
 .pcb-auth-form__toggle-pwd--shown .pcb-icon-eye-off {
   display: block;
 }
+
+/* Nút tài khoản demo Quản trị viên (Admin): trải hết hàng, viền tím */
+.pcb-demo-btn--admin {
+  grid-column: span 2;
+  background-color: #f8fafc;
+  border-color: #6366f1;
+}
+
+.pcb-demo-btn--admin .pcb-auth-demo__title {
+  color: #4338ca;
+}
+
+.pcb-demo-btn__role {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6366f1;
+}

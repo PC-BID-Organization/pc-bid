@@ -212,21 +212,21 @@ function kiemTraVaDinhDangGiaRealtime(oNhapGia, kichHoatDinhDang = true) {
     oNhapGia.classList.add('pcb-pd__input--ceiling');
     if (oFeedback) {
       oFeedback.classList.add('pcb-pd__input-feedback--ceiling');
-      oFeedback.innerHTML = `⚡ <strong>Đạt Giá Trần (${dinhDangVnd(giaTran)})!</strong> Bạn sẽ thắng và kết thúc phiên ngay khi Xác nhận.`;
+      oFeedback.innerHTML = `${icon('zap', { size: 14 })} <strong>Đạt Giá Trần (${dinhDangVnd(giaTran)})!</strong> Bạn sẽ thắng và kết thúc phiên ngay khi Xác nhận.`;
     }
   } else if (soTien >= giaToiThieu) {
     // Giá hợp lệ: Khung viền xanh lá (Visual feedback)
     oNhapGia.classList.add('pcb-pd__input--valid');
     if (oFeedback) {
       oFeedback.classList.add('pcb-pd__input-feedback--valid');
-      oFeedback.innerHTML = `✓ <strong>Giá đặt hợp lệ:</strong> Đủ điều kiện cao hơn mức tối thiểu (${dinhDangVnd(giaToiThieu)})`;
+      oFeedback.innerHTML = `${icon('circle-check', { size: 14 })} <strong>Giá đặt hợp lệ:</strong> Đủ điều kiện cao hơn mức tối thiểu (${dinhDangVnd(giaToiThieu)})`;
     }
   } else {
     // Giá chưa đủ: Khung viền đỏ (Visual feedback)
     oNhapGia.classList.add('pcb-pd__input--error');
     if (oFeedback) {
       oFeedback.classList.add('pcb-pd__input-feedback--error');
-      oFeedback.innerHTML = `✕ <strong>Giá chưa hợp lệ:</strong> Cần tối thiểu ${dinhDangVnd(giaToiThieu)} (hiện tại + bước giá)`;
+      oFeedback.innerHTML = `${icon('circle-x', { size: 14 })} <strong>Giá chưa hợp lệ:</strong> Cần tối thiểu ${dinhDangVnd(giaToiThieu)} (hiện tại + bước giá)`;
     }
   }
 }
@@ -651,9 +651,9 @@ function capNhatTrangThaiDuyetAdmin() {
     if (pendingBanner) {
       pendingBanner.hidden = false;
       pendingBanner.innerHTML = `
-        <div class="pcb-pd__pending-icon">❌</div>
+        <div class="pcb-pd__pending-icon pcb-pd__pending-icon--rejected">${icon('shield-x', { size: 24 })}</div>
         <div class="pcb-pd__pending-text">
-          <strong style="color: #dc2626;">Phiên đấu giá đã bị Quản trị viên từ chối phê duyệt</strong>
+          <strong class="pcb-pd__pending-title--rejected">Phiên đấu giá đã bị Quản trị viên từ chối phê duyệt</strong>
           <p>Lý do: Chưa đủ cơ sở thẩm định nguồn gốc linh kiện hoặc mô tả chưa trung thực.</p>
         </div>
       `;
@@ -1238,7 +1238,7 @@ function khoiDongDemNguoc(thoiGianKetThuc) {
     if (demNguoc) {
       demNguoc.innerHTML = `
         <div class="pcb-pd__ceiling-timer-badge">
-          <span style="font-size:18px;">⚡</span>
+          ${icon('zap', { size: 18 })}
           <span>Đấu giá vô hạn giờ: Mở liên tục cho đến khi có người chốt GIÁ TRẦN!</span>
         </div>
       `;
@@ -1325,7 +1325,7 @@ function hienThiPhienKetThuc() {
     if (sp && sp.winner) {
       const nguoiThang = describeBidder({ bidderName: sp.winner });
       const lyDo = sp.closedByCeiling
-        ? '⚡ Phiên đã chốt ngay do đạt GIÁ TRẦN'
+        ? 'Phiên đã chốt ngay do đạt GIÁ TRẦN'
         : 'Phiên đấu giá đã kết thúc';
       thongBaoKetThuc.innerHTML = `${icon('bell')} ${lyDo} · Người thắng: ${maHoaHtml(nguoiThang.name)} (${maHoaHtml(nguoiThang.maskedUid || sp.winner)}) với giá ${dinhDangVnd(sp.currentBid)}`;
     } else if (sp && Number(sp.bidCount || 0) === 0) {
@@ -1852,7 +1852,7 @@ function hienThiModalThanhCong(tenSanPham, soTien, laGiaTran = false) {
   if (oSoTien) oSoTien.textContent = dinhDangVnd(soTien);
 
   if (laGiaTran) {
-    if (oTitle) oTitle.textContent = '🎉 CHÚC MỪNG BẠN ĐÃ THẮNG PHIÊN!';
+    if (oTitle) oTitle.innerHTML = `${icon('party-popper', { size: 20 })} CHÚC MỪNG BẠN ĐÃ THẮNG PHIÊN!`;
     if (oDesc) oDesc.textContent = 'Bạn đã đặt mức Giá trần kết thúc ngay! Phiên đấu giá đã chính thức chốt bán thành công cho bạn. Đơn hàng đã được tạo trong Hồ sơ cá nhân.';
   } else {
     if (oTitle) oTitle.textContent = 'Đặt giá thành công!';
@@ -2064,18 +2064,8 @@ function ganSuKien() {
       sanPhamHienTai.status = 'active';
       sanPhamHienTai.approvalStatus = 'approved';
       sanPhamHienTai.approvedAt = new Date().toISOString();
+      // Trang Hồ sơ của người bán đọc trạng thái duyệt từ pcbid_products nên chỉ cần cập nhật tại đây
       capNhatSanPhamTrongLocalStorage(sanPhamHienTai);
-
-      // Cập nhật trạng thái trong danh sách đăng bán của người bán (pcbid_my_auctions_selling)
-      try {
-        const allSelling = JSON.parse(localStorage.getItem('pcbid_my_auctions_selling') || '[]');
-        const idx = allSelling.findIndex(p => Number(p.id) === Number(sanPhamHienTai.id));
-        if (idx !== -1) {
-          allSelling[idx].status = 'active';
-          allSelling[idx].approvalStatus = 'approved';
-          localStorage.setItem('pcbid_my_auctions_selling', JSON.stringify(allSelling));
-        }
-      } catch {}
 
       await showAlert({
         title: 'Phê duyệt thành công!',

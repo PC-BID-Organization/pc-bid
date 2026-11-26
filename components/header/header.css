@@ -1515,3 +1515,10 @@
     padding: 0 8px;
   }
 }
+
+/* Mục "Quản lý & Duyệt phiên" chỉ hiện với tài khoản Quản trị viên (Admin) */
+.header__dropdown-item--admin {
+  font-weight: 700;
+  color: #4f46e5;
+  background-color: #eef2ff;
+}

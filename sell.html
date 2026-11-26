@@ -298,7 +298,7 @@
             <div class="pcb-form-row">
               <div class="pcb-form-group">
                 <label for="sell-start-price" class="pcb-form-label pcb-form-label--required">Giá khởi điểm (VNĐ)</label>
-                <input type="number" id="sell-start-price" name="startingPrice" class="pcb-form-input" placeholder="Ví dụ: 2000000" min="50000" step="10000" required>
+                <input type="text" inputmode="numeric" autocomplete="off" id="sell-start-price" name="startingPrice" class="pcb-form-input" data-price-input placeholder="Ví dụ: 2.000.000" required>
                 <span class="pcb-form-hint" id="start-price-hint">Mức giá người đầu tiên có thể đặt</span>
               </div>
 
@@ -329,7 +329,7 @@
 
               <div class="pcb-form-group" id="group-sell-market-price">
                 <label for="sell-market-price" class="pcb-form-label">Giá thị trường mới tham khảo (VNĐ)</label>
-                <input type="number" id="sell-market-price" name="marketPriceNew" class="pcb-form-input" placeholder="Tự động điền theo catalogue" min="0" step="100000">
+                <input type="text" inputmode="numeric" autocomplete="off" id="sell-market-price" name="marketPriceNew" class="pcb-form-input" data-price-input placeholder="Tự động điền theo catalogue">
                 <span class="pcb-form-hint">Dùng để hiển thị tỷ lệ giá hời cho người mua</span>
               </div>
             </div>
@@ -355,7 +355,7 @@
                   <span>Giá trần chốt phiên ngay (VNĐ)</span>
                   <span id="badge-sell-ceiling" class="pcb-form-badge pcb-form-badge--required">(Bắt buộc)</span>
                 </label>
-                <input type="number" id="sell-ceiling-price" name="ceilingPrice" class="pcb-form-input" placeholder="Ví dụ: 5000000" min="0" step="50000" required>
+                <input type="text" inputmode="numeric" autocomplete="off" id="sell-ceiling-price" name="ceilingPrice" class="pcb-form-input" data-price-input placeholder="Ví dụ: 5.000.000" required>
                 <span class="pcb-form-hint" id="sell-ceiling-hint">Nếu có người đặt giá bằng hoặc cao hơn mức này, phiên lập tức kết thúc và chốt bán ngay</span>
               </div>
             </div>
@@ -467,7 +467,7 @@
   <!-- ==================== HỘP THOẠI THÔNG BÁO TẠO PHIÊN THÀNH CÔNG ==================== -->
   <div class="pcb-modal-overlay" id="sell-success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
     <div class="pcb-modal-box">
-      <div class="pcb-modal-icon" style="background: #eef2ff; color: #4f46e5; border: 2px solid #c7d2fe;">🛡️</div>
+      <div class="pcb-modal-icon" style="background: #eef2ff; color: #4f46e5; border: 2px solid #c7d2fe;"><span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s24" aria-hidden="true"></span></div>
       <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
       <p class="pcb-modal-desc" id="modal-success-desc">
         Phiên đã được tạo và gửi tới <strong>Quản trị viên (Admin) thẩm định &amp; phê duyệt</strong> (kiểm tra tính xác thực linh kiện &amp; cơ sở có hàng). Sau khi Admin duyệt, phiên sẽ chính thức mở trên sàn.
@@ -486,7 +486,7 @@
           Xem chi tiết phiên (Chờ duyệt)
         </a>
         <a href="login.html" class="pcb-btn pcb-btn--secondary pcb-btn--block" id="sell-success-admin" style="color: #4f46e5; border-color: #a5b4fc; background: #f5f3ff;">
-          🔑 Đăng nhập Admin để duyệt ngay (Demo)
+          <span class="lucide pcb-icon pcb-icon--log-in pcb-icon--s16" aria-hidden="true"></span> Đăng nhập Admin để duyệt ngay (Demo)
         </a>
       </div>
     </div>

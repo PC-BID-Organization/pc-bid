@@ -192,6 +192,30 @@ function formatTimeRemaining(endTimestamp, start = 0) {
 }
 
 /**
+ * Sao chép chuỗi vào bộ nhớ tạm (clipboard); trình duyệt cũ dùng cách chọn chữ rồi execCommand
+ * @param {string} text
+ * @returns {Promise<boolean>} true nếu sao chép thành công
+ */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const temp = document.createElement('textarea');
+    temp.value = text;
+    temp.setAttribute('readonly', '');
+    temp.style.position = 'fixed';
+    temp.style.opacity = '0';
+    document.body.appendChild(temp);
+    temp.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    temp.remove();
+    return ok;
+  }
+}
+
+/**
  * Hiển thị thanh thông báo Toast nhanh góc dưới màn hình
  */
 function showToast(message, isSuccess = true, action = null) {
@@ -313,6 +337,14 @@ function getSellingItems() {
     // Phiên mẫu chưa đăng lại: luôn lấy thông tin chuẩn mới nhất (sửa dữ liệu cũ lưu sai ảnh / tên / trạng thái)
     const sample = DEFAULT_SELLING.find(d => d.id === Number(saved.id));
     const item = sample && !(saved.relisted || saved.closedEarly) ? { ...saved, ...sample } : { ...saved };
+
+    // Trạng thái duyệt lấy từ pcbid_products (nơi Admin duyệt / từ chối): bản lưu trong danh sách
+    // đăng bán chỉ là bản sao lúc đăng nên có thể vẫn ghi "chờ duyệt" dù Admin đã xử lý xong
+    const approvalSource = productMap.get(Number(item.id));
+    if (approvalSource?.approvalStatus && approvalSource.approvalStatus !== item.approvalStatus) {
+      item.approvalStatus = approvalSource.approvalStatus;
+      if (['active', 'rejected', 'pending_approval'].includes(approvalSource.status)) item.status = approvalSource.status;
+    }
 
     if (item.status === 'active') {
       const product = productMap.get(Number(item.id));
@@ -509,17 +541,13 @@ function renderSellingCard(item) {
 
   if (item.status === 'pending_approval' || item.approvalStatus === 'pending') {
     modifierClass = 'pcb-auction-card--selling-active';
-    badgeHtml = `<span class="pcb-status-badge" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">
-      ⏳ Chờ Admin duyệt
-    </span>`;
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--pending">Chờ Admin duyệt</span>';
     actionButtonsHtml = `
-      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết &amp; Thẩm định</a>
+      <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
     `;
   } else if (item.status === 'rejected') {
     modifierClass = 'pcb-auction-card--selling-ended';
-    badgeHtml = `<span class="pcb-status-badge" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;">
-      ❌ Bị từ chối
-    </span>`;
+    badgeHtml = '<span class="pcb-status-badge pcb-status-badge--outbid">Bị Admin từ chối</span>';
     actionButtonsHtml = `
       <a href="sell.html?relist=${item.id}" class="pcb-btn-rebid pcb-btn-rebid--muted">Chỉnh sửa &amp; Nộp lại</a>
       <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
@@ -650,27 +678,23 @@ function renderAdminApprovalCard(item) {
   const seller = item.seller || 'Người bán';
 
   return `
-    <article class="pcb-auction-card pcb-auction-card--admin-review" data-id="${item.id}" style="border: 1.5px solid #c7d2fe; background: #ffffff;">
+    <article class="pcb-auction-card pcb-auction-card--admin-review" data-id="${item.id}">
       <a href="${detailUrl}" class="pcb-auction-card__media-link" aria-label="Xem chi tiết ${escapeHtml(item.name)}">
-        <span class="pcb-auction-card__category-badge" style="background: #4f46e5;">${escapeHtml(item.category || 'PC')}</span>
+        <span class="pcb-auction-card__category-badge pcb-auction-card__category-badge--admin">${escapeHtml(item.category || 'PC')}</span>
         <img src="${imageSrc}" alt="${escapeHtml(item.name)}" class="pcb-auction-card__img" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
       </a>
 
       <div class="pcb-auction-card__body">
         <div class="pcb-auction-card__top-row">
-          <span class="pcb-status-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
-            ⏳ Chờ Admin duyệt
-          </span>
-          <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">
-            Người bán: <strong>${escapeHtml(seller)}</strong>
-          </span>
+          <span class="pcb-status-badge pcb-status-badge--pending">Chờ Admin duyệt</span>
+          <span class="pcb-admin-review__seller">Người bán: <strong>${escapeHtml(seller)}</strong></span>
         </div>
 
         <a href="${detailUrl}" class="pcb-auction-card__title" title="${escapeHtml(item.name)}">
           ${escapeHtml(item.name)}
         </a>
 
-        <div class="pcb-auction-card__stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;">
+        <div class="pcb-auction-card__stats pcb-admin-review__stats">
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá khởi điểm</span>
             <span class="pcb-stat-col__val">${startPrice}</span>
@@ -681,24 +705,25 @@ function renderAdminApprovalCard(item) {
           </div>
           <div class="pcb-stat-col">
             <span class="pcb-stat-col__lbl">Giá trần chốt ngay</span>
-            <span class="pcb-stat-col__val" style="color: #b45309; font-weight: 700;">${ceilingPrice}</span>
+            <span class="pcb-stat-col__val pcb-admin-review__ceiling">${ceilingPrice}</span>
           </div>
         </div>
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; margin-top: 4px; font-size: 0.75rem; color: #475569;">
-          <span>📋 Thẩm định: Đã có ảnh thật, thông số kỹ thuật &amp; mô tả. Sẵn sàng duyệt mở phiên.</span>
-        </div>
+        <p class="pcb-admin-review__note">
+          ${icon('clipboard-check', { size: 14 })}
+          <span>Hồ sơ đã có ảnh thật, thông số kỹ thuật và mô tả. Sẵn sàng duyệt mở phiên.</span>
+        </p>
       </div>
 
-      <div class="pcb-auction-card__actions" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 140px;">
-        <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-admin-quick-approve="${item.id}" style="background: #16a34a; border-color: #16a34a; justify-content: center;">
-          ✓ Duyệt mở phiên
+      <div class="pcb-auction-card__actions">
+        <button type="button" class="pcb-admin-review__btn pcb-admin-review__btn--approve" data-admin-quick-approve="${item.id}">
+          ${icon('circle-check', { size: 15 })} Duyệt mở phiên
         </button>
-        <button type="button" class="pcb-btn-rebid" data-admin-quick-reject="${item.id}" style="color: #dc2626; border-color: #fecaca; background: #fee2e2; justify-content: center;">
-          ✕ Từ chối
+        <button type="button" class="pcb-admin-review__btn pcb-admin-review__btn--reject" data-admin-quick-reject="${item.id}">
+          ${icon('circle-x', { size: 15 })} Từ chối
         </button>
-        <a href="${detailUrl}" class="pcb-btn-detail" style="text-align: center; justify-content: center;">
-          🔍 Xem chi tiết
+        <a href="${detailUrl}" class="pcb-btn-detail">
+          ${icon('search', { size: 14 })} Xem chi tiết
         </a>
       </div>
     </article>
@@ -2778,6 +2803,28 @@ document.addEventListener('DOMContentLoaded', () => {
     usernameField.addEventListener('blur', () => {
       clearTimeout(usernameTimer);
       if (!usernameField.readOnly) showUsernameError();
+    });
+  }
+
+  // Nút sao chép nhanh tên đăng nhập (dùng được cả với tài khoản demo đang khóa tên)
+  const copyUsernameBtn = document.getElementById('btn-copy-username');
+  if (copyUsernameBtn && usernameField) {
+    let copyTimer = 0;
+    copyUsernameBtn.addEventListener('click', async () => {
+      const value = usernameField.value.trim();
+      if (!value) return;
+      const ok = await copyText(value);
+      showToast(ok ? `Đã sao chép tên đăng nhập @${value}` : 'Không sao chép được, hãy chọn và sao chép thủ công.', ok);
+      if (!ok) return;
+      // Đổi icon sang dấu tick trong 1,5 giây để báo đã sao chép
+      const iconEl = copyUsernameBtn.querySelector('.pcb-icon');
+      copyUsernameBtn.classList.add('pcb-username-wrap__copy--done');
+      iconEl?.classList.replace('pcb-icon--copy', 'pcb-icon--check');
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => {
+        copyUsernameBtn.classList.remove('pcb-username-wrap__copy--done');
+        iconEl?.classList.replace('pcb-icon--check', 'pcb-icon--copy');
+      }, 1500);
     });
   }
 

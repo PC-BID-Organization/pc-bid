@@ -987,7 +987,7 @@ function updateLiveCountdowns() {
 
     // Phiên đấu giá chỉ kết thúc khi chạm giá trần (vô hạn giờ)
     if (el.getAttribute('data-end-mode') === 'ceiling_only') {
-      textSpan.textContent = '⚡ Chờ giá trần';
+      textSpan.textContent = 'Chờ giá trần';
       el.classList.remove('pcb-card__countdown--urgent');
       return;
     }

@@ -961,6 +961,99 @@
 }
 
 /* --------------------------------------------------------------------------
+   THẺ DUYỆT MỞ PHIÊN CỦA QUẢN TRỊ VIÊN (ADMIN)
+   -------------------------------------------------------------------------- */
+.pcb-auction-card--admin-review {
+  border: 1.5px solid #c7d2fe;
+  background-color: #ffffff;
+}
+
+.pcb-auction-card__category-badge--admin {
+  background-color: #4f46e5;
+}
+
+.pcb-admin-review__seller {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.pcb-admin-review__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pcb-admin-review__ceiling {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.pcb-admin-review__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.pcb-admin-review__note .pcb-icon {
+  margin-top: 1px;
+  color: #4f46e5;
+}
+
+/* Nút Duyệt / Từ chối trên thẻ duyệt phiên */
+.pcb-admin-review__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pcb-admin-review__btn--approve {
+  color: #ffffff;
+  background-color: #16a34a;
+  border: 1px solid #16a34a;
+}
+
+.pcb-admin-review__btn--approve:hover,
+.pcb-admin-review__btn--approve:focus-visible {
+  background-color: #15803d;
+  border-color: #15803d;
+}
+
+.pcb-admin-review__btn--reject {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.pcb-admin-review__btn--reject:hover,
+.pcb-admin-review__btn--reject:focus-visible {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+@media (max-width: 480px) {
+  .pcb-admin-review__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
    7. TRẠNG THÁI TRỐNG (EMPTY STATE)
    -------------------------------------------------------------------------- */
 
@@ -2910,14 +3003,58 @@
 
 .pcb-username-wrap__lock {
   position: absolute;
-  right: 14px;
+  right: 50px;
   display: inline-flex;
   color: #64748b;
 }
 
+/* Chừa chỗ bên phải ô cho biểu tượng khóa và nút sao chép */
+.pcb-username-wrap .pcb-input {
+  padding-right: 76px;
+}
+
+/* Nút sao chép tên đăng nhập: ô vuông nhỏ nằm sát mép phải trong ô nhập */
+.pcb-username-wrap__copy {
+  position: absolute;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #64748b;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pcb-username-wrap__copy:hover,
+.pcb-username-wrap__copy:focus-visible {
+  color: var(--pcb-primary, #c9450a);
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+}
+
+/* Đã sao chép: đổi sang màu xanh trong chốc lát */
+.pcb-username-wrap__copy--done,
+.pcb-username-wrap__copy--done:hover {
+  color: #047857;
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+/* Ô chỉ đọc: không hiện con trỏ nhấp nháy vì không sửa được */
+.pcb-input--readonly,
+.pcb-input[readonly] {
+  caret-color: transparent;
+}
+
 .pcb-input--readonly {
   color: #475569;
-  cursor: not-allowed;
+  cursor: default;
   background-color: #f1f5f9;
 }
 

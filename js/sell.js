@@ -463,6 +463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   dongBoQuyTacKetThucPhien();
 
   initCatalogueEvents();
+  initPriceInputs();
   initFormInputsSync();
   initFormSubmitHandler();
   initPhotoPicker();
@@ -584,9 +585,9 @@ const visitedSteps = new Set([1]);
 function getStepCompletion() {
   const value = id => document.getElementById(id)?.value || '';
   const endModeVal = value('sell-end-mode') || 'time_or_ceiling';
-  const startPriceNum = Number(value('sell-start-price'));
+  const startPriceNum = readPriceInput('sell-start-price');
   const bidStepNum = Boolean(value('sell-bid-step'));
-  const ceilingPriceNum = Number(value('sell-ceiling-price'));
+  const ceilingPriceNum = readPriceInput('sell-ceiling-price');
 
   let step3Valid = false;
   if (endModeVal === 'ceiling_only') {
@@ -924,8 +925,8 @@ function createCustomModel() {
     images: [],
     specifications: {},
     // Giữ giá người bán đã nhập (nếu có)
-    defaultStartingPrice: Number(startInput?.value) || 0,
-    marketPriceNew: Number(marketInput?.value) || 0,
+    defaultStartingPrice: readPriceInput(startInput),
+    marketPriceNew: readPriceInput(marketInput),
     defaultBidStep: Number(document.getElementById('sell-bid-step')?.value) || 50000
   };
 }
@@ -989,8 +990,8 @@ function selectModel(model) {
   const bidStepSelect = document.getElementById('sell-bid-step');
 
   // Sản phẩm tự nhập: chỉ điền khi có giá trị (giữ nguyên giá người bán đã gõ)
-  if (startPriceInput && (!model.custom || model.defaultStartingPrice)) startPriceInput.value = model.defaultStartingPrice || '';
-  if (marketPriceInput && (!model.custom || model.marketPriceNew)) marketPriceInput.value = model.marketPriceNew || '';
+  if (startPriceInput && (!model.custom || model.defaultStartingPrice)) writePriceInput(startPriceInput, model.defaultStartingPrice);
+  if (marketPriceInput && (!model.custom || model.marketPriceNew)) writePriceInput(marketPriceInput, model.marketPriceNew);
   if (bidStepSelect) bidStepSelect.value = String(model.defaultBidStep);
 
   // 2. Nạp thông số của mẫu vào các ô người bán có thể chỉnh sửa
@@ -1406,7 +1407,7 @@ function dongBoQuyTacKetThucPhien() {
     if (ceilingInput) {
       ceilingInput.disabled = false;
       ceilingInput.setAttribute('required', 'true');
-      ceilingInput.placeholder = 'Bắt buộc nhập Giá trần, ví dụ: 5000000';
+      ceilingInput.placeholder = 'Bắt buộc nhập Giá trần, ví dụ: 5.000.000';
     }
     if (groupCeiling) groupCeiling.classList.remove('pcb-form-group--disabled');
     if (labelCeiling) labelCeiling.classList.add('pcb-form-label--required');
@@ -1418,7 +1419,7 @@ function dongBoQuyTacKetThucPhien() {
       hintCeiling.textContent = 'Bắt buộc: Khi có người đặt giá bằng hoặc cao hơn mức này, phiên lập tức kết thúc và chốt bán ngay.';
     }
     if (hintEndMode) {
-      hintEndMode.textContent = '⚡ Phiên mở không giới hạn thời gian cho đến khi đạt mức Giá trần quy định.';
+      hintEndMode.textContent = 'Phiên mở không giới hạn thời gian cho đến khi đạt mức Giá trần quy định.';
     }
   } else if (mode === 'time_only') {
     // 2. Chỉ kết thúc theo thời hạn đấu giá
@@ -1451,7 +1452,7 @@ function dongBoQuyTacKetThucPhien() {
       hintCeiling.textContent = 'Đã khóa: Chế độ đấu giá thuần theo thời gian không áp dụng mức giá trần chốt ngay.';
     }
     if (hintEndMode) {
-      hintEndMode.textContent = '⏱️ Đấu giá truyền thống: Chốt người trả giá cao nhất khi hết thời gian mở phiên.';
+      hintEndMode.textContent = 'Đấu giá truyền thống: Chốt người trả giá cao nhất khi hết thời gian mở phiên.';
     }
   } else {
     // 3. Theo thời hạn HOẶC chạm Giá trần (Khuyên dùng)
@@ -1470,7 +1471,7 @@ function dongBoQuyTacKetThucPhien() {
     if (ceilingInput) {
       ceilingInput.disabled = false;
       ceilingInput.setAttribute('required', 'true');
-      ceilingInput.placeholder = 'Ví dụ: 5000000';
+      ceilingInput.placeholder = 'Ví dụ: 5.000.000';
     }
     if (groupCeiling) groupCeiling.classList.remove('pcb-form-group--disabled');
     if (labelCeiling) labelCeiling.classList.add('pcb-form-label--required');
@@ -1482,9 +1483,71 @@ function dongBoQuyTacKetThucPhien() {
       hintCeiling.textContent = 'Nếu có người đặt giá bằng hoặc cao hơn mức này trước khi hết giờ, phiên lập tức kết thúc và chốt bán ngay.';
     }
     if (hintEndMode) {
-      hintEndMode.textContent = '🎯 Kết hợp linh hoạt: Ai chạm giá trần trước thì chốt ngay, hoặc hết giờ thì chốt người cao nhất.';
+      hintEndMode.textContent = 'Kết hợp linh hoạt: Ai chạm giá trần trước thì chốt ngay, hoặc hết giờ thì chốt người cao nhất.';
     }
   }
+}
+
+/* --------------------------------------------------------------------------
+   Ô NHẬP GIÁ CÓ DẤU CHẤM PHÂN CÁCH HÀNG NGHÌN (VD: 2.000.000)
+   Ô giá dùng type="text" + inputmode="numeric" để hiện được dấu chấm; khi đọc giá
+   trị thì bỏ hết ký tự không phải số.
+   -------------------------------------------------------------------------- */
+
+/**
+ * Định dạng số nguyên thành chuỗi có dấu chấm hàng nghìn
+ * @param {number|string} digits
+ * @returns {string}
+ */
+function formatThousands(digits) {
+  return String(digits).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/**
+ * Đọc giá trị số của một ô giá (bỏ dấu chấm và ký tự khác)
+ * @param {HTMLInputElement|string|null} elOrId - Ô nhập hoặc id của ô
+ * @returns {number} 0 nếu ô trống
+ */
+function readPriceInput(elOrId) {
+  const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+  const digits = String(el?.value || '').replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
+}
+
+/**
+ * Ghi giá trị số vào ô giá theo dạng có dấu chấm
+ * @param {HTMLInputElement|null} el
+ * @param {number} amount - 0 hoặc rỗng thì để trống ô
+ */
+function writePriceInput(el, amount) {
+  if (!el) return;
+  const num = Number(amount) || 0;
+  el.value = num > 0 ? formatThousands(num) : '';
+}
+
+/**
+ * Gắn định dạng dấu chấm khi gõ cho các ô [data-price-input], giữ đúng vị trí con trỏ
+ */
+function initPriceInputs() {
+  document.querySelectorAll('[data-price-input]').forEach(input => {
+    input.addEventListener('input', () => {
+      const caret = input.selectionStart ?? input.value.length;
+      // Đếm số chữ số đứng trước con trỏ để đặt lại con trỏ sau khi chèn dấu chấm
+      const digitsBeforeCaret = input.value.slice(0, caret).replace(/\D/g, '').length;
+      // Bỏ số 0 ở đầu và giới hạn 12 chữ số (tối đa vài trăm tỷ đồng)
+      const digits = input.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 12);
+      const formatted = digits ? formatThousands(digits) : '';
+      if (formatted === input.value) return;
+      input.value = formatted;
+      let pos = 0;
+      let seen = 0;
+      while (pos < formatted.length && seen < digitsBeforeCaret) {
+        if (/\d/.test(formatted[pos])) seen += 1;
+        pos += 1;
+      }
+      if (document.activeElement === input) input.setSelectionRange(pos, pos);
+    });
+  });
 }
 
 function initFormInputsSync() {
@@ -1566,14 +1629,14 @@ function updateLivePreview() {
   // Giá khởi điểm & Giá thị trường
   const startPriceInput = document.getElementById('sell-start-price');
   const previewPrice = document.getElementById('preview-price');
-  const priceVal = startPriceInput ? parseInt(startPriceInput.value, 10) || 0 : 0;
+  const priceVal = readPriceInput(startPriceInput);
   if (previewPrice) {
     previewPrice.textContent = formatVnd(priceVal);
   }
 
   const marketPriceInput = document.getElementById('sell-market-price');
   const previewMarketPrice = document.getElementById('preview-market-price');
-  const marketVal = marketPriceInput ? parseInt(marketPriceInput.value, 10) || 0 : 0;
+  const marketVal = readPriceInput(marketPriceInput);
   if (previewMarketPrice) {
     previewMarketPrice.textContent = formatVnd(marketVal);
   }
@@ -1594,7 +1657,7 @@ function updateLivePreview() {
     const endMode = endModeSelect?.value || 'time_or_ceiling';
     const textSpan = previewCountdown.querySelector('.pcb-countdown-text');
     if (endMode === 'ceiling_only') {
-      if (textSpan) textSpan.textContent = '⚡ Chờ giá trần';
+      if (textSpan) textSpan.textContent = 'Chờ giá trần';
     } else if (durationSelect) {
       const days = parseInt(durationSelect.value, 10) || 3;
       const hours = days * 24;
@@ -1642,7 +1705,7 @@ function initFormSubmitHandler() {
     }
 
     const startPriceInput = document.getElementById('sell-start-price');
-    const startPrice = startPriceInput ? parseInt(startPriceInput.value, 10) : 0;
+    const startPrice = readPriceInput(startPriceInput);
     if (!startPrice || startPrice < 10000) {
       await showAlert({ title: 'Giá khởi điểm không hợp lệ', message: 'Vui lòng nhập Giá khởi điểm hợp lệ (tối thiểu 10.000₫).', tone: 'warning' });
       startPriceInput?.focus();
@@ -1670,8 +1733,8 @@ function initFormSubmitHandler() {
     const durationSelect = document.getElementById('sell-duration');
     const durationDays = (!durationSelect || durationSelect.disabled) ? 0 : (parseInt(durationSelect.value, 10) || 3);
     const ceilingPriceInput = document.getElementById('sell-ceiling-price');
-    const ceilingPrice = (ceilingPriceInput && !ceilingPriceInput.disabled && ceilingPriceInput.value)
-      ? parseInt(ceilingPriceInput.value, 10) : 0;
+    const ceilingPrice = (ceilingPriceInput && !ceilingPriceInput.disabled)
+      ? readPriceInput(ceilingPriceInput) : 0;
 
     // Kiểm tra tính hợp lệ chặt chẽ theo từng quy tắc kết thúc phiên
     if (endMode === 'ceiling_only') {
@@ -1737,7 +1800,7 @@ function initFormSubmitHandler() {
     }
 
     // Giá thị trường tham khảo: người bán nhập; sản phẩm tự nhập chưa có thì ước tính 1,5 lần giá khởi điểm
-    const marketPrice = parseInt(document.getElementById('sell-market-price')?.value, 10)
+    const marketPrice = readPriceInput('sell-market-price')
       || currentSelectedModel.marketPriceNew || Math.round(startPrice * 1.5);
 
     // Lấy thông tin người đăng bán từ localStorage nếu có
