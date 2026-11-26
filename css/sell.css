@@ -1041,8 +1041,9 @@ button.pcb-thumb-item {
 
 .pcb-custom-specs__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) 36px;
   gap: 8px;
+  align-items: center;
 }
 
 .pcb-custom-specs__input {
@@ -1061,21 +1062,32 @@ button.pcb-thumb-item {
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
+/* Nút xóa dòng thông số: ô vuông 36x36, biểu tượng X nằm chính giữa */
 .pcb-custom-specs__remove {
-  font-family: inherit;
-  font-size: 18px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   color: #64748b;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .pcb-custom-specs__remove:hover,
 .pcb-custom-specs__remove:focus-visible {
   color: #dc2626;
+  background-color: #fef2f2;
   border-color: #fca5a5;
+}
+
+.pcb-custom-specs__remove:focus-visible {
+  outline: 2px solid #fca5a5;
+  outline-offset: 2px;
 }
 
 .pcb-custom-specs__add {
@@ -1099,13 +1111,46 @@ button.pcb-thumb-item {
   display: none;
 }
 
-@media (max-width: 420px) {
-  .pcb-custom-specs__row {
-    grid-template-columns: minmax(0, 1fr) 32px;
+/* Màn hình hẹp (mobile): mỗi thông số thành một thẻ nhỏ.
+   Hàng trên: tên thông số + nút X; hàng dưới: giá trị trải hết chiều ngang */
+@media (max-width: 480px) {
+  .pcb-spec-box {
+    padding: 12px;
   }
 
-  .pcb-custom-specs__row .pcb-custom-specs__input[data-spec-value] {
-    grid-column: 1 / 2;
+  .pcb-custom-specs__row {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    gap: 6px;
+    padding: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+
+  .pcb-custom-specs__row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .pcb-custom-specs__row > :nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .pcb-custom-specs__row > .pcb-custom-specs__remove {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Cỡ chữ 16px để iOS không tự phóng to khi focus vào ô nhập */
+  .pcb-custom-specs__input {
+    font-size: 16px;
+  }
+
+  .pcb-custom-specs__add {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
   }
 }
 

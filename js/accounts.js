@@ -311,6 +311,98 @@ export function normalizePhone(phone) {
   return digits;
 }
 
+/* ==========================================================================
+   KIỂM TRA ĐỊNH DẠNG CHI TIẾT: SỐ ĐIỆN THOẠI VÀ EMAIL
+   Trả về câu lỗi cụ thể (sai đầu số, thiếu mấy số, thiếu @...) thay vì báo chung chung.
+   partial = true: đang gõ dở nên bỏ qua các lỗi "còn thiếu" để không báo đỏ quá sớm.
+   ========================================================================== */
+
+// Đầu số di động Việt Nam đang được các nhà mạng cấp (3 chữ số đầu)
+const MOBILE_PREFIXES = new Set([
+  '032', '033', '034', '035', '036', '037', '038', '039',
+  '052', '055', '056', '058', '059',
+  '070', '076', '077', '078', '079',
+  '081', '082', '083', '084', '085', '086', '087', '088', '089',
+  '090', '091', '092', '093', '094', '095', '096', '097', '098', '099'
+]);
+
+/**
+ * Kiểm tra định dạng số điện thoại di động Việt Nam (10 chữ số)
+ * @param {string} raw - Nội dung người dùng nhập
+ * @param {{partial?: boolean}} [opts]
+ * @returns {string} Thông báo lỗi, rỗng nếu hợp lệ (hoặc chưa đủ để kết luận khi partial)
+ */
+export function validatePhoneNumber(raw, { partial = false } = {}) {
+  const value = String(raw || '').trim();
+  if (!value) return partial ? '' : 'Vui lòng nhập số điện thoại.';
+  // Cho phép khoảng trắng, dấu chấm, gạch ngang, ngoặc để tách nhóm số; dấu + chỉ ở đầu
+  const badChar = value.replace(/^\+/, '').match(/[^\d\s.\-()]/);
+  if (badChar) return `Số điện thoại chỉ được chứa chữ số, không dùng ký tự "${badChar[0]}".`;
+  if (value.startsWith('+') && !value.replace(/[\s.\-()]/g, '').startsWith('+84') && value.replace(/[\s.\-()]/g, '').length >= 3) {
+    return 'Chỉ hỗ trợ số điện thoại Việt Nam (bắt đầu bằng 0 hoặc +84).';
+  }
+  const phone = normalizePhone(value);
+  if (value.startsWith('+') && phone.startsWith('+')) return ''; // mới gõ "+", "+8"
+  if (!phone.startsWith('0')) return 'Số điện thoại phải bắt đầu bằng số 0 (hoặc +84).';
+  if (phone.length >= 2) {
+    const second = phone[1];
+    if (second === '0') return 'Đầu số "00" là mã gọi quốc tế, không phải số di động Việt Nam.';
+    if (second === '1') return 'Đầu số "01" (số 11 chữ số) đã ngừng sử dụng từ năm 2018. Hãy dùng đầu số mới, ví dụ 0162 → 032.';
+    if (second === '2') return 'Đầu số "02" là số máy bàn cố định. Vui lòng nhập số di động (03, 05, 07, 08, 09).';
+    if (second === '4' || second === '6') return `Đầu số "0${second}" không phải đầu số di động Việt Nam (hợp lệ: 03, 05, 07, 08, 09).`;
+  }
+  if (phone.length >= 3 && !MOBILE_PREFIXES.has(phone.slice(0, 3))) {
+    return `Đầu số "${phone.slice(0, 3)}" chưa được nhà mạng nào cấp cho thuê bao di động.`;
+  }
+  if (phone.length > 10) return `Số điện thoại thừa ${phone.length - 10} chữ số (chỉ gồm 10 chữ số).`;
+  if (phone.length < 10 && !partial) return `Số điện thoại còn thiếu ${10 - phone.length} chữ số (cần đủ 10 chữ số).`;
+  return '';
+}
+
+// Tên miền email hay gõ nhầm → tên miền đúng
+const EMAIL_DOMAIN_TYPOS = {
+  'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gamil.com': 'gmail.com', 'gmal.com': 'gmail.com',
+  'gnail.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com',
+  'gmail.vn': 'gmail.com', 'yaho.com': 'yahoo.com', 'yahoo.con': 'yahoo.com', 'hotmial.com': 'hotmail.com',
+  'hotmail.con': 'hotmail.com', 'outlok.com': 'outlook.com', 'outlook.con': 'outlook.com'
+};
+
+/**
+ * Kiểm tra định dạng địa chỉ email, chỉ ra đúng phần bị sai
+ * @param {string} raw
+ * @param {{partial?: boolean}} [opts]
+ * @returns {string} Thông báo lỗi, rỗng nếu hợp lệ
+ */
+export function validateEmailAddress(raw, { partial = false } = {}) {
+  const value = String(raw || '').trim();
+  if (!value) return partial ? '' : 'Vui lòng nhập địa chỉ email.';
+  if (/\s/.test(value)) return 'Email không được chứa khoảng trắng.';
+  const atCount = (value.match(/@/g) || []).length;
+  if (atCount > 1) return 'Email chỉ được có một ký tự "@".';
+  if (atCount === 0) return partial ? '' : 'Email thiếu ký tự "@" (ví dụ: ten@example.com).';
+  const [local, domain] = value.split('@');
+  if (!local) return 'Thiếu phần tên trước ký tự "@" (ví dụ: ten@example.com).';
+  const badLocal = local.match(/[^A-Za-z0-9._%+-]/);
+  if (badLocal) return `Phần trước "@" chứa ký tự không hợp lệ "${badLocal[0]}" (chỉ dùng chữ không dấu, số và . _ % + -).`;
+  if (local.startsWith('.') || local.endsWith('.')) return 'Phần trước "@" không được bắt đầu hoặc kết thúc bằng dấu chấm.';
+  if (local.includes('..')) return 'Phần trước "@" không được có hai dấu chấm liền nhau.';
+  if (!domain) return partial ? '' : 'Thiếu tên miền sau ký tự "@" (ví dụ: gmail.com).';
+  const badDomain = domain.match(/[^A-Za-z0-9.-]/);
+  if (badDomain) return `Tên miền chứa ký tự không hợp lệ "${badDomain[0]}" (chỉ dùng chữ không dấu, số, dấu chấm và gạch ngang).`;
+  if (domain.startsWith('.') || domain.startsWith('-')) return 'Tên miền không được bắt đầu bằng dấu chấm hoặc gạch ngang.';
+  if (domain.includes('..')) return 'Tên miền không được có hai dấu chấm liền nhau.';
+  if (!domain.includes('.')) return partial ? '' : 'Tên miền thiếu phần đuôi (ví dụ: .com, .vn).';
+  if (domain.endsWith('.')) return partial ? '' : 'Tên miền thiếu phần đuôi sau dấu chấm (ví dụ: .com, .vn).';
+  const tld = domain.split('.').pop();
+  if (!/^[A-Za-z]{2,}$/.test(tld)) {
+    if (partial && /^[A-Za-z]$/.test(tld)) return '';
+    return 'Đuôi tên miền phải gồm ít nhất 2 chữ cái (ví dụ: .com, .vn).';
+  }
+  const fix = EMAIL_DOMAIN_TYPOS[domain.toLowerCase()];
+  if (fix && !partial) return `Tên miền "${domain}" có vẻ bị gõ nhầm. Có phải bạn muốn nhập "${local}@${fix}"?`;
+  return '';
+}
+
 /**
  * Kiểm tra email / số điện thoại đã được tài khoản khác sử dụng chưa
  * @param {Object} query
@@ -491,20 +583,36 @@ export function isDemoAccount(user) {
  * Kiểm tra tên đăng nhập mới
  * @param {string} name - Tên muốn dùng
  * @param {Object} [exclude] - Tài khoản hiện tại (bỏ qua khi kiểm tra trùng)
+ * @param {{partial?: boolean}} [opts] - partial = true khi đang gõ dở (bỏ qua lỗi thiếu ký tự / trùng tên)
  * @returns {string} Thông báo lỗi, chuỗi rỗng nếu hợp lệ
  */
-export function validateUsername(name, exclude) {
+export function validateUsername(name, exclude, { partial = false } = {}) {
   const value = String(name || '').trim().toLowerCase();
-  if (!value) return 'Vui lòng nhập tên đăng nhập.';
-  if (value.length < 3 || value.length > 20) return 'Tên đăng nhập dài từ 3 đến 20 ký tự.';
-  if (!USERNAME_PATTERN.test(value)) return 'Chỉ dùng chữ thường không dấu, số, dấu chấm hoặc gạch dưới; không bắt đầu / kết thúc bằng dấu.';
+  if (!value) return partial ? '' : 'Vui lòng nhập tên đăng nhập.';
+  if (/\s/.test(value)) return 'Tên đăng nhập không được chứa khoảng trắng.';
   if (value.includes('@')) return 'Tên đăng nhập không được chứa ký tự @.';
+  const badChar = value.match(/[^a-z0-9._]/);
+  if (badChar) {
+    const ch = badChar[0];
+    // Chữ có dấu: gợi ý chữ không dấu tương ứng (ư → u, đ → d)
+    const plain = ch === 'đ' ? 'd' : ch.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    if (/^[a-z]$/.test(plain)) return `Chữ "${ch}" có dấu, hãy dùng chữ không dấu "${plain}".`;
+    return `Ký tự "${ch}" không được phép. Chỉ dùng chữ thường không dấu, số, dấu chấm (.) hoặc gạch dưới (_).`;
+  }
+  if (/^[._]/.test(value)) return 'Tên đăng nhập phải bắt đầu bằng chữ cái hoặc số, không phải dấu chấm / gạch dưới.';
+  if (/[._]{2,}/.test(value)) return 'Không dùng hai dấu chấm / gạch dưới liền nhau.';
+  if (value.length > 20) return `Tên đăng nhập dài quá ${value.length - 20} ký tự (tối đa 20).`;
+  // Đang gõ dở: chưa báo lỗi kết thúc bằng dấu / thiếu ký tự (người dùng có thể đang gõ tiếp)
+  if (partial && (/[._]$/.test(value) || value.length < 3)) return '';
+  if (/[._]$/.test(value)) return 'Tên đăng nhập phải kết thúc bằng chữ cái hoặc số, không phải dấu chấm / gạch dưới.';
+  if (value.length < 3) return `Tên đăng nhập còn thiếu ${3 - value.length} ký tự (tối thiểu 3 ký tự).`;
+  if (!USERNAME_PATTERN.test(value)) return 'Chỉ dùng chữ thường không dấu, số, dấu chấm hoặc gạch dưới; không bắt đầu / kết thúc bằng dấu.';
   const isSelf = u => exclude && ((exclude.id && u.id === exclude.id) || u.username === exclude.username);
   const taken = [...getAllAccounts(), ...MOCK_BIDDERS].some(u => !isSelf(u) && String(u.username || '').toLowerCase() === value);
-  if (taken) return 'Tên đăng nhập này đã có người sử dụng.';
+  if (taken) return `Tên đăng nhập "@${value}" đã có người sử dụng.`;
   // Không trùng email của tài khoản khác để ô đăng nhập "Tên đăng nhập / Email" không bị nhập nhằng
   const asEmail = getAllAccounts().some(u => !isSelf(u) && String(u.email || '').toLowerCase() === value);
-  if (asEmail) return 'Tên đăng nhập này đã có người sử dụng.';
+  if (asEmail) return `Tên đăng nhập "@${value}" đã có người sử dụng.`;
   return '';
 }
 

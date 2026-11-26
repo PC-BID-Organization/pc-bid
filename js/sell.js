@@ -514,6 +514,9 @@ function getCustomSpecsObject() {
   return result;
 }
 
+// Biểu tượng X dạng SVG cho nút xóa dòng thông số (nét đều, luôn nằm giữa nút)
+const REMOVE_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
 /**
  * Vẽ danh sách dòng thông số bổ sung (ô tên + ô giá trị + nút xóa)
  * @param {number} [focusIndex] - Dòng cần đặt con trỏ sau khi vẽ
@@ -528,7 +531,7 @@ function renderCustomSpecs(focusIndex) {
         placeholder="Tên thông số (VD: Bảo hành còn lại)" maxlength="40" aria-label="Tên thông số bổ sung ${idx + 1}">
       <input type="text" class="pcb-custom-specs__input" data-spec-value="${idx}" value="${escapeHtml(spec.value)}"
         placeholder="Giá trị (VD: 8 tháng)" maxlength="80" aria-label="Giá trị thông số bổ sung ${idx + 1}">
-      <button type="button" class="pcb-custom-specs__remove" data-spec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}">×</button>
+      <button type="button" class="pcb-custom-specs__remove" data-spec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}" title="Xóa thông số">${REMOVE_ICON}</button>
     </li>`).join('');
   if (addBtn) addBtn.hidden = customSpecs.length >= MAX_CUSTOM_SPECS;
   if (focusIndex !== undefined) list.querySelector(`[data-spec-key="${focusIndex}"]`)?.focus();
@@ -1050,7 +1053,7 @@ function renderModelSpecs(focusIndex) {
         maxlength="40" aria-label="Tên thông số ${idx + 1}">
       <input type="text" class="pcb-custom-specs__input" data-mspec-value="${idx}" value="${escapeHtml(spec.value)}"
         maxlength="120" aria-label="Giá trị thông số ${idx + 1}">
-      <button type="button" class="pcb-custom-specs__remove" data-mspec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}">×</button>
+      <button type="button" class="pcb-custom-specs__remove" data-mspec-remove="${idx}" aria-label="Xóa thông số ${idx + 1}" title="Xóa thông số">${REMOVE_ICON}</button>
     </li>`).join('')}</ul>`;
   if (focusIndex !== undefined) container.querySelector(`[data-mspec-value="${focusIndex}"]`)?.focus();
 }
