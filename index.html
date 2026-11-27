@@ -875,19 +875,21 @@
       </section>
 
       <!-- ============================================================
-           11. ĐĂNG KÝ EMAIL NHẬN THÔNG BÁO LINH KIỆN (NEWSLETTER)
+           11. SĂN LINH KIỆN ĐÚNG NHU CẦU: THEO DÕI PHIÊN + NHẬN THÔNG BÁO QUA EMAIL TÀI KHOẢN
+           Khách: mời đăng ký / đăng nhập (cần tài khoản mới dùng được watchlist).
+           Đã đăng nhập: dùng email của tài khoản, bật / tắt nhận email, vào danh sách theo dõi.
            ============================================================ -->
       <section class="pcb-subscribe" aria-labelledby="sub-heading">
-        <div>
+        <div class="pcb-subscribe__text">
           <h2 class="pcb-subscribe__title" id="sub-heading">Săn Linh Kiện Đúng Nhu Cầu Của Bạn</h2>
-          <p class="pcb-subscribe__desc">Nhận thông báo qua email ngay khi có phiên đấu giá bạn quan tâm — cam
-            kết không gửi thư rác.</p>
+          <p class="pcb-subscribe__desc" id="pcb-subscribe-desc">Tạo tài khoản miễn phí để theo dõi các phiên bạn quan tâm và nhận
+            email khi bị vượt giá, phiên sắp kết thúc hoặc khi bạn thắng.</p>
         </div>
-        <form class="pcb-subscribe__form" id="pcb-subscribe-form">
-          <input type="email" class="pcb-subscribe__input" id="pcb-subscribe-input"
-            placeholder="Nhập địa chỉ email của bạn..." aria-label="Email nhận bản tin" autocomplete="email" required>
-          <button type="submit" class="pcb-subscribe__btn">Đăng ký ngay</button>
-        </form>
+        <!-- Nội dung theo trạng thái đăng nhập, JS vẽ lại; mặc định là nút cho khách -->
+        <div class="pcb-subscribe__actions" id="pcb-subscribe-actions">
+          <a href="register.html" class="pcb-subscribe__btn">Đăng ký miễn phí</a>
+          <a href="login.html?redirect=index.html" class="pcb-subscribe__btn pcb-subscribe__btn--ghost">Đăng nhập</a>
+        </div>
       </section>
 
     </div>

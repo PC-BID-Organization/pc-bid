@@ -769,7 +769,12 @@ export const PHRASES = [
   ['Tải 100% ổn định', 'Stable at 100% load', '100%負荷で安定'],
   ['POST OK', 'POST OK', 'POST OK'],
   ['Đã kiểm định', 'Inspected', '検査済み'],
-  ['Email nhận bản tin', 'Newsletter email', 'ニュースレター用メール'],
+  ['Tạo tài khoản miễn phí để theo dõi các phiên bạn quan tâm và nhận email khi bị vượt giá, phiên sắp kết thúc hoặc khi bạn thắng.', 'Create a free account to follow auctions you care about and get emails when you are outbid, an auction is ending soon or you win.', '無料アカウントを作成すると、気になるオークションをフォローし、入札を超えられた時・終了間近・落札時にメールを受け取れます。'],
+  ['Đăng ký miễn phí', 'Sign up free', '無料登録'],
+  ['Đang nhận email', 'Email on', 'メール受信中'],
+  ['Đã tắt email', 'Email off', 'メール停止中'],
+  ['Đổi email nhận thông báo', 'Change notification email', '通知メールを変更'],
+  ['Đã tắt nhận email thông báo', 'Email notifications turned off', 'メール通知をオフにしました'],
   ['Người bán đã xác thực danh tính', 'Seller identity verified', '出品者の本人確認済み'],
   ['Giá thấp nhất', 'Minimum price', '最低価格'],
   ['Số dư ví ảo:', 'Virtual wallet:', '仮想ウォレット:'],
@@ -1140,6 +1145,8 @@ export const PHRASES = [
  * ($1, $2... là các nhóm bắt được trong câu gốc)
  */
 export const PATTERNS = [
+  [/^Đang theo dõi \((\d+)\)$/, 'Watching ($1)', 'フォロー中（$1）'],
+  [/^Đã bật nhận email thông báo về (.+)$/, 'Email notifications turned on for $1', '$1 へのメール通知をオンにしました'],
   [/^(\d+) cảnh báo$/, '$1 warnings', '警告 $1件'],
   [/^Cảnh báo \((\d+)\)$/, 'Warn ($1)', '警告（$1）'],
   [/^([\d,]+|< 1) km · Gần nhất$/, '$1 km · Nearest', '$1 km · 最寄り'],

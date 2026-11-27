@@ -1859,30 +1859,30 @@
   margin: 0;
 }
 
-.pcb-subscribe__form {
+.pcb-subscribe__text {
+  max-width: 560px;
+}
+
+.pcb-subscribe__email {
+  color: #fdba74;
+  word-break: break-all;
+}
+
+/* Nhóm nút theo trạng thái đăng nhập */
+.pcb-subscribe__actions {
   display: flex;
-  gap: 8px;
-  max-width: 440px;
-  width: 100%;
-}
-
-.pcb-subscribe__input {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: var(--pcb-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  font-size: 13px;
-}
-
-.pcb-subscribe__input:focus {
-  outline: none;
-  border-color: var(--pcb-primary);
-  background: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
 }
 
 .pcb-subscribe__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
   padding: 10px 18px;
   background: var(--pcb-primary);
   border: none;
@@ -1897,6 +1897,75 @@
 
 .pcb-subscribe__btn:hover {
   background: var(--pcb-primary-hover);
+}
+
+.pcb-subscribe__btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.pcb-subscribe__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pcb-subscribe__link {
+  font-size: 12px;
+  color: #cbd5e1;
+  text-decoration: underline;
+}
+
+.pcb-subscribe__link:hover {
+  color: #ffffff;
+}
+
+/* Công tắc bật / tắt nhận email thông báo */
+.pcb-subscribe__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pcb-subscribe__switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.pcb-subscribe__switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.pcb-subscribe__toggle[aria-checked="true"] .pcb-subscribe__switch {
+  background-color: #16a34a;
+}
+
+.pcb-subscribe__toggle[aria-checked="true"] .pcb-subscribe__switch::after {
+  transform: translateX(16px);
+}
+
+.pcb-subscribe__toggle:focus-visible {
+  outline: 2px solid #fdba74;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* ==========================================================================
@@ -2299,8 +2368,8 @@
     flex-direction: column;
     text-align: center;
   }
-  .pcb-subscribe__form {
-    max-width: 100%;
+  .pcb-subscribe__actions {
+    justify-content: center;
   }
 }
 
@@ -2412,16 +2481,9 @@
     grid-template-columns: 1fr;
   }
 
-  /* Ô đăng ký nhận tin: ô nhập và nút xếp dọc */
-  .pcb-subscribe__form {
-    flex-direction: column;
-  }
-
-  .pcb-subscribe__input {
-    min-width: 0;
-  }
-
+  /* Khối săn linh kiện: nút trải hết chiều ngang trên điện thoại */
   .pcb-subscribe__btn {
+    justify-content: center;
     width: 100%;
   }
 }

@@ -13,7 +13,7 @@ import { icon } from './icons.js';
 // Danh sách phiên và lượt đặt giá thật dùng cho băng chuyền trực tiếp
 import { loadAllAuctions, readAllBids } from './bid-history.js';
 // Họ tên người đặt và tra cứu tài khoản để mở hồ sơ công khai
-import { describeBidder, findAccount } from './accounts.js';
+import { describeBidder, findAccount, saveAccount } from './accounts.js';
 // Trạng thái kiểm định của phiên (chờ kiểm định / đã gắn tem)
 import { isAwaitingInspection, getInspectionSeal, getCountdownStart, getRemainingMs } from './inspection.js';
 // Bỏ các bài đăng bị Quản trị viên ẩn / gỡ khỏi danh sách hiển thị
@@ -1348,16 +1348,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 8. Đăng ký nhận bản tin email
-  const subForm = document.getElementById('pcb-subscribe-form');
-  if (subForm) {
-    subForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const input = document.getElementById('pcb-subscribe-input');
-      if (input && input.value.trim()) {
-        showToast(`Cảm ơn bạn! Đã đăng ký nhận tin cho: ${input.value.trim()}`);
-        input.value = '';
-      }
-    });
-  }
+  // 8. Săn linh kiện đúng nhu cầu: theo trạng thái đăng nhập
+  renderSubscribeSection();
+  window.addEventListener('pcbid:watchlist-updated', renderSubscribeSection);
 });
+
+/**
+ * Khối "Săn linh kiện đúng nhu cầu":
+ * - Khách: mời đăng ký / đăng nhập, vì cần tài khoản mới theo dõi phiên và nhận thông báo được.
+ * - Đã đăng nhập: thông báo gửi về email của chính tài khoản (đổi trong Cài đặt), có công tắc
+ *   bật / tắt nhận email (dùng chung tùy chọn "Nhận email" ở Cài đặt tài khoản) và lối tắt tới watchlist.
+ */
+function renderSubscribeSection() {
+  const actions = document.getElementById('pcb-subscribe-actions');
+  const desc = document.getElementById('pcb-subscribe-desc');
+  if (!actions || !desc) return;
+  const user = readCurrentUser();
+  if (!user) return;
+
+  const emailOn = user.pref_email !== false;
+  const watchCount = getWatchlist(user).length;
+  desc.innerHTML = emailOn
+    ? `Bấm ${icon('heart', { size: 12 })} trên phiên bạn quan tâm để theo dõi. Thông báo vượt giá, sắp kết thúc và thắng phiên được gửi tới <strong class="pcb-subscribe__email">${escapeHtml(user.email || '')}</strong>.`
+    : `Bạn đang tắt nhận email. Thông báo vẫn hiện trên chuông thông báo của PCBid, bật lại để nhận qua <strong class="pcb-subscribe__email">${escapeHtml(user.email || '')}</strong>.`;
+  actions.innerHTML = `
+    <button type="button" class="pcb-subscribe__toggle" role="switch" aria-checked="${emailOn}" id="pcb-subscribe-toggle">
+      <span class="pcb-subscribe__switch" aria-hidden="true"></span>
+      <span>${emailOn ? 'Đang nhận email' : 'Đã tắt email'}</span>
+    </button>
+    <a href="profile.html#watchlist" class="pcb-subscribe__btn">${icon('heart', { size: 14 })} Đang theo dõi (${watchCount})</a>
+    <a href="profile.html#account" class="pcb-subscribe__link">Đổi email nhận thông báo</a>
+  `;
+  document.getElementById('pcb-subscribe-toggle').addEventListener('click', () => {
+    const current = readCurrentUser();
+    if (!current) return;
+    const next = current.pref_email === false;
+    saveAccount({ ...current, pref_email: next });
+    showToast(next ? `Đã bật nhận email thông báo về ${current.email}` : 'Đã tắt nhận email thông báo');
+    renderSubscribeSection();
+  });
+}
