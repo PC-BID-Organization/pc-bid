@@ -17,6 +17,10 @@ import { startSettlement } from './settlement.js';
 import { initChatWidget } from './chat.js';
 // Cụm nút liên hệ nổi: Facebook, Zalo, Gọi điện
 import { initContactFloat } from './contact-float.js';
+// Tài khoản bị Quản trị viên cảnh báo / xóa
+import { getAccountDeletion, getUnseenWarnings, markWarningsSeen } from './moderation.js';
+import { readLoggedInUser } from './user-data.js';
+import { showAlert } from './dialog.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Nạp đồng thời cả Header và Footer từ tệp HTML thành phần riêng biệt
@@ -39,7 +43,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Nút liên hệ nổi ở góc phải dưới (mọi trang)
   initContactFloat();
+
+  // Tài khoản đang đăng nhập bị xóa thì đăng xuất ngay; có cảnh báo mới thì báo cho người dùng
+  checkAccountStatus();
 });
+
+/**
+ * Kiểm tra trạng thái tài khoản đang đăng nhập:
+ * - Đã bị Quản trị viên xóa: đăng xuất và báo lý do.
+ * - Có cảnh báo chưa xem: hiện hộp thoại cảnh báo một lần rồi đánh dấu đã xem.
+ */
+async function checkAccountStatus() {
+  const user = readLoggedInUser();
+  if (!user?.username) return;
+  const deletion = getAccountDeletion(user.username);
+  if (deletion) {
+    localStorage.removeItem('pcbid_currentUser');
+    localStorage.removeItem('pcbid_user');
+    localStorage.setItem('pcbid_logged_out', 'true');
+    await showAlert({
+      title: 'Tài khoản đã bị xóa',
+      message: `Tài khoản @${user.username} đã bị Quản trị viên PCBid xóa do vi phạm quy chế hoạt động.\nLý do: ${deletion.reason}\nNếu cho rằng đây là nhầm lẫn, vui lòng liên hệ hotline 1900 6868.`,
+      tone: 'danger'
+    });
+    window.location.href = 'index.html';
+    return;
+  }
+  const warnings = getUnseenWarnings(user.username);
+  if (!warnings.length) return;
+  markWarningsSeen(user.username);
+  await showAlert({
+    title: warnings.length > 1 ? `Bạn có ${warnings.length} cảnh báo mới từ PCBid` : 'Cảnh báo từ Quản trị viên PCBid',
+    message: `${warnings.map(w => `• ${w.reason}`).join('\n')}\n\nVui lòng tuân thủ quy chế hoạt động của sàn. Tài khoản tiếp tục vi phạm có thể bị xóa.`,
+    confirmText: 'Tôi đã hiểu',
+    tone: 'warning'
+  });
+}
 
 /**
  * Nạp mã HTML của thành phần động vào phần tử chỉ định

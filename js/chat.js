@@ -26,7 +26,7 @@ import { showAlert, showConfirm } from './dialog.js';
 // Bộ icon Lucide dùng chung
 import { icon } from './icons.js';
 // Vai trò Quản trị viên / Kiểm định viên để hiện thẻ vai trò nổi bật
-import { getStaffRole, ROLE_LABELS } from './moderation.js';
+import { getStaffRole, ROLE_LABELS, isUserDeleted } from './moderation.js';
 
 const CHATS_KEY = 'pcbid_chats';
 // Thời gian phía bên kia "đang soạn tin" trước khi tự trả lời
@@ -186,7 +186,9 @@ function counterpartOf(chat, role) {
   // Tài khoản Quản trị viên / Kiểm định viên: nhãn vai trò thay cho Người bán / Người mua
   const staffRole = getStaffRole(account);
   const tradeLabel = role === 'buyer' ? 'Người bán' : 'Người mua';
-  const label = staffRole ? `${ROLE_LABELS[staffRole]} PCBid` : (hasTradeContext(chat) ? tradeLabel : 'Thành viên PCBid');
+  const peerUsername = role === 'buyer' ? chat.sellerUsername : chat.buyerUsername;
+  const label = isUserDeleted(peerUsername) ? 'Tài khoản đã bị xóa'
+    : staffRole ? `${ROLE_LABELS[staffRole]} PCBid` : (hasTradeContext(chat) ? tradeLabel : 'Thành viên PCBid');
   if (role === 'buyer') {
     return { name: account?.fullname || chat.sellerName, account, username: chat.sellerUsername, label, staffRole };
   }
