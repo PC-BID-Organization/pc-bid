@@ -265,10 +265,13 @@
                 <div class="pcb-inspect-note" role="note">
                   <span class="lucide pcb-icon pcb-icon--microscope pcb-icon--s18 pcb-inspect-note__icon" aria-hidden="true"></span>
                   <p class="pcb-inspect-note__text">
-                    <strong>Bắt buộc với mọi phiên.</strong> Sau khi đăng, linh kiện ở trạng thái <em>Chờ kiểm định</em>.
-                    PCBid Lab chạy Furmark / MemTest86 / CrystalDiskInfo tùy loại linh kiện (mô phỏng 1 phút),
-                    đạt chuẩn thì gắn tem PCBid Verified và mở đặt giá.
+                    <strong>Bắt buộc với mọi phiên.</strong> Sau khi bài đăng được Kiểm định viên duyệt, bạn gửi linh kiện tới
+                    <strong>chi nhánh kiểm định PCBid</strong> gần nhất (trong 3 ngày). Chi nhánh nhận hàng, PCBid Lab chạy Furmark /
+                    MemTest86 / CrystalDiskInfo tùy loại linh kiện (mô phỏng 1 phút), đạt chuẩn thì gắn tem PCBid Verified và mở đặt giá.
                   </p>
+                  <button type="button" class="pcb-inspect-note__link" id="btn-find-branch">
+                    <span class="lucide pcb-icon pcb-icon--map-pin pcb-icon--s14" aria-hidden="true"></span> Tìm chi nhánh kiểm định gần bạn
+                  </button>
                 </div>
               </div>
             </div>
@@ -470,7 +473,7 @@
       <div class="pcb-modal-icon" style="background: #eef2ff; color: #4f46e5; border: 2px solid #c7d2fe;"><span class="lucide pcb-icon pcb-icon--shield-check pcb-icon--s24" aria-hidden="true"></span></div>
       <h3 class="pcb-modal-title" id="modal-success-title">Đăng Phiên Đấu Giá Thành Công!</h3>
       <p class="pcb-modal-desc" id="modal-success-desc">
-        Bài đăng đã được gửi tới <strong>Kiểm định viên PCBid</strong> xét duyệt (đối chiếu ảnh thật, thông số &amp; bằng chứng có hàng). Duyệt xong, linh kiện được PCBid Lab kiểm định rồi mới mở đặt giá. <strong>Thời hạn đấu giá chỉ bắt đầu tính từ lúc đó.</strong>
+        Bài đăng đã được gửi tới <strong>Kiểm định viên PCBid</strong> xét duyệt (đối chiếu ảnh thật, thông số &amp; bằng chứng có hàng). Duyệt xong, bạn gửi linh kiện tới chi nhánh kiểm định PCBid gần nhất; chi nhánh nhận hàng và kiểm định đạt thì mới mở đặt giá. <strong>Thời hạn đấu giá chỉ bắt đầu tính từ lúc đó.</strong>
       </p>
       <!-- Đồng hồ đếm ngược tự chuyển sang trang Chi tiết phiên -->
       <div class="pcb-modal-countdown" aria-live="polite">

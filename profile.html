@@ -330,12 +330,26 @@
                 <span>Duyệt bài đăng</span>
                 <span class="pcb-tab__counter" id="count-admin-approvals">0</span>
               </button>
+              <!-- Nhận hàng: linh kiện người bán gửi tới chi nhánh kiểm định, chờ xác nhận đã nhận -->
+              <button type="button" class="pcb-tab" id="tab-btn-admin-shipments" role="tab" aria-selected="false"
+                aria-controls="tab-content-admin-shipments" data-tab="admin-shipments" data-group="admin" hidden>
+                <span class="lucide pcb-icon pcb-icon--package pcb-icon--s16" aria-hidden="true"></span>
+                <span>Nhận hàng</span>
+                <span class="pcb-tab__counter" id="count-admin-shipments">0</span>
+              </button>
               <!-- Quản lý phiên: chỉ Quản trị viên (ẩn / hiện lại / gỡ bài đăng) -->
               <button type="button" class="pcb-tab" id="tab-btn-admin-manage" role="tab" aria-selected="false"
                 aria-controls="tab-content-admin-manage" data-tab="admin-manage" data-group="admin" data-admin-only hidden>
                 <span class="lucide pcb-icon pcb-icon--layout-list pcb-icon--s16" aria-hidden="true"></span>
                 <span>Quản lý phiên</span>
                 <span class="pcb-tab__counter" id="count-admin-manage">0</span>
+              </button>
+              <!-- Tài khoản: chỉ Quản trị viên (cảnh báo / xóa / khôi phục tài khoản vi phạm) -->
+              <button type="button" class="pcb-tab" id="tab-btn-admin-accounts" role="tab" aria-selected="false"
+                aria-controls="tab-content-admin-accounts" data-tab="admin-accounts" data-group="admin" data-admin-only hidden>
+                <span class="lucide pcb-icon pcb-icon--user-x pcb-icon--s16" aria-hidden="true"></span>
+                <span>Tài khoản</span>
+                <span class="pcb-tab__counter" id="count-admin-accounts">0</span>
               </button>
               <!-- Báo cáo vi phạm từ người dùng: Quản trị viên và Kiểm định viên cùng xử lý -->
               <button type="button" class="pcb-tab" id="tab-btn-admin-reports" role="tab" aria-selected="false"
@@ -468,6 +482,30 @@
                 </div>
                 <h3 class="pcb-empty-state__title">Không có bài đăng nào đang chờ duyệt</h3>
                 <p class="pcb-empty-state__desc">Bài đăng mới của người bán sẽ hiện ở đây để Kiểm định viên đối chiếu thông tin trước khi gửi PCBid Lab kiểm định.</p>
+              </div>
+            </div>
+
+            <!-- ================= NHẬN HÀNG KIỂM ĐỊNH TẠI CHI NHÁNH ================= -->
+            <div class="pcb-tab-pane" id="tab-content-admin-shipments" role="tabpanel" aria-labelledby="tab-btn-admin-shipments" hidden>
+              <ul class="pcb-staff-list" id="grid-admin-shipments"></ul>
+              <div class="pcb-empty-state" id="empty-admin-shipments" hidden>
+                <div class="pcb-empty-state__icon">
+                  <span class="lucide pcb-icon pcb-icon--package pcb-icon--s40" aria-hidden="true"></span>
+                </div>
+                <h3 class="pcb-empty-state__title">Không có linh kiện nào chờ nhận</h3>
+                <p class="pcb-empty-state__desc">Bài đã duyệt mà người bán chưa gửi hoặc đang gửi linh kiện tới chi nhánh sẽ hiện ở đây.</p>
+              </div>
+            </div>
+
+            <!-- ================= TÀI KHOẢN NGƯỜI DÙNG (Chỉ Quản trị viên) ================= -->
+            <div class="pcb-tab-pane" id="tab-content-admin-accounts" role="tabpanel" aria-labelledby="tab-btn-admin-accounts" hidden>
+              <ul class="pcb-staff-list" id="grid-admin-accounts"></ul>
+              <div class="pcb-empty-state" id="empty-admin-accounts" hidden>
+                <div class="pcb-empty-state__icon">
+                  <span class="lucide pcb-icon pcb-icon--user pcb-icon--s40" aria-hidden="true"></span>
+                </div>
+                <h3 class="pcb-empty-state__title">Không có tài khoản phù hợp</h3>
+                <p class="pcb-empty-state__desc">Thử đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
               </div>
             </div>
 

@@ -2643,3 +2643,35 @@ a.pcb-pd__seller-avatar {
   color: #dc2626;
   text-decoration: underline;
 }
+
+/* Banner chờ gửi hàng kiểm định: nút chính và nhóm nút */
+.pcb-pd__pending-icon--approved {
+  color: #047857;
+}
+
+.pcb-pd__banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pcb-pd__banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-primary, #c9450a);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-pd__banner-btn:hover,
+.pcb-pd__banner-btn:focus-visible {
+  background-color: var(--color-primary-hover, #d94e07);
+}

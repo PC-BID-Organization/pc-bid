@@ -16,12 +16,16 @@ import { openChatWithUser } from './chat.js';
 import {
   isStaff, isAdmin, getStaffRole, getRoleLabel, ROLE_LABELS, isAwaitingReview, needsMoreInfo, isRejected,
   getLastStaffNote, getReviewQueue, getModerationState, isListingVisible, getReports, getOpenReportCount, getHiddenListingCount,
-  REPORT_STATUS_LABELS
+  REPORT_STATUS_LABELS, isAwaitingShipment, isShipmentOverdue, getShipmentQueue, isPubliclyListed,
+  getWarnings, getAccountDeletion, isUserDeleted
 } from './moderation.js';
 import {
   confirmApprove, promptRequestInfo, promptReject, promptSellerReply, promptHide, confirmUnhide, promptRemove,
-  openReportDialog, promptResolveReport
+  openReportDialog, promptResolveReport, promptShipToBranch, confirmReceived,
+  promptWarnUser, promptDeleteUser, confirmRestoreUser
 } from './review-actions.js';
+// Chi nhánh kiểm định nhận linh kiện của người bán
+import { getBranch, formatBranchAddress, openBranchFinder } from './branches.js';
 // Sổ địa chỉ nhận hàng
 import { getAddresses, openAddressForm, deleteAddress, setDefaultAddress, renderAddressInfo, getVerificationStatus } from './address-book.js';
 import { renderOrderCard, bindOrderActions, tickOrderCountdowns } from './order-view.js';
@@ -35,7 +39,7 @@ import { getParticipatingAuctions, getDepositHold, getAvailableBalance, checkBid
 import { USER_LIST_KEYS, getUserKey, isDemoUser, readUserList, writeUserList } from './user-data.js';
 // Tài khoản demo, avatar chữ cái và UID dùng chung
 import { DEMO_ACCOUNTS, MOCK_BIDDERS, getAvatarInitial, getUserUid, getGivenName, describeBidder, maskUid,
-  renderAvatarContent, saveAccount, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
+  renderAvatarContent, saveAccount, getAllAccounts, getPrivacy, formatBirthDate, findAccount, findAccountConflict, normalizePhone,
   hashPassword, verifyPassword, accountHasPassword, isDemoAccount, validateUsername, migrateUsername,
   validatePhoneNumber, validateEmailAddress } from './accounts.js';
 // Công cụ cắt ảnh đại diện
@@ -353,11 +357,12 @@ function getSellingItems() {
     const approvalSource = productMap.get(Number(item.id));
     if (approvalSource?.approvalStatus) {
       item.approvalStatus = approvalSource.approvalStatus;
-      if (['active', 'rejected', 'pending_approval'].includes(approvalSource.status) && ['active', 'rejected', 'pending_approval'].includes(item.status)) {
+      const flowStatuses = ['active', 'rejected', 'pending_approval', 'awaiting_shipment'];
+      if (flowStatuses.includes(approvalSource.status) && flowStatuses.includes(item.status)) {
         item.status = approvalSource.status;
       }
-      // Nhật ký kiểm duyệt, mốc kiểm định và giờ kết thúc được tính lại lúc duyệt
-      ['reviewLog', 'inspection', 'endTime', 'durationMs', 'reviewedBy'].forEach(field => {
+      // Nhật ký kiểm duyệt, mốc kiểm định, gửi hàng và giờ kết thúc được tính lại theo từng bước
+      ['reviewLog', 'inspection', 'endTime', 'durationMs', 'reviewedBy', 'shipment'].forEach(field => {
         if (field in approvalSource) item[field] = approvalSource[field];
       });
       if (approvalSource.endTime) item.endTimestamp = new Date(approvalSource.endTime).getTime();
@@ -574,6 +579,27 @@ function renderSellingCard(item) {
       <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-seller-reply="${item.id}">Gửi bổ sung</button>
       <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
     `;
+  } else if (isAwaitingShipment(item)) {
+    // Đã duyệt: người bán gửi linh kiện tới chi nhánh kiểm định
+    const ship = item.shipment || {};
+    const branch = getBranch(ship.branchId);
+    modifierClass = 'pcb-auction-card--selling-active';
+    if (ship.status === 'in_transit') {
+      badgeHtml = '<span class="pcb-status-badge pcb-status-badge--active">Đang chuyển tới chi nhánh</span>';
+      noteHtml = `<strong>${escapeHtml(branch?.name || '')}</strong> · ${escapeHtml(formatBranchAddress(branch))}${ship.trackingCode ? ` · ${escapeHtml(ship.carrier)} ${escapeHtml(ship.trackingCode)}` : ' · Mang trực tiếp'}`;
+      actionButtonsHtml = `
+        <button type="button" class="pcb-btn-detail" data-branch-received-demo="${item.id}">Giả lập chi nhánh nhận hàng (demo)</button>
+        <a href="${detailUrl}" class="pcb-btn-detail">Xem chi tiết</a>
+      `;
+    } else {
+      const overdue = isShipmentOverdue(item);
+      badgeHtml = `<span class="pcb-status-badge ${overdue ? 'pcb-status-badge--outbid' : 'pcb-status-badge--pending'}">${overdue ? 'Quá hạn gửi hàng' : 'Chờ gửi hàng kiểm định'}</span>`;
+      noteHtml = `Đã được duyệt. Gửi linh kiện tới chi nhánh kiểm định PCBid trước <strong>${new Date(ship.deadline || Date.now()).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}</strong>.`;
+      actionButtonsHtml = `
+        <button type="button" class="pcb-btn-primary pcb-btn-primary--compact" data-ship-to-branch="${item.id}">Gửi hàng kiểm định</button>
+        <button type="button" class="pcb-btn-detail" data-browse-branches>Tìm chi nhánh gần nhất</button>
+      `;
+    }
   } else if (isAwaitingReview(item)) {
     modifierClass = 'pcb-auction-card--selling-active';
     badgeHtml = '<span class="pcb-status-badge pcb-status-badge--pending">Chờ kiểm duyệt</span>';
@@ -647,7 +673,7 @@ function renderSellingCard(item) {
           ${escapeHtml(item.name)}
         </a>
         ${moderation.hidden && !moderation.removed ? `<p class="pcb-auction-card__review-note pcb-auction-card__review-note--warn">${icon('eye-off', { size: 13 })}<span>Đang tạm ẩn khỏi sàn: ${escapeHtml(moderation.hidden.reason || '')}</span></p>` : ''}
-        ${noteHtml ? `<p class="pcb-auction-card__review-note">${icon('message-square', { size: 13 })}<span>${noteHtml}</span></p>` : ''}
+        ${noteHtml ? `<p class="pcb-auction-card__review-note">${icon(isAwaitingShipment(item) ? 'truck' : 'message-square', { size: 13 })}<span>${noteHtml}</span></p>` : ''}
 
         <div class="pcb-auction-card__stats">
           <div class="pcb-stat-col">
@@ -660,10 +686,10 @@ function renderSellingCard(item) {
             <span class="pcb-stat-col__val">${formatVnd(item.startingPrice)}</span>
           </div>
 
-          ${isAwaitingReview(item) ? `
+          ${isAwaitingReview(item) || isAwaitingShipment(item) ? `
             <div class="pcb-stat-col">
               <span class="pcb-stat-col__lbl">Thời gian còn lại</span>
-              <span class="pcb-stat-col__val pcb-stat-col__val--muted">Bắt đầu sau khi duyệt</span>
+              <span class="pcb-stat-col__val pcb-stat-col__val--muted">${isAwaitingShipment(item) ? 'Bắt đầu khi kiểm định xong' : 'Bắt đầu sau khi duyệt'}</span>
             </div>
           ` : item.status === 'active' ? `
             <div class="pcb-stat-col">
@@ -848,6 +874,90 @@ function renderManageRow(item) {
 }
 
 /**
+ * Một linh kiện chờ tới chi nhánh kiểm định (tab Nhận hàng)
+ * @param {Object} item
+ * @returns {string}
+ */
+function renderShipmentRow(item) {
+  const ship = item.shipment || {};
+  const branch = getBranch(ship.branchId);
+  const sellerAcc = findAccount({ username: item.seller });
+  const inTransit = ship.status === 'in_transit';
+  const overdue = isShipmentOverdue(item);
+  const imageSrc = item.images?.[0] || 'images/placeholder-product.svg';
+  const dateText = iso => new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+  return `
+    <li class="pcb-staff-row${overdue ? ' pcb-staff-row--hidden' : ''}" data-id="${item.id}">
+      <img class="pcb-staff-row__img" src="${escapeHtml(imageSrc)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
+      <div class="pcb-staff-row__body">
+        <a class="pcb-staff-row__title" href="product-detail.html?id=${item.id}">${escapeHtml(item.name)}</a>
+        <span class="pcb-staff-row__meta">
+          <span class="pcb-staff-row__state pcb-staff-row__state--${inTransit ? 'visible' : 'hidden'}">${inTransit ? 'Đang chuyển tới' : overdue ? 'Quá hạn gửi hàng' : 'Người bán chưa gửi'}</span>
+          · Người bán: ${escapeHtml(sellerAcc?.fullname || item.seller || '---')}
+          · ${inTransit ? `Gửi lúc ${dateText(ship.sentAt)}` : `Hạn gửi ${dateText(ship.deadline)}`}
+        </span>
+        ${inTransit ? `<span class="pcb-staff-row__reason">${icon('map-pin', { size: 12 })} ${escapeHtml(branch?.name || '')} · ${ship.method === 'courier' ? `${escapeHtml(ship.carrier)} · Mã vận đơn <strong>${escapeHtml(ship.trackingCode)}</strong>` : 'Mang trực tiếp tới quầy'}</span>` : ''}
+      </div>
+      <div class="pcb-staff-row__actions">
+        ${inTransit ? `<button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--ok" data-ship-received="${item.id}">${icon('package', { size: 14 })} Đã nhận hàng</button>` : ''}
+        <a class="pcb-staff-row__btn" href="product-detail.html?id=${item.id}">${icon('search', { size: 14 })} Xem</a>
+      </div>
+    </li>
+  `;
+}
+
+/**
+ * Danh sách tài khoản người dùng cho tab Tài khoản (không gồm tài khoản đội ngũ PCBid)
+ * @returns {Array<Object>} Tài khoản kèm warnings, deletion, openReports
+ */
+function getManagedAccounts() {
+  const reports = getReports().filter(r => r.type === 'user');
+  return getAllAccounts()
+    .filter(acc => acc.username && !getStaffRole(acc))
+    .map(acc => ({
+      ...acc,
+      warnings: getWarnings(acc.username),
+      deletion: getAccountDeletion(acc.username),
+      openReports: reports.filter(r => r.status === 'open' && r.targetId === acc.username).length
+    }))
+    // Tài khoản bị báo cáo nhiều lên đầu, tài khoản đã xóa xuống cuối
+    .sort((a, b) => (Boolean(a.deletion) - Boolean(b.deletion)) || (b.openReports - a.openReports) || (b.warnings.length - a.warnings.length));
+}
+
+/**
+ * Một tài khoản trong tab Tài khoản của Quản trị viên
+ * @param {Object} acc - Kết quả getManagedAccounts
+ * @returns {string}
+ */
+function renderAccountRow(acc) {
+  const lastWarning = acc.warnings[acc.warnings.length - 1];
+  const avatar = renderAvatarContent(acc, 'pcb-staff-row__avatar-img');
+  return `
+    <li class="pcb-staff-row${acc.deletion ? ' pcb-staff-row--removed' : ''}" data-username="${escapeHtml(acc.username)}">
+      <span class="pcb-staff-row__avatar" aria-hidden="true">${avatar.startsWith('<img') ? avatar : escapeHtml(avatar)}</span>
+      <div class="pcb-staff-row__body">
+        <a class="pcb-staff-row__title" href="profile.html?user=${encodeURIComponent(acc.username)}">${escapeHtml(acc.fullname || acc.username)} <span class="pcb-staff-row__handle">@${escapeHtml(acc.username)}</span></a>
+        <span class="pcb-staff-row__meta">
+          <span class="pcb-staff-row__state pcb-staff-row__state--${acc.deletion ? 'removed' : 'visible'}">${acc.deletion ? 'Đã xóa' : 'Đang hoạt động'}</span>
+          · ${escapeHtml(acc.email || '')}
+          ${acc.warnings.length ? `<span class="pcb-staff-row__warn">${icon('triangle-alert', { size: 12 })} ${acc.warnings.length} cảnh báo</span>` : ''}
+          ${acc.openReports ? `<span class="pcb-staff-row__flag">${icon('flag', { size: 12 })} ${acc.openReports} báo cáo</span>` : ''}
+        </span>
+        ${acc.deletion
+          ? `<span class="pcb-staff-row__reason">Lý do xóa: ${escapeHtml(acc.deletion.reason)}</span>`
+          : lastWarning ? `<span class="pcb-staff-row__reason">Cảnh báo gần nhất: ${escapeHtml(lastWarning.reason)} (${timeAgo(lastWarning.at)}${lastWarning.seenAt ? ', đã xem' : ', chưa xem'})</span>` : ''}
+      </div>
+      <div class="pcb-staff-row__actions">
+        ${acc.deletion
+          ? `<button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--ok" data-account-action="restore" data-account="${escapeHtml(acc.username)}">${icon('circle-check', { size: 14 })} Khôi phục</button>`
+          : `<button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--warn" data-account-action="warn" data-account="${escapeHtml(acc.username)}">${icon('triangle-alert', { size: 14 })} Cảnh báo</button>
+             <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--danger" data-account-action="delete" data-account="${escapeHtml(acc.username)}">${icon('trash-2', { size: 14 })} Xóa tài khoản</button>`}
+      </div>
+    </li>
+  `;
+}
+
+/**
  * Một báo cáo vi phạm trong tab Báo cáo
  * @param {Object} report
  * @returns {string}
@@ -875,6 +985,9 @@ function renderReportRow(report) {
         <a class="pcb-staff-row__btn" href="${targetUrl}">${icon('search', { size: 14 })} Xem</a>
         ${open ? `
           ${isListing && isAdmin(getCurrentUser()) && !listingState?.hidden && !listingState?.removed ? `<button type="button" class="pcb-staff-row__btn" data-report-action="hide" data-report-id="${report.id}">${icon('eye-off', { size: 14 })} Ẩn bài</button>` : ''}
+          ${!isListing && isAdmin(getCurrentUser()) && !isUserDeleted(report.targetId) ? `
+            <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--warn" data-account-action="warn" data-account="${escapeHtml(report.targetId)}">${icon('triangle-alert', { size: 14 })} Cảnh báo</button>
+            <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--danger" data-account-action="delete" data-account="${escapeHtml(report.targetId)}">${icon('trash-2', { size: 14 })} Xóa TK</button>` : ''}
           <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--ok" data-report-action="resolved" data-report-id="${report.id}">${icon('circle-check', { size: 14 })} Đã xử lý</button>
           <button type="button" class="pcb-staff-row__btn" data-report-action="dismissed" data-report-id="${report.id}">${icon('circle-x', { size: 14 })} Không vi phạm</button>
         ` : ''}
@@ -966,7 +1079,9 @@ const TAB_GROUP = {
   selling: 'sell',
   'sell-orders': 'sell',
   'admin-approvals': 'admin',
+  'admin-shipments': 'admin',
   'admin-manage': 'admin',
+  'admin-accounts': 'admin',
   'admin-reports': 'admin'
 };
 let currentActiveTab = 'participating';
@@ -1563,9 +1678,16 @@ function updateCounters() {
   if (countReportsEl) countReportsEl.textContent = openReports;
   const countManageEl = document.getElementById('count-admin-manage');
   if (countManageEl) countManageEl.textContent = getHiddenListingCount();
+  // Linh kiện đang trên đường tới chi nhánh (cần xác nhận nhận hàng) và tài khoản bị báo cáo chưa xử lý
+  const inTransit = getShipmentQueue().filter(p => p.shipment?.status === 'in_transit').length;
+  const countShipEl = document.getElementById('count-admin-shipments');
+  if (countShipEl) countShipEl.textContent = inTransit;
+  const countAccEl = document.getElementById('count-admin-accounts');
+  if (countAccEl) countAccEl.textContent = new Set(getReports().filter(r => r.type === 'user' && r.status === 'open').map(r => r.targetId)).size;
   if (badgeAdminEl) {
-    badgeAdminEl.textContent = reviewWaiting + openReports;
-    badgeAdminEl.hidden = reviewWaiting + openReports === 0;
+    const waitingTotal = reviewWaiting + openReports + getShipmentQueue().filter(p => p.shipment?.status === 'in_transit').length;
+    badgeAdminEl.textContent = waitingTotal;
+    badgeAdminEl.hidden = waitingTotal === 0;
   }
 
   // Số thông báo chưa đọc
@@ -1595,6 +1717,7 @@ function renderFilterChips() {
     chips = [
       { id: 'all', label: 'Tất cả' },
       { id: 'review', icon: 'shield-check', label: 'Chờ duyệt' },
+      { id: 'ship', icon: 'truck', label: 'Chờ gửi hàng' },
       { id: 'active', icon: 'clock', label: 'Đang diễn ra' },
       { id: 'sold', icon: 'circle-check', label: 'Đã bán thành công' },
       { id: 'ended', icon: 'circle-x', label: 'Đã kết thúc' }
@@ -1604,6 +1727,19 @@ function renderFilterChips() {
       { id: 'all', label: 'Tất cả' },
       { id: 'pending', icon: 'clipboard-check', label: 'Chờ duyệt' },
       { id: 'info', icon: 'message-square', label: 'Chờ người bán bổ sung' }
+    ];
+  } else if (currentActiveTab === 'admin-shipments') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'in_transit', icon: 'truck', label: 'Đang chuyển tới' },
+      { id: 'awaiting_dropoff', icon: 'clock', label: 'Người bán chưa gửi' }
+    ];
+  } else if (currentActiveTab === 'admin-accounts') {
+    chips = [
+      { id: 'all', label: 'Tất cả' },
+      { id: 'reported', icon: 'flag', label: 'Bị báo cáo' },
+      { id: 'warned', icon: 'triangle-alert', label: 'Đã cảnh báo' },
+      { id: 'deleted', icon: 'trash-2', label: 'Đã xóa' }
     ];
   } else if (currentActiveTab === 'admin-manage') {
     chips = [
@@ -1683,7 +1819,8 @@ function renderCurrentAuctionTab() {
     const filtered = list.filter(item => {
       const matchKw = !kw || item.name.toLowerCase().includes(kw) || item.category.toLowerCase().includes(kw);
       const matchChip = currentFilterChip === 'all'
-        || (currentFilterChip === 'review' ? isAwaitingReview(item) : item.status === currentFilterChip);
+        || (currentFilterChip === 'review' ? isAwaitingReview(item)
+          : currentFilterChip === 'ship' ? isAwaitingShipment(item) : item.status === currentFilterChip);
       return matchKw && matchChip;
     });
 
@@ -1757,6 +1894,35 @@ function renderCurrentAuctionTab() {
     const empty = document.getElementById('empty-admin-approvals');
     if (grid && empty) {
       grid.innerHTML = filtered.map(renderAdminApprovalCard).join('');
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
+    }
+  } else if (currentActiveTab === 'admin-shipments') {
+    const filtered = getShipmentQueue().filter(p => {
+      const matchKw = !kw || `${p.name} ${p.seller} ${p.shipment?.trackingCode || ''}`.toLowerCase().includes(kw);
+      return matchKw && (currentFilterChip === 'all' || p.shipment?.status === currentFilterChip);
+    });
+    const grid = document.getElementById('grid-admin-shipments');
+    const empty = document.getElementById('empty-admin-shipments');
+    if (grid && empty) {
+      grid.innerHTML = filtered.map(renderShipmentRow).join('');
+      grid.hidden = !filtered.length;
+      empty.hidden = Boolean(filtered.length);
+    }
+  } else if (currentActiveTab === 'admin-accounts') {
+    const filtered = getManagedAccounts().filter(acc => {
+      const matchKw = !kw || `${acc.fullname} ${acc.username} ${acc.email}`.toLowerCase().includes(kw);
+      const chip = currentFilterChip;
+      const matchChip = chip === 'all'
+        || (chip === 'reported' && acc.openReports > 0)
+        || (chip === 'warned' && acc.warnings.length > 0)
+        || (chip === 'deleted' && acc.deletion);
+      return matchKw && matchChip;
+    });
+    const grid = document.getElementById('grid-admin-accounts');
+    const empty = document.getElementById('empty-admin-accounts');
+    if (grid && empty) {
+      grid.innerHTML = filtered.map(renderAccountRow).join('');
       grid.hidden = !filtered.length;
       empty.hidden = Boolean(filtered.length);
     }
@@ -1867,12 +2033,50 @@ function initStaffActions() {
     if (await promptResolveReport(report, action, staff)) refresh();
   });
 
-  // Người bán gửi phần bổ sung theo yêu cầu của Kiểm định viên
+  // Nhân viên chi nhánh xác nhận đã nhận linh kiện
+  document.getElementById('grid-admin-shipments')?.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-ship-received]');
+    const staff = getCurrentUser();
+    if (!btn || !isStaff(staff)) return;
+    const product = findProduct(btn.dataset.shipReceived);
+    if (product && await confirmReceived(product, staff)) refresh();
+  });
+
+  // Cảnh báo / xóa / khôi phục tài khoản (tab Tài khoản và báo cáo tài khoản)
+  const handleAccountAction = async e => {
+    const btn = e.target.closest('[data-account-action]');
+    const staff = getCurrentUser();
+    if (!btn || !isAdmin(staff)) return false;
+    const username = btn.dataset.account;
+    const account = findAccount({ username }) || { username, fullname: username };
+    const action = btn.dataset.accountAction;
+    const done = action === 'warn' ? await promptWarnUser(account, staff)
+      : action === 'delete' ? await promptDeleteUser(account, staff)
+        : await confirmRestoreUser(account);
+    if (done) refresh();
+    return true;
+  };
+  document.getElementById('grid-admin-accounts')?.addEventListener('click', handleAccountAction);
+  document.getElementById('grid-admin-reports')?.addEventListener('click', handleAccountAction);
+
+  // Người bán: gửi bổ sung, gửi hàng tới chi nhánh kiểm định, tra cứu chi nhánh, giả lập chi nhánh nhận hàng
   document.getElementById('grid-selling')?.addEventListener('click', async e => {
-    const btn = e.target.closest('[data-seller-reply]');
+    const seller = getCurrentUser();
+    const replyBtn = e.target.closest('[data-seller-reply]');
+    const shipBtn = e.target.closest('[data-ship-to-branch]');
+    const demoBtn = e.target.closest('[data-branch-received-demo]');
+    if (e.target.closest('[data-browse-branches]')) {
+      openBranchFinder({ mode: 'browse', defaultAddress: seller?.address || '' });
+      return;
+    }
+    const btn = replyBtn || shipBtn || demoBtn;
     if (!btn) return;
-    const product = findProduct(btn.dataset.sellerReply);
-    if (product && await promptSellerReply(product, getCurrentUser())) refresh();
+    const product = findProduct(btn.dataset.sellerReply || btn.dataset.shipToBranch || btn.dataset.branchReceivedDemo);
+    if (!product) return;
+    const done = replyBtn ? await promptSellerReply(product, seller)
+      : shipBtn ? await promptShipToBranch(product, seller)
+        : await confirmReceived(product, null);
+    if (done) refresh();
   });
 }
 
@@ -1953,6 +2157,12 @@ function applyHashRoute() {
   } else if (hash === '#admin-manage') {
     switchSection('section-auctions');
     switchAuctionTab('admin-manage');
+  } else if (hash === '#admin-shipments') {
+    switchSection('section-auctions');
+    switchAuctionTab('admin-shipments');
+  } else if (hash === '#admin-accounts' || hash === '#accounts') {
+    switchSection('section-auctions');
+    switchAuctionTab('admin-accounts');
   } else if (hash === '#admin-reports' || hash === '#reports') {
     switchSection('section-auctions');
     switchAuctionTab('admin-reports');
@@ -2282,23 +2492,57 @@ async function renderPublicProfile(username) {
 
   // Thẻ vai trò nổi bật cạnh tên với tài khoản Quản trị viên / Kiểm định viên
   const staffRole = getStaffRole(account);
-  if (nameEl && staffRole) {
+  if (nameEl && staffRole && !nameEl.querySelector('.pcb-role-badge')) {
     nameEl.insertAdjacentHTML('beforeend', ` <span class="pcb-role-badge pcb-role-badge--${staffRole}">${icon('shield-check', { size: 12 })}${ROLE_LABELS[staffRole]}</span>`);
   }
 
   // Nút báo cáo tài khoản: ẩn với chính mình và với tài khoản của đội ngũ PCBid
   const reportBtn = document.getElementById('public-report-btn');
-  if (reportBtn) {
-    reportBtn.hidden = isSelf || Boolean(staffRole) || isStaff(viewer);
+  if (reportBtn) reportBtn.hidden = isSelf || Boolean(staffRole) || isStaff(viewer);
+  if (reportBtn && !reportBtn.dataset.bound) {
+    reportBtn.dataset.bound = '1';
     reportBtn.addEventListener('click', () => {
       openReportDialog({ type: 'user', targetId: username, targetName: account.fullname || username }, viewer && viewer.isLoggedIn !== false ? viewer : null);
     });
   }
 
+  // Tài khoản đã bị Quản trị viên xóa: hiện thông báo, không nhắn tin / báo cáo được nữa
+  const deletion = getAccountDeletion(username);
+  const headEl = document.querySelector('.pcb-public__head');
+  document.querySelector('.pcb-public__deleted')?.remove();
+  if (deletion && headEl) {
+    headEl.insertAdjacentHTML('afterend', `<p class="pcb-public__deleted">${icon('user-x', { size: 16 })}<span>Tài khoản này đã bị Quản trị viên PCBid xóa do vi phạm quy chế hoạt động của sàn.${isAdmin(viewer) ? ` Lý do: ${escapeHtml(deletion.reason)}` : ''}</span></p>`);
+    if (reportBtn) reportBtn.hidden = true;
+  }
+
+  // Quản trị viên: cảnh báo / xóa / khôi phục tài khoản ngay trên hồ sơ công khai
+  const actionsEl = document.querySelector('.pcb-public__actions');
+  actionsEl?.querySelector('.pcb-public__admin-actions')?.remove();
+  if (actionsEl && isAdmin(viewer) && !isSelf && !staffRole && findAccount({ username })) {
+    const warnCount = getWarnings(username).length;
+    actionsEl.insertAdjacentHTML('beforeend', `
+      <div class="pcb-public__admin-actions">
+        ${deletion
+          ? `<button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--ok" data-account-action="restore" data-account="${escapeHtml(username)}">${icon('circle-check', { size: 14 })} Khôi phục tài khoản</button>`
+          : `<button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--warn" data-account-action="warn" data-account="${escapeHtml(username)}">${icon('triangle-alert', { size: 14 })} Cảnh báo${warnCount ? ` (${warnCount})` : ''}</button>
+             <button type="button" class="pcb-staff-row__btn pcb-staff-row__btn--danger" data-account-action="delete" data-account="${escapeHtml(username)}">${icon('trash-2', { size: 14 })} Xóa tài khoản</button>`}
+      </div>`);
+    actionsEl.querySelector('.pcb-public__admin-actions').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-account-action]');
+      if (!btn) return;
+      const action = btn.dataset.accountAction;
+      const done = action === 'warn' ? await promptWarnUser(account, viewer)
+        : action === 'delete' ? await promptDeleteUser(account, viewer)
+          : await confirmRestoreUser(account);
+      if (done) renderPublicProfile(username);
+    });
+  }
+
   // Nút nhắn tin: ẩn khi xem hồ sơ của chính mình; chưa đăng nhập thì mời đăng nhập
   const chatBtn = document.getElementById('public-chat-btn');
-  if (chatBtn) {
-    chatBtn.hidden = isSelf;
+  if (chatBtn) chatBtn.hidden = isSelf || Boolean(deletion);
+  if (chatBtn && !chatBtn.dataset.bound) {
+    chatBtn.dataset.bound = '1';
     chatBtn.addEventListener('click', async () => {
       if (openChatWithUser(username)) return;
       const goLogin = await showConfirm({
@@ -2338,7 +2582,7 @@ async function renderPublicProfile(username) {
   const products = await loadAllAuctions();
   const now = Date.now();
   // Chỉ hiện phiên đã được duyệt và không bị Quản trị viên ẩn / gỡ
-  const selling = products.filter(p => p.seller === username && !isAwaitingReview(p) && !isRejected(p) && isListingVisible(p));
+  const selling = products.filter(p => p.seller === username && isPubliclyListed(p) && isListingVisible(p));
   fillPublicBlock('public-selling', privacy.selling, selling.map(p => {
     const closed = isAuctionClosed(p) || getAuctionEndTimestamp(p) <= now;
     const label = p.status === 'sold' ? 'Đã bán' : closed ? 'Đã kết thúc' : 'Đang diễn ra';
@@ -2397,7 +2641,7 @@ function switchAuctionTab(tabName) {
   if (!TAB_GROUP[tabName]) tabName = 'participating';
   const viewer = getCurrentUser();
   if (TAB_GROUP[tabName] === 'admin' && !isStaff(viewer)) tabName = 'participating';
-  if (tabName === 'admin-manage' && !isAdmin(viewer)) tabName = 'admin-approvals';
+  if ((tabName === 'admin-manage' || tabName === 'admin-accounts') && !isAdmin(viewer)) tabName = 'admin-approvals';
   currentActiveTab = tabName;
   currentFilterChip = 'all';
 

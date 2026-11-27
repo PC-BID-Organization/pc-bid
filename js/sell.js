@@ -16,6 +16,9 @@ import { INSPECTION_MS, createInspectionRequest } from './inspection.js';
 import { enhanceSelects } from './custom-select.js';
 // Tìm tài khoản Kiểm định viên demo cho nút duyệt nhanh sau khi đăng
 import { findAccount } from './accounts.js';
+// Tra cứu chi nhánh kiểm định PCBid gần nhất
+import { openBranchFinder } from './branches.js';
+import { getDefaultAddress } from './address-book.js';
 
 
 /* ==========================================================================
@@ -466,6 +469,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initCatalogueEvents();
   initPriceInputs();
+  // Nút tra cứu chi nhánh kiểm định gần nhất (chỉ xem, chọn chi nhánh khi bài đã được duyệt)
+  document.getElementById('btn-find-branch')?.addEventListener('click', () => {
+    const user = readLoggedInUser();
+    openBranchFinder({ mode: 'browse', defaultAddress: (user && getDefaultAddress(user)?.address) || user?.address || '' });
+  });
   initFormInputsSync();
   initFormSubmitHandler();
   initPhotoPicker();

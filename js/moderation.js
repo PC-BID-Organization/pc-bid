@@ -7,9 +7,13 @@
      và thêm quyền quản lý phiên: ẩn / hiện lại / gỡ bài đăng.
    - Luồng một bài đăng mới:
        Chờ kiểm duyệt → (Yêu cầu bổ sung ⇄ Người bán phản hồi) → Duyệt
-       → PCBid Lab kiểm định (INSPECTION_MS) → mở đặt giá, đồng hồ bắt đầu chạy.
-     Thời hạn phiên chỉ được tính từ lúc duyệt, nên bài chờ duyệt lâu không bị
-     mất thời gian đấu giá.
+       → Chờ gửi hàng: người bán gửi linh kiện tới chi nhánh kiểm định PCBid
+       → Chi nhánh xác nhận đã nhận hàng → PCBid Lab kiểm định (INSPECTION_MS)
+       → mở đặt giá, đồng hồ bắt đầu chạy.
+     Thời hạn phiên chỉ được tính từ lúc chi nhánh nhận hàng, nên bài chờ duyệt
+     hay chờ vận chuyển lâu không bị mất thời gian đấu giá.
+   - Quản trị viên cảnh báo / xóa / khôi phục tài khoản vi phạm
+     (pcbid_account_moderation).
    - Ẩn / gỡ bài lưu ở pcbid_moderation (áp dụng được cả cho phiên có sẵn trong
      danh mục products.json lẫn phiên người dùng tự đăng).
    - Báo cáo bài đăng / tài khoản lưu ở pcbid_reports, hiện cho cả Quản trị viên
@@ -22,6 +26,10 @@ const PRODUCTS_KEY = 'pcbid_products';
 const SELLING_PREFIX = 'pcbid_my_auctions_selling';
 const MODERATION_KEY = 'pcbid_moderation';
 const REPORTS_KEY = 'pcbid_reports';
+const ACCOUNT_MODERATION_KEY = 'pcbid_account_moderation';
+
+// Hạn người bán phải gửi linh kiện tới chi nhánh sau khi bài được duyệt (3 ngày)
+export const SHIPMENT_DEADLINE_MS = 3 * 24 * 3600 * 1000;
 
 // Thời hạn mặc định khi phiên cũ chưa lưu durationMs (3 ngày)
 const DEFAULT_DURATION_MS = 3 * 24 * 3600 * 1000;
@@ -164,7 +172,7 @@ export function getReviewQueue() {
 }
 
 // Các trường trạng thái cần chép sang bản sao trong danh sách "Đã đăng bán" của người bán
-const MIRRORED_FIELDS = ['status', 'approvalStatus', 'inspection', 'endTime', 'endTimestamp', 'reviewLog', 'reviewedBy', 'reviewedAt', 'durationMs'];
+const MIRRORED_FIELDS = ['status', 'approvalStatus', 'inspection', 'endTime', 'endTimestamp', 'reviewLog', 'reviewedBy', 'reviewedAt', 'durationMs', 'shipment'];
 
 /**
  * Cập nhật một bài đăng trong pcbid_products và bản sao ở danh sách đăng bán của mọi tài khoản
@@ -223,7 +231,7 @@ function getDurationMs(product) {
 }
 
 /**
- * Duyệt bài đăng: chuyển sang PCBid Lab kiểm định ngay, đồng hồ đấu giá chạy khi kiểm định xong
+ * Duyệt bài đăng: người bán cần gửi linh kiện tới chi nhánh kiểm định PCBid (chưa kiểm định, chưa tính giờ)
  * @param {number|string} id
  * @param {Object} staff - Kiểm định viên / Quản trị viên đang duyệt
  * @returns {Object|null}
@@ -231,13 +239,74 @@ function getDurationMs(product) {
 export function approveListing(id, staff) {
   return updateProduct(id, p => {
     const now = Date.now();
-    const duration = getDurationMs(p);
-    p.status = 'active';
+    p.status = 'awaiting_shipment';
     p.approvalStatus = 'approved';
-    p.durationMs = duration;
+    p.durationMs = getDurationMs(p);
     p.reviewedBy = staffInfo(staff);
     p.reviewedAt = new Date(now).toISOString();
-    // Mốc kiểm định tính từ lúc duyệt (trước đây tính từ lúc đăng nên đồng hồ chạy trước khi duyệt)
+    p.endTime = null;
+    delete p.inspection;
+    p.shipment = { status: 'awaiting_dropoff', approvedAt: new Date(now).toISOString(), deadline: new Date(now + SHIPMENT_DEADLINE_MS).toISOString() };
+    pushLog(p, { by: staffInfo(staff), action: 'approve' });
+    return p;
+  });
+}
+
+/**
+ * Bài đã duyệt, đang chờ linh kiện tới chi nhánh kiểm định (chưa gửi hoặc đang vận chuyển)
+ * @param {Object} product
+ * @returns {boolean}
+ */
+export function isAwaitingShipment(product) {
+  return product?.status === 'awaiting_shipment';
+}
+
+/**
+ * Bài đăng đã lên sàn công khai (đã duyệt, linh kiện đã tới chi nhánh)
+ * @param {Object} product
+ * @returns {boolean}
+ */
+export function isPubliclyListed(product) {
+  return !isAwaitingReview(product) && !isRejected(product) && !isAwaitingShipment(product);
+}
+
+/**
+ * Người bán xác nhận đã gửi / mang linh kiện tới chi nhánh kiểm định
+ * @param {number|string} id
+ * @param {Object} info
+ * @param {string} info.branchId - Chi nhánh nhận hàng
+ * @param {'dropoff'|'courier'} info.method - Mang trực tiếp hoặc gửi qua đơn vị vận chuyển
+ * @param {string} [info.carrier] - Đơn vị vận chuyển
+ * @param {string} [info.trackingCode] - Mã vận đơn
+ * @returns {Object|null}
+ */
+export function submitShipment(id, { branchId, method, carrier = '', trackingCode = '' }) {
+  return updateProduct(id, p => {
+    p.shipment = {
+      ...(p.shipment || {}),
+      status: 'in_transit',
+      branchId,
+      method,
+      carrier: method === 'courier' ? carrier : '',
+      trackingCode: method === 'courier' ? String(trackingCode).trim().toUpperCase() : '',
+      sentAt: new Date().toISOString()
+    };
+    return p;
+  });
+}
+
+/**
+ * Chi nhánh xác nhận đã nhận linh kiện: bắt đầu kiểm định, giờ kết thúc tính từ lúc kiểm định xong
+ * @param {number|string} id
+ * @param {Object|null} staff - Nhân viên xác nhận (null khi giả lập bằng nút demo)
+ * @returns {Object|null}
+ */
+export function confirmBranchReceived(id, staff = null) {
+  return updateProduct(id, p => {
+    const now = Date.now();
+    const duration = getDurationMs(p);
+    p.status = 'active';
+    p.shipment = { ...(p.shipment || {}), status: 'received', receivedAt: new Date(now).toISOString(), receivedBy: staff ? staffInfo(staff) : null };
     p.inspection = createInspectionRequest(now);
     if (p.endMode === 'ceiling_only') {
       p.endTime = null;
@@ -245,9 +314,29 @@ export function approveListing(id, staff) {
       p.endTime = new Date(now + INSPECTION_MS + duration).toISOString();
       p.endTimestamp = now + INSPECTION_MS + duration;
     }
-    pushLog(p, { by: staffInfo(staff), action: 'approve' });
     return p;
   });
+}
+
+/**
+ * Các bài đang chờ linh kiện tới chi nhánh (đang vận chuyển lên đầu)
+ * @returns {Array}
+ */
+export function getShipmentQueue() {
+  const order = { in_transit: 0, awaiting_dropoff: 1 };
+  return readProducts()
+    .filter(isAwaitingShipment)
+    .sort((a, b) => (order[a.shipment?.status] ?? 2) - (order[b.shipment?.status] ?? 2));
+}
+
+/**
+ * Bài đã quá hạn gửi hàng mà người bán chưa gửi
+ * @param {Object} product
+ * @returns {boolean}
+ */
+export function isShipmentOverdue(product) {
+  return isAwaitingShipment(product) && product.shipment?.status === 'awaiting_dropoff'
+    && new Date(product.shipment.deadline || 0).getTime() < Date.now();
 }
 
 /**
@@ -356,7 +445,7 @@ export function isListingVisible(productOrId) {
  */
 export function filterVisibleListings(products) {
   const data = readModeration();
-  return (products || []).filter(p => !data.hidden[p.id] && !data.removed[p.id]);
+  return (products || []).filter(p => !data.hidden[p.id] && !data.removed[p.id] && isPubliclyListed(p));
 }
 
 /**
@@ -394,11 +483,12 @@ export function unhideListing(id) {
  * @param {number|string} id
  * @param {Object} staff
  * @param {string} reason
+ * @param {'manual'|'account_deleted'} [source] - Gỡ thủ công hay do tài khoản người bán bị xóa
  */
-export function removeListing(id, staff, reason = '') {
+export function removeListing(id, staff, reason = '', source = 'manual') {
   const data = readModeration();
   delete data.hidden[id];
-  data.removed[id] = { at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim() };
+  data.removed[id] = { at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim(), source };
   writeModeration(data);
 }
 
@@ -516,4 +606,139 @@ export function resolveReport(id, status, staff, note = '') {
   report.note = String(note).trim();
   writeReports(list);
   return report;
+}
+
+/* ==========================================================================
+   CẢNH BÁO / XÓA TÀI KHOẢN (QUẢN TRỊ VIÊN)
+   ========================================================================== */
+
+// Lý do thường gặp khi cảnh báo / xóa tài khoản
+export const ACCOUNT_VIOLATIONS = [
+  'Đăng bán hàng không đúng mô tả, nghi ngờ hàng giả',
+  'Thắng đấu giá nhưng không thanh toán',
+  'Đặt giá ảo, thông đồng đẩy giá',
+  'Lừa đảo hoặc giao dịch ngoài sàn',
+  'Quấy rối, ngôn từ không phù hợp khi nhắn tin',
+  'Vi phạm khác quy chế hoạt động của PCBid'
+];
+
+/**
+ * Đọc dữ liệu cảnh báo / xóa tài khoản
+ * @returns {{warnings: Object, deleted: Object}}
+ */
+function readAccountModeration() {
+  try {
+    const data = JSON.parse(localStorage.getItem(ACCOUNT_MODERATION_KEY) || '{}');
+    return { warnings: data.warnings || {}, deleted: data.deleted || {} };
+  } catch {
+    return { warnings: {}, deleted: {} };
+  }
+}
+
+/**
+ * Ghi dữ liệu cảnh báo / xóa tài khoản
+ * @param {{warnings: Object, deleted: Object}} data
+ */
+function writeAccountModeration(data) {
+  localStorage.setItem(ACCOUNT_MODERATION_KEY, JSON.stringify(data));
+}
+
+/**
+ * Danh sách cảnh báo của một tài khoản (mới nhất cuối)
+ * @param {string} username
+ * @returns {Array<{id: string, at: string, by: Object, reason: string, seenAt: string|null}>}
+ */
+export function getWarnings(username) {
+  return readAccountModeration().warnings[username] || [];
+}
+
+/**
+ * Cảnh báo người dùng chưa xem (hiện thông báo khi họ vào trang)
+ * @param {string} username
+ * @returns {Array}
+ */
+export function getUnseenWarnings(username) {
+  return getWarnings(username).filter(w => !w.seenAt);
+}
+
+/**
+ * Đánh dấu người dùng đã đọc mọi cảnh báo
+ * @param {string} username
+ */
+export function markWarningsSeen(username) {
+  const data = readAccountModeration();
+  const now = new Date().toISOString();
+  (data.warnings[username] || []).forEach(w => { if (!w.seenAt) w.seenAt = now; });
+  writeAccountModeration(data);
+}
+
+/**
+ * Gửi cảnh báo tới một tài khoản
+ * @param {string} username
+ * @param {Object} staff - Quản trị viên
+ * @param {string} reason
+ * @returns {Object} Cảnh báo vừa tạo
+ */
+export function warnUser(username, staff, reason) {
+  const data = readAccountModeration();
+  const warning = { id: `wn_${Date.now()}`, at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim(), seenAt: null };
+  data.warnings[username] = [...(data.warnings[username] || []), warning];
+  writeAccountModeration(data);
+  return warning;
+}
+
+/**
+ * Thông tin xóa tài khoản (null nếu tài khoản còn hoạt động)
+ * @param {string} username
+ * @returns {Object|null}
+ */
+export function getAccountDeletion(username) {
+  return readAccountModeration().deleted[username] || null;
+}
+
+/**
+ * Tài khoản đã bị Quản trị viên xóa
+ * @param {Object|string|null} userOrUsername
+ * @returns {boolean}
+ */
+export function isUserDeleted(userOrUsername) {
+  const username = typeof userOrUsername === 'string' ? userOrUsername : userOrUsername?.username;
+  return Boolean(username && readAccountModeration().deleted[username]);
+}
+
+/**
+ * Xóa tài khoản vi phạm: không đăng nhập được nữa, các phiên đang đăng / chờ duyệt bị gỡ khỏi sàn.
+ * Dữ liệu vẫn được giữ lại (xóa mềm) để Quản trị viên có thể khôi phục.
+ * @param {string} username
+ * @param {Object} staff
+ * @param {string} reason
+ * @returns {number} Số bài đăng bị gỡ theo
+ */
+export function deleteUser(username, staff, reason) {
+  const data = readAccountModeration();
+  data.deleted[username] = { at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim() };
+  writeAccountModeration(data);
+  let removed = 0;
+  readProducts()
+    .filter(p => p.seller === username && !['sold', 'ended'].includes(p.status) && !getModerationState(p.id).removed)
+    .forEach(p => {
+      removeListing(p.id, staff, `Tài khoản người bán bị xóa: ${reason}`, 'account_deleted');
+      removed += 1;
+    });
+  return removed;
+}
+
+/**
+ * Khôi phục tài khoản đã xóa, hiện lại các bài bị gỡ theo khi xóa tài khoản
+ * @param {string} username
+ */
+export function restoreUser(username) {
+  const data = readAccountModeration();
+  delete data.deleted[username];
+  writeAccountModeration(data);
+  const mod = readModeration();
+  readProducts().filter(p => p.seller === username).forEach(p => {
+    if (mod.removed[p.id]?.source === 'account_deleted') delete mod.removed[p.id];
+  });
+  writeModeration(mod);
 }
