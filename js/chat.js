@@ -990,7 +990,7 @@ function renderThread() {
     ${peer.staffRole ? `
       <p class="pcb-chat__staff-note pcb-chat__staff-note--${peer.staffRole}">
         ${icon('shield-check', { size: 14 })}
-        <span>${escapeHtml(peer.name)} là <strong>${ROLE_LABELS[peer.staffRole]}</strong> chính thức của PCBid. Nhân viên PCBid không bao giờ yêu cầu bạn chuyển tiền ngoài sàn.</span>
+        <span><strong>${ROLE_LABELS[peer.staffRole]} chính thức của PCBid</strong> <span>Nhân viên PCBid không bao giờ yêu cầu bạn chuyển tiền ngoài sàn.</span></span>
       </p>` : ''}
     <div class="pcb-chat__messages">
       ${messages.length ? '' : `<p class="pcb-chat__hint">Hãy hỏi ${role === 'buyer' ? 'người bán' : 'người mua'} về tình trạng linh kiện, bảo hành hoặc giao hàng.</p>`}

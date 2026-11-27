@@ -713,7 +713,7 @@ function capNhatTrangThaiDuyetAdmin() {
       <div class="pcb-pd__pending-text">
         <strong>${needsMoreInfo(sp) ? 'Bài đăng đang chờ người bán bổ sung thông tin' : 'Bài đăng đang chờ Kiểm định viên PCBid duyệt'}</strong>
         <p>${laChuPhien
-          ? 'Sau khi được duyệt, linh kiện sẽ được PCBid Lab kiểm định. Kiểm định đạt thì phiên mở đặt giá và thời hạn đấu giá bắt đầu tính từ lúc đó.'
+          ? 'Sau khi được duyệt, bạn gửi linh kiện tới chi nhánh kiểm định PCBid. Chi nhánh nhận hàng và kiểm định đạt thì phiên mở đặt giá, thời hạn đấu giá bắt đầu tính từ lúc đó.'
           : 'PCBid đang đối chiếu thông tin và bằng chứng có hàng của người bán trước khi mở đấu giá công khai.'}</p>
         <button type="button" class="pcb-pd__demo-admin-switch" id="btn-demo-switch-inspector">${icon('log-in', { size: 14 })} Chuyển sang tài khoản Kiểm định viên để duyệt (demo)</button>
       </div>`;

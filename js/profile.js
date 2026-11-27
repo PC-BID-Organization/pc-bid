@@ -782,7 +782,7 @@ function renderAdminApprovalCard(item) {
       <div class="pcb-auction-card__body">
         <div class="pcb-auction-card__top-row">
           <span class="pcb-status-badge ${waitingInfo ? 'pcb-status-badge--active' : 'pcb-status-badge--pending'}">${waitingInfo ? 'Chờ người bán bổ sung' : 'Chờ duyệt'}</span>
-          <span class="pcb-admin-review__seller">Người bán: <a href="profile.html?user=${encodeURIComponent(item.seller || '')}"><strong>${escapeHtml(sellerName)}</strong></a> · Gửi ${timeAgo(item.submittedAt || new Date().toISOString())}</span>
+          <span class="pcb-admin-review__seller">Người bán: <a href="profile.html?user=${encodeURIComponent(item.seller || '')}"><strong>${escapeHtml(sellerName)}</strong></a> · <span>${timeAgo(item.submittedAt || new Date().toISOString())}</span></span>
         </div>
 
         <a href="${detailUrl}" class="pcb-auction-card__title" title="${escapeHtml(item.name)}">

@@ -28,7 +28,7 @@ export const LANGUAGES = [
 // Thuộc tính chứa chữ hiển thị cần dịch
 const ATTRS = ['placeholder', 'title', 'aria-label', 'data-tooltip'];
 // Vùng không dịch: nội dung người dùng tự nhập (tin nhắn), mã nguồn, vùng đánh dấu translate="no"
-const SKIP_SELECTOR = 'script, style, textarea, code, pre, [translate="no"], [data-no-i18n], .pcb-chat__bubble';
+const SKIP_SELECTOR = 'script, style, textarea, code, pre, [translate="no"], [data-no-i18n], .pcb-chat__bubble, .pcb-chat__item-last';
 
 // Từ điển tra cứu nhanh theo câu tiếng Việt đã chuẩn hóa khoảng trắng
 const DICTS = { en: new Map(), ja: new Map() };
