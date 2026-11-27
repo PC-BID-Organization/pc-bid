@@ -6,6 +6,8 @@
  */
 
 // Tài khoản demo và tiện ích tên / avatar dùng chung
+// Tài khoản bị Quản trị viên xóa không đăng nhập được
+import { getAccountDeletion } from './moderation.js';
 import { DEMO_ACCOUNTS, getGivenName, getAllAccounts, findAccount, findAccountConflict, normalizePhone,
   hashPassword, verifyPassword, accountHasPassword, makeUniqueUsername, saveAccount } from './accounts.js';
 
@@ -180,6 +182,13 @@ function initLoginForm() {
     if (!matched) {
       inputUsername?.classList.add('is-invalid');
       showFieldError(inputPassword, 'err-login-password', loginError);
+      return;
+    }
+    // Tài khoản đã bị Quản trị viên xóa: không cho đăng nhập
+    const deletion = getAccountDeletion(matched.username);
+    if (deletion) {
+      inputUsername?.classList.add('is-invalid');
+      showFieldError(inputPassword, 'err-login-password', `Tài khoản này đã bị Quản trị viên PCBid xóa do vi phạm quy chế. Lý do: ${deletion.reason}`);
       return;
     }
     if (!accountHasPassword(matched)) {

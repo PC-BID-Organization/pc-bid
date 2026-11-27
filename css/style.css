@@ -250,6 +250,319 @@
   color: #dc2626;
 }
 
+/* ==========================================================================
+   HỘP THOẠI TÌM CHI NHÁNH KIỂM ĐỊNH PCBID (branches.js)
+   ========================================================================== */
+.pcb-branch-finder {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(11, 28, 48, 0.55);
+  animation: pcbDialogFade 0.15s ease;
+}
+
+.pcb-branch-finder__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(11, 28, 48, 0.25);
+  animation: pcbDialogPop 0.18s ease;
+}
+
+.pcb-branch-finder__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pcb-branch-finder__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-branch-finder__title .pcb-icon {
+  color: var(--color-primary);
+}
+
+.pcb-branch-finder__close {
+  display: inline-flex;
+  padding: 6px;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pcb-branch-finder__close:hover,
+.pcb-branch-finder__close:focus-visible {
+  background-color: #f1f5f9;
+}
+
+.pcb-branch-finder__intro,
+.pcb-branch-finder__origin {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.pcb-branch-finder__origin {
+  font-size: 0.78rem;
+}
+
+.pcb-branch-finder__search {
+  display: flex;
+  gap: 8px;
+}
+
+.pcb-branch-finder__search-box {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 12px;
+  color: var(--color-text-muted);
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.pcb-branch-finder__search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.pcb-branch-finder__input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.pcb-branch-finder__locate {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pcb-branch-finder__locate:hover,
+.pcb-branch-finder__locate:focus-visible {
+  background-color: #ffedd5;
+}
+
+.pcb-branch-finder__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  margin: 0;
+  padding: 0 2px 2px 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.pcb-branch-finder__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pcb-branch-finder__item:hover {
+  background-color: #f8fafc;
+}
+
+.pcb-branch-finder__item--selected {
+  border-color: var(--color-primary);
+  background-color: #fff7ed;
+}
+
+.pcb-branch-finder__item input {
+  margin-top: 4px;
+  accent-color: var(--color-primary);
+}
+
+.pcb-branch-finder__item-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pcb-branch-finder__item-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
+.pcb-branch-finder__item-name {
+  font-size: 0.9rem;
+  color: var(--color-text-main);
+}
+
+.pcb-branch-finder__distance {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #047857;
+  white-space: nowrap;
+  background-color: #ecfdf5;
+  border-radius: 999px;
+}
+
+.pcb-branch-finder__item-line,
+.pcb-branch-finder__item-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.pcb-branch-finder__item-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.pcb-branch-finder__empty {
+  padding: 16px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.pcb-branch-finder__method {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.pcb-branch-finder__legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.pcb-branch-finder__choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pcb-branch-finder__choice:has(input:checked) {
+  border-color: var(--color-primary);
+  background-color: #fff7ed;
+}
+
+.pcb-branch-finder__choice input {
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+}
+
+.pcb-branch-finder__choice span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pcb-branch-finder__choice small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.pcb-branch-finder__courier {
+  display: flex;
+  gap: 8px;
+}
+
+.pcb-branch-finder__select,
+.pcb-branch-finder__tracking {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.pcb-branch-finder__error {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.pcb-branch-finder__actions {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .pcb-branch-finder__card {
+    padding: 16px;
+  }
+
+  .pcb-branch-finder__courier {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-branch-finder,
+  .pcb-branch-finder__card {
+    animation: none;
+  }
+}
+
 @keyframes pcbDialogFade {
   from { opacity: 0; }
   to { opacity: 1; }

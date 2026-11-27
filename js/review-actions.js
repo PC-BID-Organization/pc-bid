@@ -10,10 +10,14 @@
 import {
   approveListing, requestMoreInfo, rejectListing, submitSellerReply,
   hideListing, unhideListing, removeListing, submitReport, resolveReport,
-  getLastStaffNote, getRoleLabel, REPORT_REASONS
+  getLastStaffNote, getRoleLabel, REPORT_REASONS,
+  submitShipment, confirmBranchReceived, SHIPMENT_DEADLINE_MS,
+  warnUser, deleteUser, restoreUser, getWarnings, ACCOUNT_VIOLATIONS
 } from './moderation.js';
 import { showAlert, showConfirm, showFormDialog } from './dialog.js';
 import { sendDirectMessage } from './chat.js';
+import { openBranchFinder, getBranch, formatBranchAddress } from './branches.js';
+import { getDefaultAddress } from './address-book.js';
 
 // Lý do từ chối bài đăng thường gặp
 const REJECT_REASONS = [
@@ -58,7 +62,7 @@ function signature(staff) {
 export async function confirmApprove(product, staff) {
   const ok = await showConfirm({
     title: 'Duyệt bài đăng?',
-    message: `"${product.name}" sẽ được gửi sang PCBid Lab kiểm định. Kiểm định đạt thì phiên mở đặt giá và đồng hồ đấu giá bắt đầu chạy.`,
+    message: `Người bán sẽ có ${Math.round(SHIPMENT_DEADLINE_MS / 86400000)} ngày để gửi "${product.name}" tới chi nhánh kiểm định PCBid. Chi nhánh nhận hàng xong mới kiểm định, đạt thì phiên mở đặt giá và đồng hồ đấu giá bắt đầu chạy.`,
     confirmText: 'Duyệt bài đăng',
     cancelText: 'Để sau',
     tone: 'success'
@@ -66,10 +70,10 @@ export async function confirmApprove(product, staff) {
   if (!ok) return false;
   approveListing(product.id, staff);
   sendDirectMessage(staff, product.seller, {
-    text: `Chào bạn, mình là ${signature(staff)}. Bài đăng "${product.name}" đã được duyệt và đang được PCBid Lab kiểm định. Kiểm định đạt là phiên tự mở đặt giá, thời hạn đấu giá tính từ lúc đó nhé.`,
+    text: `Chào bạn, mình là ${signature(staff)}. Bài đăng "${product.name}" đã được duyệt. Bạn vui lòng gửi linh kiện tới chi nhánh kiểm định PCBid gần nhất trong ${Math.round(SHIPMENT_DEADLINE_MS / 86400000)} ngày (nút "Gửi hàng kiểm định" ở mục Quản lý đấu giá → Bán hàng). Chi nhánh nhận hàng và kiểm định đạt là phiên tự mở đặt giá, thời hạn đấu giá tính từ lúc đó nhé.`,
     product: productCard(product)
   });
-  await showAlert({ title: 'Đã duyệt bài đăng', message: 'Bài đăng đã chuyển sang bước kiểm định PCBid Lab. Người bán đã nhận được tin nhắn thông báo.', tone: 'success' });
+  await showAlert({ title: 'Đã duyệt bài đăng', message: 'Bài đăng chuyển sang bước "Chờ gửi hàng". Người bán đã nhận được hướng dẫn gửi linh kiện tới chi nhánh kiểm định.', tone: 'success' });
   return true;
 }
 
@@ -297,5 +301,131 @@ export async function promptResolveReport(report, status, staff) {
   });
   if (!values) return false;
   resolveReport(report.id, status, staff, values.note);
+  return true;
+}
+
+/**
+ * Người bán chọn chi nhánh kiểm định và cách gửi linh kiện
+ * @param {Object} product
+ * @param {Object} seller
+ * @returns {Promise<boolean>}
+ */
+export async function promptShipToBranch(product, seller) {
+  const result = await openBranchFinder({
+    mode: 'select',
+    productName: product.name,
+    defaultAddress: getDefaultAddress(seller)?.address || seller?.address || ''
+  });
+  if (!result) return false;
+  submitShipment(product.id, result);
+  const branch = getBranch(result.branchId);
+  // Báo cho Kiểm định viên đã duyệt bài biết linh kiện đang trên đường tới chi nhánh
+  if (product.reviewedBy?.username) {
+    sendDirectMessage(seller, product.reviewedBy.username, {
+      text: result.method === 'courier'
+        ? `Mình đã gửi "${product.name}" tới ${branch?.name} qua ${result.carrier}, mã vận đơn ${result.trackingCode.toUpperCase()}.`
+        : `Mình sẽ mang "${product.name}" trực tiếp tới ${branch?.name} (${formatBranchAddress(branch)}).`,
+      product: productCard(product)
+    });
+  }
+  await showAlert({
+    title: 'Đã ghi nhận gửi hàng',
+    message: `Chi nhánh nhận hàng: ${branch?.name}\n${formatBranchAddress(branch)}\nKhi chi nhánh xác nhận đã nhận, linh kiện được kiểm định và phiên tự mở đặt giá.`,
+    tone: 'success'
+  });
+  return true;
+}
+
+/**
+ * Nhân viên chi nhánh xác nhận đã nhận linh kiện: bắt đầu kiểm định
+ * @param {Object} product
+ * @param {Object|null} staff - null khi giả lập bằng nút demo của người bán
+ * @returns {Promise<boolean>}
+ */
+export async function confirmReceived(product, staff = null) {
+  const branch = getBranch(product.shipment?.branchId);
+  const ok = await showConfirm({
+    title: staff ? 'Xác nhận đã nhận hàng?' : 'Giả lập chi nhánh đã nhận hàng?',
+    message: `${branch?.name || 'Chi nhánh'} nhận "${product.name}". PCBid Lab bắt đầu kiểm định ngay, đạt thì phiên mở đặt giá và đồng hồ đấu giá bắt đầu chạy.`,
+    confirmText: staff ? 'Đã nhận hàng' : 'Giả lập đã nhận',
+    tone: 'success'
+  });
+  if (!ok) return false;
+  confirmBranchReceived(product.id, staff);
+  if (staff && product.seller) {
+    sendDirectMessage(staff, product.seller, {
+      text: `Chào bạn, mình là ${signature(staff)}. ${branch?.name || 'Chi nhánh PCBid'} đã nhận "${product.name}" và đang kiểm định. Kiểm định đạt là phiên tự mở đặt giá nhé.`,
+      product: productCard(product)
+    });
+  }
+  return true;
+}
+
+/**
+ * Quản trị viên gửi cảnh báo tới một tài khoản
+ * @param {{username: string, fullname?: string}} account
+ * @param {Object} staff
+ * @returns {Promise<boolean>}
+ */
+export async function promptWarnUser(account, staff) {
+  const count = getWarnings(account.username).length;
+  const values = await showFormDialog({
+    title: 'Cảnh báo tài khoản',
+    message: `${account.fullname || account.username} (@${account.username})${count ? ` đã nhận ${count} cảnh báo trước đó` : ' chưa có cảnh báo nào'}. Người dùng sẽ thấy cảnh báo khi vào PCBid và nhận tin nhắn từ Quản trị viên.`,
+    fields: [
+      { type: 'radio', name: 'reason', label: 'Hành vi vi phạm', options: ACCOUNT_VIOLATIONS, required: true },
+      { type: 'textarea', name: 'detail', label: 'Nội dung cảnh báo (không bắt buộc)', maxlength: 400, placeholder: 'VD: Phiên #1234 bị nhiều người báo cáo ảnh không phải ảnh thật.' }
+    ],
+    confirmText: 'Gửi cảnh báo',
+    tone: 'warning'
+  });
+  if (!values) return false;
+  const reason = values.detail ? `${values.reason}. ${values.detail}` : values.reason;
+  warnUser(account.username, staff, reason);
+  sendDirectMessage(staff, account.username, {
+    text: `[Cảnh báo từ Quản trị viên PCBid] ${reason}. Tài khoản tiếp tục vi phạm có thể bị xóa theo quy chế hoạt động của sàn.`
+  });
+  await showAlert({ title: 'Đã gửi cảnh báo', message: `Cảnh báo thứ ${count + 1} đã được gửi tới @${account.username}.`, tone: 'success' });
+  return true;
+}
+
+/**
+ * Quản trị viên xóa tài khoản vi phạm
+ * @param {{username: string, fullname?: string}} account
+ * @param {Object} staff
+ * @returns {Promise<boolean>}
+ */
+export async function promptDeleteUser(account, staff) {
+  const values = await showFormDialog({
+    title: 'Xóa tài khoản',
+    message: `@${account.username} sẽ không đăng nhập được nữa, các phiên đang đăng / chờ duyệt của tài khoản bị gỡ khỏi sàn. Bạn có thể khôi phục lại ở tab Tài khoản.`,
+    fields: [
+      { type: 'radio', name: 'reason', label: 'Lý do xóa', options: ACCOUNT_VIOLATIONS, required: true },
+      { type: 'textarea', name: 'detail', label: 'Ghi chú (không bắt buộc)', maxlength: 400 }
+    ],
+    confirmText: 'Xóa tài khoản',
+    tone: 'danger'
+  });
+  if (!values) return false;
+  const reason = values.detail ? `${values.reason}. ${values.detail}` : values.reason;
+  const removed = deleteUser(account.username, staff, reason);
+  await showAlert({ title: 'Đã xóa tài khoản', message: `@${account.username} đã bị xóa${removed ? `, ${removed} bài đăng bị gỡ theo` : ''}.`, tone: 'success' });
+  return true;
+}
+
+/**
+ * Khôi phục tài khoản đã xóa
+ * @param {{username: string}} account
+ * @returns {Promise<boolean>}
+ */
+export async function confirmRestoreUser(account) {
+  const ok = await showConfirm({
+    title: 'Khôi phục tài khoản?',
+    message: `@${account.username} đăng nhập lại được, các bài đăng bị gỡ do xóa tài khoản sẽ hiện lại.`,
+    confirmText: 'Khôi phục',
+    tone: 'info'
+  });
+  if (!ok) return false;
+  restoreUser(account.username);
   return true;
 }

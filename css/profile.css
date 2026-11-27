@@ -3506,3 +3506,73 @@
     margin-left: 0;
   }
 }
+
+/* Tab Tài khoản: avatar, tên đăng nhập, số cảnh báo, nút cảnh báo */
+.pcb-staff-row__avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f97316, #c2410c);
+  border-radius: 50%;
+}
+
+.pcb-staff-row__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pcb-staff-row__handle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.pcb-staff-row__warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  padding: 0 6px;
+  font-weight: 700;
+  color: #92400e;
+  background-color: #fef3c7;
+  border-radius: 999px;
+}
+
+.pcb-staff-row__btn--warn {
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.pcb-staff-row__btn--warn:hover,
+.pcb-staff-row__btn--warn:focus-visible {
+  background-color: #fffbeb;
+}
+
+/* Hồ sơ công khai của tài khoản đã bị xóa */
+.pcb-public__deleted {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+/* Nút quản trị tài khoản trên hồ sơ công khai (chỉ Quản trị viên thấy) */
+.pcb-public__admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
