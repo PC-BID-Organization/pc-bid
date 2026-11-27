@@ -43,6 +43,8 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 
 ### Đấu giá thời gian thực
 - Đồng hồ đếm ngược theo giây, kiểm tra bước giá tối thiểu, chặn người bán tự đặt giá phiên của mình.
+- Ô nhập giá tự thêm **dấu chấm hàng nghìn** và đổi màu ngay khi gõ (xanh: hợp lệ, đỏ: thấp hơn mức tối thiểu, vàng: chạm giá trần).
+- **Giá trần chốt ngay:** người bán chọn quy tắc kết thúc *Theo thời hạn HOẶC chạm giá trần* (mặc định), *Chỉ khi chạm giá trần* (không giới hạn thời gian) hoặc *Chỉ theo thời hạn*. Ai đặt bằng giá trần thì thắng và phiên kết thúc ngay (có nút "Đặt giá trần để thắng ngay").
 - **Lịch sử đặt giá** gồm lượt đặt thật và lượt mẫu sinh cố định theo từng phiên, hiển thị **họ tên + UID che bớt** (`#PCB-7K***XA`).
 - **Bot đặt giá mô phỏng** (`js/bot-bidder.js`): cứ 15–60 giây một người dùng mẫu đặt giá thật vào một phiên đang mở. Chỉ một tab chạy bot nhờ cơ chế khóa trong `localStorage`, có mức trần giá theo giá thị trường.
 - **Băng chuyền "Trực tiếp sàn đấu giá"** ở trang chủ hiện các lượt đặt mới nhất; bấm tên người để mở hồ sơ, bấm tên linh kiện để mở phiên.
@@ -74,17 +76,19 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Sổ giao dịch ví (`pcbid_wallet_ledger`) ghi mọi khoản cộng / trừ của cả người mua lẫn người bán.
 - Nút **"Kết thúc phiên ngay (demo)"** giúp trình diễn toàn bộ quy trình mà không phải chờ hết giờ.
 
-### Quản lý đấu giá tách hai luồng Mua / Bán
+### Quản lý đấu giá tách luồng Mua / Bán / Đội ngũ PCBid
 - Icon xe hàng trên header mở khu vực **Quản lý đấu giá**, tách biệt với phần cài đặt tài khoản.
 - **Mua hàng:** Phiên đang tham gia · Đơn mua · Danh sách theo dõi.
-- **Bán hàng:** Phiên đang bán · Đơn bán.
+- **Bán hàng:** Phiên đang bán (lọc Chờ duyệt / Chờ gửi hàng / Đang diễn ra / Đã bán / Đã kết thúc) · Đơn bán.
+- **Kiểm duyệt** (Kiểm định viên) / **Quản trị** (Quản trị viên): Duyệt bài đăng · Nhận hàng · Quản lý phiên* · Tài khoản* · Báo cáo (*chỉ Quản trị viên).
 - Thẻ đơn hàng có dòng thời gian 4 bước, đồng hồ hạn thanh toán, nút thao tác theo vai trò và nút nhắn tin với bên còn lại.
 
 ### Đăng bán linh kiện
-- Chọn mẫu từ catalogue chuẩn để tự điền thông số, bổ sung thông số riêng.
+- Chọn mẫu từ catalogue chuẩn để tự điền thông số, sửa / bổ sung thông số riêng (trên điện thoại mỗi thông số là một thẻ gọn, nút xóa vuông dễ bấm).
 - Tải tối đa 6 ảnh (nén trước khi lưu), chọn ảnh bìa, gợi ý ảnh liên quan theo mẫu.
-- Thanh tiến trình 3 bước, xem trước thẻ đấu giá trực tiếp.
-- Đăng xong có đồng hồ 10 giây tự chuyển sang trang Sàn đấu giá, phiên vừa đăng được ưu tiên hiển thị kèm nhãn **"Bạn vừa đăng"**.
+- Ô giá khởi điểm, giá thị trường, giá trần hiện **dấu chấm hàng nghìn** khi gõ; chọn quy tắc kết thúc phiên và giá trần chốt ngay.
+- Thanh tiến trình 3 bước, xem trước thẻ đấu giá trực tiếp; nút **"Tìm chi nhánh kiểm định gần bạn"** để tra cứu trước khi đăng.
+- Đăng xong có đồng hồ 10 giây tự chuyển sang trang chi tiết bài đăng (trạng thái *Chờ kiểm duyệt*). Khi phiên đã lên sàn, phiên vừa đăng được ưu tiên hiển thị ở Sàn đấu giá kèm nhãn **"Bạn vừa đăng"**.
 - Người bán có bảng quản lý riêng trên trang chi tiết: đóng phiên ngay, đăng bán lại, xem lịch sử đặt giá.
 
 ### Tài khoản, hồ sơ & quyền riêng tư
@@ -92,7 +96,9 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Đăng ký kiểm tra trùng email / số điện thoại, tự tạo tên đăng nhập không trùng.
 - **Đổi tên đăng nhập** trong phần cài đặt (3–20 ký tự, chữ thường, số, dấu chấm, gạch dưới, không trùng); tên mới dùng được để đăng nhập ngay và dữ liệu cũ (phiên, lượt đặt giá, đơn hàng, theo dõi) được chuyển theo. Tài khoản demo giữ cố định tên đăng nhập.
 - **Thanh lưu nổi** cho các form Thông tin tài khoản, Đổi mật khẩu và Quyền riêng tư: trên máy tính hiện khi nút Lưu đang khuất, trên điện thoại hiện ngay khi có thay đổi (kể cả lúc đang gõ, nằm sát phía trên bàn phím). Rời trang, chuyển mục hoặc tải lại khi chưa lưu sẽ được hỏi **Lưu / Không lưu / Ở lại**.
-- Thông tin tài khoản: họ đệm và tên tách riêng, giới tính, tiểu sử, ngày sinh chỉ được đổi 1 lần (có biểu tượng khóa), kiểm tra trùng email / số điện thoại ngay khi rời ô (dòng chữ đỏ và dấu X đỏ).
+- Thông tin tài khoản: họ đệm và tên tách riêng, giới tính, tiểu sử, ngày sinh chỉ được đổi 1 lần (có biểu tượng khóa).
+- **Kiểm tra trực tiếp khi gõ** ở ô Số điện thoại, Email, Tên đăng nhập với thông báo lỗi cụ thể: sai đầu số (VD: *"Đầu số 02 là số máy bàn cố định"*, đầu số 01 đã ngừng sử dụng, đầu số chưa nhà mạng nào cấp), thiếu / thừa mấy chữ số, email thiếu "@" / thiếu tên miền / gõ nhầm `gmial.com`, tên đăng nhập có dấu hoặc ký tự lạ, trùng với tài khoản khác.
+- Ô tên đăng nhập có **nút sao chép nhanh**; ô chỉ đọc không hiện con trỏ nhấp nháy.
 - Ảnh đại diện tải lên kèm công cụ cắt ảnh bằng Canvas; mặc định là chữ cái đầu của tên.
 - **Hồ sơ công khai** (`profile.html?user=<tên đăng nhập>`): tiểu sử, liên hệ, phiên đang bán / đang tham gia, danh sách theo dõi, nút **Nhắn tin**; từng mục bật / tắt công khai bằng nút gạt.
 - **Sổ địa chỉ nhận hàng** giống Shopee: nhiều địa chỉ với tên và số điện thoại người nhận khác nhau, địa chỉ mặc định luôn đứng đầu.
@@ -108,6 +114,7 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 - Thông báo cho mọi tình huống: bị vượt giá, sắp kết thúc, thắng / không thắng, từng bước của đơn mua và đơn bán.
 
 ### Đa ngôn ngữ & giao diện
+- Trang chủ: khối **"Săn linh kiện đúng nhu cầu"** mời khách đăng ký / đăng nhập; khi đã đăng nhập thì dùng email của tài khoản, có công tắc bật / tắt nhận email (đồng bộ với Cài đặt) và lối tắt tới danh sách theo dõi.
 - Chuyển **Tiếng Việt / English / 日本語** bằng nút quả địa cầu trên thanh trên cùng (hoặc trong menu tài khoản trên điện thoại). Bộ dịch quét chữ trên trang, kể cả nội dung sinh động bằng JavaScript; ngôn ngữ được nhớ cho mọi trang.
 - Bộ icon **Lucide** lưu thành tệp SVG trong `images/icons/lucide/`, hiển thị bằng CSS `mask-image` để đổi màu theo chữ.
 - Hộp thoại xác nhận / thông báo riêng thay cho `alert()` / `confirm()` của trình duyệt.
@@ -138,13 +145,13 @@ Toàn bộ website chạy **100% phía trình duyệt** (HTML/CSS/JavaScript thu
 
 | # | Trang | Nội dung chính |
 | :-: | :--- | :--- |
-| 1 | `index.html` | Hero, danh mục, băng chuyền trực tiếp, phiên hot, sắp kết thúc, sản phẩm mới, đặt giá nhanh, cam kết sàn |
+| 1 | `index.html` | Hero, danh mục, băng chuyền trực tiếp, phiên hot, sắp kết thúc, sản phẩm mới, đặt giá nhanh, cam kết sàn, khối săn linh kiện theo tài khoản |
 | 2 | `products.html` | Bộ lọc danh mục / khoảng giá / tình trạng / kiểm định, sắp xếp, tìm kiếm, phân trang có ô nhảy tới trang, nhãn "Bạn vừa đăng" |
-| 3 | `product-detail.html` | Gallery + zoom + chuyển ảnh, khung và phiếu kiểm định, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá, lịch sử đặt giá, bảng quản lý của người bán, đơn hàng sau đấu giá, liên hệ người bán |
-| 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, bước giá, thời hạn, xem trước thẻ, thanh tiến trình, gửi kiểm định |
+| 3 | `product-detail.html` | Gallery + zoom + chuyển ảnh, khung và phiếu kiểm định, thông số, so sánh giá thị trường, đếm ngược, khung đặt giá có giá trần, lịch sử đặt giá, bảng quản lý của người bán, trạng thái duyệt / gửi hàng, bảng kiểm duyệt và thanh quản lý phiên cho đội ngũ PCBid, báo cáo bài đăng / người bán, đơn hàng sau đấu giá, liên hệ người bán |
+| 4 | `sell.html` | Form đăng bán theo catalogue, ảnh, thông số bổ sung, giá có dấu chấm, bước giá, quy tắc kết thúc phiên & giá trần, thời hạn, xem trước thẻ, thanh tiến trình, tra cứu chi nhánh kiểm định, gửi duyệt |
 | 5 | `login.html` | Đăng nhập có kiểm tra mật khẩu, nút đăng nhập nhanh 4 tài khoản demo + Kiểm định viên + Quản trị viên |
 | 6 | `register.html` | Đăng ký, kiểm tra trùng email / số điện thoại, khởi tạo ví ảo |
-| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng; Duyệt bài · Quản lý phiên · Báo cáo cho đội ngũ PCBid), thông báo, thông tin tài khoản (đổi tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` có thẻ vai trò và nút Báo cáo |
+| 7 | `profile.html` | Quản lý đấu giá (Mua / Bán, đơn hàng; Duyệt bài · Nhận hàng · Quản lý phiên · Tài khoản · Báo cáo cho đội ngũ PCBid), thông báo, thông tin tài khoản (kiểm tra trực tiếp SĐT / email / tên đăng nhập, sao chép tên đăng nhập, thanh lưu nổi), địa chỉ nhận hàng, bảo mật & quyền riêng tư (có hỏi lưu khi rời đi), danh sách theo dõi có Hoàn tác, hồ sơ công khai `?user=` có thẻ vai trò và nút Báo cáo |
 | 8 | `404.html` | Trang báo lỗi thân thiện kèm điều hướng về trang chủ |
 
 > Để giữ đúng 8 màn hình, hồ sơ công khai và khu vực Quản lý đấu giá là các chế độ hiển thị bên trong `profile.html` (ví dụ `profile.html#participating`, `profile.html?user=<tên đăng nhập>`).
@@ -306,6 +313,8 @@ Bốn tài khoản demo mang tên thành viên nhóm cùng hai tài khoản đ�
 - Khi triển khai thật cần backend để xác thực, băm mật khẩu bằng bcrypt / argon2, kiểm tra giá đặt và số dư phía server, dùng HTTPS và phiên đăng nhập an toàn.
 - Nhãn "Đã xác thực" là mô phỏng: tài khoản có đủ email, số điện thoại và ít nhất một địa chỉ nhận hàng thì được gắn nhãn.
 - Kiểm định PCBid Lab là mô phỏng: kết quả đo trên phiếu được sinh cố định theo mã phiên và loại linh kiện, không có kiểm tra phần cứng thật.
+- 9 chi nhánh kiểm định, giờ mở cửa, số điện thoại và mã vận đơn là dữ liệu giả lập; khoảng cách "Gần tôi" là đường chim bay, không phải đường đi thực tế. Việc chi nhánh nhận hàng do Kiểm định viên / Quản trị viên xác nhận (hoặc nút giả lập của người bán).
+- Cảnh báo / xóa tài khoản là xóa mềm trong `localStorage`; email cảnh báo và email thông báo chỉ được mô phỏng bằng tin nhắn và thông báo trong web.
 - Nút Facebook / Zalo / Gọi điện dùng thông tin liên hệ minh họa (fanpage UIT và số `0999999999`).
 
 ---
