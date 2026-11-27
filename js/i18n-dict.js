@@ -863,6 +863,7 @@ export const PHRASES = [
   ['Phiên đấu giá chưa mở', 'Auction not open yet', 'オークションはまだ開始されていません'],
   ['Kiểm định viên', 'Inspector', '検査員'],
   ['Kiểm duyệt', 'Review', '審査'],
+  ['Quản trị', 'Admin', '管理'],
   ['Quản trị (Admin)', 'Admin', '管理（Admin）'],
   ['Kiểm duyệt bài đăng', 'Review listings', '出品審査'],
   ['Quản trị sàn (Admin)', 'Marketplace admin', 'マーケット管理（Admin）'],

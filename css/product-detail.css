@@ -63,12 +63,42 @@
 
 /* Mục hiện tại (trang đang xem) */
 .pcb-pd__breadcrumb-item--current {
-  color: var(--color-text-main);
-  font-weight: 600;
+  /* display: block để text-overflow hoạt động (li dạng flex sẽ cắt cụt chữ) */
+  display: block;
+  min-width: 0;
   max-width: 280px;
   overflow: hidden;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--color-text-main);
+}
+
+.pcb-pd__breadcrumb-link {
+  white-space: nowrap;
+}
+
+/* Điện thoại: tên linh kiện xuống một dòng riêng, tối đa 2 dòng rồi mới hiện "…" */
+@media (max-width: 640px) {
+  .pcb-pd__breadcrumb {
+    margin-bottom: 16px;
+  }
+
+  .pcb-pd__breadcrumb-list {
+    row-gap: 2px;
+    font-size: 0.8125rem;
+  }
+
+  .pcb-pd__breadcrumb-item--current {
+    display: -webkit-box;
+    flex: 1 1 100%;
+    max-width: 100%;
+    line-height: 1.45;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
 }
 
 /* Liên kết trong breadcrumb */
@@ -2506,25 +2536,42 @@ a.pcb-pd__seller-avatar {
 .pcb-pd__review-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 10px 12px;
   font-size: 0.8125rem;
   background-color: #ffffff;
-  border-left: 3px solid #6366f1;
-  border-radius: 6px;
-}
-
-.pcb-pd__review-item--reply {
-  border-left-color: #16a34a;
-}
-
-.pcb-pd__review-item--reject {
-  border-left-color: #dc2626;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
 .pcb-pd__review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
   font-size: 0.75rem;
   color: #64748b;
+}
+
+/* Nhãn loại trao đổi: yêu cầu (tím), người bán bổ sung (xanh lá), từ chối (đỏ), đã duyệt (xanh lá) */
+.pcb-pd__review-meta strong {
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #4338ca;
+  background-color: #eef2ff;
+  border-radius: 999px;
+}
+
+.pcb-pd__review-item--reply .pcb-pd__review-meta strong,
+.pcb-pd__review-item--approve .pcb-pd__review-meta strong {
+  color: #047857;
+  background-color: #ecfdf5;
+}
+
+.pcb-pd__review-item--reject .pcb-pd__review-meta strong {
+  color: #b91c1c;
+  background-color: #fef2f2;
 }
 
 .pcb-pd__review-note {
@@ -2674,4 +2721,34 @@ a.pcb-pd__seller-avatar {
 .pcb-pd__banner-btn:hover,
 .pcb-pd__banner-btn:focus-visible {
   background-color: var(--color-primary-hover, #d94e07);
+}
+
+/* Bảng kiểm duyệt trên điện thoại: nhãn trạng thái xuống dưới tiêu đề,
+   nút Duyệt trải hết hàng, Yêu cầu bổ sung và Từ chối chia đôi hàng dưới */
+@media (max-width: 640px) {
+  .pcb-pd__admin-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .pcb-pd__admin-status {
+    white-space: nowrap;
+  }
+
+  .pcb-pd__admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pcb-pd__admin-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  .pcb-pd__admin-btn--approve {
+    grid-column: 1 / -1;
+  }
 }

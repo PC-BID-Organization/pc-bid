@@ -1530,7 +1530,7 @@ function syncUserInfoUI(options = {}) {
     const staffRole = getStaffRole(user);
     adminTradeBtn.hidden = !staffRole;
     const label = document.getElementById('trade-btn-admin-label');
-    if (label) label.textContent = staffRole === 'admin' ? 'Quản trị (Admin)' : 'Kiểm duyệt';
+    if (label) label.textContent = staffRole === 'admin' ? 'Quản trị' : 'Kiểm duyệt';
     const iconEl = document.getElementById('trade-btn-admin-icon');
     if (iconEl) {
       iconEl.classList.toggle('pcb-icon--shield-check', staffRole === 'admin');

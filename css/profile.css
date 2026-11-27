@@ -18,8 +18,9 @@
 /* Đường dẫn Breadcrumb */
 .pcb-profile__breadcrumb {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
   font-size: 13px;
   color: var(--color-text-muted, #565e74);
   margin-bottom: 24px;
@@ -29,6 +30,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
   color: var(--color-text-muted, #565e74);
   text-decoration: none;
   transition: color 0.2s ease;
@@ -2748,9 +2750,22 @@
   }
 
   .pcb-trade-switch__btn {
-    flex: 1;
+    position: relative;
+    flex: 1 1 0;
+    flex-direction: column;
     justify-content: center;
-    padding: 9px 10px;
+    gap: 3px;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  /* Số việc cần xử lý nằm góc trên bên phải nút */
+  .pcb-trade-switch__badge {
+    position: absolute;
+    top: 3px;
+    right: 6px;
   }
 }
 
@@ -3575,4 +3590,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* Thẻ duyệt bài trên điện thoại / máy tính bảng: các nút xếp lưới, không tràn ngang.
+   Duyệt và Xem chi tiết trải hết hàng, Yêu cầu bổ sung và Từ chối chia đôi */
+@media (max-width: 1024px) {
+  .pcb-auction-card--admin-review .pcb-auction-card__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pcb-auction-card--admin-review .pcb-auction-card__actions > * {
+    min-width: 0;
+    min-height: 42px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .pcb-auction-card--admin-review .pcb-admin-review__btn--approve,
+  .pcb-auction-card--admin-review .pcb-btn-detail {
+    grid-column: 1 / -1;
+  }
 }

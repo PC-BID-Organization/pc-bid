@@ -638,7 +638,8 @@ function renderNhatKyKiemDuyet(sp) {
   return log.map(e => `
     <li class="pcb-pd__review-item pcb-pd__review-item--${e.action}">
       <span class="pcb-pd__review-meta">
-        <strong>${REVIEW_LOG_LABELS[e.action] || 'Cập nhật'}</strong> · ${maHoaHtml(e.by?.name || '')} · ${new Date(e.at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+        <strong>${REVIEW_LOG_LABELS[e.action] || 'Cập nhật'}</strong>
+        <span translate="no">${maHoaHtml(e.by?.name || '')} · ${new Date(e.at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}</span>
       </span>
       ${e.note ? `<span class="pcb-pd__review-note">${maHoaHtml(e.note)}</span>` : ''}
     </li>`).join('');
