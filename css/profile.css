@@ -3613,3 +3613,84 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Nhãn loại tài khoản mẫu (bot đặt giá / người bán mẫu) trong tab Tài khoản */
+.pcb-staff-row__kind {
+  display: inline-flex;
+  margin-left: 4px;
+  padding: 0 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+}
+
+/* Hồ sơ công khai trên điện thoại (Quản trị viên xem): Nhắn tin trải hết hàng,
+   Cảnh báo / Xóa tài khoản chia đôi hàng dưới, nút Báo cáo nằm giữa */
+@media (max-width: 640px) {
+  .pcb-public__actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .pcb-public__actions .pcb-public__chat-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pcb-public__report-btn {
+    align-self: center;
+  }
+
+  .pcb-public__admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pcb-public__admin-actions .pcb-staff-row__btn {
+    justify-content: center;
+    min-height: 42px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* Chỉ còn nút Khôi phục: trải hết hàng */
+  .pcb-public__admin-actions .pcb-staff-row__btn:only-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Vùng vừa chuyển tới từ menu tài khoản: nhấp nháy viền cam rồi trở lại bình thường */
+.pcb-flash {
+  animation: pcbFlash 1.5s ease;
+}
+
+@keyframes pcbFlash {
+  0%,
+  60% {
+    background-color: #ffedd5;
+    box-shadow: 0 0 0 3px rgba(201, 69, 10, 0.45);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 69, 10, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcb-flash {
+    animation: none;
+    outline: 3px solid rgba(201, 69, 10, 0.45);
+  }
+}
+
+/* Nút lọc đang chọn giữ chữ trắng cả khi rê chuột (trước đây :hover đè thành chữ tối trên nền tối) */
+.pcb-chip-btn--active:hover,
+.pcb-chip-btn--active:focus-visible {
+  color: #ffffff;
+  background-color: #0b1c30;
+  border-color: #0b1c30;
+}

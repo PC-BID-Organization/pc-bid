@@ -17,7 +17,7 @@ import { isAuctionClosed } from './auction-time.js';
 // Bot không đặt giá vào phiên đang chờ kiểm định
 import { isAwaitingInspection } from './inspection.js';
 // Không đặt giá vào bài chưa duyệt hoặc đang bị ẩn / gỡ
-import { isPubliclyListed, isListingVisible } from './moderation.js';
+import { isPubliclyListed, isListingVisible, isUserDeleted } from './moderation.js';
 import { MOCK_BIDDERS } from './accounts.js';
 import { loadAllAuctions, buildBidHistory, readAllBids } from './bid-history.js';
 import { readLoggedInUser } from './user-data.js';
@@ -160,7 +160,8 @@ export async function placeBotBid({ timestamp = Date.now(), excludeIds = new Set
   // Người đang dẫn đầu theo đúng bảng lịch sử: bot khác người đó và khác người bán
   const history = buildBidHistory(product, allBids);
   const leaderName = history[0]?.bidderName;
-  const bots = MOCK_BIDDERS.filter(b => b.username !== leaderName && b.username !== product.seller);
+  // Bot bị Quản trị viên xóa tài khoản thì không đặt giá nữa
+  const bots = MOCK_BIDDERS.filter(b => b.username !== leaderName && b.username !== product.seller && !isUserDeleted(b.username));
   if (!bots.length) return null;
   const bot = pickOne(bots);
 

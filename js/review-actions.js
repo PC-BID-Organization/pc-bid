@@ -390,12 +390,13 @@ export async function promptWarnUser(account, staff) {
 }
 
 /**
- * Quản trị viên xóa tài khoản vi phạm
+ * Quản trị viên xóa tài khoản vi phạm (kể cả tài khoản mẫu: bot đặt giá, người bán mẫu)
  * @param {{username: string, fullname?: string}} account
  * @param {Object} staff
+ * @param {Array} [listings] - Danh sách phiên trên sàn để gỡ theo phiên của tài khoản
  * @returns {Promise<boolean>}
  */
-export async function promptDeleteUser(account, staff) {
+export async function promptDeleteUser(account, staff, listings = []) {
   const values = await showFormDialog({
     title: 'Xóa tài khoản',
     message: `@${account.username} sẽ không đăng nhập được nữa, các phiên đang đăng / chờ duyệt của tài khoản bị gỡ khỏi sàn. Bạn có thể khôi phục lại ở tab Tài khoản.`,
@@ -408,7 +409,7 @@ export async function promptDeleteUser(account, staff) {
   });
   if (!values) return false;
   const reason = values.detail ? `${values.reason}. ${values.detail}` : values.reason;
-  const removed = deleteUser(account.username, staff, reason);
+  const removed = deleteUser(account.username, staff, reason, listings);
   await showAlert({ title: 'Đã xóa tài khoản', message: `@${account.username} đã bị xóa${removed ? `, ${removed} bài đăng bị gỡ theo` : ''}.`, tone: 'success' });
   return true;
 }

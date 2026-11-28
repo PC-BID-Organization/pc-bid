@@ -908,21 +908,32 @@ function renderShipmentRow(item) {
 
 /**
  * Danh sách tài khoản người dùng cho tab Tài khoản (không gồm tài khoản đội ngũ PCBid)
- * @returns {Array<Object>} Tài khoản kèm warnings, deletion, openReports
+ * @param {Array} [products] - Toàn bộ phiên trên sàn (để lấy người bán mẫu trong danh mục)
+ * @returns {Array<Object>} Tài khoản kèm kind, warnings, deletion, openReports
  */
-function getManagedAccounts() {
+function getManagedAccounts(products = []) {
   const reports = getReports().filter(r => r.type === 'user');
-  return getAllAccounts()
-    .filter(acc => acc.username && !getStaffRole(acc))
+  // Tài khoản thật (thành viên demo / đã đăng ký), bot đặt giá và người bán mẫu trong danh mục
+  const real = getAllAccounts().filter(acc => acc.username && !getStaffRole(acc)).map(acc => ({ ...acc, kind: 'real' }));
+  const bots = MOCK_BIDDERS.map(acc => ({ ...acc, kind: 'bot' }));
+  const known = new Set([...real, ...bots].map(acc => acc.username));
+  const sampleSellers = [...new Set(products.map(p => p.seller).filter(Boolean))]
+    .filter(username => !known.has(username) && !getStaffRole(findAccount({ username })))
+    .map(username => ({ username, fullname: username, kind: 'sample_seller', listingCount: products.filter(p => p.seller === username).length }));
+  return [...real, ...bots, ...sampleSellers]
     .map(acc => ({
       ...acc,
       warnings: getWarnings(acc.username),
       deletion: getAccountDeletion(acc.username),
       openReports: reports.filter(r => r.status === 'open' && r.targetId === acc.username).length
     }))
-    // Tài khoản bị báo cáo nhiều lên đầu, tài khoản đã xóa xuống cuối
-    .sort((a, b) => (Boolean(a.deletion) - Boolean(b.deletion)) || (b.openReports - a.openReports) || (b.warnings.length - a.warnings.length));
+    // Tài khoản bị báo cáo nhiều lên đầu, tài khoản thật trước tài khoản mẫu, tài khoản đã xóa xuống cuối
+    .sort((a, b) => (Boolean(a.deletion) - Boolean(b.deletion)) || (b.openReports - a.openReports)
+      || ((a.kind !== 'real') - (b.kind !== 'real')) || (b.warnings.length - a.warnings.length));
 }
+
+// Nhãn loại tài khoản mẫu trong tab Tài khoản
+const ACCOUNT_KIND_LABELS = { bot: 'Bot đặt giá', sample_seller: 'Người bán mẫu' };
 
 /**
  * Một tài khoản trong tab Tài khoản của Quản trị viên
@@ -939,7 +950,8 @@ function renderAccountRow(acc) {
         <a class="pcb-staff-row__title" href="profile.html?user=${encodeURIComponent(acc.username)}">${escapeHtml(acc.fullname || acc.username)} <span class="pcb-staff-row__handle">@${escapeHtml(acc.username)}</span></a>
         <span class="pcb-staff-row__meta">
           <span class="pcb-staff-row__state pcb-staff-row__state--${acc.deletion ? 'removed' : 'visible'}">${acc.deletion ? 'Đã xóa' : 'Đang hoạt động'}</span>
-          · ${escapeHtml(acc.email || '')}
+          ${ACCOUNT_KIND_LABELS[acc.kind] ? `<span class="pcb-staff-row__kind">${ACCOUNT_KIND_LABELS[acc.kind]}</span>` : ''}
+          ${acc.email ? `· ${escapeHtml(acc.email)}` : ''}${acc.kind === 'sample_seller' ? `· ${acc.listingCount} phiên` : ''}
           ${acc.warnings.length ? `<span class="pcb-staff-row__warn">${icon('triangle-alert', { size: 12 })} ${acc.warnings.length} cảnh báo</span>` : ''}
           ${acc.openReports ? `<span class="pcb-staff-row__flag">${icon('flag', { size: 12 })} ${acc.openReports} báo cáo</span>` : ''}
         </span>
@@ -1739,6 +1751,7 @@ function renderFilterChips() {
       { id: 'all', label: 'Tất cả' },
       { id: 'reported', icon: 'flag', label: 'Bị báo cáo' },
       { id: 'warned', icon: 'triangle-alert', label: 'Đã cảnh báo' },
+      { id: 'sample', icon: 'user', label: 'Tài khoản mẫu' },
       { id: 'deleted', icon: 'trash-2', label: 'Đã xóa' }
     ];
   } else if (currentActiveTab === 'admin-manage') {
@@ -1910,22 +1923,7 @@ function renderCurrentAuctionTab() {
       empty.hidden = Boolean(filtered.length);
     }
   } else if (currentActiveTab === 'admin-accounts') {
-    const filtered = getManagedAccounts().filter(acc => {
-      const matchKw = !kw || `${acc.fullname} ${acc.username} ${acc.email}`.toLowerCase().includes(kw);
-      const chip = currentFilterChip;
-      const matchChip = chip === 'all'
-        || (chip === 'reported' && acc.openReports > 0)
-        || (chip === 'warned' && acc.warnings.length > 0)
-        || (chip === 'deleted' && acc.deletion);
-      return matchKw && matchChip;
-    });
-    const grid = document.getElementById('grid-admin-accounts');
-    const empty = document.getElementById('empty-admin-accounts');
-    if (grid && empty) {
-      grid.innerHTML = filtered.map(renderAccountRow).join('');
-      grid.hidden = !filtered.length;
-      empty.hidden = Boolean(filtered.length);
-    }
+    renderAccountsTab(kw);
   } else if (currentActiveTab === 'admin-manage') {
     renderManageTab(kw);
   } else if (currentActiveTab === 'admin-reports') {
@@ -1974,6 +1972,31 @@ async function renderManageTab(kw) {
   grid.innerHTML = rows.slice(0, 60).map(renderManageRow).join('');
   grid.hidden = !rows.length;
   empty.hidden = Boolean(rows.length);
+}
+
+/**
+ * Vẽ tab Tài khoản (bất đồng bộ vì cần toàn bộ phiên trên sàn để lấy người bán mẫu)
+ * @param {string} kw - Từ khóa tìm kiếm (chữ thường)
+ */
+async function renderAccountsTab(kw) {
+  const grid = document.getElementById('grid-admin-accounts');
+  const empty = document.getElementById('empty-admin-accounts');
+  if (!grid || !empty) return;
+  const products = await loadAllAuctions();
+  if (currentActiveTab !== 'admin-accounts') return;
+  const filtered = getManagedAccounts(products).filter(acc => {
+    const matchKw = !kw || `${acc.fullname} ${acc.username} ${acc.email || ''}`.toLowerCase().includes(kw);
+    const chip = currentFilterChip;
+    const matchChip = chip === 'all'
+      || (chip === 'reported' && acc.openReports > 0)
+      || (chip === 'warned' && acc.warnings.length > 0)
+      || (chip === 'sample' && acc.kind !== 'real')
+      || (chip === 'deleted' && acc.deletion);
+    return matchKw && matchChip;
+  });
+  grid.innerHTML = filtered.map(renderAccountRow).join('');
+  grid.hidden = !filtered.length;
+  empty.hidden = Boolean(filtered.length);
 }
 
 /**
@@ -2051,7 +2074,7 @@ function initStaffActions() {
     const account = findAccount({ username }) || { username, fullname: username };
     const action = btn.dataset.accountAction;
     const done = action === 'warn' ? await promptWarnUser(account, staff)
-      : action === 'delete' ? await promptDeleteUser(account, staff)
+      : action === 'delete' ? await promptDeleteUser(account, staff, await loadAllAuctions())
         : await confirmRestoreUser(account);
     if (done) refresh();
     return true;
@@ -2140,6 +2163,32 @@ function updateHash(hash) {
 }
 
 /**
+ * Làm nổi bật tạm thời (đổi màu rồi trở lại) vùng tương ứng với mục vừa bấm trong menu tài khoản
+ * @param {string} hash - VD: '#admin-approvals', '#selling'
+ */
+function flashProfileTarget(hash) {
+  const targets = {
+    '#admin-approvals': '#trade-btn-admin',
+    '#selling': '#tab-btn-selling',
+    '#participating': '#tab-btn-participating',
+    '#my-auctions': '#tab-btn-participating',
+    '#watchlist': '#tab-btn-watchlist',
+    '#buy-orders': '#tab-btn-buy-orders',
+    '#sell-orders': '#tab-btn-sell-orders',
+    '#notifications': '[data-section="section-notifications"]',
+    '#account': '[data-section="section-account"]'
+  };
+  const el = document.querySelector(targets[hash.toLowerCase()] || '');
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('pcb-flash');
+  // Ép trình duyệt vẽ lại để hiệu ứng chạy lại khi bấm liên tiếp
+  void el.offsetWidth;
+  el.classList.add('pcb-flash');
+  setTimeout(() => el.classList.remove('pcb-flash'), 1600);
+}
+
+/**
  * Mở đúng mục / tab theo hash hiện tại trên URL (profile.html#watchlist, #notifications, ...)
  * Được gọi khi tải trang và mỗi khi hash thay đổi (bấm link header khi đang ở profile.html)
  */
@@ -2177,6 +2226,11 @@ function applyHashRoute() {
     switchAuctionTab('participating');
   } else if (hash === '#notifications') {
     switchSection('section-notifications');
+  } else if (hash === '#deposit') {
+    // Nạp nhanh từ nút "+" ở ví trong menu tài khoản
+    openModal('modal-deposit');
+    // Bỏ #deposit khỏi địa chỉ để tải lại trang không tự mở lại hộp thoại
+    history.replaceState(null, '', window.location.pathname + window.location.search);
   } else if (hash === '#account') {
     switchSection('section-account');
   } else if (hash === '#security') {
@@ -2221,7 +2275,7 @@ function renderNotifications() {
         <p class="pcb-notify__message">${escapeHtml(n.message)}</p>
       </div>
       <div class="pcb-notify__actions">
-        <a class="pcb-notify__link" href="product-detail.html?id=${n.productId}" data-notify-open>Xem phiên</a>
+        ${n.link ? '' : `<a class="pcb-notify__link" href="product-detail.html?id=${n.productId}" data-notify-open>Xem phiên</a>`}
         ${n.read ? '' : '<button type="button" class="pcb-notify__mark" data-notify-mark>Đã đọc</button>'}
       </div>
     </li>
@@ -2518,7 +2572,8 @@ async function renderPublicProfile(username) {
   // Quản trị viên: cảnh báo / xóa / khôi phục tài khoản ngay trên hồ sơ công khai
   const actionsEl = document.querySelector('.pcb-public__actions');
   actionsEl?.querySelector('.pcb-public__admin-actions')?.remove();
-  if (actionsEl && isAdmin(viewer) && !isSelf && !staffRole && findAccount({ username })) {
+  // Áp dụng cho mọi tài khoản không phải đội ngũ PCBid: tài khoản thật, bot đặt giá, người bán mẫu
+  if (actionsEl && isAdmin(viewer) && !isSelf && !staffRole) {
     const warnCount = getWarnings(username).length;
     actionsEl.insertAdjacentHTML('beforeend', `
       <div class="pcb-public__admin-actions">
@@ -2532,7 +2587,7 @@ async function renderPublicProfile(username) {
       if (!btn) return;
       const action = btn.dataset.accountAction;
       const done = action === 'warn' ? await promptWarnUser(account, viewer)
-        : action === 'delete' ? await promptDeleteUser(account, viewer)
+        : action === 'delete' ? await promptDeleteUser(account, viewer, await loadAllAuctions())
           : await confirmRestoreUser(account);
       if (done) renderPublicProfile(username);
     });
@@ -2843,6 +2898,8 @@ document.addEventListener('DOMContentLoaded', () => {
   //    và mỗi khi hash thay đổi trong lúc đang ở trang này (bấm link trên header)
   applyHashRoute();
   window.addEventListener('hashchange', applyHashRoute);
+  // Bấm mục trong menu tài khoản khi đang ở trang này: làm nổi bật vùng vừa chuyển tới
+  window.addEventListener('pcbid:profile-nav', e => flashProfileTarget(e.detail?.hash || ''));
 
   // Thêm / xóa địa chỉ hoặc cập nhật email, số điện thoại: tính lại nhãn xác thực ngay
   const refreshVerification = () => renderVerificationStatus(getCurrentUser());

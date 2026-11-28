@@ -18,6 +18,8 @@
 import { getAuctionEndTimestamp } from './auction-time.js';
 // Lưu trạng thái đã đọc của thông báo theo từng tài khoản
 import { USER_LIST_KEYS, readUserList, writeUserList } from './user-data.js';
+// Cảnh báo của Quản trị viên hiện trong danh sách thông báo
+import { getWarnings } from './moderation.js';
 
 // Tỷ lệ tiền cọc trên mỗi mức giá đặt
 export const DEPOSIT_RATE = 0.1;
@@ -521,6 +523,22 @@ export function getUserNotifications(user) {
   });
 
   notifications.push(...getOrderNotifications(user, orders, formatVnd));
+
+  // Cảnh báo từ Quản trị viên: hiện chi tiết lý do, luôn được coi là cần chú ý
+  getWarnings(user.username).forEach((w, index, all) => {
+    notifications.push({
+      id: `warning_${w.id}`,
+      type: 'danger',
+      important: true,
+      title: `Cảnh báo từ Quản trị viên PCBid (lần ${index + 1}/${all.length})`,
+      message: `${w.reason}. Tài khoản tiếp tục vi phạm có thể bị xóa theo quy chế hoạt động của sàn.`,
+      eventTime: new Date(w.at).getTime(),
+      endTimestamp: 0,
+      link: 'profile.html#notifications',
+      linkText: 'Xem quy chế',
+      image: 'images/icons/icon-192.png'
+    });
+  });
 
   // Gắn trạng thái đã đọc. ID thông báo chứa mức giá liên quan nên khi tình huống thay đổi
   // (ví dụ bị vượt giá ở mức mới) sẽ sinh thông báo mới, chưa đọc

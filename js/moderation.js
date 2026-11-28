@@ -712,20 +712,23 @@ export function isUserDeleted(userOrUsername) {
  * @param {string} username
  * @param {Object} staff
  * @param {string} reason
+ * @param {Array} [listings] - Danh sách phiên trên sàn (gồm cả phiên có sẵn trong danh mục) để gỡ theo
  * @returns {number} Số bài đăng bị gỡ theo
  */
-export function deleteUser(username, staff, reason) {
+export function deleteUser(username, staff, reason, listings = []) {
+  // Gộp phiên người dùng tự đăng (pcbid_products) với phiên trong danh mục (người bán mẫu) do trang gọi truyền vào
+  const byId = new Map();
+  [...readProducts(), ...(Array.isArray(listings) ? listings : [])].forEach(p => { if (p && !byId.has(String(p.id))) byId.set(String(p.id), p); });
+  const removedIds = [];
+  byId.forEach(p => {
+    if (p.seller !== username || ['sold', 'ended'].includes(p.status) || getModerationState(p.id).removed) return;
+    removeListing(p.id, staff, `Tài khoản người bán bị xóa: ${reason}`, 'account_deleted');
+    removedIds.push(p.id);
+  });
   const data = readAccountModeration();
-  data.deleted[username] = { at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim() };
+  data.deleted[username] = { at: new Date().toISOString(), by: staffInfo(staff), reason: String(reason).trim(), removedIds };
   writeAccountModeration(data);
-  let removed = 0;
-  readProducts()
-    .filter(p => p.seller === username && !['sold', 'ended'].includes(p.status) && !getModerationState(p.id).removed)
-    .forEach(p => {
-      removeListing(p.id, staff, `Tài khoản người bán bị xóa: ${reason}`, 'account_deleted');
-      removed += 1;
-    });
-  return removed;
+  return removedIds.length;
 }
 
 /**
@@ -734,9 +737,14 @@ export function deleteUser(username, staff, reason) {
  */
 export function restoreUser(username) {
   const data = readAccountModeration();
+  const removedIds = data.deleted[username]?.removedIds || [];
   delete data.deleted[username];
   writeAccountModeration(data);
   const mod = readModeration();
+  // Hiện lại các phiên đã gỡ theo khi xóa tài khoản (kể cả phiên có sẵn trong danh mục)
+  removedIds.forEach(id => {
+    if (mod.removed[id]?.source === 'account_deleted') delete mod.removed[id];
+  });
   readProducts().filter(p => p.seller === username).forEach(p => {
     if (mod.removed[p.id]?.source === 'account_deleted') delete mod.removed[p.id];
   });

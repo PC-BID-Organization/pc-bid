@@ -1529,3 +1529,59 @@
   color: #047857;
   background-color: #ecfdf5;
 }
+
+/* Số phiên đang bán / đang tham gia bấm được để mở đúng tab Quản lý đấu giá */
+a.header__dropdown-stat {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+a.header__dropdown-stat:hover,
+a.header__dropdown-stat:focus-visible {
+  color: #c9450a;
+  text-decoration: underline;
+}
+
+/* Số lần bị Quản trị viên cảnh báo */
+.header__dropdown-stat--warn {
+  flex-basis: 100%;
+  font-weight: 700;
+  color: #b91c1c !important;
+}
+
+.header__dropdown-stat--warn .lucide {
+  color: #dc2626;
+}
+
+/* Ví khả dụng: số dư + nút "+" nạp nhanh */
+.header__dropdown-wallet-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header__dropdown-wallet-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+  background-color: #10b981;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.header__dropdown-wallet-add:hover,
+.header__dropdown-wallet-add:focus-visible {
+  background-color: #059669;
+  transform: scale(1.1);
+}
+
+/* Mục vừa bấm khi đang ở trang Hồ sơ: đổi màu trong chốc lát trước khi menu đóng */
+.header__dropdown-link--pressed,
+.header__dropdown-item.header__dropdown-link--pressed {
+  color: #ffffff !important;
+  background-color: #c9450a !important;
+}

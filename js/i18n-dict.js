@@ -822,6 +822,11 @@ export const PHRASES = [
   ['trên phiên bạn quan tâm để theo dõi. Thông báo vượt giá, sắp kết thúc và thắng phiên được gửi tới', 'on auctions you like to follow them. Outbid, ending-soon and win notifications go to', 'をタップしてフォロー。入札超過・終了間近・落札の通知は次に届きます：'],
   ['Bạn đang tắt nhận email. Thông báo vẫn hiện trên chuông thông báo của PCBid, bật lại để nhận qua', 'Email is off. Notifications still appear in the PCBid bell; turn it back on to receive them at', 'メールはオフです。通知はPCBidのベルに表示されます。オンにすると次に届きます：'],
   ['Đã sao chép tên đăng nhập', 'Username copied', 'ユーザー名をコピーしました'],
+  ['Nạp thêm tiền vào ví', 'Top up wallet', 'ウォレットにチャージ'],
+  ['Nạp thêm tiền', 'Top up', 'チャージ'],
+  ['Bot đặt giá', 'Bidding bot', '入札ボット'],
+  ['Người bán mẫu', 'Sample seller', 'サンプル出品者'],
+  ['Tài khoản mẫu', 'Sample accounts', 'サンプルアカウント'],
   /* ---------- Sao chép tên đăng nhập, duyệt phiên của Quản trị viên ---------- */
   ['Nhận hàng', 'Receive items', '入荷'],
   ['Đang chuyển tới', 'In transit', '輸送中'],
@@ -921,6 +926,7 @@ export const PHRASES = [
   ['Quản lý phiên (Quản trị viên)', 'Auction management (Admin)', 'オークション管理（管理者）'],
   ['Kiểm định viên · Duyệt bài đăng', 'Inspector · Reviews listings', '検査員 · 出品審査'],
   ['Admin · Quản lý phiên', 'Admin · Manages auctions', '管理者 · オークション管理'],
+  ['Quản trị viên · Quản lý phiên & tài khoản', 'Administrator · Manages auctions & accounts', '管理者 · オークションとアカウント管理'],
   ['Chuyển sang tài khoản Kiểm định viên để duyệt (demo)', 'Switch to the inspector account to review (demo)', '検査員アカウントに切り替えて審査（デモ）'],
   ['Sao chép tên đăng nhập', 'Copy username', 'ユーザー名をコピー'],
   ['Không sao chép được, hãy chọn và sao chép thủ công.', 'Could not copy. Please select and copy it manually.', 'コピーできませんでした。手動で選択してコピーしてください。'],
@@ -1357,6 +1363,10 @@ export const PHRASES = [
  * ($1, $2... là các nhóm bắt được trong câu gốc)
  */
 export const PATTERNS = [
+  [/^(\d+) lần bị cảnh báo$/, 'Warned $1 time(s)', '警告 $1回'],
+  [/^Cảnh báo từ Quản trị viên PCBid \(lần (\d+)\/(\d+)\)$/, 'Warning from PCBid administrator ($1/$2)', 'PCBid管理者からの警告（$1/$2）'],
+  [/^(.+)\. Tài khoản tiếp tục vi phạm có thể bị xóa theo quy chế hoạt động của sàn\.$/, '$1. Further violations may get the account deleted under marketplace rules.', '$1。違反が続くと規約によりアカウントが削除される場合があります。'],
+  [/^· (\d+) phiên$/, '· $1 auctions', '· $1件'],
   /* ---------- Câu có tên sản phẩm / tài khoản / số (kiểm duyệt, gửi hàng, tài khoản) ---------- */
   [/^(Bài đăng|Tài khoản): (.+)\. Báo cáo được gửi tới Quản trị viên và Kiểm định viên PCBid, thông tin người báo cáo được giữ kín\.$/, (_, t, n) => `${t === 'Bài đăng' ? 'Listing' : 'Account'}: ${n}. The report goes to PCBid administrators and inspectors; your identity stays private.`, (_, t, n) => `${t === 'Bài đăng' ? '出品' : 'アカウント'}：${n}。報告はPCBidの管理者と検査員に送られ、報告者の情報は公開されません。`],
   [/^"(.+)" sẽ không được lên sàn\. Người bán có thể chỉnh sửa và đăng lại\.$/, '"$1" will not be listed. The seller can edit and resubmit.', '「$1」は出品されません。出品者は編集して再出品できます。'],

@@ -4,6 +4,8 @@
  */
 
 // Tính số dư khả dụng (đã trừ tiền cọc đang giữ) từ module ví dùng chung
+// Số lần bị Quản trị viên cảnh báo hiện trong menu tài khoản
+import { getWarnings } from '../../js/moderation.js';
 import { getAvailableBalance, getUnreadNotificationCount, getUserNotifications, markNotificationsRead, getParticipatingAuctions } from '../../js/wallet.js';
 // Thời điểm kết thúc / trạng thái phiên để chỉ đếm phiên còn diễn ra
 import { getAuctionEndTimestamp, isAuctionClosed } from '../../js/auction-time.js';
@@ -149,7 +151,7 @@ function renderNotifyItem(n) {
   const image = n.image || 'images/placeholder-product.svg';
   return `
     <li>
-      <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="product-detail.html?id=${n.productId}" data-notify-id="${escapeHeaderHtml(n.id)}">
+      <a class="header__notify-item${n.read ? '' : ' header__notify-item--unread'}" href="${escapeHeaderHtml(n.link || `product-detail.html?id=${n.productId}`)}" data-notify-id="${escapeHeaderHtml(n.id)}">
         <span class="header__notify-avatar">
           <img src="${escapeHeaderHtml(image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='images/placeholder-product.svg'">
           <span class="header__notify-icon header__notify-icon--${n.type}">${icon(NOTIFY_ICON_NAMES[n.type] || 'bell', { size: 12 })}</span>
@@ -551,9 +553,12 @@ function initHeaderUserStatus() {
     // Không phân biệt người bán / người mua: chỉ hiện số phiên đang bán và đang tham gia
     const now = Date.now();
     const participatingCount = getParticipatingAuctions(user).filter(item => getAuctionEndTimestamp(item) > now).length;
+    // Bấm vào số phiên để mở đúng tab trong Quản lý đấu giá; tài khoản có cảnh báo thì hiện số lần cảnh báo
+    const warningCount = getWarnings(user.username).length;
     const renderStats = sellingCount => `
-      <span class="header__dropdown-stat">${icon('tag', { size: 12 })} ${sellingCount} phiên đang bán</span>
-      <span class="header__dropdown-stat">${icon('gavel', { size: 12 })} ${participatingCount} phiên đang tham gia</span>`;
+      <a class="header__dropdown-stat" href="profile.html#selling">${icon('tag', { size: 12 })} ${sellingCount} phiên đang bán</a>
+      <a class="header__dropdown-stat" href="profile.html#participating">${icon('gavel', { size: 12 })} ${participatingCount} phiên đang tham gia</a>
+      ${warningCount ? `<a class="header__dropdown-stat header__dropdown-stat--warn" href="profile.html#notifications">${icon('triangle-alert', { size: 12 })} ${warningCount} lần bị cảnh báo</a>` : ''}`;
 
     avatarBtn.title = `Tài khoản: ${displayName}`;
     avatarBtn.classList.add('header__user-avatar--initial');
@@ -573,7 +578,11 @@ function initHeaderUserStatus() {
         </div>
         <div class="header__dropdown-wallet">
           <span class="header__dropdown-wallet-label">Ví khả dụng:</span>
-          <span class="header__dropdown-wallet-val">${formatHeaderVnd(getAvailableBalance(user))}</span>
+          <span class="header__dropdown-wallet-right">
+            <span class="header__dropdown-wallet-val">${formatHeaderVnd(getAvailableBalance(user))}</span>
+            <!-- Nạp nhanh tiền vào ví ảo (mở hộp thoại nạp tiền ở trang Hồ sơ) -->
+            <a class="header__dropdown-wallet-add" href="profile.html#deposit" aria-label="Nạp thêm tiền vào ví" title="Nạp thêm tiền">${icon('plus', { size: 12 })}</a>
+          </span>
         </div>
       </div>
 
@@ -735,6 +744,25 @@ function initHeaderUserStatus() {
 
   // Menu vừa vẽ lại: đánh dấu ngôn ngữ đang chọn
   syncLanguageButtons();
+
+  // Đang ở trang Hồ sơ mà bấm một mục trỏ tới chính trang này (chỉ khác #hash):
+  // mục đổi màu trong chốc lát rồi menu đóng lại, trang Hồ sơ chuyển tab và làm nổi bật vùng tương ứng
+  dropdown.onclick = (e) => {
+    const link = e.target.closest('a[href^="profile.html"]');
+    const onOwnProfile = /profile\.html$/.test(window.location.pathname) && !new URLSearchParams(window.location.search).get('user');
+    if (!link || !onOwnProfile) return;
+    e.preventDefault();
+    const hash = new URL(link.href, window.location.href).hash;
+    link.classList.add('header__dropdown-link--pressed');
+    setTimeout(() => {
+      link.classList.remove('header__dropdown-link--pressed');
+      dropdown.hidden = true;
+      avatarBtn.setAttribute('aria-expanded', 'false');
+      if (hash && window.location.hash !== hash) window.location.hash = hash;
+      else if (hash) window.dispatchEvent(new HashChangeEvent('hashchange'));
+      window.dispatchEvent(new CustomEvent('pcbid:profile-nav', { detail: { hash } }));
+    }, 220);
+  };
 
   // Đóng/Mở Dropdown khi bấm vào Avatar
   avatarBtn.onclick = (e) => {
