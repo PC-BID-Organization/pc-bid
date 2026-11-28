@@ -2583,3 +2583,53 @@
   text-align: center;
   color: #64748b;
 }
+
+/* Tên linh kiện tách khỏi phần chữ để luôn hiện được: máy tính nằm cùng dòng, điện thoại xuống dòng thứ hai */
+.pcb-ticker__text {
+  flex-shrink: 0;
+}
+
+.pcb-ticker__product {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Điện thoại: mỗi lượt đặt giá hiện 2 dòng
+   Dòng 1: người đặt + giá; Dòng 2: tên linh kiện (cắt bằng "…" nếu quá dài) + thời gian */
+@media (max-width: 640px) {
+  .pcb-ticker__viewport {
+    height: 40px;
+  }
+
+  .pcb-ticker__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "text text"
+      "product time";
+    align-content: center;
+    row-gap: 1px;
+    column-gap: 6px;
+    height: 40px;
+  }
+
+  .pcb-ticker__text {
+    grid-area: text;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pcb-ticker__time {
+    grid-area: time;
+  }
+
+  .pcb-ticker__product {
+    grid-area: product;
+    font-weight: 600;
+    color: var(--pcb-text-main);
+  }
+}
