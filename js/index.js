@@ -824,8 +824,8 @@ function renderLiveTicker(newBidId = null) {
       : `<strong>${escapeHtml(bidder.name)}</strong>`;
     return `
       <div class="pcb-ticker__item${bid.id === newBidId ? ' pcb-ticker__item--new' : ''}">
-        <span class="pcb-ticker__text"><span class="pcb-ticker__flame">${icon('flame', { size: 14 })}</span> ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho
-          <a class="pcb-ticker__product" href="product-detail.html?id=${product.id}">${escapeHtml(product.name)}</a></span>
+        <span class="pcb-ticker__text"><span class="pcb-ticker__flame">${icon('flame', { size: 14 })}</span> ${nameHtml} vừa đặt <span class="pcb-ticker__price">${formatVnd(bid.amount)}</span> cho</span>
+        <a class="pcb-ticker__product" href="product-detail.html?id=${product.id}">${escapeHtml(product.name)}</a>
         <span class="pcb-ticker__time" data-time="${escapeHtml(bid.timestamp)}">• ${formatTimeAgo(bid.timestamp)}</span>
       </div>
     `;
@@ -833,7 +833,16 @@ function renderLiveTicker(newBidId = null) {
 
   // Có lượt mới thì quay về dòng đầu tiên (lượt mới nhất)
   if (newBidId || tickerIndex >= bids.length) tickerIndex = 0;
-  track.style.transform = `translateY(-${tickerIndex * 22}px)`;
+  track.style.transform = `translateY(-${tickerIndex * getTickerRowHeight(track)}px)`;
+}
+
+/**
+ * Chiều cao một dòng băng chuyền (máy tính 22px, điện thoại 2 dòng nên cao hơn)
+ * @param {HTMLElement} track
+ * @returns {number}
+ */
+function getTickerRowHeight(track) {
+  return track.firstElementChild?.offsetHeight || 22;
 }
 
 /**
@@ -842,9 +851,19 @@ function renderLiveTicker(newBidId = null) {
  * @param {Array} auctions - Danh sách phiên từ loadAllAuctions()
  */
 function updateOpenAuctionCount(auctions) {
-  const openAuctions = auctions.filter(p => !isAuctionClosed(p));
+  // Chỉ đếm phiên đang hiện công khai trên sàn (bỏ phiên chờ duyệt / chờ gửi hàng / bị ẩn, gỡ)
+  const openAuctions = filterVisibleListings(auctions).filter(p => !isAuctionClosed(p));
   const el = document.getElementById('pcb-open-count-link');
   if (el) el.textContent = `Xem tất cả ${openAuctions.length} phiên đang mở`;
+
+  // Số liệu ở khung Hero: phiên đang mở và tổng lượt trả giá (đã gồm lượt đặt thật của người dùng / bot)
+  const openStat = document.getElementById('hero-stat-open');
+  if (openStat) openStat.textContent = openAuctions.length.toLocaleString('vi-VN');
+  const bidStat = document.getElementById('hero-stat-bids');
+  if (bidStat) {
+    const totalBids = filterVisibleListings(auctions).reduce((sum, p) => sum + (Number(p.bidCount) || 0), 0);
+    bidStat.textContent = totalBids.toLocaleString('vi-VN');
+  }
 
   // Số phiên mở theo từng danh mục (cùng cách phân loại với bộ lọc ở trang Sàn đấu giá)
   const counts = { vga: 0, cpu: 0, mainboard: 0, ram: 0, storage: 0, psu: 0, cooling: 0, case: 0 };
@@ -901,7 +920,7 @@ async function initLiveTicker() {
     const count = track.children.length;
     if (count <= 1) return;
     tickerIndex = (tickerIndex + 1) % count;
-    track.style.transform = `translateY(-${tickerIndex * 22}px)`;
+    track.style.transform = `translateY(-${tickerIndex * getTickerRowHeight(track)}px)`;
   }, 3800);
 
   // Cập nhật nhãn "x giây trước" mỗi 5 giây
